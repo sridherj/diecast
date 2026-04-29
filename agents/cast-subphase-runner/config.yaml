@@ -1,0 +1,6 @@
+model: opus
+headless: true
+timeout_minutes: 45
+context_mode: lightweight
+allowed_delegations: []
+artifact_directory: external_project_dir

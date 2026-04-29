@@ -1,0 +1,7 @@
+model: opus
+timeout_minutes: 90
+context_mode: full
+interactive: true
+artifact_directory: external_project_dir
+allowed_delegations:
+  - cast-plan-review

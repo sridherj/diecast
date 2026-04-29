@@ -1,0 +1,4 @@
+model: sonnet
+context_mode: lightweight
+interactive: false
+timeout: 60

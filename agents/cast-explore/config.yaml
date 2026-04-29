@@ -1,0 +1,8 @@
+model: opus
+timeout_minutes: 120
+context_mode: full
+allowed_delegations:
+  - cast-goal-decomposer
+  - cast-web-researcher
+  - cast-playbook-synthesizer
+  - cast-code-explorer

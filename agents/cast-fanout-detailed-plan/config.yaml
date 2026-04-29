@@ -1,0 +1,8 @@
+model: opus
+timeout_minutes: 300
+context_mode: lightweight
+interactive: true
+allowed_delegations:
+  - cast-detailed-plan
+  - cast-plan-review
+artifact_directory: external_project_dir
