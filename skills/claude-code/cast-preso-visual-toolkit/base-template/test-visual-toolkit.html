@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Toolkit Test</title>
+
+  <!-- Reveal.js from CDN (standalone, no npm required) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       Design Tokens
+       ============================================================ */
+    :root {
+      --color-bg: #F5F4F0;
+      --color-text: #1A1A28;
+      --color-muted: #4A4860;
+      --color-surface: #ECEAE4;
+      --color-accent: #D6235C;
+      --color-callout-bg: rgba(214, 35, 92, 0.06);
+      --color-callout-border: var(--color-accent);
+      --color-question-bg: rgba(74, 72, 96, 0.06);
+      --color-question-border: var(--color-muted);
+      --color-selection-bg: var(--color-accent);
+      --color-selection-text: #FFFFFF;
+      --color-link: var(--color-accent);
+      --color-link-hover: #B01D4D;
+      --font-heading: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    /* FOUC prevention */
+    .reveal { visibility: hidden; }
+
+    /* Grid background */
+    .reveal {
+      background-color: var(--color-bg);
+      background-image:
+        linear-gradient(rgba(74, 72, 96, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 72, 96, 0.07) 1px, transparent 1px);
+      background-size: 5px 5px;
+    }
+
+    /* Typography */
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      text-transform: none;
+      color: var(--color-text);
+    }
+    .reveal h1 { font-size: 2.5em; }
+    .reveal h2 { font-size: 1.6em; }
+    .reveal h3 { font-size: 1.3em; }
+    .reveal h4 { font-size: 1.0em; }
+    .reveal {
+      font-family: var(--font-body);
+      color: var(--color-text);
+    }
+    .reveal .muted { color: var(--color-muted); }
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .l1-body { font-family: var(--font-body); font-size: 1.1em; font-weight: 600; color: var(--color-text); }
+    .l2-body { font-family: var(--font-body); font-size: 0.9em; font-weight: 400; color: var(--color-muted); }
+    .source-citation { font-family: var(--font-body); font-size: 0.5em; font-weight: 400; color: var(--color-muted); }
+
+    /* Callout box */
+    .callout {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      border-left: 4px solid var(--color-callout-border);
+      background: var(--color-callout-bg);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+    }
+    .callout .callout-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.7em;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .callout .callout-text {
+      flex: 1;
+      line-height: 1.4;
+      font-size: 0.85em;
+    }
+
+    /* Question annotation */
+    .question-annotation {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border-left: 4px solid var(--color-question-border);
+      background: var(--color-question-bg);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-style: italic;
+    }
+    .question-annotation .question-icon {
+      font-size: 1.2em;
+      flex-shrink: 0;
+      color: var(--color-muted);
+      font-style: normal;
+    }
+    .question-annotation .question-text {
+      flex: 1;
+      line-height: 1.4;
+      font-size: 0.8em;
+      color: var(--color-muted);
+    }
+
+    /* Fragment animations */
+    .fragment.callout-appear {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .fragment.callout-appear.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .no-animations .fragment {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+    }
+    .no-animations .fragment.callout-appear {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    /* Navigation elements */
+    .back-link {
+      position: absolute;
+      bottom: 20px;
+      left: 30px;
+      font-family: var(--font-heading);
+      font-size: 0.5em;
+      color: var(--color-muted);
+      opacity: 0.6;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--color-accent); opacity: 1; }
+    .nav-marker {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      font-family: var(--font-heading);
+      font-size: 0.5em;
+      color: var(--color-muted);
+      opacity: 0.5;
+    }
+    .deep-dive-link {
+      display: inline-block;
+      color: var(--color-accent);
+      font-family: var(--font-heading);
+      font-size: 0.6em;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .deep-dive-link:hover { border-bottom-color: var(--color-accent); }
+
+    /* Reveal.js overrides */
+    .reveal .slides section { text-align: left; }
+    .reveal a { color: var(--color-link); }
+    .reveal a:hover { color: var(--color-link-hover); }
+
+    /* Selection */
+    .reveal ::selection {
+      background: var(--color-selection-bg);
+      color: var(--color-selection-text);
+    }
+
+    /* Print */
+    @media print {
+      .reveal { background-image: none; }
+      .back-link, .nav-marker { display: none; }
+      .fragment { opacity: 1 !important; visibility: visible !important; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .fragment {
+        opacity: 1 !important; visibility: visible !important;
+        transform: none !important; transition: none !important;
+      }
+      .fragment.callout-appear {
+        opacity: 1 !important; transform: none !important; transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ====== SLIDE 1: Title Slide ====== -->
+      <section id="title">
+        <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; text-align: left; padding-left: 40px;">
+          <h1 style="font-size: 3.5em; line-height: 1.1; margin-bottom: 0.3em;">Visual Toolkit Test</h1>
+          <p style="font-size: 1.1em; color: var(--color-muted); font-weight: 400;">Validating templates, components, and animation modes</p>
+        </div>
+        <div class="nav-marker">&gt;test_</div>
+        <aside class="notes">This is the title slide. Press S to open speaker notes view.</aside>
+      </section>
+
+      <!-- ====== SLIDE 2: Single-Stat Hero ====== -->
+      <section id="stat-hero">
+        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; height: 100%;">
+          <div class="r-fit-text" style="color: var(--color-accent); font-family: var(--font-heading); font-weight: 700; line-height: 1;">
+            3.2M
+          </div>
+          <p class="fragment" style="font-size: 1.1em; color: var(--color-muted); margin-top: 0.5em; font-weight: 400;">
+            requests per second — 4x our previous architecture
+          </p>
+        </div>
+        <aside class="notes">Test: r-fit-text should auto-scale "3.2M" to fill viewport. Context line appears on click.</aside>
+      </section>
+
+      <!-- ====== SLIDE 3: Content with 3 Callout Boxes ====== -->
+      <section id="callouts">
+        <h2 class="slide-title">Three capabilities that changed everything</h2>
+
+        <div style="margin-top: 1em;">
+          <div class="fragment callout-appear callout" data-fragment-index="1" style="margin-bottom: 16px;">
+            <div class="callout-num">1</div>
+            <div class="callout-text"><strong>Semantic search</strong> replaces keyword matching — find what you mean, not what you typed</div>
+          </div>
+
+          <div class="fragment callout-appear callout" data-fragment-index="2" style="margin-bottom: 16px;">
+            <div class="callout-num">2</div>
+            <div class="callout-text"><strong>Agent delegation</strong> breaks monolithic tasks into parallel subtasks with automatic coordination</div>
+          </div>
+
+          <div class="fragment callout-appear callout" data-fragment-index="3">
+            <div class="callout-num">3</div>
+            <div class="callout-text"><strong>Self-healing pipelines</strong> detect failures, diagnose root causes, and retry with corrected parameters</div>
+          </div>
+        </div>
+
+        <aside class="notes">Test callout animations: manual (spacebar), automatic (?callout=automatic), none (?callout=none).</aside>
+      </section>
+
+      <!-- ====== SLIDE 4: Compare/Contrast ====== -->
+      <section id="compare">
+        <h2 class="slide-title">New architecture reduces latency 4x</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 1em;">
+          <div>
+            <h3 style="color: var(--color-muted); font-size: 1.0em; margin-bottom: 0.8em;">Before</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="margin-bottom: 0.6em; font-size: 0.9em;">1200ms average response time</li>
+              <li style="margin-bottom: 0.6em; font-size: 0.9em;">Sequential processing pipeline</li>
+              <li style="margin-bottom: 0.6em; font-size: 0.9em;">Single point of failure</li>
+            </ul>
+          </div>
+
+          <div class="fragment" data-fragment-index="1">
+            <h3 style="color: var(--color-accent); font-size: 1.0em; margin-bottom: 0.8em;">After</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li class="fragment" data-fragment-index="2" style="margin-bottom: 0.6em; font-size: 0.9em;">89ms average response time</li>
+              <li class="fragment" data-fragment-index="3" style="margin-bottom: 0.6em; font-size: 0.9em;">Parallel fan-out with barrier</li>
+              <li class="fragment" data-fragment-index="4" style="margin-bottom: 0.6em; font-size: 0.9em;">Automatic failover to replicas</li>
+            </ul>
+          </div>
+        </div>
+
+        <aside class="notes">Test: Two-column grid layout. "After" column reveals sequentially.</aside>
+      </section>
+
+      <!-- ====== SLIDE 5: Question Annotation ====== -->
+      <section id="question">
+        <h2 class="slide-title">Your team ships features every sprint</h2>
+        <p class="l1-body" style="margin-top: 0.8em;">But how much of that velocity is real?</p>
+
+        <div class="fragment callout-appear question-annotation" data-fragment-index="1" style="margin-top: 1.5em;">
+          <div class="question-icon">?</div>
+          <div class="question-text">What percentage of your shipped features actually get used by customers in the first 30 days?</div>
+        </div>
+
+        <aside class="notes">Test: Question annotation with muted styling and italic text. "?" icon should appear.</aside>
+      </section>
+
+      <!-- ====== SLIDE 6: Diagram with SVG and Callouts (+ deep-dive link) ====== -->
+      <section id="architecture">
+        <h2 class="slide-title">Agent orchestrator coordinates all stages</h2>
+
+        <div style="position: relative; width: 100%; height: 65%; margin-top: 0.5em;">
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 800 400" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-text)"/>
+                </marker>
+              </defs>
+
+              <!-- Orchestrator -->
+              <rect x="300" y="20" width="200" height="60" rx="8" fill="var(--color-surface)" stroke="var(--color-accent)" stroke-width="2"/>
+              <text x="400" y="55" text-anchor="middle" font-family="var(--font-heading)" font-size="16" font-weight="700" fill="var(--color-text)">Orchestrator</text>
+
+              <!-- Stage boxes -->
+              <g class="fragment" data-fragment-index="1">
+                <rect x="50" y="160" width="160" height="50" rx="6" fill="var(--color-surface)" stroke="var(--color-muted)" stroke-width="1"/>
+                <text x="130" y="190" text-anchor="middle" font-family="var(--font-body)" font-size="14" fill="var(--color-text)">WHAT Maker</text>
+                <line x1="400" y1="80" x2="130" y2="160" stroke="var(--color-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+              </g>
+
+              <g class="fragment" data-fragment-index="2">
+                <rect x="320" y="160" width="160" height="50" rx="6" fill="var(--color-surface)" stroke="var(--color-muted)" stroke-width="1"/>
+                <text x="400" y="190" text-anchor="middle" font-family="var(--font-body)" font-size="14" fill="var(--color-text)">HOW Maker</text>
+                <line x1="400" y1="80" x2="400" y2="160" stroke="var(--color-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+              </g>
+
+              <g class="fragment" data-fragment-index="3">
+                <rect x="590" y="160" width="160" height="50" rx="6" fill="var(--color-surface)" stroke="var(--color-muted)" stroke-width="1"/>
+                <text x="670" y="190" text-anchor="middle" font-family="var(--font-body)" font-size="14" fill="var(--color-text)">Assembler</text>
+                <line x1="400" y1="80" x2="670" y2="160" stroke="var(--color-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+              </g>
+
+              <!-- Checker (dashed = async) -->
+              <g class="fragment" data-fragment-index="4">
+                <rect x="320" y="280" width="160" height="50" rx="6" fill="var(--color-surface)" stroke="var(--color-accent)" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <text x="400" y="310" text-anchor="middle" font-family="var(--font-body)" font-size="14" fill="var(--color-accent)">Check Coordinator</text>
+                <line x1="400" y1="210" x2="400" y2="280" stroke="var(--color-muted)" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow)"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Positioned callout -->
+          <div class="fragment callout-appear callout" data-fragment-index="5"
+               style="position: absolute; top: 5%; left: 68%; width: 280px;">
+            <div class="callout-num">1</div>
+            <div class="callout-text">Orchestrator dispatches makers in parallel, then runs checker barrier</div>
+          </div>
+        </div>
+
+        <a class="deep-dive-link" href="#/architecture-detail">Deep dive: full agent graph &darr;</a>
+
+        <aside class="notes">Test: SVG diagram with progressive reveal + positioned callout overlay + deep-dive link.</aside>
+      </section>
+
+      <!-- ====== SLIDE 7: Appendix vertical stack ====== -->
+      <section>
+        <!-- Appendix slide 1 -->
+        <section id="architecture-detail">
+          <h2 class="slide-title">Full agent delegation graph</h2>
+          <p class="l2-body" style="margin-top: 0.8em;">
+            14 agents across 4 stages. Solid lines = sync delegation. Dashed = async check.
+          </p>
+          <p class="l2-body" style="margin-top: 1em;">
+            Stage 1: Narrative &rarr; Stage 2: WHAT (per-slide) &rarr; Stage 3: HOW (per-slide) &rarr; Stage 4: Assembly
+          </p>
+          <p class="l2-body" style="margin-top: 1em;">
+            Each maker has at least one dedicated checker. The check-coordinator runs content, visual, and tone checks in parallel.
+          </p>
+          <a class="back-link" href="#/architecture">&larr; back to architecture</a>
+          <aside class="notes">Appendix slide. Test back-link navigation.</aside>
+        </section>
+
+        <!-- Appendix slide 2 -->
+        <section id="architecture-detail-2">
+          <h2 class="slide-title">Rework loop mechanics</h2>
+          <p class="l2-body" style="margin-top: 0.8em;">
+            Max 2 rework attempts per slide. After 2 failures, escalate to human review with specific feedback.
+          </p>
+          <a class="back-link" href="#/architecture">&larr; back to architecture</a>
+          <aside class="notes">Second appendix slide in the vertical stack.</aside>
+        </section>
+      </section>
+
+      <!-- ====== SLIDE 8: Close/CTA ====== -->
+      <section id="close">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+          <h2 style="font-size: 2.5em; margin-bottom: 0.5em;">The toolkit works.</h2>
+          <p style="font-size: 1.0em; color: var(--color-muted); margin-bottom: 1.5em;">Now go build something with it.</p>
+          <p style="font-family: var(--font-heading); font-size: 0.8em; color: var(--color-accent);">sridherj@gmail.com</p>
+        </div>
+        <aside class="notes">Close/CTA slide. Accent-colored monospace contact info.</aside>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js + plugins from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+
+  <script>
+    // Callout mode: ?callout=none|manual|automatic (default: manual)
+    const CALLOUT_MODE = new URLSearchParams(location.search).get('callout') || 'manual';
+
+    if (CALLOUT_MODE === 'none') {
+      document.body.classList.add('no-animations');
+    } else if (CALLOUT_MODE === 'automatic') {
+      document.body.classList.add('timed-animations');
+      document.querySelectorAll('.callout.fragment:not([data-autoslide])').forEach(el => {
+        el.setAttribute('data-autoslide', '2000');
+      });
+    }
+
+    const deck = Reveal.initialize({
+      width: 1920,
+      height: 1080,
+      margin: 0.04,
+      hash: true,
+      history: true,
+      overview: true,
+      navigationMode: 'default',
+      controls: true,
+      controlsBackArrows: 'visible',
+      pdfSeparateFragments: false,
+      pdfMaxPagesPerSlide: 1,
+      plugins: [RevealNotes, RevealHighlight, RevealZoom],
+    });
+
+    // FOUC prevention
+    deck.then(() => {
+      document.querySelector('.reveal').style.visibility = 'visible';
+    });
+
+    // FALLBACK: If data-autoslide per-fragment is not supported in reveal.js 5.x,
+    // uncomment below and remove the setAttribute loop above:
+    //
+    // if (CALLOUT_MODE === 'automatic') {
+    //   Reveal.on('fragmentshown', (event) => {
+    //     if (event.fragment.classList.contains('callout')) {
+    //       setTimeout(() => Reveal.next(), 2000);
+    //     }
+    //   });
+    // }
+  </script>
+</body>
+</html>

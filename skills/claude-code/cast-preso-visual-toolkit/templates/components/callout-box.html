@@ -1,0 +1,27 @@
+<!--
+  Callout Box Component
+  Usage: Copy the variant you need into your <section> element.
+  Animation mode is controlled globally via ?callout=manual|automatic|none URL parameter.
+  Placeholders: {{INDEX}}, {{NUMBER}}, {{TEXT}}, {{TOP}}, {{LEFT}}, {{WIDTH}}
+  Replace manually — NOT processed by any template engine.
+-->
+
+<!-- Variant 1: Animated callout (default — use this for most slides) -->
+<div class="fragment callout-appear callout" data-fragment-index="{{INDEX}}">
+  <div class="callout-num">{{NUMBER}}</div>
+  <div class="callout-text">{{TEXT}}</div>
+</div>
+
+<!-- Variant 2: Static callout (always visible, no animation) -->
+<div class="callout">
+  <div class="callout-num">{{NUMBER}}</div>
+  <div class="callout-text">{{TEXT}}</div>
+</div>
+
+<!-- Variant 3: Positioned callout (for overlaying on diagrams) -->
+<div class="fragment callout-appear callout"
+     data-fragment-index="{{INDEX}}"
+     style="position: absolute; top: {{TOP}}%; left: {{LEFT}}%; width: {{WIDTH}}px;">
+  <div class="callout-num">{{NUMBER}}</div>
+  <div class="callout-text">{{TEXT}}</div>
+</div>

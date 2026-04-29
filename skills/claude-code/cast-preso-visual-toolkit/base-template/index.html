@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PRESENTATION_TITLE}}</title>
+
+  <!-- For standalone dev without Vite: uncomment these CDN links and comment out the module script below
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  -->
+
+  <!-- Dev mode: Google Fonts CDN for fast iteration -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      {{SLIDES}}
+    </div>
+  </div>
+  <!-- Requires npm install first (Vite handles module resolution).
+       For CDN alternative, uncomment the script tags above and replace this with a non-module script. -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>

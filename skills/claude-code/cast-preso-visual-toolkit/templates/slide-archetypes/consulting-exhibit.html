@@ -1,0 +1,40 @@
+<!--
+  Archetype: Consulting Exhibit (Action Title + Evidence)
+  When to use: Information or Reveal slides — executive audiences, data-driven arguments.
+  Density limits: Title max 15 words (complete sentence with verb), source line required for data claims.
+  Placeholders: {{SLIDE_ID}}, {{ACTION_TITLE}}, {{SUBTITLE}}, {{BODY_CONTENT}}, {{SOURCE}}, {{SPEAKER_NOTES}}
+  Structure: Action title → optional subtitle → body (chart/table/structured bullets) → source line.
+-->
+<section id="{{SLIDE_ID}}">
+  <!-- Action title: complete sentence, max 2 lines, ~15 words -->
+  <h2 class="slide-title" style="text-align: left;">{{ACTION_TITLE}}</h2>
+
+  <!-- Optional subtitle: scopes or qualifies -->
+  <p class="l2-body" style="text-align: left; margin-top: 0.2em;">{{SUBTITLE}}</p>
+
+  <!-- Body: chart placeholder / table / structured bullets with bold leads -->
+  <div style="margin-top: 1.2em; text-align: left;">
+    {{BODY_CONTENT}}
+    <!--
+      For structured bullets with bold leads:
+      <ul style="list-style: none; padding: 0;">
+        <li class="fragment" style="margin-bottom: 0.6em; font-size: 0.9em;">
+          <strong>Bold lead phrase</strong> — supporting detail here
+        </li>
+      </ul>
+
+      For a simple table:
+      <table style="width: 100%; font-size: 0.8em;">
+        <thead><tr><th>Column</th><th>Column</th></tr></thead>
+        <tbody><tr><td>Data</td><td>Data</td></tr></tbody>
+      </table>
+    -->
+  </div>
+
+  <!-- Source line: non-negotiable for data claims.
+       In-flow (margin-top) — NOT position: absolute. Absolute footers overlap
+       flex-centered content on dense slides (observed on a09, a13). -->
+  <p class="source-citation" style="margin-top: 0.8em;">Source: {{SOURCE}}</p>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

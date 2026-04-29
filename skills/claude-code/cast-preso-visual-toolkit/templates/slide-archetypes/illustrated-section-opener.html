@@ -1,0 +1,14 @@
+<!--
+  Archetype: Illustrated Section Opener
+  When to use: Moment slides — full-bleed illustration as section divider. Use sparingly (3-5 per deck).
+  Density limits: Illustration >= 80% of slide, text overlay <= 5 words, thematically specific.
+  Placeholders: {{SLIDE_ID}}, {{IMAGE_PATH}}, {{SECTION_TITLE}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}" data-background-image="{{IMAGE_PATH}}" data-background-size="cover" data-background-position="center">
+  <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.5em; font-weight: 700; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); text-align: center;">
+      {{SECTION_TITLE}}
+    </h2>
+  </div>
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

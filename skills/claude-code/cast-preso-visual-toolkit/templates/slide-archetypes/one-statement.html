@@ -1,0 +1,16 @@
+<!--
+  Archetype: One-Statement (Takahashi/Apple)
+  When to use: Hook, Moment, or Reveal slides — single bold phrase filling the viewport.
+  Density limits: Exactly one sentence/phrase, zero supporting elements, 50-80% viewport fill.
+  Placeholders: {{SLIDE_ID}}, {{STATEMENT}}, {{SUBTITLE}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}">
+  <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; height: 100%;">
+    <div class="r-fit-text" style="font-family: var(--font-heading); font-weight: 700; color: var(--color-text);">
+      {{STATEMENT}}
+    </div>
+    <!-- Optional: small muted subtitle below -->
+    <p style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.5em; font-weight: 400;">{{SUBTITLE}}</p>
+  </div>
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

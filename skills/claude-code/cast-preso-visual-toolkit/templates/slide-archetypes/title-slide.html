@@ -1,0 +1,14 @@
+<!--
+  Template: Title Slide
+  When to use: Opening slide of any presentation.
+  Density limits: Title + subtitle + optional nav marker. No bullets or body content.
+  Placeholders: {{SLIDE_ID}}, {{TITLE}}, {{SUBTITLE}}, {{NAV_MARKER}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}">
+  <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; text-align: left; padding-left: 40px;">
+    <h1 style="font-size: 3.5em; line-height: 1.1; margin-bottom: 0.3em;">{{TITLE}}</h1>
+    <p style="font-size: 1.1em; color: var(--color-muted); font-weight: 400;">{{SUBTITLE}}</p>
+  </div>
+  <div class="nav-marker">{{NAV_MARKER}}</div>
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

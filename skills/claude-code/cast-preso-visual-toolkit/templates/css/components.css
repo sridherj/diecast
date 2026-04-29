@@ -1,0 +1,184 @@
+/* Components — Presentation Visual Toolkit
+   Callout boxes, question annotations, fragment animations, navigation elements.
+   All colors use var(--color-*) tokens — no hardcoded hex values. */
+
+
+/* ============================================================
+   1. Callout Box
+   ============================================================ */
+
+.callout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  border-left: 4px solid var(--color-callout-border);
+  background: var(--color-callout-bg);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+}
+
+.callout .callout-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.7em;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.callout .callout-text {
+  flex: 1;
+  line-height: 1.4;
+  font-size: 0.85em;
+}
+
+
+/* ============================================================
+   2. Question Annotation
+   ============================================================ */
+
+.question-annotation {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-left: 4px solid var(--color-question-border);
+  background: var(--color-question-bg);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-style: italic;
+}
+
+.question-annotation .question-icon {
+  font-size: 1.2em;
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-style: normal;
+}
+
+.question-annotation .question-text {
+  flex: 1;
+  line-height: 1.4;
+  font-size: 0.8em;
+  color: var(--color-muted);
+}
+
+
+/* ============================================================
+   3. Fragment Animations
+   ============================================================ */
+
+/* Custom callout appear animation */
+.fragment.callout-appear {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.fragment.callout-appear.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* "none" mode: all fragments immediately visible */
+.no-animations .fragment {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+.no-animations .fragment.callout-appear {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Note: .timed-animations body class is JS-driven only.
+   Auto-advance timing is handled entirely by JavaScript.
+   No CSS visual indicator needed for automatic mode. */
+
+
+/* ============================================================
+   4. Navigation Elements
+   ============================================================ */
+
+.back-link {
+  position: absolute;
+  bottom: 20px;
+  left: 30px;
+  font-family: var(--font-heading);
+  font-size: 0.5em;
+  color: var(--color-muted);
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+.nav-marker {
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  font-family: var(--font-heading);
+  font-size: 0.5em;
+  color: var(--color-muted);
+  opacity: 0.5;
+}
+
+.deep-dive-link {
+  display: inline-block;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 0.6em;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.deep-dive-link:hover {
+  border-bottom-color: var(--color-accent);
+}
+
+
+/* ============================================================
+   5. Print Overrides
+   ============================================================ */
+
+@media print {
+  .back-link,
+  .nav-marker {
+    display: none;
+  }
+
+  .fragment {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
+
+
+/* ============================================================
+   6. Reduced Motion Accessibility
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .fragment {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .fragment.callout-appear {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

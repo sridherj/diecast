@@ -1,0 +1,98 @@
+/* Typography — Presentation Visual Toolkit
+   Font families, sizes, weights, and scale classes.
+   All colors use var(--color-*) tokens — no hardcoded hex values. */
+
+/* Font family custom properties */
+:root {
+  --font-heading: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
+/* Heading defaults */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-transform: none;
+  color: var(--color-text);
+}
+
+.reveal h1 { font-size: 2.5em; }
+/* h2 = 1.6em (67px) fits short, punchy action titles. On text-heavy /
+   appendix slides, titles longer than ~8 words wrap 2-3 lines and eat
+   100+ px. Override per-slide to 1.0-1.1em with line-height 1.15-1.25.
+   See SKILL.md "Recurring Overflow Patterns". */
+.reveal h2 { font-size: 1.6em; }
+.reveal h3 { font-size: 1.3em; }
+.reveal h4 { font-size: 1.0em; }
+
+/* Body defaults */
+.reveal {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  /* Reveal.js core CSS does NOT set a base font-size; that lives in
+     dist/theme/*.css which we do not import. Every em-based slide
+     declaration is relative to this value, so it MUST be set here. */
+  font-size: 42px;
+}
+
+/* Muted text utility */
+.reveal .muted {
+  color: var(--color-muted);
+}
+
+/* Typography scale classes (match visual_toolkit.human.md Section 2) */
+
+.slide-title {
+  font-family: var(--font-heading);
+  font-size: 1.6em;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.l1-body {
+  font-family: var(--font-body);
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.l2-body {
+  font-family: var(--font-body);
+  font-size: 0.9em;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.callout-num {
+  font-family: var(--font-heading);
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.callout-text {
+  font-family: var(--font-body);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.source-citation {
+  font-family: var(--font-body);
+  font-size: 0.5em;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.nav-marker {
+  font-family: var(--font-heading);
+  font-size: 0.5em;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+/* Note: Use reveal.js built-in class `r-fit-text` for auto-scaling large text
+   (hero stats, one-statement slides). It sets font-size dynamically. */

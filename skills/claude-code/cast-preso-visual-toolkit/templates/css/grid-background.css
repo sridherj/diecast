@@ -1,0 +1,18 @@
+/* Grid Background — Presentation Visual Toolkit
+   Subtle engineering-notebook grid inspired by derekherman.co.
+   Barely perceptible — if someone asks "is there a grid?", you got it right. */
+
+.reveal {
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(rgba(74, 72, 96, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 72, 96, 0.07) 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+/* Clean PDF output — no grid lines */
+@media print {
+  .reveal {
+    background-image: none;
+  }
+}

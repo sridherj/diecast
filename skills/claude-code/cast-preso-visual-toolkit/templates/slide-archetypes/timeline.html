@@ -1,0 +1,59 @@
+<!--
+  Archetype: Timeline/Progression
+  When to use: Information or Hook slides — roadmaps, evolution, phased rollouts.
+  Density limits: Max 5-7 milestones, brief labels only, clear temporal direction.
+  Placeholders: {{SLIDE_ID}}, {{ACTION_TITLE}}, {{MILESTONE_LABEL_N}}, {{MILESTONE_DESC_N}}, {{SPEAKER_NOTES}}
+  Color convention: completed = var(--color-accent), in-progress = var(--color-text), future = var(--color-muted)
+-->
+<section id="{{SLIDE_ID}}">
+  <h2 class="slide-title">{{ACTION_TITLE}}</h2>
+
+  <div style="position: relative; margin-top: 2em; padding: 0 40px;">
+    <!-- Timeline line -->
+    <svg style="position: absolute; top: 18px; left: 40px; right: 40px; width: calc(100% - 80px); height: 4px;">
+      <line x1="0" y1="2" x2="100%" y2="2" stroke="var(--color-muted)" stroke-width="2" stroke-opacity="0.3"/>
+    </svg>
+
+    <!-- Milestones -->
+    <div style="display: flex; justify-content: space-between; position: relative;">
+
+      <!-- Milestone 1 (completed) -->
+      <div class="fragment fade-in-then-semi-out" data-fragment-index="1" style="text-align: center; flex: 1;">
+        <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--color-accent); margin: 10px auto;"></div>
+        <div style="font-family: var(--font-heading); font-size: 0.7em; font-weight: 700; color: var(--color-accent);">{{MILESTONE_LABEL_1}}</div>
+        <div style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.3em;">{{MILESTONE_DESC_1}}</div>
+      </div>
+
+      <!-- Milestone 2 (completed) -->
+      <div class="fragment fade-in-then-semi-out" data-fragment-index="2" style="text-align: center; flex: 1;">
+        <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--color-accent); margin: 10px auto;"></div>
+        <div style="font-family: var(--font-heading); font-size: 0.7em; font-weight: 700; color: var(--color-accent);">{{MILESTONE_LABEL_2}}</div>
+        <div style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.3em;">{{MILESTONE_DESC_2}}</div>
+      </div>
+
+      <!-- Milestone 3 (in-progress) -->
+      <div class="fragment fade-in-then-semi-out" data-fragment-index="3" style="text-align: center; flex: 1;">
+        <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--color-text); margin: 10px auto;"></div>
+        <div style="font-family: var(--font-heading); font-size: 0.7em; font-weight: 700; color: var(--color-text);">{{MILESTONE_LABEL_3}}</div>
+        <div style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.3em;">{{MILESTONE_DESC_3}}</div>
+      </div>
+
+      <!-- Milestone 4 (future) -->
+      <div class="fragment fade-in-then-semi-out" data-fragment-index="4" style="text-align: center; flex: 1;">
+        <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--color-muted); margin: 10px auto; opacity: 0.5;"></div>
+        <div style="font-family: var(--font-heading); font-size: 0.7em; font-weight: 700; color: var(--color-muted);">{{MILESTONE_LABEL_4}}</div>
+        <div style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.3em;">{{MILESTONE_DESC_4}}</div>
+      </div>
+
+      <!-- Milestone 5 (future — last, no semi-out) -->
+      <div class="fragment" data-fragment-index="5" style="text-align: center; flex: 1;">
+        <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--color-muted); margin: 10px auto; opacity: 0.5;"></div>
+        <div style="font-family: var(--font-heading); font-size: 0.7em; font-weight: 700; color: var(--color-muted);">{{MILESTONE_LABEL_5}}</div>
+        <div style="font-size: 0.6em; color: var(--color-muted); margin-top: 0.3em;">{{MILESTONE_DESC_5}}</div>
+      </div>
+
+    </div>
+  </div>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

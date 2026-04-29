@@ -1,0 +1,47 @@
+<!--
+  Archetype: Diagram-with-Annotations
+  When to use: Information or Reveal slides — architecture walkthroughs, system diagrams.
+  Density limits: Diagram 60-70% of slide, max 6-8 annotations at 5-10 words each.
+  Placeholders: {{SLIDE_ID}}, {{ACTION_TITLE}}, {{SVG_CONTENT}},
+                {{CALLOUT_N_TOP}}, {{CALLOUT_N_LEFT}}, {{CALLOUT_N_NUM}}, {{CALLOUT_N_TEXT}}, {{SPEAKER_NOTES}}
+  Notes: Position callouts with percentage-based coordinates for responsive layout.
+-->
+<section id="{{SLIDE_ID}}">
+  <h2 class="slide-title">{{ACTION_TITLE}}</h2>
+
+  <div style="position: relative; width: 100%; height: 70%; margin-top: 0.5em;">
+    <!-- Central SVG diagram — occupies 60-70% of slide -->
+    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+      {{SVG_CONTENT}}
+      <!--
+        SVG guidelines:
+        - Use viewBox for responsive sizing (e.g., viewBox="0 0 800 500")
+        - Set width="100%" height="100%" with preserveAspectRatio="xMidYMid meet"
+        - Solid lines = sync communication, dashed = async
+        - Include <defs><marker> for arrowheads
+        - Use class="fragment" on <g> elements for progressive reveal
+      -->
+    </div>
+
+    <!-- Numbered callout overlays — absolute positioned -->
+    <div class="fragment callout-appear callout" data-fragment-index="1"
+         style="position: absolute; top: {{CALLOUT_1_TOP}}%; left: {{CALLOUT_1_LEFT}}%; width: 280px;">
+      <div class="callout-num">1</div>
+      <div class="callout-text">{{CALLOUT_1_TEXT}}</div>
+    </div>
+
+    <div class="fragment callout-appear callout" data-fragment-index="2"
+         style="position: absolute; top: {{CALLOUT_2_TOP}}%; left: {{CALLOUT_2_LEFT}}%; width: 280px;">
+      <div class="callout-num">2</div>
+      <div class="callout-text">{{CALLOUT_2_TEXT}}</div>
+    </div>
+
+    <div class="fragment callout-appear callout" data-fragment-index="3"
+         style="position: absolute; top: {{CALLOUT_3_TOP}}%; left: {{CALLOUT_3_LEFT}}%; width: 280px;">
+      <div class="callout-num">3</div>
+      <div class="callout-text">{{CALLOUT_3_TEXT}}</div>
+    </div>
+  </div>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

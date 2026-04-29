@@ -1,0 +1,21 @@
+<!--
+  Question Annotation Component
+  Usage: Use for audience questions or pain-point probes overlaid on slides.
+  When to use questions vs callouts:
+    - Callouts = assertions/facts the presenter makes
+    - Questions = audience perspective / "you might be wondering..."
+  Placeholders: {{INDEX}}, {{QUESTION_TEXT}}
+  Replace manually — NOT processed by any template engine.
+-->
+
+<!-- Variant 1: Animated question (appears as fragment) -->
+<div class="fragment callout-appear question-annotation" data-fragment-index="{{INDEX}}">
+  <div class="question-icon">?</div>
+  <div class="question-text">{{QUESTION_TEXT}}</div>
+</div>
+
+<!-- Variant 2: Static question (always visible) -->
+<div class="question-annotation">
+  <div class="question-icon">?</div>
+  <div class="question-text">{{QUESTION_TEXT}}</div>
+</div>

@@ -1,0 +1,14 @@
+<!--
+  Template: Close/CTA Slide
+  When to use: Final slide of any presentation.
+  Density limits: Closing line + CTA text + contact info. Center-aligned.
+  Placeholders: {{SLIDE_ID}}, {{CLOSING_LINE}}, {{CTA_TEXT}}, {{CONTACT_INFO}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}">
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+    <h2 style="font-size: 2.5em; margin-bottom: 0.5em;">{{CLOSING_LINE}}</h2>
+    <p style="font-size: 1.0em; color: var(--color-muted); margin-bottom: 1.5em;">{{CTA_TEXT}}</p>
+    <p style="font-family: var(--font-heading); font-size: 0.8em; color: var(--color-accent);">{{CONTACT_INFO}}</p>
+  </div>
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

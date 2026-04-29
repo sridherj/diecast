@@ -1,0 +1,32 @@
+<!--
+  Archetype: Build-Up Sequence
+  When to use: Information or Reveal slides — arguments that build on each other, process steps.
+  Density limits: Max 5-6 fragment steps, each a complete thought. Uses fade-in-then-semi-out.
+  Placeholders: {{SLIDE_ID}}, {{ACTION_TITLE}}, {{ITEM_1}}..{{ITEM_N}}, {{SPEAKER_NOTES}}
+  Note: All items except the last use fade-in-then-semi-out (dim previous, highlight current).
+        The last item uses plain fragment to stay fully visible.
+-->
+<section id="{{SLIDE_ID}}">
+  <h2 class="slide-title">{{ACTION_TITLE}}</h2>
+
+  <ul style="list-style: none; padding: 0; margin-top: 1em;">
+    <li class="fragment fade-in-then-semi-out" style="margin-bottom: 0.8em; font-size: 1.0em;">
+      {{ITEM_1}}
+    </li>
+    <li class="fragment fade-in-then-semi-out" style="margin-bottom: 0.8em; font-size: 1.0em;">
+      {{ITEM_2}}
+    </li>
+    <li class="fragment fade-in-then-semi-out" style="margin-bottom: 0.8em; font-size: 1.0em;">
+      {{ITEM_3}}
+    </li>
+    <li class="fragment fade-in-then-semi-out" style="margin-bottom: 0.8em; font-size: 1.0em;">
+      {{ITEM_4}}
+    </li>
+    <!-- Last item: stays fully visible (no semi-out) -->
+    <li class="fragment" style="margin-bottom: 0.8em; font-size: 1.0em;">
+      {{ITEM_5}}
+    </li>
+  </ul>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>

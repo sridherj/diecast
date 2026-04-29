@@ -1,0 +1,57 @@
+<!--
+  Archetype: Compare/Contrast
+  When to use: Reveal or Information slides — side-by-side comparison (before/after, problem/solution).
+  Density limits: Strict visual symmetry, max 5 attributes per side, action title states conclusion.
+  Placeholders: {{SLIDE_ID}}, {{ACTION_TITLE}}, {{LEFT_HEADER}}, {{RIGHT_HEADER}},
+                {{LEFT_ITEM_1}}..{{LEFT_ITEM_N}}, {{RIGHT_ITEM_1}}..{{RIGHT_ITEM_N}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}">
+  <h2 class="slide-title">{{ACTION_TITLE}}</h2>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 60px; margin-top: 1em;">
+    <!-- "Before" / Problem column -->
+    <div>
+      <h3 style="color: var(--color-muted); font-size: 1.0em; margin-bottom: 0.8em;">{{LEFT_HEADER}}</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li style="margin-bottom: 0.6em; font-size: 0.9em;">{{LEFT_ITEM_1}}</li>
+        <li style="margin-bottom: 0.6em; font-size: 0.9em;">{{LEFT_ITEM_2}}</li>
+        <li style="margin-bottom: 0.6em; font-size: 0.9em;">{{LEFT_ITEM_3}}</li>
+      </ul>
+    </div>
+
+    <!-- "After" / Solution column -->
+    <div class="fragment" data-fragment-index="1">
+      <h3 style="color: var(--color-accent); font-size: 1.0em; margin-bottom: 0.8em;">{{RIGHT_HEADER}}</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li class="fragment" data-fragment-index="2" style="margin-bottom: 0.6em; font-size: 0.9em;">{{RIGHT_ITEM_1}}</li>
+        <li class="fragment" data-fragment-index="3" style="margin-bottom: 0.6em; font-size: 0.9em;">{{RIGHT_ITEM_2}}</li>
+        <li class="fragment" data-fragment-index="4" style="margin-bottom: 0.6em; font-size: 0.9em;">{{RIGHT_ITEM_3}}</li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>
+
+<!--
+  Code-Diff Variant: Side-by-side code blocks with tinted backgrounds.
+  Use for technical talks comparing code approaches.
+
+<section id="{{SLIDE_ID}}">
+  <h2 class="slide-title">{{ACTION_TITLE}}</h2>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; margin-top: 1em;">
+    <div style="background: rgba(220, 50, 50, 0.06); border-radius: 8px; padding: 20px;">
+      <h3 style="color: var(--color-muted); font-size: 0.8em; margin-bottom: 0.5em;">{{LEFT_HEADER}}</h3>
+      <pre><code class="language-{{LANG}}" data-line-numbers="{{LEFT_LINE_HIGHLIGHTS}}">{{LEFT_CODE}}</code></pre>
+    </div>
+
+    <div class="fragment" style="background: rgba(50, 180, 50, 0.06); border-radius: 8px; padding: 20px;">
+      <h3 style="color: var(--color-accent); font-size: 0.8em; margin-bottom: 0.5em;">{{RIGHT_HEADER}}</h3>
+      <pre><code class="language-{{LANG}}" data-line-numbers="{{RIGHT_LINE_HIGHLIGHTS}}">{{RIGHT_CODE}}</code></pre>
+    </div>
+  </div>
+
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>
+-->

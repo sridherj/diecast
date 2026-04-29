@@ -1,0 +1,17 @@
+<!--
+  Archetype: Single-Stat Hero
+  When to use: Hook or Reveal slides — one massive number tells the entire story.
+  Density limits: 1 metric, 1 context sentence, zero bullets/diagrams/images, min 60% whitespace.
+  Placeholders: {{SLIDE_ID}}, {{STAT_VALUE}}, {{CONTEXT_LINE}}, {{SPEAKER_NOTES}}
+-->
+<section id="{{SLIDE_ID}}">
+  <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; height: 100%;">
+    <div class="r-fit-text" style="color: var(--color-accent); font-family: var(--font-heading); font-weight: 700; line-height: 1;">
+      {{STAT_VALUE}}
+    </div>
+    <p class="fragment" style="font-size: 1.1em; color: var(--color-muted); margin-top: 0.5em; font-weight: 400;">
+      {{CONTEXT_LINE}}
+    </p>
+  </div>
+  <aside class="notes">{{SPEAKER_NOTES}}</aside>
+</section>
