@@ -1,4 +1,4 @@
-# `taskos-preso-how` — Manual Test Cases
+# `cast-preso-how` — Manual Test Cases
 
 > 12 core scenarios + 1 cross-slide isolation test. These are **manual** test cases — run when the agent is invoked and inspect outputs for the expected behaviors listed.
 
@@ -10,7 +10,7 @@
 | 2 | Information slide — Consulting Exhibit with illustration | normal | Watercolor delegation, asset wiring |
 | 3 | Reveal slide — Code-Snippet with auto-animate | normal | Multi-section output, `data-auto-animate` pairing |
 | 4 | Rework mode — tone checker failure | rework | Feedback reading, version preservation |
-| 5 | Regeneration mode — SJ edits brief | regenerate | Skip Steps 2-5, respect edited brief |
+| 5 | Regeneration mode — the user edits brief | regenerate | Skip Steps 2-5, respect edited brief |
 | 6 | One-idea validation failure | normal | Blocking open question, proceed with primary |
 | 7 | Illustration delegation with inline SVG | normal | SVG element substitution (not `<img>`) |
 | 8 | Illustration delegation failure/timeout | normal | Graceful fallback, placeholder preservation |
@@ -51,7 +51,7 @@ Plus: **Cross-slide isolation** — `slide-01` and `slide-02` run in parallel, e
 **Input:**
 - `what/06-agent-marketplace.md` — slide_type=`information`, Top-Level Outcome: "Audience sees what an agent marketplace looks like as a concrete product surface." L1: 3 data points about the marketplace.
 - WHAT doc explicitly lists "illustration of agent profile card" as a required asset.
-- `taskos-preso-illustration-creator` is available (dispatch returns 200).
+- `cast-preso-illustration-creator` is available (dispatch returns 200).
 
 **Expected behavior:**
 - Step 3 shortlists Consulting Exhibit, Diagram-with-Annotations, Build-Up Sequence.
@@ -110,11 +110,11 @@ Plus: **Cross-slide isolation** — `slide-01` and `slide-02` run in parallel, e
 
 ---
 
-## Test 5: Regeneration mode — SJ edits brief
+## Test 5: Regeneration mode — the user edits brief
 
 **Input:**
 - Existing `how/07-orchestrator/brief.collab.md` with archetype set to Single-Stat Hero (from prior run).
-- SJ manually edited the brief: Chosen Archetype now reads "Compare/Contrast" with different L1 treatment notes.
+- the user manually edited the brief: Chosen Archetype now reads "Compare/Contrast" with different L1 treatment notes.
 - Delegation context: `regenerate: true`. Also carries pending `checker_feedback` from an incomplete rework loop.
 
 **Expected behavior:**
@@ -196,15 +196,15 @@ Plus: **Cross-slide isolation** — `slide-01` and `slide-02` run in parallel, e
 - Step 4 produces two approaches (Single-Stat Hero and One-Statement) that score within 10% on the Steve Jobs test.
 
 **Expected behavior:**
-- Brief contains both approaches in "Approaches Considered" + populated Version A/B section with explicit "SJ decides" note.
+- Brief contains both approaches in "Approaches Considered" + populated Version A/B section with explicit "the user decides" note.
 - Step 6 writes `versions/version-a.html` (Single-Stat Hero) and `versions/version-b.html` (One-Statement).
 - Step 6 copies Version A (the recommended one) to `slide.html` with a comment marker: `<!-- Recommended Version A. See versions/ for alternatives. -->`.
-- `open_questions.md` logs a nice-to-have question: "SJ: pick Version A or B. Differs in [concrete difference]."
+- `open_questions.md` logs a nice-to-have question: "the user: pick Version A or B. Differs in [concrete difference]."
 
 **Failure criteria:**
 - Only one HTML file written. Test fails.
 - `slide.html` lacks the version marker comment. Test fails.
-- No open question flagging SJ decision. Test fails.
+- No open question flagging the user decision. Test fails.
 
 ---
 

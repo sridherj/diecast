@@ -6,14 +6,14 @@ blocking: true
 ---
 ## Context
 
-If a maker agent regenerates Stage-2 WHAT after SJ has edited a slide, his
+If a maker agent regenerates Stage-2 WHAT after the user has edited a slide, his
 saved edits in `localStorage` may no longer map to the regenerated slide
 blocks. See `docs/plan/2026-04-17-preso-editable-preview.md:252-258`.
 
 ## Recommended
 
 - **Option A — Hash source, offer "carry forward / archive" on mismatch:**
-  Cheap (one SHA per input file). SJ keeps control. Matches the user's
+  Cheap (one SHA per input file). the user keeps control. Matches the user's
   pattern of iterating multiple rounds per stage. Reference:
   `docs/plan/2026-04-17-preso-editable-preview.md:256`.
 

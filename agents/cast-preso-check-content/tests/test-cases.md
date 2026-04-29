@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-check-content
+# Test Cases: cast-preso-check-content
 
 Six test cases covering the base 8 criteria and slide-type-specific checks.
 

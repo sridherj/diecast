@@ -1,6 +1,6 @@
 # Compliance Checker Test Cases
 
-Manual test scenarios for `taskos-preso-compliance-checker`. Uses assembled output from the assembler test fixtures.
+Manual test scenarios for `cast-preso-compliance-checker`. Uses assembled output from the assembler test fixtures.
 
 ## Scenario 4: Compliance Pass Case
 
@@ -25,7 +25,7 @@ The test slides don't satisfy this (they only mention 2 advantages, and not by n
 1. Run checker with the stricter narrative.
 2. Verify Pass 3 (Walk-Away Outcomes) FAILs.
 3. Verify routing points to the specific slides that should carry the third advantage.
-4. Verify classified as "route to `taskos-preso-how`" (not "escalate to SJ" — content fix, not structural).
+4. Verify classified as "route to `cast-preso-how`" (not "escalate to the user" — content fix, not structural).
 
 **Pass criteria:** Failure surfaced on Pass 3, routing to HOW for named slides.
 
@@ -47,6 +47,6 @@ The test slides don't satisfy this (they only mention 2 advantages, and not by n
 **Steps:**
 1. Run compliance checker.
 2. Verify Pass 6 (Navigation Integrity) fails.
-3. Verify routing points to `taskos-preso-assembler` (not `taskos-preso-how`) — broken nav is a wiring issue, not a content issue.
+3. Verify routing points to `cast-preso-assembler` (not `cast-preso-how`) — broken nav is a wiring issue, not a content issue.
 
 **Pass criteria:** Routing differentiation works — the checker distinguishes content failures from assembly failures.

@@ -1,8 +1,8 @@
-# Test Cases: taskos-preso-check-tone
+# Test Cases: cast-preso-check-tone
 
 Eight test cases covering all 10 criteria plus the authorship spectrum meta-test.
 
-## Test 1: Clean SJ Voice
+## Test 1: Clean the user Voice
 
 **Mock Input:**
 - `how/test-01/slide.html` text: "28 companies. $10M pipeline. Built in 4 months."
@@ -12,7 +12,7 @@ Eight test cases covering all 10 criteria plus the authorship spectrum meta-test
 - `verdict`: PASS
 - Score: > 0.90
 - Authorship spectrum placement: "Probably human" or "Obviously human-authored"
-- Evidence: "Direct, compressed, concrete. Fragments. Specific numbers. SJ voice."
+- Evidence: "Direct, compressed, concrete. Fragments. Specific numbers. the user voice."
 
 ---
 
@@ -74,11 +74,11 @@ Eight test cases covering all 10 criteria plus the authorship spectrum meta-test
 ## Test 6: Third Person
 
 **Mock Input:**
-- Text: "SJ built this system over 4 months. Sridher's approach focused on concrete outcomes."
+- Text: "the user built this system over 4 months. Sridher's approach focused on concrete outcomes."
 
 **Expected Output:**
 - `verdict`: FAIL
-- Primary issue: `first-person-only` (error) — "Uses 'SJ' and 'Sridher' in third person. Switch to 'I' or 'we'."
+- Primary issue: `first-person-only` (error) — "Uses 'the user' and 'Sridher' in third person. Switch to 'I' or 'we'."
 - `what_good_looks_like`: "'Built this in 4 months. Focused on concrete outcomes.'"
 
 ---

@@ -71,7 +71,7 @@ Calibration examples for the check-visual agent. Describe what good looks like s
 
 ### 5. Cast v1 Thesis Microsite — Internal Reference
 
-**Example:** `taskos/goals/taskos-gtm/thesis_microsite/index.html` (if available)
+**Example:** `docs/exploration/thesis_microsite/index.html` (if available)
 
 - Fly.io-adjacent editorial feel (inspired by Annie Ruygt's illustration style)
 - Warm palette with watercolor illustrations
@@ -79,7 +79,7 @@ Calibration examples for the check-visual agent. Describe what good looks like s
 - Handwritten annotations and editorial accents
 - Numbers always concrete, never rounded for effect
 
-**Why it works:** Internal reference point — this is the aesthetic SJ wants the presentation agents to produce by default.
+**Why it works:** Internal reference point — this is the aesthetic the user wants the presentation agents to produce by default.
 
 **What to look for:** Watercolor illustration style (Annie Ruygt influence)? Warm palette consistent with the visual toolkit? Concrete numbers? Editorial (not corporate) voice?
 

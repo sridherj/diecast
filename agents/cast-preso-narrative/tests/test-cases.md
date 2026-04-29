@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-narrative
+# Test Cases: cast-preso-narrative
 
 ## Test 1: Happy path — Cast v2 narrative
 - Input: Cast thesis doc + v1 presentation + raw requirements
@@ -8,7 +8,7 @@
 ## Test 2: Interview skip mode
 - Input: Same as Test 1, with skip_interview: true
 - Expected: narrative.collab.md synthesized from source material alone
-- Verify: Document is complete but may have less SJ-specific nuance
+- Verify: Document is complete but may have less the user-specific nuance
 
 ## Test 3: Checker rework loop
 - Input: Deliberately weak source material (no clear TG)

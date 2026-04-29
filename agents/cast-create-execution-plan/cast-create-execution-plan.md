@@ -16,14 +16,14 @@ Take a plan document and split it into independently executable sub-phases, each
 ## Output Routing
 
 Your prompt preamble provides two distinct directories:
-- `goal_dir` (e.g., `.taskos/`) — Diecast tracking only. Write **ONLY** the final `.agent-{run_id}.output.json` contract file here.
+- `goal_dir` (e.g., `.diecast/`) — Diecast tracking only. Write **ONLY** the final `.agent-{run_id}.output.json` contract file here.
 - `output_dir` (your working directory) — write ALL execution plan artifacts here:
   - `docs/execution/<plan-name>/_manifest.md`
   - `docs/execution/<plan-name>/_shared_context.md`
   - `docs/execution/<plan-name>/sp*_*/plan.md`
   - All gate files, review summaries, etc.
 
-Never write execution plan files into `goal_dir` / `.taskos/` — that directory is for Diecast tracking only.
+Never write execution plan files into `goal_dir` / `.diecast/` — that directory is for Diecast tracking only.
 
 ## Step 1: Gather Inputs
 

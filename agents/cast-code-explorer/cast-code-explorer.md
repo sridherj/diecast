@@ -56,7 +56,7 @@ You receive via delegation context:
 
 Use tools in this order. If a tier fails or is unavailable, fall back to the next.
 
-### Tier 1: code-review-graph MCP tools (try first)
+### Layer-1: code-review-graph MCP tools (try first)
 
 Token-efficient and relationship-aware. Use for structural queries:
 - `semantic_search_nodes_tool` — find classes, functions, types by name or keyword
@@ -66,9 +66,9 @@ Token-efficient and relationship-aware. Use for structural queries:
 - `get_impact_radius_tool` — understand blast radius of a component
 
 If MCP tools error (tool not found, graph not built, connection refused): note the
-fallback in your output and continue with Tier 2/3. **Never block on MCP unavailability.**
+fallback in your output and continue with Layer-2/3. **Never block on MCP unavailability.**
 
-### Tier 2: Explore subagent
+### Layer-2: Explore subagent
 
 Claude Code's built-in `Explore` subagent (`subagent_type="Explore"`). Good for:
 - Broad questions: "find all API endpoints", "how does authentication work?"
@@ -78,12 +78,12 @@ Claude Code's built-in `Explore` subagent (`subagent_type="Explore"`). Good for:
 Launch with specific focus areas. Use `"quick"` thoroughness for targeted searches,
 `"medium"` for broader exploration.
 
-### Tier 3: Inline Glob/Grep/Read
+### Layer-3: Inline Glob/Grep/Read
 
 Always available. Use for:
 - Targeted lookups: specific file, specific function name, specific pattern
 - Confirming what MCP/Explore found
-- Reading specific file contents after finding them via Tier 1/2
+- Reading specific file contents after finding them via Layer-1/2
 
 ## Workflow
 

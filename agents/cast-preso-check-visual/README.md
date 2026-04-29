@@ -3,7 +3,7 @@
 Evaluates a Stage 3 slide for visual quality: layout specificity, hierarchy clarity, viewport fit, visual toolkit consistency, and whether it avoids the "generic AI slide" aesthetic.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:**

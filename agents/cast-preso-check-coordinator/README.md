@@ -3,7 +3,7 @@
 Dispatches the 3 specialized checkers for a slide, aggregates their verdicts, runs an adversarial pass, and determines next action (approve, rework, or escalate). Supports full and lightweight check modes. After all slides pass, runs cross-slide consistency.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:**

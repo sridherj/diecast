@@ -25,7 +25,7 @@ proven fan-out pattern from `cast-explore`.
   instead of passing N raw plan files to later children.
 - **Collect, don't act.** Children may flag revisions to earlier sub-phases. These are batched
   and surfaced during reconciliation, never acted on mid-sequence.
-- **Delegate, don't abdicate.** Reconciliation presents conflicts to SJ for decision.
+- **Delegate, don't abdicate.** Reconciliation presents conflicts to the user for decision.
   It does NOT auto-edit child-produced plans.
 
 ## Input
@@ -255,7 +255,7 @@ Write standard Diecast output contract (contract_version "2") to
 - **Child failure:** Report error details, suggest retry or manual planning for that sub-phase.
 - **Partial completion:** Report which sub-phases succeeded and which failed. All completed
   plan files are valid and preserved.
-- **Server unreachable:** "Diecast server required. Start with `uv run taskos`."
+- **Server unreachable:** "Diecast server required. Start with `uv run cast-server`."
 
 ## Quality Bar
 

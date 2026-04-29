@@ -3,7 +3,7 @@
 Stage 2 checker: validates WHAT docs against a 7-item checklist. Runs per what/ doc.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 

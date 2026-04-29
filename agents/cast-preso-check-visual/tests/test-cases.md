@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-check-visual
+# Test Cases: cast-preso-check-visual
 
 Six test cases covering the 9 base criteria and the 3 image-specific criteria (Chrome MCP path).
 

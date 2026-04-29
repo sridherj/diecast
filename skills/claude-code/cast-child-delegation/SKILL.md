@@ -1,11 +1,11 @@
 ---
 name: cast-child-delegation
-description: Comprehensive delegation mechanics for TaskOS parent-child agent communication, dispatch, polling, status checks, failure handling, and context passing
+description: Comprehensive delegation mechanics for Diecast parent-child agent communication, dispatch, polling, status checks, failure handling, and context passing
 ---
 
-# TaskOS Child Delegation Skill
+# Diecast Child Delegation Skill
 
-Complete reference for TaskOS agent delegation: parent mechanics (dispatch, polling, status checks, failure handling, async patterns) and child mechanics (reading delegation context, writing output contracts).
+Complete reference for Diecast agent delegation: parent mechanics (dispatch, polling, status checks, failure handling, async patterns) and child mechanics (reading delegation context, writing output contracts).
 
 ---
 
@@ -46,7 +46,7 @@ CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{agent-name}/tri
 **Key fields:**
 - `goal_slug` (string): The goal this work belongs to. From your prompt preamble. Auto-injected into `delegation_context` if missing there.
 - `parent_run_id` (string): Your run_id, injected in prompt preamble. Links delegation tree. Auto-injected into `delegation_context` if missing there.
-- `delegation_context.agent_name` (string): The agent to invoke (e.g., "taskos-startup-enrich").
+- `delegation_context.agent_name` (string): The agent to invoke (e.g., "cast-detailed-plan").
 - `delegation_context.instructions` (string): Detailed task description for the child. Include what success looks like.
 - `delegation_context.context.relevant_artifacts` (array): List artifact paths relative to `goal_dir` that the child should read.
 - `delegation_context.context.prior_output` (string): Summarize what you've done so far, so child understands context.
@@ -94,12 +94,12 @@ NO_PROGRESS_COUNT=0
 LAST_CONTENT_HASH=""
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  # Tier 1: Regular polling (every 10s) — output file check
+  # Layer-1: Regular polling (every 10s) — output file check
   if [ -f "$TRACKING_DIR/.agent-$CHILD_RUN_ID.output.json" ]; then
     break
   fi
 
-  # Tier 2: Deep polling (every 60s) — HTTP status + progress detection
+  # Layer-2: Deep polling (every 60s) — HTTP status + progress detection
   if [ $((ELAPSED % DEEP_POLL_INTERVAL)) -eq 0 ] && [ $ELAPSED -gt 0 ]; then
     STATUS=$(curl -s "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status // empty')
 
@@ -119,10 +119,10 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
       LAST_CONTENT_HASH="$CONTENT_HASH"
     fi
 
-    # Tier 3: Distress notification (5+ consecutive no-progress = 5+ min stuck)
+    # Layer-3: Distress notification (5+ consecutive no-progress = 5+ min stuck)
     if [ $NO_PROGRESS_COUNT -ge 5 ]; then
       if command -v notify-send >/dev/null 2>&1; then
-        notify-send "TaskOS: Child Agent Stuck" \
+        notify-send "Diecast: Child Agent Stuck" \
           "Agent $CHILD_RUN_ID no progress for $((NO_PROGRESS_COUNT * DEEP_POLL_INTERVAL / 60))min"
       fi
     fi
@@ -144,12 +144,12 @@ fi
 
 | Agent | Timeout | Reason |
 |-------|---------|--------|
-| taskos-startup-enrich | 120s | Quick data lookup |
-| taskos-create-execution-plan | 1800s | Plan analysis + phase file creation |
-| taskos-subphase-runner | 2700s | Full sub-phase execution (up to 45 min) |
-| taskos-explore | 2400s | Research + playbook synthesis |
-| taskos-reachout-packet | 1800s | Multi-step packet generation |
-| taskos-web-researcher | 600s | Single angle research |
+| cast-task-suggester | 120s | Quick data lookup |
+| cast-create-execution-plan | 1800s | Plan analysis + phase file creation |
+| cast-subphase-runner | 2700s | Full sub-phase execution (up to 45 min) |
+| cast-explore | 2400s | Research + playbook synthesis |
+| cast-detailed-plan | 1800s | Multi-step plan generation |
+| cast-web-researcher | 600s | Single angle research |
 
 Use the timeout from your own agent instructions, not this table.
 
@@ -235,7 +235,7 @@ When dispatching multiple children that can run in parallel, collect run_ids and
 ```bash
 # Dispatch multiple children, store run_ids
 CHILD_RUN_IDS=()
-for agent in taskos-startup-enrich taskos-opportunity-finder; do
+for agent in cast-web-researcher cast-playbook-synthesizer; do
   RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/$agent/trigger \
     -H "Content-Type: application/json" \
     -d '{"goal_slug":"...","parent_run_id":"...","delegation_context":{...}}' \
@@ -295,19 +295,19 @@ Dispatch a child early, do independent work while it runs, then read the result 
 
 ```bash
 # Step 1: Dispatch child at START of phase
-CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/taskos-opportunity-finder/trigger ...)
+CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/cast-web-researcher/trigger ...)
 
 # Step 2: Do independent work (phases N.1, N.2, N.3)
-#         These steps don't depend on opportunity-finder output
+#         These steps don't depend on the child's output
 echo "Working on phase N.1..."
 echo "Working on phase N.2..."
 
-# Step 3: Before step N.4 (which needs opportunity-finder), read the child's result
+# Step 3: Before step N.4 (which needs the child's research), read the child's result
 while [ ! -f "{goal_dir}/.agent-$CHILD_RUN_ID.output.json" ]; do sleep 10; done
-OPPORTUNITIES=$(cat "{goal_dir}/.agent-$CHILD_RUN_ID.output.json" | jq .artifacts[0].path)
+RESEARCH=$(cat "{goal_dir}/.agent-$CHILD_RUN_ID.output.json" | jq .artifacts[0].path)
 
 # Step 4: Use child's output
-echo "Opportunities found: $OPPORTUNITIES"
+echo "Research artifact: $RESEARCH"
 ```
 
 **Benefit:** Overlaps I/O (child running) with local work (your steps), reducing total time.
@@ -352,7 +352,7 @@ fi
 **New trigger (start fresh):**
 
 ```bash
-NEW_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/taskos-subphase-runner/trigger \
+NEW_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/cast-subphase-runner/trigger \
   -H "Content-Type: application/json" \
   -d '{"goal_slug":"...","parent_run_id":"...","delegation_context":{...}}' \
   | jq -r '.run_id')
@@ -385,21 +385,21 @@ cat "$DELEGATION_FILE" | jq .
 
 ```json
 {
-  "agent_name": "taskos-startup-enrich",
-  "instructions": "Enrich 5 companies with latest funding info...",
+  "agent_name": "cast-web-researcher",
+  "instructions": "Research 5 candidate frameworks with latest release info...",
   "context": {
-    "goal_title": "LinkedIn AI Outreach",
-    "goal_phase": "Phase 1: Company Research",
+    "goal_title": "Framework Selection",
+    "goal_phase": "Phase 1: Discovery",
     "artifacts": [
       "docs/execution/my_plan/_shared_context.md",
-      "target_companies.json"
+      "candidates.json"
     ],
-    "prior_output": "Already researched 3 companies from YC; need 2 more from VCs.",
-    "constraints": "Do not modify company names; only add funding data."
+    "prior_output": "Already researched 3 candidates; need 2 more from the long-tail list.",
+    "constraints": "Do not modify candidate names; only add release data."
   },
   "output": {
-    "output_dir": "/data/workspace/second-brain/docs/execution/my_plan",
-    "expected_artifacts": ["enrichment_result.json"]
+    "output_dir": "~/workspace/diecast/docs/execution/my_plan",
+    "expected_artifacts": ["research_result.json"]
   }
 }
 ```
@@ -462,19 +462,19 @@ At the end of your work, write the standard output contract to `{goal_dir}/.agen
 cat > "{goal_dir}/.agent-{run_id}.output.json" << 'EOF'
 {
   "contract_version": "2",
-  "agent_name": "taskos-startup-enrich",
-  "task_title": "Enrich AI startups with funding data",
+  "agent_name": "cast-web-researcher",
+  "task_title": "Research candidate frameworks",
   "status": "completed",
-  "summary": "Researched 5 companies and added funding history (Series A, B rounds) from their last 2 years. All data current as of March 2026.",
+  "summary": "Researched 5 frameworks and added release history (latest minor + major) for the last 2 years. All data current as of March 2026.",
   "artifacts": [
     {
-      "path": "docs/execution/my_plan/enrichment_result.json",
+      "path": "docs/execution/my_plan/research_result.json",
       "type": "data",
-      "description": "5 companies with funding_rounds array, total_funding, last_round_date"
+      "description": "5 frameworks with release_history array, latest_version, last_release_date"
     }
   ],
   "errors": [],
-  "next_steps": ["Review funding data for accuracy before outreach"],
+  "next_steps": ["Review release data for accuracy before selection"],
   "human_action_needed": false,
   "human_action_items": [],
   "started_at": "2026-03-24T10:30:00Z",
@@ -517,7 +517,7 @@ Interpret what you see:
 **Step 2: Nudge (if idle/waiting)**
 
 ```bash
-# Option A: Send continuation via HTTP (preferred — uses TaskOS continue endpoint)
+# Option A: Send continuation via HTTP (preferred — uses Diecast continue endpoint)
 if [ "$STATUS" = "idle" ]; then
   curl -s -X POST "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID/continue" \
     -H "Content-Type: application/json" \
@@ -579,7 +579,7 @@ CHILD_RUN_ID="$NEW_RUN_ID"
 
 ### Before Dispatching a Child
 
-- [ ] TaskOS server is running (`curl -s http://localhost:8000/api/agents/runs?status=running | head -1`)
+- [ ] Diecast cast-server is running (`curl -s http://localhost:8000/api/agents/runs?status=running | head -1`)
 - [ ] Child agent exists in registry (check `/agents/*/config.yaml`)
 - [ ] Instructions are specific and include success criteria
 - [ ] Context artifacts are relevant and paths are correct (relative to goal_dir)

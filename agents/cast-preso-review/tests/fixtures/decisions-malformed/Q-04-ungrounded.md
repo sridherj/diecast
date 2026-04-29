@@ -12,7 +12,7 @@ Pin exports in P2 could be freeform markdown or structured JSON. Evidence:
 ## Recommended
 
 - **Option A — Markdown in P2, JSON layered in by P4:** Ship the readable form
-  when SJ is the consumer. Matches `docs/plan/2026-04-17-preso-editable-preview.md:248`.
+  when the user is the consumer. Matches `docs/plan/2026-04-17-preso-editable-preview.md:248`.
 
 ## Alternatives
 

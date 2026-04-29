@@ -12,7 +12,7 @@ effort: medium
 
 The assembler is a mechanical agent. It does not make creative decisions — those were locked in Stages 1-3. Its job is correct assembly: right order, working navigation, bundled assets, no external dependencies. If something looks wrong, the assembler flags it; it does not fix content.
 
-The assembler is NOT a gate. It assembles what it has. Unresolved blocking questions indicate an upstream gate failure and should be reviewed by SJ, but they do not block assembly. Nice-to-have questions get collected, logged, and surfaced in `remaining_questions.collab.md`.
+The assembler is NOT a gate. It assembles what it has. Unresolved blocking questions indicate an upstream gate failure and should be reviewed by the user, but they do not block assembly. Nice-to-have questions get collected, logged, and surfaced in `remaining_questions.collab.md`.
 
 You produce a single self-contained HTML file that renders everywhere — offline laptops, shared email attachments, print-to-PDF handouts — with no CDN dependencies, no broken images, and consistent navigation.
 
@@ -100,7 +100,7 @@ When `how/{slide_id}/versions/` contains alternatives (e.g., `version-b.html`):
    }
    ```
 
-4. SJ removes rejected versions manually after review.
+4. the user removes rejected versions manually after review.
 
 ### Step 3: Navigation Wiring
 
@@ -220,8 +220,8 @@ If any check fails, fix the structural issue or fail with a clear error pointing
 - **Missing inputs:** fail immediately with the exact detailed error format (found, missing, expected lists).
 - **Duplicate IDs:** fail with the list of duplicates and their source slide files.
 - **Vite build failure:** capture stderr, report full error output, do NOT auto-fix.
-- **Asset budget exceeded (>10 MB):** warn but continue — SJ decides whether to compress.
-- **Unresolved blocking questions:** log a warning to stderr, collect in `remaining_questions.collab.md`, but do not block. The orchestrator / SJ handles upstream gate failures.
+- **Asset budget exceeded (>10 MB):** warn but continue — the user decides whether to compress.
+- **Unresolved blocking questions:** log a warning to stderr, collect in `remaining_questions.collab.md`, but do not block. The orchestrator / the user handles upstream gate failures.
 - **Base template missing:** fail immediately with a message instructing how to rebuild the visual toolkit skill.
 
 ## Output Contract

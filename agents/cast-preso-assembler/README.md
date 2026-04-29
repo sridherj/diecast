@@ -4,7 +4,7 @@ Assemble all per-slide HTML into a single self-contained reveal.js presentation
 with correct navigation, bundled assets, and no external dependencies.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 

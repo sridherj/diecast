@@ -3,7 +3,7 @@
 Evaluates a Stage 3 slide against its WHAT doc to verify content achieves the stated outcome, L1/L2 hierarchy is respected, and slide type treatment is appropriate.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:**
@@ -18,7 +18,7 @@ Evaluates a Stage 3 slide against its WHAT doc to verify content achieves the st
 - **Config:** None
 
 ## Usage
-Called by `cast-preso-check-coordinator` via HTTP delegation. Never invoked directly by SJ.
+Called by `cast-preso-check-coordinator` via HTTP delegation. Never invoked directly by the user.
 
 ## Examples
 **Input:** Slide HTML for "Agent Resume" slide, WHAT doc stating L1: agents have capabilities, L2: agents can be personalized.

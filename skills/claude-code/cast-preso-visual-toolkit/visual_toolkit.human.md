@@ -1,7 +1,7 @@
 # Presentation Visual Toolkit
 
-> The single authoritative style reference for all `taskos-preso-*` agents.
-> SJ maintains this file. All agents read it. Do not edit programmatically.
+> The single authoritative style reference for all `cast-preso-*` agents.
+> The maintainer owns this file. All agents read it. Do not edit programmatically.
 
 ---
 

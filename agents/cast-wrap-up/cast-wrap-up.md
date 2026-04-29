@@ -50,10 +50,10 @@ If there are learnings worth capturing, append them to `plan_and_progress/LEARNI
 
 ## Step 3.5: Check Spec Drift
 
-Run `uv run python scripts/check_spec_drift.py` from the second-brain root.
+Run `uv run python scripts/check_spec_drift.py` from the Diecast project root.
 
 - If **MUST_REVIEW** or **SHOULD_REVIEW** specs are flagged:
-  - Show the report to SJ
+  - Show the report to the user
   - Ask: "Specs flagged for drift -- want to run /update-spec for any of these?"
 - If no drift: skip silently (don't mention it)
 - If the script fails or specs directory doesn't exist: skip silently

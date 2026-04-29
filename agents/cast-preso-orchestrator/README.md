@@ -3,7 +3,7 @@
 Manages Stages 2-4 of the presentation pipeline with persistent state and clean recovery.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:** Path to a presentation directory containing `narrative.collab.md` (approved via G1)
@@ -20,17 +20,17 @@ Manages Stages 2-4 of the presentation pipeline with persistent state and clean 
 - `cast-preso-compliance-checker` — Stage 4 compliance verification
 
 ## Usage
-Invoke after `cast-preso-narrative` completes and SJ approves the narrative (G1).
+Invoke after `cast-preso-narrative` completes and the user approves the narrative (G1).
 Can be re-invoked any number of times — reads state.json and resumes.
 
 ## Human Gates
-- G2: After Stage 2 — SJ reviews per-slide WHAT docs
-- G3a: After Stage 3 — SJ reviews all slides (batched after cross-slide consistency)
-- G3b: After G3a — SJ resolves blocking open questions one at a time
-- G4: After Stage 4 — SJ does final presentation walkthrough
+- G2: After Stage 2 — the user reviews per-slide WHAT docs
+- G3a: After Stage 3 — the user reviews all slides (batched after cross-slide consistency)
+- G3b: After G3a — the user resolves blocking open questions one at a time
+- G4: After Stage 4 — the user does final presentation walkthrough
 
 ## Examples
-Dispatched via HTTP delegation or directly by SJ:
+Dispatched via HTTP delegation or directly by the user:
 ```
 POST /api/agents/cast-preso-orchestrator/trigger
 ```

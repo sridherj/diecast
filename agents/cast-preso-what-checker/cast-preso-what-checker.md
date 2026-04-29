@@ -152,5 +152,5 @@ Output a structured verdict per WHAT doc checked:
    - Guidance: {what good looks like}
 
 ### Iteration
-This is iteration {N}/2. {If N=2: "Final iteration. Escalate to SJ with best version and remaining issues."}
+This is iteration {N}/2. {If N=2: "Final iteration. Escalate to the user with best version and remaining issues."}
 ```

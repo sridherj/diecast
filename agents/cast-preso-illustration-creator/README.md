@@ -4,7 +4,7 @@ Create illustrations for presentation slides using Stitch MCP (watercolor/raster
 or inline SVG (diagrams/data viz). Uses Style Bible approach for cross-deck consistency.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 
@@ -28,7 +28,7 @@ or inline SVG (diagrams/data viz). Uses Style Bible approach for cross-deck cons
 None (style configuration comes from the visual toolkit / scene brief)
 
 ## Usage
-Delegated by `cast-preso-how`. Not invoked directly by SJ.
+Delegated by `cast-preso-how`. Not invoked directly by the user.
 
 ## Delegates To
 - `cast-preso-illustration-checker` — Three-pass verification of generated illustrations

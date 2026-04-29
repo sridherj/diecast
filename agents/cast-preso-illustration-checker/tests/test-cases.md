@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-illustration-checker
+# Test Cases: cast-preso-illustration-checker
 
 | # | Scenario | Input | Expected Verdict | Validates |
 |---|----------|-------|------------------|-----------|

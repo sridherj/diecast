@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-check-coordinator
+# Test Cases: cast-preso-check-coordinator
 
 Seven coordinator unit tests + seven integration tests covering the full HOW → check → rework loop.
 
@@ -83,7 +83,7 @@ These tests stub child checker outputs (or mock dispatch) and verify the coordin
   - Best version so far (path)
   - What's still failing (specific criteria)
   - What was tried across iterations 0, 1, 2 (summary)
-  - One specific question for SJ
+  - One specific question for the user
 
 ---
 
@@ -229,7 +229,7 @@ These tests exercise the full HOW → check → rework loop with real child agen
   - Best version so far (path to iteration 2 version)
   - What's still failing (the persistent criterion)
   - What was tried (summary of all 3 attempts)
-  - Specific question for SJ (one decision needed)
+  - Specific question for the user (one decision needed)
 - [ ] `check-results.json` has `decision: "escalated"`
 
 ---

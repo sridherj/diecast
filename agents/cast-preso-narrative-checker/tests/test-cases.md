@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-narrative-checker
+# Test Cases: cast-preso-narrative-checker
 
 ## Test 1: Good narrative — should PASS
 - Input: narrative-gold-standard.md from references/

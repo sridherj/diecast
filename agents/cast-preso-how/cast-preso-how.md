@@ -32,7 +32,7 @@ Validate inputs and load files **lazily** — read each reference at the step th
 | `what/{slide_id}.md` | Step 1 (now) | YES — fail if missing |
 | `narrative.collab.md` | Step 1 (now) | YES — fail if missing |
 | `.claude/skills/cast-preso-visual-toolkit/visual_toolkit.human.md` | Step 1 (now) | YES — style tokens needed throughout |
-| `about_me/sj-writing-tone.md` | Step 5 (brief writing) | YES — tone guide |
+| `docs/style/writing-tone.md` | Step 5 (brief writing) | YES — tone guide |
 | `references/archetype-treatment-matrix.md` | Step 3 (archetype selection) | Loaded inline at that step |
 | `references/brief-template.md` | Step 5 (brief creation) | Loaded inline at that step |
 | `references/html-generation-rules.md` | Step 6 (HTML generation) | Loaded inline at that step |
@@ -134,13 +134,13 @@ Steve Jobs test: Would this slide make the cut in an Apple keynote? Why/why not?
 4. **Distinctiveness** — does the approach earn its slide, or could any archetype have been picked?
 5. **Production cost** — if two approaches tie on the above, prefer the one that needs fewer illustration delegations or custom CSS rules.
 
-Pick the strongest. Document WHY in the brief's Selection Rationale — be specific about the trade-off you made (e.g., "picked Compare/Contrast over Single-Stat Hero because the hook needs the audience to see both sides of the pain, not just the aggregate number"). If two are genuinely close on the Steve Jobs test (within ~10% subjective gap), promote BOTH to a Version A/B and let SJ decide.
+Pick the strongest. Document WHY in the brief's Selection Rationale — be specific about the trade-off you made (e.g., "picked Compare/Contrast over Single-Stat Hero because the hook needs the audience to see both sides of the pain, not just the aggregate number"). If two are genuinely close on the Steve Jobs test (within ~10% subjective gap), promote BOTH to a Version A/B and let the user decide.
 
 ### Step 5: Brief Creation
 
 **Read `references/brief-template.md` now.**
 
-Fill in EVERY section of the template. The brief is the regeneration blueprint — if SJ edits this brief and re-runs with `regenerate: true`, the new HTML must follow predictably from the edited brief.
+Fill in EVERY section of the template. The brief is the regeneration blueprint — if the user edits this brief and re-runs with `regenerate: true`, the new HTML must follow predictably from the edited brief.
 
 Mark optional sections as "N/A" rather than omitting them. Stable structure matters for downstream agents (assembler, compliance checker).
 
@@ -206,7 +206,7 @@ Write to `how/{slide_id}/open_questions.md`. Format:
 - **From:** cast-preso-how
 - **Severity:** blocking | nice-to-have
 - **Category:** content | visual | technical | scope
-- **Question:** {one-sentence question for SJ}
+- **Question:** {one-sentence question for the user}
 - **Context:** {what triggered this question — quote the WHAT doc / brief if relevant}
 - **Recommendation:** {your suggested resolution — be opinionated}
 ```
@@ -216,7 +216,7 @@ Write to `how/{slide_id}/open_questions.md`. Format:
 - WHAT doc has a vague resource ("recent benchmarks" with no numbers) (nice-to-have)
 - Illustration delegation times out or illustration-creator missing (nice-to-have)
 - A required CSS token referenced by the chosen archetype doesn't exist in the visual toolkit (blocking)
-- Version A/B selected and SJ needs to pick (nice-to-have)
+- Version A/B selected and the user needs to pick (nice-to-have)
 
 If no open questions, write the file with a single line: `_No open questions._` Always create the file — assembler expects it.
 
@@ -251,8 +251,8 @@ Triggered when delegation context contains `checker_feedback`. Read the feedback
    - Never bundle dimension-spanning fixes — it confuses the next checker pass.
 3. **Preserve the old version:** Move existing `slide.html` to `versions/v{N}.html` before writing the new HTML.
 4. **Update the brief's Rework History section** with: failed criterion (verbatim), what changed, why.
-5. **Max 3 rework iterations.** On the 4th, escalate to SJ via blocking open question — do not write a 4th iteration.
-6. **Oscillation detection:** If iteration N fixes check X but breaks check Y that passed at N-1, escalate immediately. This is a structural tension only SJ can resolve.
+5. **Max 3 rework iterations.** On the 4th, escalate to the user via blocking open question — do not write a 4th iteration.
+6. **Oscillation detection:** If iteration N fixes check X but breaks check Y that passed at N-1, escalate immediately. This is a structural tension only the user can resolve.
 
 Rework does NOT re-run brainstorming. The archetype and brief structure stay; you patch the chosen approach.
 
@@ -262,12 +262,12 @@ Triggered when delegation context contains `regenerate: true`.
 
 1. **Execute Step 1 (context loading)** to validate inputs.
 2. **SKIP Steps 2-5** (no brainstorming, no archetype re-selection, no new brief).
-3. **Read the EXISTING `how/{slide_id}/brief.collab.md`** — SJ may have edited it. The edited brief is now the source of truth.
+3. **Read the EXISTING `how/{slide_id}/brief.collab.md`** — the user may have edited it. The edited brief is now the source of truth.
 4. **Execute Steps 6-8:** generate new HTML from the (possibly edited) brief, delegate illustration if requirements changed, refresh open questions and assembler notes.
 5. **Move old `slide.html` to `versions/pre-regen-{timestamp}.html`** before writing the new one.
-6. **Ignore `checker_feedback` entirely.** SJ's brief edit supersedes any pending checker rework. Archive any pending feedback file by appending `.archived` to its name.
+6. **Ignore `checker_feedback` entirely.** the user's brief edit supersedes any pending checker rework. Archive any pending feedback file by appending `.archived` to its name.
 
-Regeneration is the safety valve when checkers and SJ disagree, or when SJ wants to steer the slide manually. The brief is the lever.
+Regeneration is the safety valve when checkers and the user disagree, or when the user wants to steer the slide manually. The brief is the lever.
 
 ## Output Contract
 

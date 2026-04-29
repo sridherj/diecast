@@ -99,7 +99,7 @@ If no specs match the changed files, write "No specs cover these files.">
 Run this command (replace `<brief_path>` with the actual file path from step 2):
 
 ```bash
-ptyxis --tab --title "Code Review $(date +%H:%M)" -- bash -lc 'cd <working_dir> && claude --permission-mode acceptEdits "Read <brief_path> for review context, then use /review to review the listed files. Focus on whether the implementation matches the plan requirements exactly. If specs are listed in the brief, read them and check SAV behaviors against the code. Flag violations in a Spec Compliance section."'
+$TERMINAL --tab --title "Code Review $(date +%H:%M)" -- bash -lc 'cd <working_dir> && claude --permission-mode acceptEdits "Read <brief_path> for review context, then use /review to review the listed files. Focus on whether the implementation matches the plan requirements exactly. If specs are listed in the brief, read them and check SAV behaviors against the code. Flag violations in a Spec Compliance section."'
 ```
 
 ## Step 4: Confirm

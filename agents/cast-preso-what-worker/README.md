@@ -4,7 +4,7 @@ Stage 2b worker: takes one planner stub and produces the full WHAT doc with cura
 resources, data points, and verification criteria for Stage 3.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 

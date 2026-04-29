@@ -3,7 +3,7 @@ name: cast-interactive-questions
 description: >
   Standard protocol for asking users questions via AskUserQuestion tool.
   One question at a time, structured options, recommendation first with grounded reasoning.
-  Referenced by all interactive TaskOS agents.
+  Referenced by all interactive Diecast agents.
 ---
 
 # Interactive Question Protocol

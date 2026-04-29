@@ -182,7 +182,7 @@ Audience should understand the agent profile format in < 5 seconds.
 
 ## Content Pointers (for worker)
 - `agents/REGISTRY.md:1-50` — real agent catalog format for visual inspiration
-- `taskos/goals/taskos-gtm/thesis_v1.collab.md`, Agent Marketplace section — mental model language
+- `docs/exploration/thesis_v1.collab.md`, Agent Marketplace section — mental model language
 - Narrative reference: "04-marketplace" slide mentions the profile idea; this slide makes it concrete
 
 ## Open Questions for Worker

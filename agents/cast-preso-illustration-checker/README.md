@@ -5,7 +5,7 @@ Style Bible, and cross-deck style consistency. Returns structured verdicts with 
 feedback for rework.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 
@@ -61,7 +61,7 @@ None
 
 ## Usage
 Delegated by `cast-preso-illustration-creator` after generating an illustration.
-Not invoked directly by SJ.
+Not invoked directly by the user.
 
 ## Examples
 Input: Watercolor illustration + scene brief + style anchor

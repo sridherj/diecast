@@ -1,6 +1,9 @@
 <!-- Phase 6 will replace this skeleton with the full launch README per refined-req US15. -->
 # Diecast
 
+**Cast to spec. No drift.**
+**Cast from the same die. Every run.**
+
 Opinionated agents, cast to spec from a die you control.
 
 v1 in development. See CHANGELOG.md.

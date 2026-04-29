@@ -14,4 +14,4 @@ claude-code-skill
 - `/cast-update-spec` or "update spec", "modify spec", "add behavior to spec"
 
 ## Tags
-[specs] [planning] [taskos]
+[specs] [planning] [diecast]

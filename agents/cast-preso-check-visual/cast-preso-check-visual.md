@@ -43,7 +43,7 @@ Decision:
   - Use `mcp__claude-in-chrome__computer` (or screenshot tool) to capture at 1920x1080
   - Analyze the screenshot for criteria 11-13
 
-**Chrome MCP fallback:** If Chrome MCP is unavailable or the screenshot fails, skip criteria 11-13 and add a warning: "Image integration not verified — Chrome MCP unavailable. Manual review recommended." Do NOT fail the slide solely because screenshots couldn't be taken. The warning alerts SJ to spot-check.
+**Chrome MCP fallback:** If Chrome MCP is unavailable or the screenshot fails, skip criteria 11-13 and add a warning: "Image integration not verified — Chrome MCP unavailable. Manual review recommended." Do NOT fail the slide solely because screenshots couldn't be taken. The warning alerts the user to spot-check.
 
 ## Evaluation Criteria (10 base + 3 image-specific)
 

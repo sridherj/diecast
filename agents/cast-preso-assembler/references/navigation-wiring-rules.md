@@ -81,7 +81,7 @@ When a slide has `versions/` alternatives:
   ```
 
 - A/B stacks are **separate from appendix stacks** — they are attached to the primary slide's own stack, not the appendix.
-- SJ removes rejected versions manually after review; the assembler does not auto-select.
+- the user removes rejected versions manually after review; the assembler does not auto-select.
 
 ## 5. Prohibited Patterns
 

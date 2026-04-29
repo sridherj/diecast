@@ -137,7 +137,7 @@ SVG. Instead, the agent follows `references/svg-specification.md` and the visual
 toolkit's CSS class names.
 
 **Step 1.5 — Product-screen pre-draft skill invocation.**
-When the scene brief describes a product screen (ticket UI, dashboard, config panel, app chrome), invoke the `/ui-ux-pro-max:ui-ux-pro-max` skill BEFORE drafting SVG. Use it to pick palette, typography pairing, spacing scale, and interaction primitives that match a real product. SJ's rule: product-mock illustrations must look like they were ripped out of a real app — not assembled from generic card templates.
+When the scene brief describes a product screen (ticket UI, dashboard, config panel, app chrome), invoke the `/ui-ux-pro-max:ui-ux-pro-max` skill BEFORE drafting SVG. Use it to pick palette, typography pairing, spacing scale, and interaction primitives that match a real product. the user's rule: product-mock illustrations must look like they were ripped out of a real app — not assembled from generic card templates.
 
 After the skill returns recommendations, draft the SVG using those tokens. This step applies to the product-screen path only; watercolor-hero, abstract-metaphor, and data-viz scenes skip it.
 

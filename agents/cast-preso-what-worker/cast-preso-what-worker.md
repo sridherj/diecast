@@ -71,7 +71,7 @@ For this slide (and only this slide):
      also fails, log the gap as a worker open question and continue.
 
 4. **Compile resource list** with concrete references:
-   - File paths with line ranges: `agents/taskos-explore/README.md:15-30`
+   - File paths with line ranges: `agents/cast-explore/README.md:15-30`
    - URLs with what's relevant: `https://example.com — section on agent architecture`
    - Exact data: `"28 companies, $4.2M median Series A, 73% YoY growth"`
    - Proof points: specific quotes, screenshots, code snippets
@@ -136,7 +136,7 @@ planner decisions), then fill in the rest:
 - [ ] {For reveal slides: "There's genuine surprise — this wasn't obvious from the hook"}
 
 ## Worker Open Questions (if any)
-- {Questions for the planner, reviewer, or SJ — e.g., "Narrative implies 44 agents; registry shows 47. Which number to use?"}
+- {Questions for the planner, reviewer, or the user — e.g., "Narrative implies 44 agents; registry shows 47. Which number to use?"}
 ```
 
 **Writing quality rules:**
@@ -205,12 +205,12 @@ The audience should understand the agent profile format in < 5 seconds.
 | File | Relevant Section | What to Use |
 |------|-----------------|-------------|
 | `agents/REGISTRY.md` | Lines 1-50 | Real agent catalog format — use as visual inspiration |
-| `taskos/goals/taskos-gtm/thesis_v1.collab.md` | "Agent Marketplace" section | Core mental model language |
+| `docs/exploration/thesis_v1.collab.md` | "Agent Marketplace" section | Core mental model language |
 
 ### Data Points
-- 47 agents currently in the second-brain registry (verified against HEAD)
+- 47 agents currently in the Diecast project registry (verified against HEAD)
 - Each agent has: name, type, I/O contract, config, test cases
-- Real example: `taskos-web-researcher` — input: topic, output: 7-angle research notes
+- Real example: `cast-web-researcher` — input: topic, output: 7-angle research notes
 
 ### External References
 | URL | What's There | How to Use |

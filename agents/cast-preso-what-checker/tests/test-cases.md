@@ -1,4 +1,4 @@
-# Test Cases: taskos-preso-what-checker
+# Test Cases: cast-preso-what-checker
 
 ## Test 1: Passing WHAT Doc
 **Input:** Well-formed what/ doc that meets all 7 criteria

@@ -20,7 +20,7 @@ information
 
 ## Resources
 - Existing capabilities taxonomy: `docs/specs/agent-capabilities.md`
-- Voice guide: `about_me/sj-writing-tone.md`
+- Voice guide: `docs/style/writing-tone.md`
 
 ## Verification Criteria
 - Viewer can identify the 3 capabilities within 5 seconds

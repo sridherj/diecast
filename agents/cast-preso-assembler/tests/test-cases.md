@@ -1,6 +1,6 @@
 # Assembler Test Cases
 
-Manual test scenarios for `taskos-preso-assembler`. Fixtures live in `tests/fixtures/`.
+Manual test scenarios for `cast-preso-assembler`. Fixtures live in `tests/fixtures/`.
 
 ## Scenario 1: Happy Path Assembly
 

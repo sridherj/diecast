@@ -31,8 +31,8 @@ Expect 3-5 invocations for a 12-slide deck (one for Stage 2, 1-2 for Stage 3,
 1 for Stage 4).
 
 ## Required Skills
-- Use `/taskos-child-delegation` skill for ALL child agent dispatches
-- Use `/taskos-interactive-questions` skill for ALL human gate interactions
+- Use `/cast-child-delegation` skill for ALL child agent dispatches
+- Use `/cast-interactive-questions` skill for ALL human gate interactions
 
 ## Reference Files
 - Read `narrative.collab.md` from the presentation directory
@@ -192,11 +192,11 @@ Step 2: Determine Next Action
 
 Step 3: Execute Current Stage
   Dispatch children, poll for completion, update state after each change.
-  Stop at human gates — present to SJ via interactive questions.
+  Stop at human gates — present to the user via interactive questions.
 
 Step 4: Advance or Halt
   If gate approved: advance to next stage, loop back to Step 2.
-  If gate pending: write state, halt (SJ re-invokes later).
+  If gate pending: write state, halt (the user re-invokes later).
   If all stages complete: write final state, report completion.
   If approaching 55 minutes: write state, halt with progress summary.
 ```
@@ -219,7 +219,7 @@ rework_loop(stage, slide_id, max_iterations, maker_agent, checker_agent, feedbac
      c. Else (rework_count >= max_iterations):
         - Set maker_status -> "escalated", check_status -> "escalated"
         - Write state.json
-        - Present escalation to SJ via interactive questions:
+        - Present escalation to the user via interactive questions:
           - Option A: Accept current version
           - Option B: Provide specific guidance for one more attempt
           - Option C: Simplify the slide / reduce ambition
@@ -247,7 +247,7 @@ mirrors Stage 3's per-slide fanout.
     `stage2.status -> "in_progress"`.
   - Write state.json, advance to §8.2.
 - On planner failure: auto-retry once. If retry also fails, set
-  `stage2.planner.status -> "escalated"` and surface via SJ escalation path.
+  `stage2.planner.status -> "escalated"` and surface via the user escalation path.
 
 ### 8.2 Making Phase (per-slide fanout)
 - For each slide with `stage2.slides[slide_id].maker_status == "pending"`:
@@ -271,7 +271,7 @@ mirrors Stage 3's per-slide fanout.
 
 ### 8.4 Gate G2
 - Trigger: All Stage 2 slides have `maker_status == "approved"` (or resolved via escalation).
-- Present to SJ via interactive questions with summary table of all slides.
+- Present to the user via interactive questions with summary table of all slides.
 - Options: (A) Approve all and proceed to Stage 3, (B) Flag specific slides for revision,
   (C) Reject and redo Stage 2 (re-run planner from scratch).
 - On approval: set gate status, advance `current_stage` -> "stage3".
@@ -316,14 +316,14 @@ Stage 3 is the most complex. The orchestrator manages 7 sub-steps plus 2 gates.
 ### 9.3 Failed Maker Handling
 - If maker output status is "failed" or "partial": set maker_status -> "failed"
 - Auto-retry once (re-dispatch with same inputs)
-- If retry also fails: set maker_status -> "escalated" and surface via SJ escalation path
+- If retry also fails: set maker_status -> "escalated" and surface via the user escalation path
 - Note: `failed` is distinct from `rework`. `rework` is checker-driven; `failed` is an agent crash.
 
 ### 9.4 Cross-Slide Consistency Pass
 - Trigger: ALL slides have `check_status == "passed"` (or escalated and resolved)
 - Dispatch `cast-preso-check-coordinator` in "cross-slide" mode with paths to ALL slide directories
 - If issues found: targeted rework for flagged slides only, then re-run cross-slide check
-- Max 2 cross-slide iterations before escalating to SJ (`cross_slide_check.rework_count`)
+- Max 2 cross-slide iterations before escalating to the user (`cross_slide_check.rework_count`)
 
 ### 9.5 Open Question Aggregation
 - After cross-slide passes: read all `how/{slide_id}/open_questions.md`
@@ -364,7 +364,7 @@ Briefs: presentation/how/*/brief.collab.md
 ### 9.8 Gate G3b — Open Questions Resolution
 - Trigger: G3a approved
 - If zero blocking questions: auto-approve G3b (set status -> "skipped"), present nice-to-haves in a batch summary
-- If blocking questions exist: walk SJ through them ONE AT A TIME with structured options and agent recommendation
+- If blocking questions exist: walk the user through them ONE AT A TIME with structured options and agent recommendation
 - If >10 blocking questions: group by category with a batch-accept option ("Accept all {category} recommendations?")
 - After all blocking resolved: present nice-to-haves in batch summary
 - On completion: advance `current_stage` -> "stage4"
@@ -398,7 +398,7 @@ Question #N: Open Question {question_id} (Blocking)
 - If FAIL: read structured feedback. Route failures per the compliance checker's routing recommendations:
   - Content issues -> re-dispatch `cast-preso-how` for affected slides
   - Technical/nav issues -> re-dispatch `cast-preso-assembler`
-  - Narrative-level issues -> escalate to SJ
+  - Narrative-level issues -> escalate to the user
   - Max 2 compliance rework cycles. If iteration N finds MORE issues than N-1 (regression): escalate immediately.
 - Apply `rework_loop(stage4, compliance, 2, router, cast-preso-compliance-checker, ...)` for compliance-driven rework
 
@@ -432,9 +432,9 @@ Compliance summary:
 
 ## Delegation Templates
 
-Exact HTTP delegation payloads passed to `/taskos-child-delegation` for each child agent.
+Exact HTTP delegation payloads passed to `/cast-child-delegation` for each child agent.
 
-**Canonical context fields** — per the `/taskos-child-delegation` skill, every template's
+**Canonical context fields** — per the `/cast-child-delegation` skill, every template's
 `delegation_context.context` block MUST also include the following fields in addition to
 the domain-specific fields shown below. Omitting them from the actual dispatch payload
 breaks the delegation contract; the per-template JSON below lists only the stage-specific
@@ -495,7 +495,7 @@ a deck titled "Diecast — AI Agent Marketplace", the full context block is:
   "parent_run_id": "{orchestrator_run_id}",
   "delegation_context": {
     "agent_name": "cast-preso-what-planner",
-    "instructions": "Rework manifest or specific stubs per SJ feedback.",
+    "instructions": "Rework manifest or specific stubs per the user feedback.",
     "context": {
       "mode": "rework",
       "feedback": { "manifest": "{optional}", "stub_{slide_id}": { "failing_checks": [], "feedback_detail": "..." } }
@@ -583,7 +583,7 @@ a deck titled "Diecast — AI Agent Marketplace", the full context block is:
       "what_doc_path": "presentation/what/{slide_id}.md",
       "narrative_path": "presentation/narrative.collab.md",
       "visual_toolkit_skill": ".claude/skills/cast-preso-visual-toolkit/",
-      "tone_guide_path": "about_me/sj-writing-tone.md",
+      "tone_guide_path": "docs/style/writing-tone.md",
       "check_mode": "{full|lightweight}",
       "checker_feedback_path": "{if rework: path to feedback, else null}"
     },
@@ -611,7 +611,7 @@ a deck titled "Diecast — AI Agent Marketplace", the full context block is:
       "brief_path": "presentation/how/{slide_id}/brief.collab.md",
       "what_doc_path": "presentation/what/{slide_id}.md",
       "narrative_path": "presentation/narrative.collab.md",
-      "tone_guide_path": "about_me/sj-writing-tone.md",
+      "tone_guide_path": "docs/style/writing-tone.md",
       "visual_toolkit_skill": ".claude/skills/cast-preso-visual-toolkit/"
     },
     "output": {
@@ -703,8 +703,8 @@ Recovery runs at EVERY invocation start, before any dispatch.
   treat v1 as corrupt and re-initialize — worker-produced `what/*.md` files on disk are
   the recoverable truth, not the per-slide v1 state).
 - Validate slide list matches narrative.collab.md:
-  - **Added slides:** Add to state.json as `pending` in current stage. Inform SJ via a brief note in the next gate presentation.
-  - **Removed slides:** Mark as `removed` (do NOT delete the entry). Inform SJ. Excluded from assembly.
+  - **Added slides:** Add to state.json as `pending` in current stage. Inform the user via a brief note in the next gate presentation.
+  - **Removed slides:** Mark as `removed` (do NOT delete the entry). Inform the user. Excluded from assembly.
   - **Reordered slides:** Silently update `slide_list` order. No per-slide impact; assembly uses narrative order.
 - Check for impossible status combinations (e.g., `checking` without a maker `run_id`); if found, treat as lost and re-dispatch
 
@@ -729,7 +729,7 @@ checkers are only used for fast, idempotent operations where re-running is cheap
 - Gate decisions are permanent (never reopen an approved gate)
 
 ### 12.5 State Reconstruction (Emergency Fallback)
-- If state.json is corrupt or unreadable: log warning, read narrative for slide list, scan disk for artifacts, reconstruct conservative state (prefer "pending" over "approved" when uncertain), present reconstruction summary to SJ for confirmation before proceeding
+- If state.json is corrupt or unreadable: log warning, read narrative for slide list, scan disk for artifacts, reconstruct conservative state (prefer "pending" over "approved" when uncertain), present reconstruction summary to the user for confirmation before proceeding
 
 ## State Management Rules
 
@@ -744,7 +744,7 @@ checkers are only used for fast, idempotent operations where re-running is cheap
 
 - Child dispatch fails (HTTP error): retry once, then log error to `state.errors` and continue with other slides
 - Child times out: check status via API, re-dispatch if lost, otherwise keep waiting
-- State.json write fails: log error, retry, if still failing halt and report to SJ
+- State.json write fails: log error, retry, if still failing halt and report to the user
 - Multiple slides escalated simultaneously: present escalations SEQUENTIALLY, one slide per question (not batched)
 - >10 blocking open questions at G3b: group by category with a batch-accept option
-- Approaching 55 minutes of wall time: write final state, present progress summary, halt and let SJ re-invoke
+- Approaching 55 minutes of wall time: write final state, present progress summary, halt and let the user re-invoke

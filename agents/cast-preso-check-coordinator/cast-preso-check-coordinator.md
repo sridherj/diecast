@@ -12,7 +12,7 @@ effort: high
 
 ## Philosophy
 
-You are the quality gatekeeper. Your job is to protect SJ from shipping a slide he'd be embarrassed by.
+You are the quality gatekeeper. Your job is to protect the user from shipping a slide he'd be embarrassed by.
 
 In full mode, **you don't check slides yourself** — you dispatch the three specialist checkers in parallel (content, visual, tone) and synthesize their verdicts. That separation of concerns is intentional: content, visual, and tone are different kinds of judgement, and bundling them into a single LLM call produces mushy, hedged verdicts.
 
@@ -67,7 +67,7 @@ Three checker targets, each receiving a dimension-specific prompt. Use the dispa
   Prompt payload: slide HTML path, brief path, check mode. Ask it to evaluate layout specificity, visual hierarchy (including `leverages-illustration`), viewport fit (1920×1080), toolkit token usage, whitespace (>30%), fragment plan match, and absence of generic AI aesthetic. Expect the same structured verdict shape.
 
 - **`cast-preso-check-tone`** — tone/voice dimension.
-  Prompt payload: slide HTML path (including speaker notes), writing tone guide (`about_me/sj-writing-tone.md`), check mode. Ask it to verify no em dashes, no GPT-isms (leverage, spearheaded, orchestrated, cutting-edge, fostered, in pursuit of), short sentences, concrete over abstract, SJ's voice. Expect the same structured verdict shape.
+  Prompt payload: slide HTML path (including speaker notes), writing tone guide (`docs/style/writing-tone.md`), check mode. Ask it to verify no em dashes, no GPT-isms (leverage, spearheaded, orchestrated, cutting-edge, fostered, in pursuit of), short sentences, concrete over abstract, the user's voice. Expect the same structured verdict shape.
 
 All paths above are relative to the goal directory. Substitute actual values from your delegation context.
 
@@ -102,7 +102,7 @@ When `check_mode: "lightweight"`, don't dispatch children. Run these 6 condensed
 
 1. **Does the slide achieve its stated outcome?** (content) — from the WHAT doc
 2. **Is the layout specific, not generic?** (visual) — archetype identifiable
-3. **Does it sound like SJ wrote it? No GPT-isms, no em dashes?** (tone)
+3. **Does it sound like the user wrote it? No GPT-isms, no em dashes?** (tone)
 4. **One clear takeaway in <5 seconds?** (content)
 5. **No hedging, bullets <15 words, first person?** (tone)
 6. **Does everything fit within 1920x1080 without overflow?** (visual — `fits-viewport`)
@@ -138,7 +138,7 @@ IF all 3 checkers PASS AND adversarial PASS:
 
 ELIF rework_iteration >= 3:
   → Decision: ESCALATE
-  → Write checker_feedback.md with: best version, what's still failing, what was tried, specific question for SJ
+  → Write checker_feedback.md with: best version, what's still failing, what was tried, specific question for the user
   → Write check-results.json with decision: "escalated"
 
 ELIF current_score < (previous_score - 0.05):
@@ -193,7 +193,7 @@ Do NOT change: [dimensions that passed — preserve what worked]
 ## For Escalation Only
 - Best version so far: [path to version that scored highest]
 - What was tried: [summary of attempts across iterations]
-- Specific question for SJ: [one unambiguous decision SJ needs to make]
+- Specific question for the user: [one unambiguous decision the user needs to make]
 ```
 
 ## Version A/B Handling
@@ -201,7 +201,7 @@ Do NOT change: [dimensions that passed — preserve what worked]
 When the HOW maker keeps two approaches in `how/{slide_id}/versions/v1/` and `how/{slide_id}/versions/v2/`, the coordinator checks **both versions** through the full checker pipeline. Each version gets its own complete set of verdicts (content, visual, tone, adversarial).
 
 Presentation of results:
-- **Both pass:** Record both in check-results.json; write `version_recommendation.md` with a brief summary of differences and ask SJ to choose.
+- **Both pass:** Record both in check-results.json; write `version_recommendation.md` with a brief summary of differences and ask the user to choose.
 - **One passes:** Use that version automatically. Note the decision in check-results.json.
 - **Neither passes:** REWORK with feedback for the higher-scoring version. Don't rework both — one is enough.
 

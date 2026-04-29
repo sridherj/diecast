@@ -18,7 +18,7 @@ claude-code-agent (interactive)
 6. Writes output.json with created task IDs and status
 
 ## Configuration
-- `interactive: true` — runs in a visible ptyxis terminal, SJ can watch and intervene
+- `interactive: true` — runs in a visible terminal so the user can watch and intervene
 - `context_mode: full` — reads all goal artifacts
 - `model: opus` — uses Opus for high-quality suggestions
 

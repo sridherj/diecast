@@ -1,7 +1,7 @@
 # Archetype Treatment Matrix
 
-> Loaded by `taskos-preso-how` at Step 3 (archetype selection).
-> Source: `taskos/goals/presentation-agents/exploration/playbooks/04-slide-design-patterns.ai.md` (Parts 1, 2, and Treatment Matrix).
+> Loaded by `cast-preso-how` at Step 3 (archetype selection).
+> Source: `docs/exploration/playbooks/04-slide-design-patterns.ai.md` (Parts 1, 2, and Treatment Matrix).
 >
 > **Usage:** Use the slide-type table as a *starting point*, then refine with the content-characteristics filter. Step 2 may pull in archetypes outside the type's primary list — the matrix is guidance, not a hard filter.
 

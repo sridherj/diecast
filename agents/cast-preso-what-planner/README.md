@@ -4,7 +4,7 @@ Stage 2a planner: reads a locked presentation narrative and emits a slide list p
 per-slide outcome stubs that Stage 2b workers fill in.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 

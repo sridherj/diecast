@@ -4,7 +4,7 @@ Interview user, synthesize inputs into a locked narrative document for a present
 Stage 1 of the 4-stage presentation process (Narrative Lock -> WHAT -> HOW -> Assembly).
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:**

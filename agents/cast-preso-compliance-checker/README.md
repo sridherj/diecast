@@ -5,7 +5,7 @@ Checks per-slide outcomes, narrative flow, walk-away outcomes, consumption mode 
 navigation integrity, technical rendering, and planning leakage.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 

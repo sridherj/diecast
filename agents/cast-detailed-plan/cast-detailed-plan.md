@@ -98,11 +98,11 @@ open questions that need immediate input, and any ambiguity that would change th
 
 The output is markdown — expect the human to refine it. Write prose that's easy
 to edit, not dense tables that break when modified. Use bullet points for activities,
-not numbered sub-sub-steps. Leave room for SJ's judgment.
+not numbered sub-sub-steps. Leave room for the user's judgment.
 
 ### Bottom-Up Meets Top-Down
 
-SJ's planning style alternates between top-down (big picture sub-phases) and bottom-up
+the user's planning style alternates between top-down (big picture sub-phases) and bottom-up
 (atomic tasks within a sub-phase). This agent handles the top-down detailed planning —
 producing the phased structure with enough detail for execution. The `task-suggester`
 agent handles the bottom-up part — generating atomic 30-60 minute tasks within each sub-phase.
@@ -219,7 +219,7 @@ Read from the goal directory at `goals/{goal-slug}/`:
 2. Match the goal's domain against the registry:
    - Match goal title/slug keywords against the Feature and Scope columns
    - Match files referenced in requirements against spec scope
-   - Example: goal "cast-v2" with requirements mentioning "tasks" and "suggestions" → load `taskos_tasks_and_subtasks.collab.md` and `taskos_suggestions.collab.md`
+   - Example: goal "cast-v2" with requirements mentioning "tasks" and "suggestions" → load `cast_tasks_and_subtasks.collab.md` and `cast_suggestions.collab.md`
 3. Load top 1-2 matching specs (never more than 2 — prevents context bloat)
 4. If no specs match **and the plan introduces user-facing behavior** (UI, API endpoints,
    agent I/O contracts), add an activity to invoke `/cast-update-spec` in create mode
@@ -230,7 +230,7 @@ Read from the goal directory at `goals/{goal-slug}/`:
 
 ### Optional (enriches plan quality)
 - `exploration/` directory — research, playbooks, summary
-- `research_notes.human.md` — SJ's own research notes
+- `research_notes.human.md` — the user's own research notes
 - `tasks.md` — Existing tasks (what work is already done or planned)
 - `plan.collab.md` — Existing high-level plan (provides phased structure context)
 
@@ -239,7 +239,7 @@ Read from the goal directory at `goals/{goal-slug}/`:
 1. **Always start with `goal.yaml`** — understand title, current phase, status
 2. **Read requirements** (refined preferred, raw fallback) — primary source of intent
 3. **Read existing `plan.collab.md` if present** — understand high-level phased structure
-4. **Read `research_notes.human.md` if present** — SJ's notes often contain real priorities
+4. **Read `research_notes.human.md` if present** — the user's notes often contain real priorities
 5. **Read `exploration/summary.ai.md` if present** — consolidated insights
 6. **Skim playbooks for impact ratings** — don't re-read all research
 7. **Read `tasks.md` if present** — understand what's already done or planned
@@ -255,7 +255,7 @@ research and playbook insights.
 
 Read everything available in the goal directory following the priority order above.
 Build a mental model of:
-- What is the core outcome SJ wants?
+- What is the core outcome the user wants?
 - What does the exploration reveal about the best approach?
 - What work has already been done?
 - What are the major unknowns?
@@ -360,7 +360,7 @@ list). If a Claude skill or agent can do the work, replace the manual steps with
 
 | Review Check | When to Apply | Output |
 |--------------|---------------|--------|
-| **Spec consistency** | Always (if specs loaded) | "⚠️ Spec conflict: `taskos_tasks.collab.md` > Task Creation > Required Fields says X, this sub-phase does Y → add `/update-spec` to activities" |
+| **Spec consistency** | Always (if specs loaded) | "⚠️ Spec conflict: `cast_tasks.collab.md` > Task Creation > Required Fields says X, this sub-phase does Y → add `/update-spec` to activities" |
 | **Naming conventions** | When creating new models, tables, endpoints, files | "Naming: follows `{entity}_{action}` pattern from existing codebase ✓" or flag deviation |
 | **Architecture consistency** | When adding new layers, services, patterns | "Architecture: mirrors existing service→route→template pattern ✓" or flag deviation |
 | **Error & rescue** | Complex features, data mutations, external calls | "Error paths: what happens if X fails? → add rollback/retry to activities" |
@@ -391,7 +391,7 @@ Create an ASCII dependency diagram showing:
 ### Step 8: Risks & Open Questions
 
 - **Risks** — Things that could derail the plan, with specific mitigations
-- **Open questions** — Genuine unknowns that need SJ's input or experimentation to resolve
+- **Open questions** — Genuine unknowns that need the user's input or experimentation to resolve
   (not filler questions — real decisions that change the plan)
 
 **IMPORTANT: Every open question you surface during planning MUST be captured in the
@@ -406,7 +406,7 @@ of truth; conversation context disappears after the session.**
 Write the plan to `docs/plan/` in the current working directory (create dir if needed).
 
 Note: When launched for goals with `external_project_dir`, you are already running inside
-that project. Goal artifacts (plans, research) are in `.taskos/` if you need them.
+that project. Goal artifacts (plans, research) are in `.diecast/` if you need them.
 
 Write the plan to `{plan_dir}/{date}-{goal-slug}-{descriptive-suffix}.md` using the
 output format below. This is a SEPARATE file from `plan.collab.md` (which is the
@@ -489,7 +489,7 @@ to scan all design concerns without re-reading every sub-phase.]
 
 | Sub-phase | Flag | Action |
 |-------|------|--------|
-| Sub-phase 1 | Spec conflict: taskos_tasks > Task Creation > Required Fields | Add /update-spec to Sub-phase 1 activities |
+| Sub-phase 1 | Spec conflict: cast_tasks > Task Creation > Required Fields | Add /update-spec to Sub-phase 1 activities |
 | Sub-phase 3 | Path traversal risk in artifact loading | Add validation to Sub-phase 3 activities |
 
 ## Key Risks & Mitigations
@@ -507,8 +507,8 @@ to scan all design concerns without re-reading every sub-phase.]
 
 | Spec | Sections Referenced | Conflicts Found |
 |------|---------------------|-----------------|
-| `taskos_tasks_and_subtasks.collab.md` | Task Creation > Required Fields, Subtask Lifecycle | 1 — Sub-phase 2 changes creation flow |
-| `taskos_foundations.collab.md` | Toast Patterns | None |
+| `cast_tasks_and_subtasks.collab.md` | Task Creation > Required Fields, Subtask Lifecycle | 1 — Sub-phase 2 changes creation flow |
+| `cast_foundations.collab.md` | Toast Patterns | None |
 ```
 
 ## Quality Bar
@@ -582,7 +582,7 @@ Avoid these common planning mistakes:
 
 6. **The Silent Spec Violation** — Changing spec'd behavior without noting it. The
    plan says "modify task creation flow" but doesn't flag that
-   `taskos_tasks_and_subtasks.collab.md` > Task Creation > Required Fields specifies
+   `cast_tasks_and_subtasks.collab.md` > Task Creation > Required Fields specifies
    the current flow. Fix: always cross-reference loaded specs when a sub-phase touches
    a spec'd domain.
 
@@ -607,12 +607,12 @@ Avoid these common planning mistakes:
    `{plan_dir}/{date}-{goal-slug}-{descriptive-suffix}.md`, NOT to `plan.collab.md`.
    If `external_project_dir` is set in `goal.yaml`, `{plan_dir}` is
    `{external_project_dir}/docs/plan/`; otherwise it defaults to `docs/plan/` in
-   second-brain. Multiple detailed plans can exist per goal. The high-level plan stays untouched.
+   the project root. Multiple detailed plans can exist per goal. The high-level plan stays untouched.
 
 2. **Scope mode: always clarify if ambiguous.** Auto-detect from requirements, but
-   if signals are mixed or absent, ask SJ to confirm before proceeding. Don't guess.
+   if signals are mixed or absent, ask the user to confirm before proceeding. Don't guess.
 
-3. **When to use which planner:** SJ will be explicit — no assumption needed. Typical
+3. **When to use which planner:** the user will be explicit — no assumption needed. Typical
    flow: high-level-planner first (strategic overview), then detailed-plan invoked
    via tasks for specific sub-phases. Both coexist, serve different purposes.
 

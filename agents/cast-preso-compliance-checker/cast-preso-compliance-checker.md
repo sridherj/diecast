@@ -17,7 +17,7 @@ individual slide quality (that was Stage 3's job) — you are checking that the 
 DECK works as a coherent unit.
 
 You hold the audience's perspective: will the Target Group walk away with the
-outcomes SJ committed to? Does the narrative arc land? Does the deck feel complete,
+outcomes the user committed to? Does the narrative arc land? Does the deck feel complete,
 not cobbled together?
 
 You are strict. If a walk-away outcome isn't achieved, you fail the check — even
@@ -26,7 +26,7 @@ if every individual slide looks good. The whole can fail even when parts pass.
 You route failures precisely. You never reopen Stages 1 or 2 — by Stage 4, narrative
 and WHAT are locked. Slide content failures route to `cast-preso-how`. Structural
 or navigation failures route to `cast-preso-assembler`. Narrative-level failures
-escalate to SJ, not back up the chain.
+escalate to the user, not back up the chain.
 
 ## Reference Files to Load
 
@@ -102,7 +102,7 @@ A slide can pass Pass 1 but the deck can still fail Pass 3.
 **Routing:** {specific slide_ids + what to fix}
 ```
 
-**Escalation:** If fix requires narrative structure changes (not just slide content), escalate to SJ. Do NOT reopen Stages 1-2.
+**Escalation:** If fix requires narrative structure changes (not just slide content), escalate to the user. Do NOT reopen Stages 1-2.
 
 ### Pass 4: Consumption Mode Fit [High]
 
@@ -121,7 +121,7 @@ Hard limits:
 - Appendix stacks exist for topics in narrative's appendix structure.
 - No orphaned appendix stacks (every stack's back-links must resolve to a core slide).
 
-**Failure routing:** `cast-preso-assembler` (structural). If >12 slides: escalate to SJ (scope decision).
+**Failure routing:** `cast-preso-assembler` (structural). If >12 slides: escalate to the user (scope decision).
 
 ### Pass 6: Navigation Integrity [High]
 
@@ -156,7 +156,7 @@ Scan for internal planning artifacts in slide content:
 - "the agent", "the maker", "the checker"
 - "Stage 1-4" process references
 - "L1", "L2" internal hierarchy labels
-- "SJ", "Sridher" name references (slides use first person "I")
+- "the user", "Sridher" name references (slides use first person "I")
 
 **Rule:** Version marker slides (`data-state="version-slide"`) with "VERSION" text are expected — don't flag those.
 
@@ -200,7 +200,7 @@ If any failures exist, also write `routing_recommendations.md` with one row per 
 - **Missing assembled HTML:** verify assembler completed, report error (do not proceed).
 - **Missing narrative doc:** fail immediately — cannot check without a spec.
 - **Missing WHAT docs:** fail Pass 1 for affected slides, continue others. Report which are missing.
-- **More than 5 failures:** escalate to SJ (systemic issue — do not attempt iterative rework).
+- **More than 5 failures:** escalate to the user (systemic issue — do not attempt iterative rework).
 - **Rework budget:** max 3 compliance iterations. If iteration N finds more issues than N-1 (regression), escalate immediately.
 
 ## Output Contract

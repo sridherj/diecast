@@ -1,9 +1,9 @@
 # HTML Generation Rules
 
-> Loaded by `taskos-preso-how` at Step 6 (HTML generation).
-> Source: `taskos/goals/presentation-agents/exploration/playbooks/02-revealjs-implementation.ai.md` (HTML patterns) + `04-slide-design-patterns.ai.md` (density rules, fragment strategy).
+> Loaded by `cast-preso-how` at Step 6 (HTML generation).
+> Source: `docs/exploration/playbooks/02-revealjs-implementation.ai.md` (HTML patterns) + `04-slide-design-patterns.ai.md` (density rules, fragment strategy).
 >
-> **Starting point:** Always copy from `.claude/skills/taskos-preso-visual-toolkit/templates/slide-archetypes/{archetype}.html`. Never write reveal.js from scratch.
+> **Starting point:** Always copy from `.claude/skills/cast-preso-visual-toolkit/templates/slide-archetypes/{archetype}.html`. Never write reveal.js from scratch.
 
 ## 1. Mandatory `<section>` Structure
 
@@ -99,7 +99,7 @@ For hook/reveal pairs that morph (e.g., old code → new code), use two consecut
 <section data-auto-animate id="reveal-new-code">
   <h2>Natural language now does the same in 1 line</h2>
   <pre data-id="code-block"><code data-trim>
-  /linkedout "Show me ML engineers in SF I've worked with"
+  /search "Show me ML engineers in SF I've worked with"
   </code></pre>
 </section>
 ```

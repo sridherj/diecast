@@ -1,4 +1,4 @@
-# Test Cases — taskos-preso-what-worker
+# Test Cases — cast-preso-what-worker
 
 ## TC-1: Happy path — information slide
 

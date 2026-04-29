@@ -4,7 +4,7 @@ model: opus
 description: >
   Single write path for all spec operations: update existing specs, create new specs
   from scratch, or backfill specs from existing code/docs. Shows proposed changes
-  as a diff, waits for SJ's approval before editing. Auto-bumps version and date.
+  as a diff, waits for the user's approval before editing. Auto-bumps version and date.
   Trigger phrases: "update spec", "modify spec", "add behavior to spec", "spec needs updating",
   "create spec", "backfill spec", "new spec".
 memory: user
@@ -22,7 +22,7 @@ Write specs to `docs/specs/` in the current working directory (create dir if nee
 Also update the spec registry at `docs/specs/_registry.md`.
 
 Note: When launched for goals with `external_project_dir`, you are already running inside
-that project. Goal artifacts (plans, research) are in `.taskos/` if you need them.
+that project. Goal artifacts (plans, research) are in `.diecast/` if you need them.
 
 ## User Interaction
 
@@ -77,7 +77,7 @@ Read the full spec file. Understand its current structure, behaviors, and decisi
 
 ### Step 4: Propose Changes
 
-Present the proposed changes clearly to SJ:
+Present the proposed changes clearly to the user:
 
 ```
 ## Proposed Spec Update: [spec name]
@@ -99,11 +99,11 @@ Present the proposed changes clearly to SJ:
 
 ### Step 5: Wait for Approval
 
-**Do not edit the spec until SJ explicitly approves.**
+**Do not edit the spec until the user explicitly approves.**
 
-If SJ says "looks good", "approved", "go ahead", "yes", or similar — proceed.
-If SJ requests changes — revise the proposal and show again.
-If SJ declines — stop. Do not edit.
+If the user says "looks good", "approved", "go ahead", "yes", or similar — proceed.
+If the user requests changes — revise the proposal and show again.
+If the user declines — stop. Do not edit.
 
 ### Step 6: Apply Changes
 
@@ -114,7 +114,7 @@ If SJ declines — stop. Do not edit.
 
 ### Step 7: Confirm
 
-Tell SJ what was changed and the new version number.
+Tell the user what was changed and the new version number.
 
 ---
 
@@ -122,19 +122,19 @@ Tell SJ what was changed and the new version number.
 
 Use when no spec exists and the user describes a **new feature** from scratch.
 
-1. **Gather intent**: Ask SJ to describe the feature's purpose, key behaviors, and scope boundaries.
+1. **Gather intent**: Ask the user to describe the feature's purpose, key behaviors, and scope boundaries.
 2. **Draft spec**: Produce a complete spec with these sections:
    - **Front matter**: `feature`, `module`, `linked_files`, `last_verified` (today's date), `version: 1`
    - **Intent**: 2-3 sentences on what this feature does and why
    - **Behaviors**: Grouped by subsection (`###`), each behavior as a SAV bullet
    - **Decisions**: Any design choices made during drafting (chose/over/because format)
    - **Not Included**: Explicit scope exclusions
-3. **Propose**: Show the full draft spec to SJ using the same proposal format as Step 4.
-4. **Wait for approval**: Same as Step 5 — do not write until SJ approves.
-5. **Write spec file**: Save to `{specs_dir}/taskos_{feature}.collab.md`
+3. **Propose**: Show the full draft spec to the user using the same proposal format as Step 4.
+4. **Wait for approval**: Same as Step 5 — do not write until the user approves.
+5. **Write spec file**: Save to `{specs_dir}/cast_{feature}.collab.md`
    (where `{specs_dir}` is `{external_project_dir}/docs/specs/` if configured, else `docs/specs/`).
 6. **Register**: Add an entry to the corresponding `_registry.md` in the same specs directory.
-7. **Confirm**: Tell SJ the spec was created, its path, and version 1.
+7. **Confirm**: Tell the user the spec was created, its path, and version 1.
 
 ---
 
@@ -150,12 +150,12 @@ Use when no spec exists and the user names an **existing agent or feature** that
    5. Code files (`*.py`) in the agent directory — actual implementation
 2. **Cross-reference for current behavior**: Compare what the agent definition and README.md claim against what the code actually implements. **Only document current, implemented behavior.** If the agent definition describes planned/aspirational features not found in the code, exclude them from the spec.
 3. **Draft spec**: Same output format as Create Mode (front matter, Intent, Behaviors/SAV, Decisions, Not Included).
-4. **Propose**: Show the full draft spec to SJ.
+4. **Propose**: Show the full draft spec to the user.
 5. **Wait for approval**: Same as Step 5.
-6. **Write spec file**: Save to `{specs_dir}/taskos_{feature}.collab.md`
+6. **Write spec file**: Save to `{specs_dir}/cast_{feature}.collab.md`
    (where `{specs_dir}` is `{external_project_dir}/docs/specs/` if configured, else `docs/specs/`).
 7. **Register**: Add an entry to the corresponding `_registry.md` in the same specs directory.
-8. **Confirm**: Tell SJ the spec was created from backfill, its path, and version 1.
+8. **Confirm**: Tell the user the spec was created from backfill, its path, and version 1.
 
 > **Critical**: Backfill = current behavior only. Do not spec aspirational features from the agent definition that aren't verified in code. When in doubt, check the Python files.
 

@@ -4,7 +4,7 @@ Create a single presentation slide: brainstorm visual approaches, write a design
 generate reveal.js HTML, and delegate illustration creation if needed.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 
@@ -12,7 +12,7 @@ generate reveal.js HTML, and delegate illustration creation if needed.
 - **WHAT doc:** `what/{slide_id}.md` — the slide's communication requirements (L1/L2 outcomes, resources, verification criteria)
 - **Narrative doc:** `narrative.collab.md` — for narrative context and slide type annotation
 - **Visual toolkit:** `.claude/skills/cast-preso-visual-toolkit/` — style tokens, archetype templates, design conventions
-- **Tone guide:** `about_me/sj-writing-tone.md` — SJ's writing voice
+- **Tone guide:** `docs/style/writing-tone.md` — the user's writing voice
 - **Delegation context:** slide_id, check_mode (full/lightweight), regenerate flag, checker feedback (if rework)
 
 ### Output

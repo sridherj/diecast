@@ -4,7 +4,7 @@ Validate a narrative document against the 14-item quality checklist.
 Stage 1 checker agent for the presentation pipeline.
 
 ## Type
-`taskos-agent`
+`diecast-agent`
 
 ## I/O Contract
 - **Input:**

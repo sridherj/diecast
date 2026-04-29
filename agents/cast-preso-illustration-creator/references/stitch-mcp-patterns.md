@@ -36,7 +36,7 @@ Aspect ratio: [16:9 or as specified].
 | Generates HTML/CSS instead of images | Add "IMAGE FILE, not a webpage" at the start |
 | Text rendering unreliable | Never include text in prompts — overlay in HTML |
 | Style consistency between runs | Use the full Style Bible block verbatim every time |
-| Credit/rate limits | Check response for limit indicators; escalate to SJ |
+| Credit/rate limits | Check response for limit indicators; escalate to the user |
 | Aspect ratio drift | Specify explicitly in the prompt |
 | Service unavailability | Fall back to placeholder description + escalate to human |
 

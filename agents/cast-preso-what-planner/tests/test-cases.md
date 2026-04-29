@@ -1,4 +1,4 @@
-# Test Cases — taskos-preso-what-planner
+# Test Cases — cast-preso-what-planner
 
 ## TC-1: Happy path — 8-slide narrative
 

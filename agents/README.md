@@ -9,8 +9,8 @@ directory name and the `name:` frontmatter field MUST match.
 `bin/generate-skills` ports each `cast-foo.md` into a Claude Code skill at
 `~/.claude/skills/cast-foo/SKILL.md`. The frontmatter is currently passed
 through untouched — the contract is the **union of fields** observed across
-representative second-brain agents (`taskos-detailed-plan`, `taskos-tasks`,
-`taskos-update-spec`, etc.) at port time:
+representative upstream agents (`cast-detailed-plan`, `cast-tasks`,
+`cast-update-spec`, etc.) at port time:
 
 | Field | Required | Type | Notes |
 |-------|----------|------|-------|
@@ -21,7 +21,7 @@ representative second-brain agents (`taskos-detailed-plan`, `taskos-tasks`,
 | `effort` | no | string | `low`, `medium`, or `high`. Hints orchestrator budgeting. |
 
 Phase 2 `/cast-harvest` will enforce this contract during harvest from
-second-brain. Any harvested agent missing a required field, or carrying an
+upstream. Any harvested agent missing a required field, or carrying an
 unknown field, will be flagged for human reconciliation rather than silently
 materialized. Adding a new field to the contract is a deliberate, documented
 change to this README — not a side effect of one harvested agent.
