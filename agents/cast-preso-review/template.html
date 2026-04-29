@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Presentation Review</title>
+  <style>{{CSS}}</style>
+</head>
+<body>
+  <div id="app" data-state="loading">
+    <aside id="sidebar" aria-label="Slide navigation">
+      <header class="sidebar-header">
+        <h1 class="sidebar-title">Review</h1>
+        <input type="search" id="sidebar-search" placeholder="/ to search" aria-label="Filter slides">
+      </header>
+      <nav id="sidebar-list" role="listbox" aria-label="Slides"></nav>
+    </aside>
+    <main id="stage">
+      <header id="stage-header">
+        <button id="btn-prev" aria-label="Previous slide">←</button>
+        <span id="stage-counter" aria-live="polite">0 / 0</span>
+        <button id="btn-next" aria-label="Next slide">→</button>
+        <span class="spacer"></span>
+        <button id="btn-revert" title="Revert this slide">Revert slide</button>
+        <button id="btn-clear" title="Clear all edits">Clear all</button>
+        <button id="btn-export" title="Export feedback markdown">Export</button>
+      </header>
+      <section id="stage-body" aria-live="polite"></section>
+      <footer id="stage-footer">
+        <span id="save-state">saved</span>
+        <span class="spacer"></span>
+        <span class="kbd-hint">← → to navigate · Esc to exit editing · / to search</span>
+      </footer>
+    </main>
+  </div>
+  <script type="application/json" id="data-slides">{{SLIDES_JSON}}</script>
+  <script type="application/json" id="data-sidebar">{{SIDEBAR_JSON}}</script>
+  <script type="application/json" id="data-meta">{{META}}</script>
+  <script>{{JS}}</script>
+</body>
+</html>

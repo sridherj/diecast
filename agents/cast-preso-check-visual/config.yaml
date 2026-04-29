@@ -1,0 +1,5 @@
+model: sonnet
+dispatch_mode: subagent
+timeout_minutes: 12
+context_mode: full
+allowed_delegations: []

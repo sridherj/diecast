@@ -1,0 +1,4 @@
+model: opus
+timeout_minutes: 30
+context_mode: full
+allowed_delegations: []    # Leaf agent — no child delegation

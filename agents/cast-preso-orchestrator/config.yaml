@@ -1,0 +1,11 @@
+model: sonnet
+timeout_minutes: 60
+context_mode: full
+allowed_delegations:
+  - cast-preso-what-planner
+  - cast-preso-what-worker
+  - cast-preso-what-checker
+  - cast-preso-how
+  - cast-preso-check-coordinator
+  - cast-preso-assembler
+  - cast-preso-compliance-checker

@@ -1,0 +1,7 @@
+model: sonnet
+timeout_minutes: 20
+context_mode: full
+allowed_delegations:
+  - cast-preso-check-content
+  - cast-preso-check-visual
+  - cast-preso-check-tone

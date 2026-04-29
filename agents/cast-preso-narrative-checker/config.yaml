@@ -1,0 +1,4 @@
+model: sonnet
+timeout_minutes: 15
+context_mode: full
+allowed_delegations: []

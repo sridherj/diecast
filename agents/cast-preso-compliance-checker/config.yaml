@@ -1,0 +1,4 @@
+model: opus
+timeout_minutes: 20
+context_mode: full
+allowed_delegations: []    # Leaf agent — routing recommendations go to orchestrator
