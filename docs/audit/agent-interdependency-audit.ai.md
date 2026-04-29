@@ -272,21 +272,877 @@ _Showing 30 of 220 green naming edges._
 
 ## Section 2 — Folder-Location Audit
 
-**Owner:** sub-phase 2.3b. Placeholder.
+> Auto-generated from `bin/audit-interdependencies --mode=folder --json`. Each row = one distinct (agent, path, direction) reference observed in agent prompts.
 
-Sub-phase 2.3a back-ports the `--mode=folder` infrastructure into
-`bin/audit-interdependencies` so 2.3b can populate this section without rewriting
-the script. Folder-mode findings are already emitted by `--mode=all` and stored in
-`_audit_full.json`; 2.3b will narrate them here.
+**Summary:** 410 distinct path references across 41 agents/shared-skills — red 5 | yellow 103 | green 302.
 
----
+**Slug-validation coverage:** 0/41 agents have explicit slug validation. _Recommend Phase 3a B-extra: shared `cast-agent-design-guide` slug-safe-name utility._
+
+Status legend — green = convention-aligned (US9 + US2 project-local subtree). yellow = ambiguous root anchor or path not matched against convention list (verify manually). red = TaskOS-style, SJ-personal, /tmp, user-home, or privileged path.
+
+| Agent | Path Reference | Direction | Convention Match? | Slug-validation present? | Status | Fix Suggestion |
+|---|---|---|---|---|---|---|
+| `cast-agent-compliance` | `agents/cast-agent-design-guide/SKILL.md` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `agents/.../foo.md` | read | yes | no | green | — |
+| `cast-agent-compliance` | `agents/REGISTRY.md` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `README.md` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `SKILL.md` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `config.yaml` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `.output.json` | write | yes | no | green | — |
+| `cast-agent-compliance` | `learnings.md` | unknown | yes | no | green | — |
+| `cast-agent-compliance` | `README.md` | read | yes | no | green | — |
+| `cast-agent-compliance` | `agents/REGISTRY.md` | read | yes | no | green | — |
+| `cast-agent-design-guide` | `ai_agent_swarm.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `agent_swarm_foundation.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `SKILL.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `README.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `workflow.json` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `config.json` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `feeds/startup-feeds.json` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `data/staging/startup-staging.json` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `summary.ai.md` | write | yes | no | green | — |
+| `cast-agent-design-guide` | `runs/latest.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `tests/test-cases.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `runs/latest.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `REGISTRY.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `latest.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `test-cases.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `db.py` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `utils.py` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `.output.json` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `config.yaml` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `path/to/expected/file.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `CHILD_RUN_ID.output.json` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `agents/shared/db.py` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `taskos/goals/build-startup-aggregator/exploration/research/09-gmail-as-buffer-architecture.ai.md` | unknown | no | no | red | Brand-pass leak — replace TaskOS path with project-local `docs/...` or `agents/...` equivalent. |
+| `cast-agent-design-guide` | `learnings.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `learnings.md` | read | yes | no | green | — |
+| `cast-agent-design-guide` | `references/learnings.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `10xme/references/learnings.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `learnings.md` | write | yes | no | green | — |
+| `cast-agent-design-guide` | `agents/{name}/{name}.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `sync-agents.sh` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `sync-second-brain.sh` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `output.json` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `.output.json` | write | yes | no | green | — |
+| `cast-agent-design-guide` | `relative/to/goal/dir/file.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-agent-design-guide` | `taskos/src/taskos/models/agent_output.py` | unknown | no | no | red | Brand-pass leak — replace TaskOS path with project-local `docs/...` or `agents/...` equivalent. |
+| `cast-agent-design-guide` | `exploration/research.ai.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `exploration/summary.ai.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `.ai.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `.collab.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `.human.md` | unknown | yes | no | green | — |
+| `cast-agent-design-guide` | `output.json` | write | yes | no | green | — |
+| `cast-agent-design-guide` | `docs/specs/taskos_foo.collab.md` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `artifact1.md` | write | yes | no | green | — |
+| `cast-child-delegation` | `artifact2.json` | write | yes | no | green | — |
+| `cast-child-delegation` | `enrichment_result.json` | read | yes | no | green | — |
+| `cast-child-delegation` | `/tmp/claude-` | write | no | no | red | Replace with project-local scratch dir under `~/workspace/diecast/.tmp/` or fixture-controlled path. |
+| `cast-child-delegation` | `/tmp/claude-` | unknown | no | no | red | Replace with project-local scratch dir under `~/workspace/diecast/.tmp/` or fixture-controlled path. |
+| `cast-child-delegation` | `RUN_ID.output.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `CHILD_RUN_ID.output.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `output.json` | read | yes | no | green | — |
+| `cast-child-delegation` | `output.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `CHILD_RUN_ID.output.json` | read | yes | no | green | — |
+| `cast-child-delegation` | `NEW_RUN_ID.output.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `RUN_ID.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `docs/execution/my_plan/_shared_context.md` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `candidates.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `~/workspace/diecast/docs/execution/` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-child-delegation` | `research_result.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `.output.json` | write | yes | no | green | — |
+| `cast-child-delegation` | `relative/to/goal/dir/file.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-child-delegation` | `.output.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `docs/execution/my_plan/research_result.json` | unknown | yes | no | green | — |
+| `cast-child-delegation` | `config.yaml` | unknown | yes | no | green | — |
+| `cast-code-explorer` | `src/services/user.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-code-explorer` | `CLAUDE.md` | read | yes | no | green | — |
+| `cast-code-explorer` | `path/to/file.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-create-execution-plan` | `.output.json` | write | yes | no | green | — |
+| `cast-create-execution-plan` | `agent_swarm_foundation.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `_manifest.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `_shared_context.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `CLAUDE.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `gate_1_name.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `_review_summary.md` | unknown | yes | no | green | — |
+| `cast-create-execution-plan` | `_shared_context.md` | read | yes | no | green | — |
+| `cast-create-execution-plan` | `_manifest.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `plan.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `CLAUDE.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `goal.yaml` | read | yes | no | green | — |
+| `cast-detailed-plan` | `high_level_plan.collab.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `refined_requirements.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `writeup.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `docs/specs/_registry.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `cast_tasks_and_subtasks.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `cast_suggestions.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `research_notes.human.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `tasks.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `plan.collab.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `research_notes.human.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `exploration/summary.ai.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `tasks.md` | read | yes | no | green | — |
+| `cast-detailed-plan` | `docs/specs/_registry.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `cast_tasks.collab.md` | unknown | yes | no | green | — |
+| `cast-detailed-plan` | `plan.collab.md` | write | yes | no | green | — |
+| `cast-detailed-plan` | `cast_foundations.collab.md` | unknown | yes | no | green | — |
+| `cast-docstring-best-practices` | `./reference_code/.cursor/rules/bestpractices.mdc` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-explore` | `steps.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `summary.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `refined_requirements.collab.md` | unknown | yes | no | green | — |
+| `cast-explore` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-explore` | `writeup.md` | unknown | yes | no | green | — |
+| `cast-explore` | `refined_requirements.collab.md` | read | yes | no | green | — |
+| `cast-explore` | `requirements.human.md` | read | yes | no | green | — |
+| `cast-explore` | `CLAUDE.md` | read | yes | no | green | — |
+| `cast-explore` | `agents/REGISTRY.md` | read | yes | no | green | — |
+| `cast-explore` | `.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `-code.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `.ai.md` | read | yes | no | green | — |
+| `cast-explore` | `-code.ai.md` | read | yes | no | green | — |
+| `cast-explore` | `summary.ai.md` | write | yes | no | green | — |
+| `cast-explore` | `01-step-one-slug.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `01-step-one-slug-code.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `02-step-two-slug.ai.md` | unknown | yes | no | green | — |
+| `cast-explore` | `02-step-two-slug-code.ai.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `_decisions_so_far.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `high_level_plan.collab.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `goal.yaml` | read | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/{goal-slug}-decisions-so-far.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/_subphase_extracts.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `_subphase_extracts.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{goal-slug}-reconciliation.md` | read | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `_subphase_extracts.md` | read | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{slug}-{suffix}.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/{slug}-decisions-so-far.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{slug}-reconciliation.md` | unknown | yes | no | green | — |
+| `cast-fanout-detailed-plan` | `.output.json` | write | yes | no | green | — |
+| `cast-goal-decomposer` | `refined_requirements.collab.md` | unknown | yes | no | green | — |
+| `cast-goal-decomposer` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-goal-decomposer` | `writeup.md` | unknown | yes | no | green | — |
+| `cast-goal-decomposer` | `refined_requirements.collab.md` | read | yes | no | green | — |
+| `cast-goal-decomposer` | `requirements.human.md` | read | yes | no | green | — |
+| `cast-goal-decomposer` | `steps.ai.md` | unknown | yes | no | green | — |
+| `cast-goals` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `plan.collab.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `.collab.md` | write | yes | no | green | — |
+| `cast-high-level-planner` | `refined_requirements.collab.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `writeup.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `.ai.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `exploration/summary.ai.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `research_notes.human.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `goal.yaml` | read | yes | no | green | — |
+| `cast-high-level-planner` | `tasks.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `docs/specs/_registry.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `docs/specs/{matching-specs}.collab.md` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-high-level-planner` | `refined_requirements.collab.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `requirements.human.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `writeup.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `research_notes.human.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `exploration/summary.ai.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `docs/specs/_registry.md` | read | yes | no | green | — |
+| `cast-high-level-planner` | `plan.collab.md` | write | yes | no | green | — |
+| `cast-high-level-planner` | `goals/{goal-slug}/plan.collab.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-high-level-planner` | `task_suggestion_service.py` | unknown | yes | no | green | — |
+| `cast-interactive-questions` | `services/base.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-mvcs-compliance` | `src/common/services/base_service.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-mvcs-compliance` | `src/common/repositories/base_repository.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-mvcs-compliance` | `src/common/controllers/crud_router_factory.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-orchestrate` | `docs/plan/my_plan.collab.md` | unknown | yes | no | green | — |
+| `cast-orchestrate` | `_manifest.md` | unknown | yes | no | green | — |
+| `cast-orchestrate` | `_shared_context.md` | unknown | yes | no | green | — |
+| `cast-orchestrate` | `_manifest.md` | write | yes | no | green | — |
+| `cast-orchestrate` | `.output.json` | unknown | yes | no | green | — |
+| `cast-plan-review` | `path/to/plan.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-plan-review` | `CLAUDE.md` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `remaining_questions.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `references/navigation-wiring-rules.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `references/assembler-checklist.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-assembler` | `how/{slide_id}/slide.html` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `package.json` | read | yes | no | green | — |
+| `cast-preso-assembler` | `index.html` | read | yes | no | green | — |
+| `cast-preso-assembler` | `version-b.html` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `slide.html` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `assets/hero.webp` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `assets/{slide_id}/hero.webp` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `assembly/index.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `index.html` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `package.json` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `src/index.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `dist/index.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `how/{slide_id}/notes_for_assembler.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `assembly/notes_summary.collab.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `how/{slide_id}/open_questions.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `assembly/remaining_questions.collab.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `src/index.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-assembler` | `notes_summary.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-assembler` | `remaining_questions.collab.md` | read | yes | no | green | — |
+| `cast-preso-check-content` | `what/{slide_id}.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-content` | `how/{slide_id}/slide.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-content` | `how/{slide_id}/brief.collab.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-content` | `narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-check-content` | `output.json` | write | yes | no | green | — |
+| `cast-preso-check-coordinator` | `check-results.json` | write | yes | no | green | — |
+| `cast-preso-check-coordinator` | `checker_feedback.md` | unknown | yes | no | green | — |
+| `cast-preso-check-coordinator` | `docs/style/writing-tone.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-coordinator` | `check-results.json` | unknown | yes | no | green | — |
+| `cast-preso-check-coordinator` | `output.json` | write | yes | no | green | — |
+| `cast-preso-check-coordinator` | `checker_feedback.md` | write | yes | no | green | — |
+| `cast-preso-check-coordinator` | `version_recommendation.md` | write | yes | no | green | — |
+| `cast-preso-check-coordinator` | `how/{slide_id}/slide.html` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-coordinator` | `how/01-opening/checker_feedback.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-coordinator` | `how/{slide_id}/check-results.json` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-coordinator` | `how/{slide_id}/checker_feedback.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-coordinator` | `cross-slide-results.json` | write | yes | no | green | — |
+| `cast-preso-check-tone` | `docs/style/writing-tone.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-tone` | `how/{slide_id}/slide.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-visual` | `how/{slide_id}/slide.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-visual` | `how/{slide_id}/brief.collab.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-check-visual` | `references/visual-gold-standards.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `references/failure-routing-matrix.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-compliance-checker` | `what/{slide_id}.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `assembly/src/index.html` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `assembly/index.html` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `what/{slide_id}.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-compliance-checker` | `compliance_report.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-compliance-checker` | `routing_recommendations.md` | write | yes | no | green | — |
+| `cast-preso-compliance-checker` | `compliance_report.collab.md` | write | yes | no | green | — |
+| `cast-preso-compliance-checker` | `routing_recommendations.md` | unknown | yes | no | green | — |
+| `cast-preso-how` | `what/{slide_id}.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-how` | `docs/style/writing-tone.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `references/archetype-treatment-matrix.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `references/brief-template.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `references/html-generation-rules.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `what/{slide_id}.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-how` | `how/{slide_id}/brief.collab.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `html-generation-rules.md` | unknown | yes | no | green | — |
+| `cast-preso-how` | `how/{slide_id}/slide.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `versions/version-a.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `versions/version-b.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `slide.html` | write | yes | no | green | — |
+| `cast-preso-how` | `slide.html` | unknown | yes | no | green | — |
+| `cast-preso-how` | `how/{slide_id}/open_questions.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `how/{slide_id}/notes_for_assembler.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `versions/v{N}.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `how/{slide_id}/brief.collab.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `versions/pre-regen-{timestamp}.html` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-how` | `brief.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-how` | `open_questions.md` | read | yes | no | green | — |
+| `cast-preso-how` | `notes_for_assembler.md` | read | yes | no | green | — |
+| `cast-preso-illustration-checker` | `references/checker-checklist.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-checker` | `references/vision-prompting-pattern.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-checker` | `references/cross-deck-consistency-checklist.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-checker` | `references/iteration-budget-table.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `references/style-bible-watercolor.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `references/style-bible-exclusions.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `references/scene-brief-template.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `references/svg-specification.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `references/stitch-mcp-patterns.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.webp` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.generation-log.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.svg` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `.generation-log.md` | unknown | yes | no | green | — |
+| `cast-preso-illustration-creator` | `.output.json` | unknown | yes | no | green | — |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.generation-log.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-illustration-creator` | `.placeholder.md` | unknown | yes | no | green | — |
+| `cast-preso-illustration-creator` | `how/03-model/assets/agent-collaboration.webp` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-narrative` | `docs/style/writing-tone.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-narrative` | `docs/exploration/playbooks/02-aha-moment-psychology.ai.md` | read | yes | no | green | — |
+| `cast-preso-narrative` | `docs/exploration/research/02-aha-moment-psychology.ai.md` | read | yes | no | green | — |
+| `cast-preso-narrative` | `references/aha-moment-frameworks.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-narrative` | `narrative.collab.md` | write | yes | no | green | — |
+| `cast-preso-narrative` | `checker-result.md` | unknown | yes | no | green | — |
+| `cast-preso-narrative` | `narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-narrative-checker` | `references/narrative-gold-standard.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `state.json` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `state.json` | write | yes | no | green | — |
+| `cast-preso-orchestrator` | `narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `config.yaml` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/state.json` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/what/_slide_list.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `state.json` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/what/_slide_list.md` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `config.yaml` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `how/{slide_id}/open_questions.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/open_questions.collab.md` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `how/{slide_id}/notes_for_assembler.md` | read | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/assembler_notes.collab.md` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `assembly/index.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/assembly/index.html` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/what/05-agent-resume.stub.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `_slide_list.md` | read | yes | no | green | — |
+| `cast-preso-orchestrator` | `what/_slide_list.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `what/{slide_id}.stub.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/what/{slide_id}.stub.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `what/{slide_id}.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/what/{slide_id}.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `what/{slide_id}.checker-result.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `docs/style/writing-tone.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `how/{slide_id}/brief.collab.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `how/{slide_id}/slide.html` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/how/{slide_id}/slide.html` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/how/{slide_id}/brief.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `how/{slide_id}/checker-result.json` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-orchestrator` | `presentation/cross-slide-consistency-report.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/assembler_notes.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `presentation/compliance-report.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `.output.json` | unknown | yes | no | green | — |
+| `cast-preso-orchestrator` | `State.json` | write | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `visual_toolkit.human.md` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `templates/slide-archetypes/{archetype}.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `index.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `package.json` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `slide.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `SKILL.md` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `callout-box.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `question-annotation.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `single-stat-hero.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `compare-contrast.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `timeline.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `diagram-annotated.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `code-showcase.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `consulting-exhibit.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `one-statement.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `illustrated-section-opener.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `build-up-sequence.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `title-slide.html` | unknown | yes | no | green | — |
+| `cast-preso-visual-toolkit` | `close-cta.html` | unknown | yes | no | green | — |
+| `cast-preso-what-checker` | `presentation/what/{slide_id}.md` | read | yes | no | green | — |
+| `cast-preso-what-checker` | `presentation/narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-what-checker` | `REGISTRY.md` | read | yes | no | green | — |
+| `cast-preso-what-checker` | `REGISTRY.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `presentation/narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `narrative.collab.md` | read | yes | no | green | — |
+| `cast-preso-what-planner` | `_slide_list.md` | write | yes | no | green | — |
+| `cast-preso-what-planner` | `presentation/what/_slide_list.md` | write | yes | no | green | — |
+| `cast-preso-what-planner` | `presentation/what/{slide_id}.stub.md` | write | yes | no | green | — |
+| `cast-preso-what-planner` | `thesis_v1.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `agents/REGISTRY.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `docs/exploration/thesis_v1.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `_slide_list.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `what/{slide_id}.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-preso-what-planner` | `.output.json` | write | yes | no | green | — |
+| `cast-preso-what-planner` | `presentation/what/_slide_list.md` | unknown | yes | no | green | — |
+| `cast-preso-what-planner` | `presentation/what/{slide_id}.stub.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.stub.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `presentation/narrative.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `agents/cast-explore/README.md` | read | yes | no | green | — |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `.stub.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `thesis_v1.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `agents/REGISTRY.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `docs/exploration/thesis_v1.collab.md` | unknown | yes | no | green | — |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.md` | read | yes | no | green | — |
+| `cast-preso-what-worker` | `.output.json` | write | yes | no | green | — |
+| `cast-pytest-best-practices` | `./reference_code/.cursor/rules/pytest.mdc` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-pytest-best-practices` | `./reference_code/conftest.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-pytest-best-practices` | `response.json` | unknown | yes | no | green | — |
+| `cast-python-best-practices` | `./reference_code/.cursor/rules/bestpractices.mdc` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-refine-requirements` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `refined_requirements.collab.md` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `goal.yaml` | read | yes | no | green | — |
+| `cast-refine-requirements` | `writeup.md` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `research_notes.human.md` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `tasks.md` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-refine-requirements` | `requirements.human.md` | read | yes | no | green | — |
+| `cast-refine-requirements` | `writeup.md` | read | yes | no | green | — |
+| `cast-refine-requirements` | `research_notes.human.md` | read | yes | no | green | — |
+| `cast-refine-requirements` | `tasks.md` | read | yes | no | green | — |
+| `cast-refine-requirements` | `refined_requirements.collab.md` | write | yes | no | green | — |
+| `cast-refine-requirements` | `goals/{goal-slug}/refined_requirements.collab.md` | write | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-review-code` | `src/foo.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-review-code` | `src/bar.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-review-code` | `docs/specs/_registry.md` | read | yes | no | green | — |
+| `cast-review-code` | `/tmp/review-brief-` | write | no | no | red | Replace with project-local scratch dir under `~/workspace/diecast/.tmp/` or fixture-controlled path. |
+| `cast-runs` | `goals/GOAL_SLUG/run-output.json` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-task-suggester` | `goal.yaml` | read | yes | no | green | — |
+| `cast-task-suggester` | `plan.collab.md` | read | yes | no | green | — |
+| `cast-task-suggester` | `tasks.md` | unknown | yes | no | green | — |
+| `cast-task-suggester` | `requirements.human.md` | unknown | yes | no | green | — |
+| `cast-task-suggester` | `goal.yaml` | unknown | yes | no | green | — |
+| `cast-task-suggester` | `plan.collab.md` | unknown | yes | no | green | — |
+| `cast-task-suggester` | `tasks.md` | read | yes | no | green | — |
+| `cast-task-suggester` | `output.json` | write | yes | no | green | — |
+| `cast-tasks` | `path/to/artifact.md` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-tasks` | `tasks.md` | unknown | yes | no | green | — |
+| `cast-update-spec` | `docs/specs/_registry.md` | write | yes | no | green | — |
+| `cast-update-spec` | `docs/specs/_registry.md` | unknown | yes | no | green | — |
+| `cast-update-spec` | `docs/specs/_registry.md` | read | yes | no | green | — |
+| `cast-update-spec` | `.collab.md` | write | yes | no | green | — |
+| `cast-update-spec` | `_registry.md` | unknown | yes | no | green | — |
+| `cast-update-spec` | `agents/{agent}/{agent}.md` | read | yes | no | green | — |
+| `cast-update-spec` | `agents/{agent}/README.md` | unknown | yes | no | green | — |
+| `cast-update-spec` | `agents/{agent}/schema_context.md` | unknown | yes | no | green | — |
+| `cast-update-spec` | `README.md` | read | yes | no | green | — |
+| `cast-wrap-up` | `LEARNINGS.md` | write | yes | no | green | — |
+| `cast-wrap-up` | `plan_and_progress/LEARNINGS.md` | unknown | yes | no | green | — |
+| `cast-wrap-up` | `scripts/check_spec_drift.py` | unknown | ambiguous | no | yellow | Verify manually — Path not matched against convention list — verify manually |
+| `cast-wrap-up` | `LEARNINGS.md` | unknown | yes | no | green | — |
+
+### Section 2 — Per-Agent Roll-Up
+
+| Agent | Total Refs | Red | Yellow | Green | Slug-Validation? |
+|---|---|---|---|---|---|
+| `cast-agent-compliance` | 10 | 0 | 0 | 10 | no |
+| `cast-agent-design-guide` | 42 | 2 | 8 | 32 | no |
+| `cast-child-delegation` | 21 | 2 | 2 | 17 | no |
+| `cast-code-explorer` | 3 | 0 | 2 | 1 | no |
+| `cast-create-execution-plan` | 9 | 0 | 0 | 9 | no |
+| `cast-detailed-plan` | 22 | 0 | 0 | 22 | no |
+| `cast-docstring-best-practices` | 1 | 0 | 1 | 0 | no |
+| `cast-explore` | 18 | 0 | 0 | 18 | no |
+| `cast-fanout-detailed-plan` | 13 | 0 | 0 | 13 | no |
+| `cast-goal-decomposer` | 6 | 0 | 0 | 6 | no |
+| `cast-goals` | 1 | 0 | 0 | 1 | no |
+| `cast-high-level-planner` | 22 | 0 | 1 | 21 | no |
+| `cast-interactive-questions` | 1 | 0 | 1 | 0 | no |
+| `cast-mvcs-compliance` | 3 | 0 | 3 | 0 | no |
+| `cast-orchestrate` | 5 | 0 | 0 | 5 | no |
+| `cast-plan-review` | 2 | 0 | 1 | 1 | no |
+| `cast-preso-assembler` | 24 | 0 | 13 | 11 | no |
+| `cast-preso-check-content` | 5 | 0 | 3 | 2 | no |
+| `cast-preso-check-coordinator` | 12 | 0 | 5 | 7 | no |
+| `cast-preso-check-tone` | 2 | 0 | 2 | 0 | no |
+| `cast-preso-check-visual` | 3 | 0 | 3 | 0 | no |
+| `cast-preso-compliance-checker` | 10 | 0 | 5 | 5 | no |
+| `cast-preso-how` | 23 | 0 | 15 | 8 | no |
+| `cast-preso-illustration-checker` | 4 | 0 | 4 | 0 | no |
+| `cast-preso-illustration-creator` | 13 | 0 | 10 | 3 | no |
+| `cast-preso-narrative` | 7 | 0 | 2 | 5 | no |
+| `cast-preso-narrative-checker` | 1 | 0 | 1 | 0 | no |
+| `cast-preso-orchestrator` | 36 | 0 | 11 | 25 | no |
+| `cast-preso-visual-toolkit` | 19 | 0 | 0 | 19 | no |
+| `cast-preso-what-checker` | 4 | 0 | 0 | 4 | no |
+| `cast-preso-what-planner` | 13 | 0 | 1 | 12 | no |
+| `cast-preso-what-worker` | 10 | 0 | 0 | 10 | no |
+| `cast-pytest-best-practices` | 3 | 0 | 2 | 1 | no |
+| `cast-python-best-practices` | 1 | 0 | 1 | 0 | no |
+| `cast-refine-requirements` | 13 | 0 | 1 | 12 | no |
+| `cast-review-code` | 4 | 1 | 2 | 1 | no |
+| `cast-runs` | 1 | 0 | 1 | 0 | no |
+| `cast-task-suggester` | 8 | 0 | 0 | 8 | no |
+| `cast-tasks` | 2 | 0 | 1 | 1 | no |
+| `cast-update-spec` | 9 | 0 | 0 | 9 | no |
+| `cast-wrap-up` | 4 | 0 | 1 | 3 | no |
 
 ## Section 3 — Failure-Recovery Audit
 
-**Owner:** sub-phase 2.3b. Placeholder.
+> Auto-generated from `bin/audit-interdependencies --mode=recovery --json`. Each row = one distinct read or unspecified-direction file expectation.
 
-Same arrangement as Section 2: `--mode=recovery` infrastructure is shipped here
-ready for 2.3b's narrative pass.
+**Summary:** 348 distinct expectations — red 312 | yellow 0 | green 36.
+
+Status legend — green = explicit fallback / early-exit / user-prompt in surrounding prose. yellow = fallback prose present but cascading failure risk (verify fallback target also exists). red = no fallback / no early-exit / no user prompt — silent crash on missing input.
+
+| Agent | File Expectation | Recovery Strategy | Status | Notes |
+|---|---|---|---|---|
+| `cast-agent-compliance` | `agents/cast-agent-design-guide/SKILL.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `agents/.../foo.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `agents/REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `SKILL.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `config.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `learnings.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-compliance` | `agents/REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `ai_agent_swarm.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `agent_swarm_foundation.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `SKILL.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `workflow.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `config.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `runs/latest.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `tests/test-cases.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `latest.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `test-cases.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `db.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `utils.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `config.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `path/to/expected/file.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `CHILD_RUN_ID.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `agents/shared/db.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `taskos/goals/build-startup-aggregator/exploration/research/09-gmail-as-buffer-architecture.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `learnings.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `learnings.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `references/learnings.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `10xme/references/learnings.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `agents/{name}/{name}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `sync-agents.sh` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `sync-second-brain.sh` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `relative/to/goal/dir/file.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `taskos/src/taskos/models/agent_output.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `exploration/research.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `exploration/summary.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-agent-design-guide` | `docs/specs/taskos_foo.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `enrichment_result.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `/tmp/claude-` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `RUN_ID.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `CHILD_RUN_ID.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `CHILD_RUN_ID.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `NEW_RUN_ID.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `RUN_ID.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `docs/execution/my_plan/_shared_context.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `candidates.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `~/workspace/diecast/docs/execution/` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `research_result.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `relative/to/goal/dir/file.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `docs/execution/my_plan/research_result.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-child-delegation` | `config.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-code-explorer` | `src/services/user.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-code-explorer` | `CLAUDE.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-code-explorer` | `path/to/file.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `agent_swarm_foundation.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `_manifest.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `_shared_context.md` | ask-user | green | Asks user via interactive-questions / confirm |
+| `cast-create-execution-plan` | `CLAUDE.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `gate_1_name.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `_review_summary.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `_shared_context.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-create-execution-plan` | `_manifest.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `CLAUDE.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `high_level_plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `refined_requirements.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `requirements.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `writeup.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `cast_tasks_and_subtasks.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `cast_suggestions.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `research_notes.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `goal.yaml` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `plan.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `research_notes.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `exploration/summary.ai.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `tasks.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-detailed-plan` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `cast_tasks.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-detailed-plan` | `cast_foundations.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-docstring-best-practices` | `./reference_code/.cursor/rules/bestpractices.mdc` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `steps.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `summary.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `refined_requirements.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-explore` | `requirements.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-explore` | `writeup.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-explore` | `refined_requirements.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `requirements.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `CLAUDE.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `agents/REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `-code.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `-code.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `01-step-one-slug.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `01-step-one-slug-code.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `02-step-two-slug.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-explore` | `02-step-two-slug-code.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `_decisions_so_far.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `high_level_plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `goal.yaml` | explicit-fallback | green | Conditional fallback present |
+| `cast-fanout-detailed-plan` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/{goal-slug}-decisions-so-far.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/_subphase_extracts.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `_subphase_extracts.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{goal-slug}-reconciliation.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `_subphase_extracts.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{slug}-{suffix}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/{slug}-decisions-so-far.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-fanout-detailed-plan` | `docs/plan/{date}-{slug}-reconciliation.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-goal-decomposer` | `refined_requirements.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-goal-decomposer` | `requirements.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-goal-decomposer` | `writeup.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-goal-decomposer` | `refined_requirements.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-goal-decomposer` | `requirements.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-goal-decomposer` | `steps.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-goals` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `refined_requirements.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `requirements.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `writeup.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `exploration/summary.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `research_notes.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `docs/specs/{matching-specs}.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `goal.yaml` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `refined_requirements.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `requirements.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `writeup.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `research_notes.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `exploration/summary.ai.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-high-level-planner` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-high-level-planner` | `task_suggestion_service.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-interactive-questions` | `services/base.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-mvcs-compliance` | `src/common/services/base_service.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-mvcs-compliance` | `src/common/repositories/base_repository.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-mvcs-compliance` | `src/common/controllers/crud_router_factory.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-orchestrate` | `docs/plan/my_plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-orchestrate` | `_manifest.md` | ask-user | green | Asks user via interactive-questions / confirm |
+| `cast-orchestrate` | `_shared_context.md` | ask-user | green | Asks user via interactive-questions / confirm |
+| `cast-orchestrate` | `.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-plan-review` | `path/to/plan.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-plan-review` | `CLAUDE.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `remaining_questions.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `references/navigation-wiring-rules.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `references/assembler-checklist.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `package.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `version-b.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `assets/hero.webp` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `assets/{slide_id}/hero.webp` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `assembly/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `package.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `dist/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `how/{slide_id}/notes_for_assembler.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `assembly/notes_summary.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `how/{slide_id}/open_questions.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `src/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `notes_summary.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-assembler` | `remaining_questions.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-content` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-content` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-content` | `how/{slide_id}/brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-content` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-coordinator` | `checker_feedback.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-coordinator` | `check-results.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-coordinator` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-coordinator` | `how/01-opening/checker_feedback.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-tone` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-visual` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-visual` | `how/{slide_id}/brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-check-visual` | `references/visual-gold-standards.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `references/failure-routing-matrix.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `assembly/src/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `assembly/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `compliance_report.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-compliance-checker` | `routing_recommendations.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `what/{slide_id}.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-preso-how` | `narrative.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-preso-how` | `references/archetype-treatment-matrix.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `references/brief-template.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `references/html-generation-rules.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `html-generation-rules.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `how/{slide_id}/brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `open_questions.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-how` | `notes_for_assembler.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-checker` | `references/checker-checklist.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-checker` | `references/vision-prompting-pattern.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-checker` | `references/cross-deck-consistency-checklist.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-checker` | `references/iteration-budget-table.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `references/style-bible-watercolor.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `references/style-bible-exclusions.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `references/scene-brief-template.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `references/svg-specification.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `references/stitch-mcp-patterns.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.webp` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.svg` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `.generation-log.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `how/{slide_id}/assets/{filename}.generation-log.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-illustration-creator` | `.placeholder.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-preso-illustration-creator` | `how/03-model/assets/agent-collaboration.webp` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-narrative` | `docs/exploration/playbooks/02-aha-moment-psychology.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-narrative` | `docs/exploration/research/02-aha-moment-psychology.ai.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-narrative` | `references/aha-moment-frameworks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-narrative` | `checker-result.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-narrative` | `narrative.collab.md` | ask-user | green | Asks user via interactive-questions / confirm |
+| `cast-preso-narrative-checker` | `references/narrative-gold-standard.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `state.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `config.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/state.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/what/_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `state.json` | explicit-fallback | green | Conditional fallback present |
+| `cast-preso-orchestrator` | `presentation/what/_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `config.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `how/{slide_id}/open_questions.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/open_questions.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `how/{slide_id}/notes_for_assembler.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/assembler_notes.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `assembly/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/assembly/index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/what/05-agent-resume.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `what/_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `what/{slide_id}.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/what/{slide_id}.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `what/{slide_id}.checker-result.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `how/{slide_id}/brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/how/{slide_id}/slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/how/{slide_id}/brief.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `how/{slide_id}/checker-result.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/cross-slide-consistency-report.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/assembler_notes.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `presentation/compliance-report.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-orchestrator` | `.output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `visual_toolkit.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `templates/slide-archetypes/{archetype}.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `index.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `package.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `SKILL.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `callout-box.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `question-annotation.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `single-stat-hero.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `compare-contrast.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `timeline.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `diagram-annotated.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `code-showcase.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `consulting-exhibit.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `one-statement.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `illustrated-section-opener.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `build-up-sequence.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `title-slide.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-visual-toolkit` | `close-cta.html` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-checker` | `presentation/what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-checker` | `presentation/narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-checker` | `REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-checker` | `REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `presentation/narrative.collab.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-preso-what-planner` | `narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `thesis_v1.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `agents/REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `docs/exploration/thesis_v1.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `presentation/what/_slide_list.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-planner` | `presentation/what/{slide_id}.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `presentation/narrative.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `agents/cast-explore/README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `.stub.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `thesis_v1.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `agents/REGISTRY.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `docs/exploration/thesis_v1.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-preso-what-worker` | `presentation/what/{slide_id}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-pytest-best-practices` | `./reference_code/.cursor/rules/pytest.mdc` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-pytest-best-practices` | `./reference_code/conftest.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-pytest-best-practices` | `response.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-python-best-practices` | `./reference_code/.cursor/rules/bestpractices.mdc` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `requirements.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `refined_requirements.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `writeup.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `research_notes.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-refine-requirements` | `goal.yaml` | explicit-fallback | green | Conditional fallback present |
+| `cast-refine-requirements` | `requirements.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-refine-requirements` | `writeup.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-refine-requirements` | `research_notes.human.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-refine-requirements` | `tasks.md` | explicit-fallback | green | Conditional fallback present |
+| `cast-review-code` | `src/foo.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-review-code` | `src/bar.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-review-code` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-runs` | `goals/GOAL_SLUG/run-output.json` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `requirements.human.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `goal.yaml` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `plan.collab.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-task-suggester` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-tasks` | `path/to/artifact.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-tasks` | `tasks.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `docs/specs/_registry.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `_registry.md` | early-exit | green | Explicit early-exit / surfaced error |
+| `cast-update-spec` | `agents/{agent}/{agent}.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `agents/{agent}/README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `agents/{agent}/schema_context.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-update-spec` | `README.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-wrap-up` | `plan_and_progress/LEARNINGS.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-wrap-up` | `scripts/check_spec_drift.py` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+| `cast-wrap-up` | `LEARNINGS.md` | explicit-fallback | red | No fallback / no early-exit / no user prompt |
+
+### Section 3 — Per-Agent Roll-Up
+
+| Agent | Total Expectations | Red | Yellow | Green |
+|---|---|---|---|---|
+| `cast-agent-compliance` | 9 | 9 | 0 | 0 |
+| `cast-agent-design-guide` | 35 | 35 | 0 | 0 |
+| `cast-child-delegation` | 17 | 17 | 0 | 0 |
+| `cast-code-explorer` | 3 | 3 | 0 | 0 |
+| `cast-create-execution-plan` | 8 | 7 | 0 | 1 |
+| `cast-detailed-plan` | 21 | 13 | 0 | 8 |
+| `cast-docstring-best-practices` | 1 | 1 | 0 | 0 |
+| `cast-explore` | 17 | 14 | 0 | 3 |
+| `cast-fanout-detailed-plan` | 12 | 11 | 0 | 1 |
+| `cast-goal-decomposer` | 6 | 3 | 0 | 3 |
+| `cast-goals` | 1 | 1 | 0 | 0 |
+| `cast-high-level-planner` | 19 | 13 | 0 | 6 |
+| `cast-interactive-questions` | 1 | 1 | 0 | 0 |
+| `cast-mvcs-compliance` | 3 | 3 | 0 | 0 |
+| `cast-orchestrate` | 4 | 2 | 0 | 2 |
+| `cast-plan-review` | 2 | 2 | 0 | 0 |
+| `cast-preso-assembler` | 22 | 22 | 0 | 0 |
+| `cast-preso-check-content` | 4 | 4 | 0 | 0 |
+| `cast-preso-check-coordinator` | 4 | 4 | 0 | 0 |
+| `cast-preso-check-tone` | 1 | 1 | 0 | 0 |
+| `cast-preso-check-visual` | 3 | 3 | 0 | 0 |
+| `cast-preso-compliance-checker` | 8 | 8 | 0 | 0 |
+| `cast-preso-how` | 13 | 11 | 0 | 2 |
+| `cast-preso-illustration-checker` | 4 | 4 | 0 | 0 |
+| `cast-preso-illustration-creator` | 12 | 11 | 0 | 1 |
+| `cast-preso-narrative` | 5 | 4 | 0 | 1 |
+| `cast-preso-narrative-checker` | 1 | 1 | 0 | 0 |
+| `cast-preso-orchestrator` | 33 | 32 | 0 | 1 |
+| `cast-preso-visual-toolkit` | 19 | 19 | 0 | 0 |
+| `cast-preso-what-checker` | 4 | 4 | 0 | 0 |
+| `cast-preso-what-planner` | 9 | 8 | 0 | 1 |
+| `cast-preso-what-worker` | 9 | 9 | 0 | 0 |
+| `cast-pytest-best-practices` | 3 | 3 | 0 | 0 |
+| `cast-python-best-practices` | 1 | 1 | 0 | 0 |
+| `cast-refine-requirements` | 11 | 6 | 0 | 5 |
+| `cast-review-code` | 3 | 3 | 0 | 0 |
+| `cast-runs` | 1 | 1 | 0 | 0 |
+| `cast-task-suggester` | 7 | 7 | 0 | 0 |
+| `cast-tasks` | 2 | 2 | 0 | 0 |
+| `cast-update-spec` | 7 | 6 | 0 | 1 |
+| `cast-wrap-up` | 3 | 3 | 0 | 0 |
 
 ---
 
