@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Diecast interdependency audit (Phase-1 stub).
+
+Phase 2 will wire the four sub-audits described in
+`docs/execution/diecast-open-source/phase-2/` (cast-* prefix coverage,
+shared-module reachability, generated-skill regen drift, fixture-tree
+sanity). This file is the no-op skeleton staged in Phase 1 (D4) so the
+CI workflow shape stays stable across phases — only the implementation
+below changes when Phase 2 lands.
+
+Exit code is always 0 in this stub.
+"""
+
+from __future__ import annotations
+
+import sys
+
+
+def main() -> int:
+    print("audit-interdependencies stub — Phase 2 wires the four sub-audits")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

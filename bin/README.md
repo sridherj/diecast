@@ -58,3 +58,51 @@ The test suite under `tests/test_generate_skills.py` always uses `tmp_path`
 and `--target-dir`, never the real `~/.claude/skills`. Manual smoke tests
 should follow the same pattern; see the verification block in
 `docs/execution/diecast-open-source/phase-1/1.2-generate-skills-port.md`.
+
+## `lint-anonymization`
+
+Scans the working tree for upstream-private references that must not appear
+in public Diecast output (personal identifiers, internal paths, private agent
+names). Fires on every push and pull request via
+`.github/workflows/anonymization-lint.yml`.
+
+### Contract
+
+- **Reads:** every tracked + untracked file in the repo (respects `.gitignore`
+  via `git ls-files`; falls back to a `pathlib` walk outside a git repo).
+- **Skips by default:** `.git/`, `.venv/`, `__pycache__/`, `node_modules/`,
+  `.cast-bak-*/`, `.pytest_cache/`, and `tests/fixtures/forbidden/`. Pass
+  `--include-fixtures` to also scan `tests/fixtures/forbidden/` for
+  pattern-coverage sweeps.
+- **Writes:** nothing. Hits print to stdout in
+  `<file>:<line>: matched pattern '<regex>' — anonymization rule X violated.`
+  format. Exits 0 on a clean tree, 1 on hits.
+
+### Forbidden patterns
+
+The regex list lives **in the script itself** (`FORBIDDEN_PATTERNS` near the
+top of `bin/lint-anonymization`) — there is no separate pattern file because
+any external file would itself need to be public. When the upstream private
+`## People` table changes, append matching `\b<First Last>\b` entries
+during the quarterly review cadence noted in `CONTRIBUTING.md`.
+
+### Self-exemption
+
+Any line carrying the substring `diecast-lint: ignore-line` (typically as a
+trailing comment) is excluded from the scan. Use sparingly and only for
+provably-legitimate references.
+
+### Flags
+
+| Flag | Purpose |
+|------|---------|
+| `--root <path>` | Scan a different tree (default: cwd). |
+| `--include-fixtures` | Also scan `tests/fixtures/forbidden/`. |
+
+## `audit-interdependencies`
+
+Phase-1 no-op skeleton (D4). Prints `audit-interdependencies stub — Phase 2
+wires the four sub-audits` and exits 0. Wired into the CI workflow now so
+the workflow shape stays stable when Phase 2 lands the actual sub-audits
+(cast-* prefix coverage, shared-module reachability, generated-skill regen
+drift, fixture-tree sanity).
