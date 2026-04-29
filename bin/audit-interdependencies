@@ -1,24 +1,798 @@
 #!/usr/bin/env python3
-"""Diecast interdependency audit (Phase-1 stub).
+# SPDX-License-Identifier: Apache-2.0
+"""Diecast interdependency audit (production).
 
-Phase 2 will wire the four sub-audits described in
-`docs/execution/diecast-open-source/phase-2/` (cast-* prefix coverage,
-shared-module reachability, generated-skill regen drift, fixture-tree
-sanity). This file is the no-op skeleton staged in Phase 1 (D4) so the
-CI workflow shape stays stable across phases — only the implementation
-below changes when Phase 2 lands.
+Walks the cast-* agent and skill fleet, extracts cross-references, and
+classifies each reference green / yellow / red. Single-pass-per-file with
+check filtering — `--mode=all` opens each source file exactly once.
 
-Exit code is always 0 in this stub.
+Modes
+-----
+naming       — agent <-> agent / agent <-> skill name references (Section 1)
+folder       — folder-location consistency (Section 2 — placeholder for 2.3b)
+recovery     — failure-recovery / orphan references (Section 3 — placeholder for 2.3b)
+cross-skill  — Skill / shared-skill invocations (Section 4)
+all          — run every enabled mode in a single pass
+
+Dual-mode parser: agents whose dir lacks a `cast-*.md` prompt file fall back
+to a Python AST + string-literal scan over `.py` files (Issue #4 / D4).
+
+Exit codes
+----------
+0  all green, or findings strictly below `--fail-on` threshold
+1  findings at or above `--fail-on` threshold
+2  script error (missing fixture dir, parse failure, etc.)
 """
 
 from __future__ import annotations
 
+import argparse
+import ast
+import json
+import re
 import sys
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import Iterable
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# Slash-command reference: /cast-foo at a word boundary, but NOT preceded by
+# alphanum (so paths like `agents/cast-foo/` don't match the slash form).
+SLASH_RE = re.compile(r"(?<![A-Za-z0-9])/cast-[a-z][a-z0-9-]*")
+
+# Bare prose reference to a cast-* name (catches `cast-foo` with optional
+# trailing "agent"/"skill"). Must not start with `/` (handled separately) and
+# not be glued to alphanum on the left.
+BARE_RE = re.compile(
+    r"(?<![A-Za-z0-9/_-])(cast-[a-z][a-z0-9-]+)(\s+(agent|skill))?",
+)
+
+SHARED_SKILLS = {
+    "cast-child-delegation",
+    "cast-interactive-questions",
+    "cast-agent-design-guide",
+}
+
+CODING_OUTPUT_SKILLS = {
+    "cast-python-best-practices",
+    "cast-pytest-best-practices",
+    "cast-docstring-best-practices",
+}
+
+# Flagged personal placeholders that must NOT survive into diecast.
+EXCLUDED_PERSONAL = {
+    "cast-startup-discover",
+    "cast-startup-enrich",
+    "cast-linkedin-ai",
+    "cast-reachout-packet",
+    "cast-opportunity-finder",
+    "cast-generate-news-digest",
+    "cast-google-alert-setup",
+    "cast-startup-pipeline",
+}
+
+LEGACY_PREFIX_RE = re.compile(r"\btaskos-[a-z][a-z0-9-]*", re.IGNORECASE)
 
 
-def main() -> int:
-    print("audit-interdependencies stub — Phase 2 wires the four sub-audits")
+# -----------------------------------------------------------------------------
+# Folder-location + failure-recovery audit (Phase 2.3b back-port)
+# -----------------------------------------------------------------------------
+
+# Convention-aligned path prefixes per US9 + US2 (writes/reads must stay
+# project-local under one of these subtrees).
+GREEN_PATH_PREFIXES = (
+    "docs/exploration/",
+    "docs/spec/",
+    "docs/specs/",
+    "docs/requirement/",
+    "docs/requirements/",
+    "docs/plan/",
+    "docs/design/",
+    "docs/execution/",
+    "docs/ui-design/",
+    "docs/audit/",
+    "docs/decision/",
+    "docs/reference/",
+    "agents/",
+    "skills/",
+    "bin/",
+    "templates/",
+    "migrations/",
+    "tests/",
+    "cast-server/",
+    "plan_and_progress/",
+    "exploration/",
+    "presentation/",
+    "feedback/",
+    "decisions/",
+)
+
+# Disallowed prefixes — TaskOS-style, SJ-personal, /tmp, user home,
+# privileged paths.
+RED_PATH_PREFIXES = (
+    "taskos/goals/",
+    "taskos/",
+    "/data/workspace/",
+    "/home/",
+    "~/.claude/",
+    "~/.config/",
+    "/tmp/",
+    "/var/tmp/",
+    "/etc/",
+    "/usr/",
+    "/private/",
+)
+
+# Ambiguous root anchors.
+YELLOW_PATH_PREFIXES = (
+    "../",
+    "./../",
+)
+
+# Bare project-root filenames that are permissible without a directory prefix.
+GREEN_BARE_FILES = {
+    "goal.yaml",
+    "tasks.md",
+    "plan.collab.md",
+    "high_level_plan.collab.md",
+    "refined_requirements.collab.md",
+    "requirements.human.md",
+    "research_notes.human.md",
+    "summary.ai.md",
+    "README.md",
+    "CHANGELOG.md",
+    "VERSION",
+    "LICENSE",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "pyproject.toml",
+    "config.yaml",
+    "uv.lock",
+    "MEMORY.md",
+}
+
+PATH_TOKEN_RE = re.compile(
+    r"""(?<![A-Za-z0-9_./\-])         # left boundary
+        (
+          ~/[A-Za-z0-9_./{}\-]+\.[A-Za-z0-9]{1,8}\b              # ~/.../file.ext
+          | ~/[A-Za-z0-9_./{}\-]*[A-Za-z0-9]/                    # ~/.../dir/
+          | /(?:tmp|var|etc|usr|home|data|private)/[A-Za-z0-9_./{}\-]+  # absolute red-prefix targets
+          | (?:\.{1,2}/)?[A-Za-z0-9_]+(?:/[A-Za-z0-9_.{}\-]+){1,}\.[A-Za-z0-9]{1,8}\b
+          | [A-Za-z0-9_.\-]+\.(?:md|json|yaml|yml|py|html|sh|toml|jsonl|sql)\b
+        )""",
+    re.VERBOSE,
+)
+
+# Reject tokens that are obviously not file paths.
+PATH_REJECT_RE = re.compile(
+    r"""^(
+        /cast-[a-z0-9\-]+               # slash-command refs
+      | /skill-[a-z0-9\-]*              # skill placeholder
+      | /[a-z]+(?:-[a-z]+)*$            # bare /command-style fragments
+      | [\d.]+                          # version numbers
+      | https?:.*
+      | mailto:.*
+    )$""",
+    re.VERBOSE | re.IGNORECASE,
+)
+
+WRITE_VERBS_RE = re.compile(
+    r"\b(Write|writes?|writing|saves?\s+to|outputs?\s+to|persists?\s+to|"
+    r"emits?\s+to|emit\s+to|append(?:s)?\s+to|drops?\s+(?:in|into)|"
+    r"creates?\s+(?:a|an)?\s*(?:file)?\s*at|stages?\s+at|renders?\s+to|"
+    r"populates?|generates?\s+to|produces?\s+to)\b"
+)
+READ_VERBS_RE = re.compile(
+    r"\b(Read|read|reads|reading|expects?|loads?\s+from|ingest\s+from|"
+    r"consume\s+from|checks?\s+for|opens?|inspects?|imports?\s+from|"
+    r"references?|parses?)\b"
+)
+
+SLUG_TEMPLATE_RE = re.compile(r"\{slug\}|\{goal_slug\}|\$\{slug\}|\$slug\b|<slug>")
+SLUG_VALIDATION_RE = re.compile(
+    r"(slug.{0,60}(valid|sanitiz|allowlist|whitelist|regex|pattern|"
+    r"alphanumer|ascii|safe[-_ ]name|reject))"
+    r"|(valid.{0,60}slug)"
+    r"|(slug.{0,40}\^)",
+    re.IGNORECASE,
+)
+
+RECOVERY_FALLBACK_RE = re.compile(
+    r"(if\s+(?:it\s+)?(?:doesn'?t\s+exist|missing|not\s+found|absent|empty|unset)|"
+    r"fall\s*back|fallback|default(?:s|ing)?\s+to|else\s+use|"
+    r"if\s+absent|if\s+present|if\s+exists?|if\s+not\s+(?:present|set|found|exists?)|"
+    r"otherwise\s+(?:use|fall|exit|skip|abort|stop|error|warn))",
+    re.IGNORECASE,
+)
+RECOVERY_EARLY_EXIT_RE = re.compile(
+    r"(early[-\s]?exit|abort|stop\s+with|halt\s+with|raise\s+(?:a|an)?\s*error|"
+    r"return\s+(?:an?\s+)?error|emit\s+error|tell\s+the\s+user|ask\s+the\s+user|"
+    r"surface\s+(?:to|an|a)|skip\s+with\s+a?\s*note|warn\s+and\s+(?:continue|skip)|"
+    r"first[-\s]?run|prompt\s+to\s+run)",
+    re.IGNORECASE,
+)
+RECOVERY_ASK_USER_RE = re.compile(
+    r"(AskUserQuestion|cast-interactive-questions|prompt\s+the\s+user|"
+    r"confirm\s+with\s+(?:the\s+)?user|interactive[-\s]questions)",
+    re.IGNORECASE,
+)
+
+
+def _classify_folder_path(path: str) -> tuple[str, str]:
+    """Return (status, reason) for a single path token."""
+    pl = path.strip()
+    pl = pl.lstrip("`'\"<")
+    pl = pl.rstrip("`'\">.,;:)]}!")
+    if not pl:
+        return "green", "empty path token"
+    for red in RED_PATH_PREFIXES:
+        if pl.startswith(red):
+            label = {
+                "taskos/goals/": "TaskOS-style goal path; should be project-local",
+                "taskos/": "Legacy TaskOS root path; not portable",
+                "/data/workspace/": "SJ-personal absolute path",
+                "/home/": "Hard-coded user home",
+                "~/.claude/": "User-home Claude config; violates US2",
+                "~/.config/": "User-home config dir; violates US2",
+                "/tmp/": "/tmp scratch path; violates US2 (non-portable)",
+                "/var/tmp/": "/var/tmp scratch path; violates US2",
+                "/etc/": "Privileged system path; violates US2",
+                "/usr/": "Privileged system path; violates US2",
+                "/private/": "Privileged path; violates US2",
+            }
+            return "red", label.get(red, f"disallowed prefix {red}")
+    for yellow in YELLOW_PATH_PREFIXES:
+        if pl.startswith(yellow):
+            return "yellow", "Ambiguous root anchor (relative escape)"
+    for green in GREEN_PATH_PREFIXES:
+        if pl.startswith(green):
+            return "green", ""
+    if pl in GREEN_BARE_FILES or pl.split("/")[0] in GREEN_BARE_FILES:
+        return "green", ""
+    if "/" not in pl and pl.endswith(
+        (".md", ".yaml", ".yml", ".json", ".html", ".jsonl", ".sh", ".toml", ".py")
+    ):
+        # Bare filename — assume project-local (within agent dir or repo root).
+        return "green", ""
+    return "yellow", "Path not matched against convention list — verify manually"
+
+
+def _classify_recovery(window: str, direction: str) -> tuple[str, str]:
+    """Classify recovery posture from the prose window around a path mention."""
+    if direction == "write":
+        if RECOVERY_FALLBACK_RE.search(window) or RECOVERY_EARLY_EXIT_RE.search(window):
+            return "green", "Write path with explicit failure handling"
+        return "n/a", "Write path; recovery not applicable"
+    if RECOVERY_ASK_USER_RE.search(window):
+        return "green", "Asks user via interactive-questions / confirm"
+    if RECOVERY_FALLBACK_RE.search(window):
+        return "green", "Conditional fallback present"
+    if RECOVERY_EARLY_EXIT_RE.search(window):
+        return "green", "Explicit early-exit / surfaced error"
+    return "red", "No fallback / no early-exit / no user prompt"
+
+
+def _extract_path_findings(
+    *,
+    src: Path,
+    rel: str,
+    source_id: str,
+    text: str,
+) -> tuple[list[Finding], list[Finding], bool]:
+    """Walk a markdown agent prompt, emit folder + recovery findings.
+
+    Returns (folder_findings, recovery_findings, slug_validation_present).
+    """
+    folder: list[Finding] = []
+    recovery: list[Finding] = []
+    lines = text.splitlines()
+    slug_validated = bool(SLUG_VALIDATION_RE.search(text))
+    for idx, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
+        for m in PATH_TOKEN_RE.finditer(line):
+            tok = m.group(1).strip().rstrip(".,;:)]}\"'")
+            if not tok or tok in (".", "/", "..", "..//"):
+                continue
+            if "://" in tok:
+                continue
+            if re.fullmatch(r"[\d.]+", tok):
+                continue
+            if PATH_REJECT_RE.match(tok):
+                continue
+            # Skip wildcard-only tokens like `*.md`.
+            if tok.startswith("*"):
+                continue
+            # Skip pure slash-commands (e.g., /cast-foo, /skill).
+            if tok.startswith("/") and "/" not in tok[1:] and tok.lstrip("/").replace("-", "").isalpha():
+                continue
+            direction = "unknown"
+            if WRITE_VERBS_RE.search(line):
+                direction = "write"
+            elif READ_VERBS_RE.search(line):
+                direction = "read"
+            else:
+                if idx > 1:
+                    prev = lines[idx - 2]
+                    if WRITE_VERBS_RE.search(prev):
+                        direction = "write"
+                    elif READ_VERBS_RE.search(prev):
+                        direction = "read"
+            conv_status, conv_reason = _classify_folder_path(tok)
+            slug_templated = bool(SLUG_TEMPLATE_RE.search(tok))
+            window_lo = max(0, idx - 3)
+            window_hi = min(len(lines), idx + 2)
+            window = "\n".join(lines[window_lo:window_hi])
+            rec_status, rec_reason = _classify_recovery(window, direction)
+            extra = {
+                "direction": direction,
+                "slug_templated": slug_templated,
+                "slug_validation_in_file": slug_validated,
+            }
+            folder.append(Finding(
+                mode="folder",
+                source_file=rel,
+                line=idx,
+                reference=tok,
+                target=source_id,
+                status=conv_status,
+                reason=conv_reason or f"convention OK ({direction})",
+                pattern=direction,
+                extra=dict(extra),
+            ))
+            if direction in ("read", "unknown"):
+                recovery.append(Finding(
+                    mode="recovery",
+                    source_file=rel,
+                    line=idx,
+                    reference=tok,
+                    target=source_id,
+                    status=rec_status if rec_status != "n/a" else "green",
+                    reason=rec_reason,
+                    pattern=direction,
+                    extra=dict(extra),
+                ))
+    return folder, recovery, slug_validated
+
+
+@dataclass(frozen=True)
+class Node:
+    id: str
+    kind: str   # "agent" | "skill"
+    path: str   # repo-relative path to the dir
+
+
+@dataclass
+class Finding:
+    mode: str
+    source_file: str
+    line: int
+    reference: str
+    target: str
+    status: str   # "green" | "yellow" | "red"
+    reason: str
+    pattern: str = ""   # invocation pattern bucket (cross-skill mode)
+    extra: dict = field(default_factory=dict)
+
+
+def _discover(root: Path) -> tuple[dict[str, Node], list[str]]:
+    """Discover all cast-* agents and skills under ``root``.
+
+    Returns a dict id -> Node and a list of skip warnings.
+    """
+    nodes: dict[str, Node] = {}
+    warnings: list[str] = []
+
+    for kind, sub in (("agent", "agents"), ("skill", "skills/claude-code")):
+        base = root / sub
+        if not base.is_dir():
+            continue
+        for child in sorted(base.iterdir()):
+            if not child.is_dir():
+                continue
+            if not child.name.startswith("cast-"):
+                continue
+            if child.name in nodes:
+                warnings.append(f"duplicate id {child.name}")
+                continue
+            nodes[child.name] = Node(
+                id=child.name,
+                kind=kind,
+                path=str(child.relative_to(root)),
+            )
+    return nodes, warnings
+
+
+def _agent_source_files(agent_dir: Path) -> tuple[list[Path], str]:
+    """Return the source files to scan and the parser flavor.
+
+    Flavor is "markdown" if a cast-*.md prompt exists, otherwise
+    "python-script" (AST + string-literal scan over .py files).
+    """
+    prompt = agent_dir / f"{agent_dir.name}.md"
+    if prompt.is_file():
+        return [prompt], "markdown"
+    py_files = sorted(agent_dir.rglob("*.py"))
+    py_files = [p for p in py_files if "/.venv/" not in str(p) and "/tests/" not in str(p)]
+    return py_files, "python-script"
+
+
+def _skill_source_files(skill_dir: Path) -> list[Path]:
+    skill_md = skill_dir / "SKILL.md"
+    if skill_md.is_file():
+        return [skill_md]
+    return sorted(skill_dir.rglob("*.md"))
+
+
+def _extract_markdown_refs(path: Path) -> list[tuple[int, str, str]]:
+    """Extract (lineno, kind, name) tuples from a markdown source.
+
+    kind ∈ {"slash", "bare"}. Names always include the cast- prefix.
+    """
+    refs: list[tuple[int, str, str]] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for m in SLASH_RE.finditer(line):
+            name = m.group(0).lstrip("/")
+            refs.append((lineno, "slash", name))
+        for m in BARE_RE.finditer(line):
+            name = m.group(1)
+            # Avoid double-counting matches that also matched the slash form.
+            start = m.start(1)
+            if start > 0 and line[start - 1] == "/":
+                continue
+            refs.append((lineno, "bare", name))
+    return refs
+
+
+def _extract_python_refs(path: Path) -> list[tuple[int, str, str]]:
+    """Extract refs from a Python source by walking AST string literals."""
+    refs: list[tuple[int, str, str]] = []
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+    except SyntaxError:
+        return refs
+    for node in ast.walk(tree):
+        # Constants (string literals).
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            for lineno, kind, name in _scan_string(node.value, node.lineno):
+                refs.append((lineno, kind, name))
+    return refs
+
+
+def _extract_legacy_taskos(path: Path, *, is_python: bool) -> list[tuple[int, str]]:
+    """Find any surviving taskos-* references — Section 1's safety net."""
+    hits: list[tuple[int, str]] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for m in LEGACY_PREFIX_RE.finditer(line):
+            hits.append((lineno, m.group(0)))
+    return hits
+
+
+def _scan_string(text: str, base_lineno: int) -> list[tuple[int, str, str]]:
+    """Scan a multi-line string literal for cast-* references."""
+    refs: list[tuple[int, str, str]] = []
+    for offset, line in enumerate(text.splitlines() or [text]):
+        lineno = base_lineno + offset
+        for m in SLASH_RE.finditer(line):
+            refs.append((lineno, "slash", m.group(0).lstrip("/")))
+        for m in BARE_RE.finditer(line):
+            start = m.start(1)
+            if start > 0 and line[start - 1] == "/":
+                continue
+            refs.append((lineno, "bare", m.group(1)))
+    return refs
+
+
+def _classify_naming(
+    *,
+    source_id: str,
+    target: str,
+    nodes: dict[str, Node],
+) -> tuple[str, str]:
+    """Return (status, reason) for a naming reference."""
+    if target in EXCLUDED_PERSONAL:
+        return ("red", "references excluded SJ-personal agent")
+    if target.startswith("taskos-"):
+        return ("red", "legacy taskos-* prefix survived into diecast")
+    if target in nodes:
+        return ("green", "target exists in fleet")
+    # Self-reference is fine.
+    if target == source_id:
+        return ("green", "self-reference")
+    return ("red", "target not found in fleet")
+
+
+def _classify_cross_skill(
+    *,
+    target: str,
+    pattern: str,
+    nodes: dict[str, Node],
+    pattern_index: dict[str, set[str]],
+) -> tuple[str, str]:
+    """Pattern: 'slash' (invoked via /cast-foo) vs 'prose' (mentioned)."""
+    node = nodes.get(target)
+    if node is None:
+        return ("red", "skill target not found")
+    if node.kind != "skill":
+        return ("green", "agent reference (handled in naming mode)")
+    patterns = pattern_index.get(target, set())
+    if target in SHARED_SKILLS and len(patterns) > 1:
+        return ("yellow", f"shared skill invoked with mixed patterns: {sorted(patterns)}")
+    return ("green", "consistent invocation")
+
+
+def _gather_pattern_index(
+    nodes: dict[str, Node],
+    refs_per_file: dict[Path, list[tuple[int, str, str]]],
+) -> dict[str, set[str]]:
+    """Per-skill set of invocation patterns observed across the fleet."""
+    idx: dict[str, set[str]] = {}
+    for refs in refs_per_file.values():
+        for _, kind, name in refs:
+            node = nodes.get(name)
+            if node is None or node.kind != "skill":
+                continue
+            idx.setdefault(name, set()).add(kind)
+    return idx
+
+
+def _build_edges(findings: list[Finding], nodes: dict[str, Node]) -> list[dict]:
+    edges: list[dict] = []
+    for f in findings:
+        if f.target not in nodes:
+            continue
+        edges.append({
+            "source": _path_to_id(f.source_file, nodes),
+            "target": f.target,
+            "kind": f.pattern or f.mode,
+            "file": f.source_file,
+            "line": f.line,
+            "status": f.status,
+        })
+    return edges
+
+
+def _path_to_id(rel_path: str, nodes: dict[str, Node]) -> str:
+    """Resolve a repo-relative source path back to its fleet node id."""
+    parts = Path(rel_path).parts
+    for part in parts:
+        if part.startswith("cast-") and part in nodes:
+            return part
+    return rel_path
+
+
+def run_audit(
+    *,
+    repo_root: Path,
+    modes: set[str],
+) -> tuple[list[Finding], dict[str, Node], dict[str, str]]:
+    """Run the audit and return (findings, nodes, parser_flavor_per_agent)."""
+    nodes, _disc_warnings = _discover(repo_root)
+
+    # Phase 1: walk every source file exactly once, collecting raw refs.
+    refs_per_file: dict[Path, list[tuple[int, str, str]]] = {}
+    legacy_per_file: dict[Path, list[tuple[int, str]]] = {}
+    flavor_per_agent: dict[str, str] = {}
+
+    for node in nodes.values():
+        node_dir = repo_root / node.path
+        if node.kind == "agent":
+            sources, flavor = _agent_source_files(node_dir)
+            flavor_per_agent[node.id] = flavor
+        else:
+            sources = _skill_source_files(node_dir)
+            flavor = "markdown"
+
+        for src in sources:
+            if flavor == "markdown" or src.suffix == ".md":
+                refs_per_file[src] = _extract_markdown_refs(src)
+                legacy_per_file[src] = _extract_legacy_taskos(src, is_python=False)
+            else:
+                refs_per_file[src] = _extract_python_refs(src)
+                legacy_per_file[src] = _extract_legacy_taskos(src, is_python=True)
+
+    pattern_index = _gather_pattern_index(nodes, refs_per_file)
+
+    # Phase 2: classify per requested mode with check filtering.
+    findings: list[Finding] = []
+
+    for src, refs in refs_per_file.items():
+        rel = str(src.relative_to(repo_root))
+        source_id = _path_to_id(rel, nodes)
+
+        if "naming" in modes:
+            for lineno, kind, name in refs:
+                status, reason = _classify_naming(
+                    source_id=source_id, target=name, nodes=nodes,
+                )
+                findings.append(Finding(
+                    mode="naming",
+                    source_file=rel,
+                    line=lineno,
+                    reference=("/" + name) if kind == "slash" else name,
+                    target=name,
+                    status=status,
+                    reason=reason,
+                    pattern=kind,
+                ))
+
+        if "cross-skill" in modes:
+            for lineno, kind, name in refs:
+                node = nodes.get(name)
+                if node is None or node.kind != "skill":
+                    continue
+                status, reason = _classify_cross_skill(
+                    target=name, pattern=kind, nodes=nodes,
+                    pattern_index=pattern_index,
+                )
+                f = Finding(
+                    mode="cross-skill",
+                    source_file=rel,
+                    line=lineno,
+                    reference=("/" + name) if kind == "slash" else name,
+                    target=name,
+                    status=status,
+                    reason=reason,
+                    pattern=kind,
+                )
+                if status == "yellow":
+                    # Add comparison call-site: the first OTHER pattern observed.
+                    other_patterns = pattern_index.get(name, set()) - {kind}
+                    if other_patterns:
+                        # Find an example file/line for the contrasting pattern.
+                        for s2, refs2 in refs_per_file.items():
+                            for ln2, k2, n2 in refs2:
+                                if n2 == name and k2 in other_patterns:
+                                    f.extra["comparison_site"] = {
+                                        "file": str(s2.relative_to(repo_root)),
+                                        "line": ln2,
+                                        "pattern": k2,
+                                    }
+                                    break
+                            if "comparison_site" in f.extra:
+                                break
+                findings.append(f)
+
+        # Section 1 safety net: surface any surviving taskos-* prefix.
+        if "naming" in modes:
+            for lineno, hit in legacy_per_file.get(src, []):
+                findings.append(Finding(
+                    mode="naming",
+                    source_file=rel,
+                    line=lineno,
+                    reference=hit,
+                    target=hit,
+                    status="red",
+                    reason="legacy taskos-* prefix survived into diecast",
+                    pattern="legacy-prefix",
+                ))
+
+    # folder + recovery modes (Phase 2.3b) — operate on the same markdown
+    # source files already collected above, so each prompt is read once.
+    if "folder" in modes or "recovery" in modes:
+        slug_validation_per_agent: dict[str, bool] = {}
+        for src, _ in refs_per_file.items():
+            if src.suffix != ".md":
+                continue
+            rel = str(src.relative_to(repo_root))
+            source_id = _path_to_id(rel, nodes)
+            text = src.read_text(encoding="utf-8", errors="replace")
+            folder_f, recovery_f, slug_valid = _extract_path_findings(
+                src=src, rel=rel, source_id=source_id, text=text,
+            )
+            if source_id in nodes:
+                slug_validation_per_agent[source_id] = (
+                    slug_validation_per_agent.get(source_id, False) or slug_valid
+                )
+            if "folder" in modes:
+                findings.extend(folder_f)
+            if "recovery" in modes:
+                findings.extend(recovery_f)
+
+    return findings, nodes, flavor_per_agent
+
+
+def render_graph_json(
+    nodes: dict[str, Node], findings: list[Finding]
+) -> dict:
+    edges = _build_edges(findings, nodes)
+    return {
+        "nodes": [asdict(n) for n in nodes.values()],
+        "edges": edges,
+    }
+
+
+def summarize(findings: list[Finding]) -> dict:
+    counts = {"green": 0, "yellow": 0, "red": 0}
+    by_mode: dict[str, dict[str, int]] = {}
+    for f in findings:
+        counts[f.status] = counts.get(f.status, 0) + 1
+        bm = by_mode.setdefault(f.mode, {"green": 0, "yellow": 0, "red": 0})
+        bm[f.status] = bm.get(f.status, 0) + 1
+    return {
+        "total": len(findings),
+        "by_status": counts,
+        "by_mode": by_mode,
+    }
+
+
+def _exit_threshold(summary: dict, fail_on: str) -> int:
+    if fail_on == "none":
+        return 0
+    s = summary["by_status"]
+    if fail_on == "red" and s.get("red", 0) > 0:
+        return 1
+    if fail_on == "yellow" and (s.get("red", 0) + s.get("yellow", 0)) > 0:
+        return 1
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="audit-interdependencies",
+        description="Audit cross-references across the cast-* fleet.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["naming", "folder", "recovery", "cross-skill", "all"],
+        default="all",
+    )
+    parser.add_argument("--json", action="store_true", help="Emit JSON to stdout.")
+    parser.add_argument(
+        "--fail-on",
+        choices=["red", "yellow", "none"],
+        default="none",
+        help="Exit 1 if findings at or above this severity exist.",
+    )
+    parser.add_argument(
+        "--fixture-dir",
+        type=Path,
+        default=None,
+        help="Run against a fixture tree instead of the live repo (used by 2.5).",
+    )
+    args = parser.parse_args(argv)
+
+    repo_root = args.fixture_dir.resolve() if args.fixture_dir else REPO_ROOT
+    if args.fixture_dir is not None and not repo_root.is_dir():
+        print(f"error: fixture-dir not found: {repo_root}", file=sys.stderr)
+        return 2
+
+    modes = {args.mode} if args.mode != "all" else {
+        "naming", "folder", "recovery", "cross-skill",
+    }
+    findings, nodes, flavors = run_audit(repo_root=repo_root, modes=modes)
+    summary = summarize(findings)
+
+    if args.json:
+        payload = {
+            "schema_version": 1,
+            "modes": sorted(modes),
+            "summary": summary,
+            "findings": [asdict(f) for f in findings],
+            "graph": render_graph_json(nodes, findings),
+            "agent_parser_flavors": flavors,
+        }
+        json.dump(payload, sys.stdout, indent=2, sort_keys=True)
+        sys.stdout.write("\n")
+    else:
+        print(f"Audit modes: {sorted(modes)}")
+        print(f"Total findings: {summary['total']}")
+        print(f"  red:    {summary['by_status'].get('red', 0)}")
+        print(f"  yellow: {summary['by_status'].get('yellow', 0)}")
+        print(f"  green:  {summary['by_status'].get('green', 0)}")
+        for mode, c in summary["by_mode"].items():
+            print(f"  [{mode}] red={c['red']} yellow={c['yellow']} green={c['green']}")
+        red = [f for f in findings if f.status == "red"][:20]
+        if red:
+            print("\nFirst red findings:")
+            for f in red:
+                print(f"  {f.source_file}:{f.line}  {f.reference}  -> {f.reason}")
+
+    return _exit_threshold(summary, args.fail_on)
 
 
 if __name__ == "__main__":
