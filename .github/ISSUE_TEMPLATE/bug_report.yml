@@ -1,0 +1,60 @@
+name: Bug report
+description: Report a defect in Diecast.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill out the
+        sections below — the more detail, the faster we can fix it.
+  - type: input
+    id: version
+    attributes:
+      label: Diecast version
+      description: Output of `cat VERSION` from your checkout.
+      placeholder: "0.1.0-alpha"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal commands or actions that trigger the bug.
+      placeholder: |
+        1. Run `./setup`
+        2. ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error output or logs if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, shell, Python version, anything else relevant.
+      placeholder: |
+        - OS:
+        - Shell:
+        - Python:
+    validations:
+      required: false

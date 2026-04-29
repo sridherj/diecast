@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Diecast setup is implemented in Phase 4. See docs/install.md when published."
+exit 0

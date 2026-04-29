@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+
+# Diecast runtime artifacts
+.cast-bak-*/
+.agent-run_*.output.json
+.delegation-run_*.json
+
+# Local secrets
+.env
+.env.local
+
+# Local cast database (default install path)
+~/.cast/diecast.db
