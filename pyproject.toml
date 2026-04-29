@@ -1,0 +1,17 @@
+[project]
+name = "diecast"
+version = "0.0.0"
+description = "Diecast — open-source extraction of TaskOS / LinkedOut agent harness."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"
