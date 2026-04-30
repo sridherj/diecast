@@ -4,5 +4,6 @@ A minimal valid agent used as the audit-script green baseline.
 
 ## Purpose
 
-Exists to confirm the audit script exits 0 on a clean fleet of one node.
-No outbound references, no path tokens, no cross-skill invocations.
+PLANTED REGRESSION: this line intentionally references /cast-doesnotexist
+to prove the planted-fixture gate fails CI when green-baseline turns red.
+Revert before merging.
