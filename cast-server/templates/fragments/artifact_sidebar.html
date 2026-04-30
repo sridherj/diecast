@@ -1,0 +1,16 @@
+{% from "macros/markdown_viewer.html" import artifact_header, artifact_content %}
+
+<div class="artifact-sidebar">
+    <div class="sidebar-top-bar">
+        <button class="sidebar-close-btn" onclick="closeArtifactSidebar()" title="Close (Esc)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <span class="sidebar-file-path">{{ path }}</span>
+    </div>
+    <div class="sidebar-content">
+        {{ artifact_header(name, path, authorship, goal_slug, phase) }}
+        {{ artifact_content(html) }}
+    </div>
+</div>

@@ -1,0 +1,88 @@
+<div class="task-suggestion-card {% if suggestion.children %}suggestion-group{% endif %}" id="task-suggestion-{{ suggestion.id }}">
+    <div class="task-suggestion-header">
+        <span class="task-suggestion-title">{{ suggestion.title }}</span>
+        <div class="task-suggestion-badges">
+            {% if suggestion.phase %}
+            <span class="badge badge-phase">{{ suggestion.phase }}</span>
+            {% endif %}
+            {% if suggestion.effort_estimate %}
+            <span class="badge badge-effort">{{ suggestion.effort_estimate }}</span>
+            {% endif %}
+            {% if suggestion.is_spike %}
+            <span class="badge badge-spike">Spike</span>
+            {% endif %}
+            {% if suggestion.recommended_agent %}
+            <span class="badge badge-agent">{{ suggestion.recommended_agent }}</span>
+            {% endif %}
+            {% if suggestion.task_type %}
+            <span class="badge badge-type">{{ suggestion.task_type }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <p class="task-suggestion-outcome">{{ suggestion.outcome }}</p>
+    {% if suggestion.rationale %}
+    <p class="task-suggestion-rationale">{{ suggestion.rationale }}</p>
+    {% endif %}
+
+    {# Render child suggestions inline if this is a group #}
+    {% if suggestion.children %}
+    <div class="suggestion-subtasks">
+        <span class="suggestion-subtasks-label">Subtasks:</span>
+        {% for child in suggestion.children %}
+        <div class="suggestion-subtask">
+            <span class="suggestion-subtask-number">{{ loop.index }}.</span>
+            <span class="suggestion-subtask-title">{{ child.title }}</span>
+            {% if child.effort_estimate %}
+            <span class="badge badge-effort">{{ child.effort_estimate }}</span>
+            {% endif %}
+            {% if child.is_spike %}
+            <span class="badge badge-spike">Spike</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="task-suggestion-actions">
+        {% if suggestion.children %}
+        {# Group actions #}
+        <button class="btn btn-sm btn-primary"
+                hx-post="/api/goals/{{ suggestion.goal_slug }}/task-suggestions/{{ suggestion.id }}/approve-group"
+                hx-target="#task-suggestion-{{ suggestion.id }}"
+                hx-swap="outerHTML"
+                hx-disabled-elt="this">
+            Approve All
+        </button>
+        <button class="btn btn-sm btn-secondary"
+                hx-post="/api/goals/{{ suggestion.goal_slug }}/task-suggestions/{{ suggestion.id }}/approve-parent-only"
+                hx-target="#task-suggestion-{{ suggestion.id }}"
+                hx-swap="outerHTML"
+                hx-disabled-elt="this">
+            Approve Parent Only
+        </button>
+        <button class="btn btn-sm btn-ghost"
+                hx-post="/api/goals/{{ suggestion.goal_slug }}/task-suggestions/{{ suggestion.id }}/decline-group"
+                hx-target="#task-suggestion-{{ suggestion.id }}"
+                hx-swap="delete"
+                hx-disabled-elt="this">
+            Decline
+        </button>
+        {% else %}
+        {# Standard single actions #}
+        <button class="btn btn-sm btn-primary"
+                hx-post="/api/goals/{{ suggestion.goal_slug }}/task-suggestions/{{ suggestion.id }}/approve"
+                hx-target="#task-suggestion-{{ suggestion.id }}"
+                hx-swap="outerHTML"
+                hx-disabled-elt="this">
+            Approve
+        </button>
+        <button class="btn btn-sm btn-ghost"
+                hx-post="/api/goals/{{ suggestion.goal_slug }}/task-suggestions/{{ suggestion.id }}/decline"
+                hx-target="#task-suggestion-{{ suggestion.id }}"
+                hx-swap="delete"
+                hx-disabled-elt="this">
+            Decline
+        </button>
+        {% endif %}
+    </div>
+</div>

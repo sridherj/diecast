@@ -1,0 +1,74 @@
+{# Phase tab content fragment — returned by GET /api/goals/{slug}/tab/{phase}.
+   Shows tasks (primary action items) then artifacts (reference material) for this phase.
+   Expects: goal (dict), tasks (list), phase (str), artifacts (list of dicts with name/path/html/authorship),
+            phase_suggestions (list of dicts, optional) #}
+{% from "macros/markdown_viewer.html" import artifact_header, artifact_content %}
+<div class="phase-tab-content">
+    {# Tasks for this phase (primary — always first) #}
+    <div class="phase-tasks">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <h4 class="phase-tasks-title" style="margin-bottom: 0;">Tasks</h4>
+            <form class="suggest-form"
+                  hx-post="/api/goals/{{ goal.slug }}/task-suggestions/generate?phase={{ phase }}"
+                  hx-target="#suggest-status-{{ phase }}"
+                  hx-swap="innerHTML">
+                <input type="text" name="user_context"
+                       placeholder="What should tasks focus on? (optional)"
+                       class="input-field suggest-input">
+                <button type="submit" class="btn-suggest">Suggest Tasks</button>
+            </form>
+        </div>
+        <div id="suggest-status-{{ phase }}"></div>
+        {% if tasks %}
+            {% for task in tasks %}
+                {% with show_phase_badge=false %}
+                {% include "fragments/task_item.html" %}
+                {% endwith %}
+            {% endfor %}
+        {% else %}
+            {% set empty_states = {
+                "requirements": "Start by writing down what you want to build",
+                "exploration": "Run the explore agent to research this space",
+                "plan": "Based on your research, create a phased plan",
+                "execution": "Break your plan into concrete tasks"
+            } %}
+            <p class="empty-state">{{ empty_states.get(phase, "No tasks in this phase yet.") }}</p>
+        {% endif %}
+    </div>
+
+    {# Pending task suggestions for this phase #}
+    {% if phase_suggestions %}
+    <div class="task-suggestions-section" id="task-suggestions-{{ phase }}">
+        <h3>Suggested Tasks</h3>
+        {% for suggestion in phase_suggestions %}
+            {% include "fragments/task_suggestion_card.html" %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Add task form for this phase #}
+    <div class="add-task-form">
+        <form hx-post="/api/goals/{{ goal.slug }}/tasks"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+            <div class="form-row">
+                <input type="hidden" name="phase" value="{{ phase }}">
+                <input type="text" name="title" placeholder="Add a task to {{ phase }}..." required class="input-field input-wide">
+                <button type="submit" class="btn btn-primary btn-sm">+ Add</button>
+            </div>
+        </form>
+    </div>
+
+    {# Rendered artifacts (reference material — below tasks) #}
+    {% if artifacts %}
+    <div class="phase-artifacts">
+        {% for artifact in artifacts %}
+        <details class="artifact-section" {% if loop.first %}open{% endif %}>
+            <summary>
+                {{ artifact_header(artifact.name, artifact.path, artifact.authorship, goal.slug, phase) }}
+            </summary>
+            {{ artifact_content(artifact.html) }}
+        </details>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>

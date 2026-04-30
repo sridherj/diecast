@@ -1,0 +1,35 @@
+{# Suggest status fragment — three states: running, completed, error.
+   Running state polls /status every 3s via hx-get + hx-trigger.
+   Completed/error states have no hx-trigger, so polling stops automatically.
+   Expects: job (dict with status), slug (str), phase (str|None), suggestions (list) #}
+
+{% if job.status == "running" %}
+<div class="suggest-status suggest-status-running"
+     hx-get="/api/goals/{{ slug }}/task-suggestions/status{% if phase %}?phase={{ phase }}{% endif %}"
+     hx-trigger="every 3s"
+     hx-swap="outerHTML">
+    <span class="spinner-sm"></span>
+    <span class="suggest-status-text">Generating task suggestions...</span>
+</div>
+
+{% elif job.status == "completed" %}
+<div class="suggest-status suggest-status-completed">
+    {% if suggestions %}
+    <div class="task-suggestions-list">
+        {% for suggestion in suggestions %}
+            {% include "fragments/task_suggestion_card.html" %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="suggest-status-text">Suggestions generated. Refresh to see them.</p>
+    {% endif %}
+</div>
+
+{% elif job.status == "error" %}
+<div class="suggest-status suggest-error">
+    <span class="suggest-error-text">Failed to generate suggestions: {{ job.error }}</span>
+</div>
+
+{% else %}
+{# idle / unknown — no active job, render nothing #}
+{% endif %}

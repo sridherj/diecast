@@ -1,0 +1,31 @@
+{# Single subtask item — used for HTMX responses when a subtask status changes #}
+<div class="subtask-item" id="task-{{ sub.id }}" data-status="{{ sub.status }}">
+    {% if sub.status == 'in_progress' %}
+    <span class="task-checkbox-wrapper in-progress" title="In progress"
+          hx-put="/api/tasks/{{ sub.id }}/status"
+          hx-vals='{"status": "completed"}'
+          hx-target="#task-{{ sub.id }}"
+          hx-swap="outerHTML">
+        <span class="task-progress-icon">&ndash;</span>
+    </span>
+    {% else %}
+    <input type="checkbox"
+           class="task-checkbox"
+           {% if sub.status == 'completed' %}checked{% endif %}
+           hx-put="/api/tasks/{{ sub.id }}/status"
+           hx-vals='{"status": "{{ 'pending' if sub.status == 'completed' else 'completed' }}"}'
+           hx-target="#task-{{ sub.id }}"
+           hx-swap="outerHTML">
+    {% endif %}
+    <div class="subtask-content">
+        <span class="subtask-title {% if sub.status == 'completed' %}completed{% endif %}">{{ sub.title }}</span>
+        {% if sub.status != 'completed' %}
+        {% if sub.outcome %}
+        <span class="subtask-outcome">{{ sub.outcome }}</span>
+        {% endif %}
+        {% if sub.estimated_time %}
+        <span class="badge badge-effort">{{ sub.estimated_time }}</span>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>

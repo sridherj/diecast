@@ -1,0 +1,9 @@
+{# Wrapper template that renders multiple task suggestion cards.
+   Expects: suggestions (list of dicts) #}
+{% if suggestions %}
+<div class="task-suggestions-list">
+    {% for suggestion in suggestions %}
+        {% include "fragments/task_suggestion_card.html" %}
+    {% endfor %}
+</div>
+{% endif %}

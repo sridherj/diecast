@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Runs — Task OS{% endblock %}
+{% block content %}
+<div class="runs-page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Agent Runs</h1>
+            <p class="runs-count">{{ pagination.total if pagination else runs|length }} runs{% if active_count %} &middot; {{ active_count }} active{% endif %}</p>
+        </div>
+    </div>
+
+    {% if summary %}
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="summary-card-label">Cost Today</div>
+            <div class="summary-card-value">${{ summary.cost_today }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Tokens Today</div>
+            <div class="summary-card-value">{{ format_tokens(summary.input_tokens) }} in / {{ format_tokens(summary.output_tokens) }} out</div>
+            <div class="summary-card-detail">{{ format_tokens(summary.cache_read_tokens) }} cached</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Dispatcher</div>
+            <div class="summary-card-value">{{ summary.slots_used }}/{{ summary.max_slots }} slots</div>
+            <div class="summary-card-detail">
+                {{ summary.slots_available }} available{% if summary.pending %}, {{ summary.pending }} queued{% endif %}{% if summary.rate_limited %}, {{ summary.rate_limited }} paused{% endif %}{% if summary.stuck %} &middot; <span class="stuck-badge">{{ summary.stuck }} stuck</span>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="runs-filters">
+        <button class="filter-btn {% if active_filter == 'all' %}active{% endif %}"
+                hx-get="/api/agents/runs?status=all"
+                hx-target="#runs-timeline"
+                hx-swap="innerHTML"
+                data-filter="all">All</button>
+        <button class="filter-btn {% if active_filter == 'running' %}active{% endif %}"
+                hx-get="/api/agents/runs?status=running"
+                hx-target="#runs-timeline"
+                hx-swap="innerHTML"
+                data-filter="running">Running</button>
+        <button class="filter-btn {% if active_filter == 'completed' %}active{% endif %}"
+                hx-get="/api/agents/runs?status=completed"
+                hx-target="#runs-timeline"
+                hx-swap="innerHTML"
+                data-filter="completed">Completed</button>
+        <button class="filter-btn {% if active_filter == 'failed' %}active{% endif %}"
+                hx-get="/api/agents/runs?status=failed"
+                hx-target="#runs-timeline"
+                hx-swap="innerHTML"
+                data-filter="failed">Failed</button>
+    </div>
+
+    <div class="context-bar-legend">
+        <span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-system"></span> System</span>
+        <span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-skills"></span> Skills</span>
+        <span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-conversation"></span> Conversation</span>
+    </div>
+
+    <div id="runs-timeline">
+        {% include "fragments/runs_list.html" %}
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.runs-filters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.runs-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('.run-row-main');
+    if (row) {
+        row.closest('.run-row').classList.toggle('expanded');
+    }
+});
+</script>
+{% endblock %}

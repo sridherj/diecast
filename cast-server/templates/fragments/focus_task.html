@@ -1,0 +1,19 @@
+<div class="focus-task-item" id="focus-task-{{ task.id }}">
+    <input type="checkbox"
+           class="task-checkbox"
+           {% if task.status == 'completed' %}checked{% endif %}
+           hx-put="/api/tasks/{{ task.id }}/status"
+           hx-vals='{"status": "{{ 'pending' if task.status == 'completed' else 'completed' }}"}'
+           hx-target="#focus-task-{{ task.id }}"
+           hx-swap="outerHTML">
+    <div class="focus-task-content">
+        <span class="task-title {% if task.status == 'completed' %}completed{% endif %}">{{ task.title }}</span>
+        {% if task.outcome %}
+        <span class="task-outcome">{{ task.outcome }}</span>
+        {% endif %}
+        <div class="task-meta">
+            {% if task.task_type %}<span class="meta-item">{{ task.task_type }}</span>{% endif %}
+            {% if task.estimated_time %}<span class="meta-item">{{ task.estimated_time }}</span>{% endif %}
+        </div>
+    </div>
+</div>

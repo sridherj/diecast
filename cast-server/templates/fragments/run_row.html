@@ -1,0 +1,240 @@
+{% from "macros/components.html" import copy_path_btn %}
+<div class="run-row {% if run.child_count|default(0) > 0 %}has-children{% endif %}" id="run-{{ run.id }}" data-status="{{ run.status }}"
+     {% if run.status in ('running', 'pending') %}
+     hx-get="/api/agents/runs/{{ run.id }}/row"
+     hx-trigger="every 3s"
+     hx-target="#run-{{ run.id }}"
+     hx-swap="outerHTML"
+     {% endif %}>
+    <div class="run-row-main">
+        <span class="run-status-dot status-{{ run.status }}"></span>
+        {% if run.status == 'stuck' %}
+        <span class="stuck-badge stuck-critical" title="Agent stuck">STUCK</span>
+        {% elif run.needs_attention and run.status == 'running' %}
+        <span class="stuck-badge stuck-warning" title="Agent may be stuck">possibly stuck</span>
+        {% elif run.needs_attention %}
+        <span class="run-attention-dot" title="Action needed"></span>
+        {% endif %}
+        {% if run.child_count|default(0) > 0 %}
+        <span class="run-expand-toggle"
+              hx-get="/api/agents/runs/{{ run.id }}/children"
+              hx-target="#children-{{ run.id }}"
+              hx-swap="innerHTML"
+              onclick="event.stopPropagation(); this.closest('.run-row').classList.toggle('children-visible'); this.classList.toggle('expanded')">▶ </span>
+        {% endif %}
+        <span class="run-agent-name">{{ run.agent_name }}</span>
+        {%- if run.session_name -%}
+        <span class="run-session-name">{{ run.session_name }}</span>
+        {%- endif -%}
+        {%- if run.is_interactive|default(false) -%}
+        <span class="badge badge-interactive">Interactive</span>
+        {%- endif -%}
+        {% if escalated_agents is defined and run.agent_name in escalated_agents %}
+        <span class="badge badge-recurring-failure" title="Recurring failure pattern">⚠ recurring failure</span>
+        {% endif %}
+        {% if run.goal_title %}
+        <a href="/goals/{{ run.goal_slug }}" class="run-goal-link">{{ run.goal_title }}</a>
+        {% elif run.goal_slug %}
+        <a href="/goals/{{ run.goal_slug }}" class="run-goal-link">{{ run.goal_slug }}</a>
+        {% endif %}
+        {% if run.task_title %}
+        <span class="run-task-title">{{ run.task_title }}</span>
+        {% endif %}
+        <span class="run-row-right">
+            <span class="run-status-pill status-{{ run.status }}">
+                {% if run.status == 'running' %}<span class="spinner"></span>{% endif %}
+                {% if run.status == 'pending' %}Queued
+                {% elif run.status == 'scheduled' %}Scheduled{% if run.scheduled_at %} · {{ run.scheduled_at[:16] }}{% endif %}
+                {% elif run.status == 'rate_limited' %}Rate Limited
+                {% else %}{{ run.status }}{% endif %}
+            </span>
+            {# Active vs wall-clock time #}
+            {% if run.active_execution_seconds %}
+            <span class="run-duration" title="Active execution time">
+                {{ run.active_execution_seconds // 60 }}m active
+                {% if run.started_at and run.completed_at %}
+                <span class="run-wall-time">({{ duration(run.started_at, run.completed_at) }} wall)</span>
+                {% endif %}
+            </span>
+            {% else %}
+            <span class="run-duration">{{ duration(run.started_at, run.completed_at) }}</span>
+            {% endif %}
+            {% if run.input_tokens %}
+            <span class="run-tokens">
+                {{ format_tokens(run.input_tokens) }} in{% if run.cache_read_tokens %} + {{ format_tokens(run.cache_read_tokens) }} cached{% endif %} &#8595; {{ format_tokens(run.output_tokens) }}&#8593;
+                {# Cache hit rate #}
+                {% if run.cache_read_tokens and run.input_tokens %}
+                {% set total_input = run.input_tokens + run.cache_read_tokens %}
+                {% set cache_pct = (run.cache_read_tokens / total_input * 100)|int %}
+                <span class="run-cache-rate" title="Cache hit rate">({{ cache_pct }}% cached)</span>
+                {% endif %}
+            </span>
+            {% endif %}
+            {% if run.cost_usd %}
+            <span class="run-cost">{{ format_cost(run.cost_usd) }}</span>
+            {% endif %}
+            <span class="run-time">{{ relative_time(run.started_at) }}</span>
+        </span>
+    </div>
+    {# Second row: context bar — always visible when data exists #}
+    {% if run.context_usage and run.context_usage.total %}
+    {% set cu = run.context_usage %}
+    {% set limit = cu.limit|default(200000) %}
+    {% set total = cu.total %}
+    {% set has_breakdown = cu.system or cu.memory or cu.agents %}
+    {% set sys_pct = (cu.system|default(0) / limit * 100)|round(1) %}
+    {% set mem_pct = (cu.memory|default(0) / limit * 100)|round(1) %}
+    {% set ag_pct  = (cu.agents|default(0) / limit * 100)|round(1) %}
+    {% set msg_pct = (cu.messages|default(0) / limit * 100)|round(1) %}
+    {% set ctx_pct = (total / limit * 100)|round(1) %}
+    <div class="run-row-context"
+         title="{% if has_breakdown %}System: {{ "{:,}".format(cu.system|default(0)) }} · Memory: {{ "{:,}".format(cu.memory|default(0)) }} · Agents: {{ "{:,}".format(cu.agents|default(0)) }} · Messages: {{ "{:,}".format(cu.messages|default(0)) }}{% else %}Context: {{ "{:,}".format(total) }}{% endif %} / {{ "{:,}".format(limit) }}">
+        <div class="context-bar">
+            {% if has_breakdown %}
+            <div class="context-bar-segment context-bar-system"   style="width: {{ sys_pct }}%"></div>
+            <div class="context-bar-segment context-bar-memory"   style="width: {{ mem_pct }}%"></div>
+            <div class="context-bar-segment context-bar-agents"   style="width: {{ ag_pct }}%"></div>
+            <div class="context-bar-segment context-bar-messages" style="width: {{ msg_pct }}%"></div>
+            {% else %}
+            <div class="context-bar-segment context-bar-messages" style="width: {{ ctx_pct }}%"></div>
+            {% endif %}
+        </div>
+        <div class="context-bar-legend">
+            {% if has_breakdown %}
+            {% if cu.system %}<span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-system"></span>System {{ "{:,}".format(cu.system) }}</span>{% endif %}
+            {% if cu.memory %}<span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-memory"></span>Memory {{ "{:,}".format(cu.memory) }}</span>{% endif %}
+            {% if cu.agents %}<span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-agents"></span>Agents {{ "{:,}".format(cu.agents) }}</span>{% endif %}
+            {% if cu.messages %}<span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-messages"></span>Messages {{ "{:,}".format(cu.messages) }}</span>{% endif %}
+            {% else %}
+            <span class="context-bar-legend-item"><span class="context-bar-legend-dot context-bar-messages"></span>Context {{ "{:,}".format(total) }}</span>
+            {% endif %}
+            <span class="context-bar-legend-total">{{ "{:,}".format(total) }} / {{ "{:,}".format(limit) }}</span>
+        </div>
+    </div>
+    {% endif %}
+    {# Children container for parent-child nesting #}
+    {% if run.child_count|default(0) > 0 %}
+    <div class="run-children-container" id="children-{{ run.id }}"></div>
+    {% endif %}
+    <div class="run-row-details">
+        {% if run.output and run.output.summary %}
+        <div class="run-detail-section">
+            <strong>Summary</strong>
+            <p>{{ run.output.summary }}</p>
+        </div>
+        {% endif %}
+        {% if run.artifacts %}
+        <div class="run-detail-section">
+            <strong>Artifacts</strong>
+            <ul class="run-artifacts-list">
+                {% for artifact in run.artifacts %}
+                <li>
+                    {% if artifact is mapping %}
+                    <code>{{ artifact.path }}</code>
+                    {% if artifact.description %} — {{ artifact.description }}{% endif %}
+                    {% else %}
+                    <code>{{ artifact }}</code>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if run.cost_usd %}
+        <div class="run-detail-section">
+            <strong>Usage</strong>
+            <p>{{ "{:,}".format(run.input_tokens|default(0)) }} input{% if run.cache_write_tokens %} + {{ "{:,}".format(run.cache_write_tokens) }} cache write{% endif %}{% if run.cache_read_tokens %} + {{ "{:,}".format(run.cache_read_tokens) }} cache read{% endif %} &#8594; {{ "{:,}".format(run.output_tokens|default(0)) }} output &middot; {{ format_cost(run.cost_usd) }}
+            {% if run.cache_read_tokens and run.input_tokens %}
+            {% set total_input = run.input_tokens + run.cache_read_tokens %}
+            {% set cache_pct = (run.cache_read_tokens / total_input * 100)|int %}
+            &middot; {{ cache_pct }}% cache hit
+            {% endif %}
+            </p>
+        </div>
+        {% endif %}
+        {% if run.error_message %}
+        <div class="run-detail-section run-error">
+            <strong>Error</strong>
+            <p>{{ run.error_message }}</p>
+        </div>
+        {% endif %}
+        {% if run.output and run.output.next_steps %}
+        <div class="run-detail-section">
+            <strong>Next Steps</strong>
+            <ul>
+                {% for step in run.output.next_steps %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if run.needs_attention and run.output and run.output.human_action_items %}
+        <div class="run-detail-section run-attention-section">
+            <strong>Action Needed</strong>
+            <ul>
+                {% for item in run.output.human_action_items %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% if run.resume_command or run.session_id %}
+            {{ copy_path_btn(run.resume_command or ('claude --resume ' + run.session_id), label='Resume session') }}
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if run.resume_command or run.session_id %}
+        <div class="run-detail-section">
+            {{ copy_path_btn(run.resume_command or ('claude --resume ' + run.session_id), label='Resume session') }}
+        </div>
+        {% endif %}
+        {% if run.directories %}
+        <div class="run-detail-section">
+            <strong>Directories</strong>
+            <ul class="run-dirs-list">
+                {% for key, val in run.directories.items() if val %}
+                <li><code>{{ key }}</code>: {{ val }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="run-detail-actions">
+            {% if run.status in ('running', 'pending') %}
+            <button class="check-status-btn"
+                    hx-get="/api/agents/runs/{{ run.id }}/row"
+                    hx-target="#run-{{ run.id }}"
+                    hx-swap="outerHTML"
+                    onclick="event.stopPropagation()">
+                Check Status
+            </button>
+            {% endif %}
+            {% if run.status == 'failed' %}
+            <button class="recheck-btn"
+                    hx-post="/api/agents/jobs/{{ run.id }}/recheck"
+                    hx-target="#run-{{ run.id }}"
+                    hx-swap="outerHTML"
+                    onclick="event.stopPropagation()">
+                Recheck
+            </button>
+            {% endif %}
+            {% if run.status in ('running', 'pending', 'scheduled') %}
+            <button class="cancel-btn"
+                    hx-post="/api/agents/runs/{{ run.id }}/cancel"
+                    hx-target="#run-{{ run.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Cancel this run?"
+                    onclick="event.stopPropagation()">
+                Cancel
+            </button>
+            {% endif %}
+            {% if run.status in ('completed', 'failed') %}
+            <button class="delete-btn"
+                    hx-delete="/api/agents/runs/{{ run.id }}"
+                    hx-target="#run-{{ run.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Delete this run permanently?"
+                    onclick="event.stopPropagation()">
+                Delete
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>

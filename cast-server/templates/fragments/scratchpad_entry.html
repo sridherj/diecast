@@ -1,0 +1,14 @@
+{# Renders scratchpad entry/entries. Supports: single entry (POST) or entries list (GET) #}
+{% if entries is defined %}
+{% for entry in entries %}
+<div class="scratchpad-entry {% if entry.content.startswith('@claude:') %}claude-entry{% endif %}">
+    <span class="entry-bullet">—</span>
+    <span class="entry-content">{{ entry.content }}</span>
+</div>
+{% endfor %}
+{% elif entry is defined %}
+<div class="scratchpad-entry {% if entry.content.startswith('@claude:') %}claude-entry{% endif %}">
+    <span class="entry-bullet">—</span>
+    <span class="entry-content">{{ entry.content }}</span>
+</div>
+{% endif %}

@@ -1,0 +1,22 @@
+{# Phase breadcrumb: [Requirements ✓] → [Exploration ●] → [Plan ○] → [Execution ○]
+   Expects: goal (dict with slug, phase), phases (list), phase_states (dict: phase → completed|current|future) #}
+<div class="phase-breadcrumb">
+    {% for p in phases %}
+    <button class="phase-step {{ phase_states[p] }}"
+            hx-put="/api/goals/{{ goal.slug }}/phase"
+            hx-vals='{"phase": "{{ p }}"}'
+            hx-swap="none">
+        {% if phase_states[p] == 'completed' %}
+        <span class="phase-step-icon">&#10003;</span>
+        {% elif phase_states[p] == 'current' %}
+        <span class="phase-step-icon">&#9679;</span>
+        {% else %}
+        <span class="phase-step-icon">&#9675;</span>
+        {% endif %}
+        {{ p|capitalize }}
+    </button>
+    {% if not loop.last %}
+    <span class="phase-arrow">&rarr;</span>
+    {% endif %}
+    {% endfor %}
+</div>

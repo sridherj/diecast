@@ -1,0 +1,16 @@
+{# Renders the filtered goal list for a dashboard tab. Expects: goals (list), active_tab (str) #}
+<div class="goal-list" id="dashboard-goals">
+    {% if goals %}
+        {% for goal in goals %}
+            {% include "fragments/goal_card.html" %}
+        {% endfor %}
+    {% else %}
+        {% if active_tab == "active" %}
+        <p class="empty-state">No active goals. Create your first goal to get started.</p>
+        {% elif active_tab == "inactive" %}
+        <p class="empty-state">No inactive goals.</p>
+        {% elif active_tab == "completed" %}
+        <p class="empty-state">No completed goals yet.</p>
+        {% endif %}
+    {% endif %}
+</div>

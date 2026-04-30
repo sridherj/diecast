@@ -1,0 +1,33 @@
+{% if runs %}
+{% for run in runs %}
+{% include "fragments/run_row.html" %}
+{% endfor %}
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.page > 1 %}
+    <button class="pagination-btn"
+            hx-get="/api/agents/runs?page={{ pagination.page - 1 }}{% if active_filter and active_filter != 'all' %}&status={{ active_filter }}{% endif %}"
+            hx-target="#runs-timeline"
+            hx-swap="innerHTML">&larr; Prev</button>
+    {% endif %}
+    {% for p in range(1, pagination.pages + 1) %}
+    <button class="pagination-btn {% if p == pagination.page %}active{% endif %}"
+            hx-get="/api/agents/runs?page={{ p }}{% if active_filter and active_filter != 'all' %}&status={{ active_filter }}{% endif %}"
+            hx-target="#runs-timeline"
+            hx-swap="innerHTML">{{ p }}</button>
+    {% endfor %}
+    {% if pagination.page < pagination.pages %}
+    <button class="pagination-btn"
+            hx-get="/api/agents/runs?page={{ pagination.page + 1 }}{% if active_filter and active_filter != 'all' %}&status={{ active_filter }}{% endif %}"
+            hx-target="#runs-timeline"
+            hx-swap="innerHTML">Next &rarr;</button>
+    {% endif %}
+    <span class="pagination-info">{{ pagination.total }} runs</span>
+</div>
+{% endif %}
+{% else %}
+<div class="empty-state-page">
+    <h2>No agent runs yet</h2>
+    <p>Runs will appear here when you trigger agents from task pages.</p>
+</div>
+{% endif %}

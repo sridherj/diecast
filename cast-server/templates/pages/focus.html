@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Focus — Task OS{% endblock %}
+
+{% block content %}
+<div class="focus-page">
+    <h2 class="page-title">Focus Mode</h2>
+    <p class="page-subtitle">In-focus goals and their active tasks</p>
+
+    {% if focus_data %}
+    <div class="focus-goals">
+        {% for item in focus_data %}
+        <div class="focus-goal-card">
+            <div class="focus-goal-header">
+                <span class="focus-star active">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
+                <a href="/goals/{{ item.goal.slug }}" class="focus-goal-title">{{ item.goal.title }}</a>
+                {% set goal = item.goal %}
+                {% include "fragments/status_badge.html" %}
+                {% if item.goal.status == "accepted" and item.goal.phase %}
+                <span class="phase-badge" data-phase="{{ item.goal.phase }}">{{ item.goal.phase }}</span>
+                {% endif %}
+            </div>
+
+            {% if item.tasks %}
+            <div class="focus-task-list">
+                {# Group tasks by phase #}
+                {% for phase_name in phases %}
+                {% set phase_tasks = item.tasks_by_phase[phase_name] %}
+                {% if phase_tasks %}
+                <div class="focus-phase-group">
+                    <h4 class="focus-phase-header">{{ phase_name|capitalize }}</h4>
+                    {% for task in phase_tasks %}
+                    {% include "fragments/focus_task.html" %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="focus-no-tasks">No active tasks — status: {{ item.goal.status }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state-page">
+        <p>No goals are in focus. Star a goal from the dashboard to see it here.</p>
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "macros/components.html" import artifact_toolbar %}
+{% block title %}Scratchpad — Task OS{% endblock %}
+
+{% block content %}
+<div class="scratchpad-page">
+    <div class="page-header">
+        <h2 class="page-title">Scratchpad</h2>
+        {{ artifact_toolbar(scratchpad_path) }}
+        <form class="scratchpad-form"
+              hx-post="/api/scratchpad"
+              hx-target="#scratchpad-entries"
+              hx-swap="afterbegin"
+              hx-on::after-request="this.reset()">
+            <textarea class="input-textarea" name="content"
+                      placeholder="What's on your mind..." rows="4" required></textarea>
+            <div class="scratchpad-form-actions">
+                <button type="submit" class="btn btn-primary btn-sm">Add Entry</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="scratchpad-timeline" id="scratchpad-entries">
+        {% for date, entries in grouped_entries.items() %}
+        <div class="date-group">
+            <div class="date-header">
+                <span class="date-label">{{ date }}</span>
+                <span class="entry-count">{{ entries|length }} entr{{ "y" if entries|length == 1 else "ies" }}</span>
+            </div>
+            <div class="date-entries">
+                {% for entry in entries %}
+                <div class="scratchpad-entry {% if entry.content.startswith('@claude:') %}claude-entry{% endif %}">
+                    <span class="entry-bullet">—</span>
+                    <span class="entry-content">{{ entry.content }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not grouped_entries %}
+        <p class="empty-state">No scratchpad entries yet. Start dumping thoughts here.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

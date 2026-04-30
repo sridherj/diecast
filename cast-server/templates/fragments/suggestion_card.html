@@ -1,0 +1,20 @@
+<div class="suggestion-card" id="suggestion-{{ suggestion.id }}">
+    <p class="suggestion-title">{{ suggestion.title }}</p>
+    {% if suggestion.rationale %}
+    <p class="suggestion-rationale">{{ suggestion.rationale }}</p>
+    {% endif %}
+    <div class="suggestion-actions">
+        <button class="btn btn-sm btn-primary"
+                hx-post="/api/goals/suggestions/{{ suggestion.id }}/approve"
+                hx-target="#suggestion-{{ suggestion.id }}"
+                hx-swap="outerHTML">
+            Approve
+        </button>
+        <button class="btn btn-sm btn-ghost"
+                hx-post="/api/goals/suggestions/{{ suggestion.id }}/decline"
+                hx-target="#suggestion-{{ suggestion.id }}"
+                hx-swap="delete">
+            Decline
+        </button>
+    </div>
+</div>

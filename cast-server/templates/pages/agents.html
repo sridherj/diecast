@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Agents — Task OS{% endblock %}
+{% block content %}
+<div class="agents-page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Agents</h1>
+            <p class="agents-count">{{ agents|length }} agents registered</p>
+        </div>
+    </div>
+
+    <div class="agents-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        {% for type in agent_types %}
+        <button class="filter-btn" data-filter="{{ type }}">{{ type }}</button>
+        {% endfor %}
+    </div>
+
+    <div class="agents-grid">
+        {% for agent in agents %}
+        <div class="agents-grid-card" data-type="{{ agent.type or '' }}" data-tags="{{ agent.tags|join(',') if agent.tags else '' }}" id="agent-{{ agent.name }}">
+            <div class="agents-grid-card-header">
+                <h3 class="agents-grid-card-name">{{ agent.name }}</h3>
+                {% if agent.type %}
+                <span class="agent-type-badge type-{{ agent.type|replace('-', '_')|replace(' ', '_') }}">{{ agent.type }}</span>
+                {% endif %}
+            </div>
+            <p class="agents-grid-card-desc">{{ agent.description }}</p>
+            {% if agent.tags %}
+            <div class="agents-grid-card-tags">
+                {% for tag in agent.tags %}
+                <span class="tag-pill">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if agent.triggers %}
+            <p class="agents-grid-card-triggers">
+                {% for trigger in agent.triggers %}
+                <em>"{{ trigger }}"</em>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+            {% if agent.input or agent.output or agent.last_tested %}
+            <details class="agents-grid-card-detail">
+                <summary>Details</summary>
+                <div class="agents-grid-card-detail-content">
+                    {% if agent.input %}<p><strong>Input:</strong> {{ agent.input }}</p>{% endif %}
+                    {% if agent.output %}<p><strong>Output:</strong> {{ agent.output }}</p>{% endif %}
+                    {% if agent.last_tested %}<p><strong>Last Tested:</strong> {{ agent.last_tested }}</p>{% endif %}
+                </div>
+            </details>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.agents-grid-card').forEach(card => {
+            if (filter === 'all' || card.dataset.type === filter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update count
+        const visible = document.querySelectorAll('.agents-grid-card:not([style*="display: none"])').length;
+        const total = document.querySelectorAll('.agents-grid-card').length;
+        const countEl = document.querySelector('.agents-count');
+        if (filter === 'all') {
+            countEl.textContent = total + ' agents registered';
+        } else {
+            countEl.textContent = visible + ' of ' + total + ' agents';
+        }
+    });
+});
+</script>
+{% endblock %}

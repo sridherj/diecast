@@ -1,0 +1,44 @@
+{# Task list fragment.
+   When filter_phase is not set (Overview tab): renders ALL tasks grouped by phase headers.
+   When filter_phase is set (phase tab): renders only that phase's tasks, no phase header.
+   Expects: tasks (list), goal_slug (str), phases (list, optional), tasks_by_phase (dict, optional),
+            filter_phase (str or None), show_phase_badge (bool, optional) #}
+
+{% set empty_states = {
+    "requirements": "Start by writing down what you want to build",
+    "exploration": "Run the explore agent to research this space",
+    "plan": "Based on your research, create a phased plan",
+    "execution": "Break your plan into concrete tasks"
+} %}
+
+<div id="task-list-{{ goal_slug }}">
+{% if not filter_phase %}
+    {# Overview: all tasks grouped by phase #}
+    {% for phase_name in ["requirements", "exploration", "plan", "execution"] %}
+    {% set phase_tasks = tasks_by_phase[phase_name] if tasks_by_phase else tasks|selectattr("phase", "equalto", phase_name)|list %}
+    <div class="phase-group">
+        <h3 class="phase-group-header">
+            {{ phase_name|capitalize }}
+            <span class="task-count">({{ phase_tasks|length }})</span>
+        </h3>
+        {% if phase_tasks %}
+            {% for task in phase_tasks %}
+                {% include "fragments/task_item.html" %}
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">{{ empty_states[phase_name] }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    {# Phase tab: only this phase's tasks #}
+    {% for task in tasks %}
+        {% with show_phase_badge=false %}
+        {% include "fragments/task_item.html" %}
+        {% endwith %}
+    {% endfor %}
+    {% if not tasks %}
+        <p class="empty-state">{{ empty_states.get(filter_phase, "No tasks yet") }}</p>
+    {% endif %}
+{% endif %}
+</div>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}News — Task OS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>News Digest</h2>
+    <div class="page-actions">
+        <button class="btn btn-primary"
+                hx-post="/api/news/generate"
+                hx-target="#digest-status"
+                hx-swap="innerHTML">
+            Generate Digest
+        </button>
+    </div>
+</div>
+
+<div id="digest-status"></div>
+
+{% if has_digests and digest_html %}
+    <!-- Date Navigation -->
+    <div class="news-date-nav">
+        {% if prev_date %}
+            <a href="/news?date={{ prev_date }}" class="nav-arrow">&larr; {{ prev_date }}</a>
+        {% else %}
+            <span class="nav-arrow disabled"></span>
+        {% endif %}
+
+        <span class="current-date">{{ current_date }}</span>
+
+        {% if next_date %}
+            <a href="/news?date={{ next_date }}" class="nav-arrow">{{ next_date }} &rarr;</a>
+        {% else %}
+            <span class="nav-arrow disabled"></span>
+        {% endif %}
+    </div>
+
+    <!-- Digest Content (iframe for CSS isolation) -->
+    <div class="digest-container">
+        <iframe srcdoc="{{ digest_html | e }}" class="digest-iframe"
+                onload="this.style.height = this.contentDocument.documentElement.scrollHeight + 'px'"></iframe>
+    </div>
+
+{% elif has_digests and not digest_html %}
+    <div class="empty-state">
+        <p>No digest for {{ current_date }}.</p>
+    </div>
+
+{% else %}
+    <div class="empty-state">
+        <p>No digests yet. Click "Generate Digest" to create your first one.</p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,57 @@
+<div class="agent-panel" id="agent-panel-{{ goal_slug }}">
+    <h3 class="panel-title">Agents</h3>
+
+    {% if agents %}
+    <div class="agent-list">
+        {% for agent in agents %}
+        <div class="agent-card">
+            <div class="agent-info">
+                <span class="agent-name">{{ agent.name }}</span>
+                {% if agent.description %}
+                <span class="agent-desc">{{ agent.description }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No agent recommendations for this goal</p>
+    {% endif %}
+
+    {# Running agent runs #}
+    {% set running_runs = runs|selectattr("status", "in", ["running", "pending"])|list if runs else [] %}
+    {% if running_runs %}
+    <div class="agent-jobs">
+        <h4>Running</h4>
+        {% for run in running_runs %}
+        <div class="job-status" id="run-{{ run.id }}"
+             hx-get="/api/agents/goals/{{ goal_slug }}/recommendations"
+             hx-trigger="every 5s"
+             hx-target="#agent-panel-{{ goal_slug }}"
+             hx-swap="outerHTML">
+            <span class="job-agent">{{ run.agent_name }}</span>
+            <span class="job-status-badge status-{{ run.status }}">
+                <span class="spinner"></span> {{ run.status }}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Recent completed/failed runs #}
+    {% set finished_runs = runs|selectattr("status", "in", ["completed", "failed"])|list if runs else [] %}
+    {% if finished_runs %}
+    <div class="agent-jobs">
+        <h4>Recent Runs</h4>
+        {% for run in finished_runs[:5] %}
+        <div class="job-status">
+            <span class="job-agent">{{ run.agent_name }}</span>
+            <span class="job-status-badge status-{{ run.status }}">{{ run.status }}</span>
+            {% if run.error_message %}
+            <span class="job-error">{{ run.error_message[:100] }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>

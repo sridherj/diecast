@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% from "macros/components.html" import artifact_toolbar, file_path_display %}
+{% block title %}{{ goal.title if goal else "Not Found" }} — Task OS{% endblock %}
+
+{% block content %}
+{% if not goal %}
+<div class="empty-state-page">
+    <h2>Goal not found</h2>
+    <a href="/dashboard" class="btn btn-ghost">Back to Dashboard</a>
+</div>
+{% else %}
+<div class="goal-detail">
+    {# Header #}
+    <div class="goal-detail-header">
+        <div class="goal-detail-nav">
+            <a href="/dashboard" class="btn btn-ghost btn-sm">&larr; Dashboard</a>
+        </div>
+        <div class="goal-detail-title-row">
+            <h1 class="goal-detail-title">{{ goal.title }}</h1>
+            {% if goal.in_focus %}
+            <button class="focus-star active" title="Remove from focus"
+                    hx-put="/api/goals/{{ goal.slug }}/focus"
+                    hx-vals='{"in_focus": "false"}'>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            {% else %}
+            <button class="focus-star" title="Add to focus"
+                    hx-put="/api/goals/{{ goal.slug }}/focus"
+                    hx-vals='{"in_focus": "true"}'>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            {% endif %}
+            {% include "fragments/status_badge.html" %}
+        </div>
+        {% if goal.tags_list %}
+        <div class="goal-detail-tags">
+            {% for tag in goal.tags_list %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {# Directory config #}
+        {% if goal.gstack_dir or goal.external_project_dir %}
+        <div class="goal-dir-config">
+            {% if goal.external_project_dir %}
+            <span class="dir-config-item" title="Execution artifacts (code, specs, detailed plans)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <code>{{ goal.external_project_dir }}</code>
+            </span>
+            {% endif %}
+            {% if goal.gstack_dir %}
+            <span class="dir-config-item dir-config-ref" title="GStack reference (not authoritative)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <code>{{ goal.gstack_dir }}</code>
+                <span class="dir-config-label">ref</span>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {# Status transition buttons #}
+        <div class="status-actions" id="goal-detail-actions-{{ goal.slug }}">
+            {% for next_status in next_statuses %}
+            {% if goal.status == "idea" and next_status == "declined" %}
+            <button class="btn btn-danger btn-sm"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "{{ next_status }}"}'>
+                &times; Decline
+            </button>
+            {% elif goal.status == "idea" and next_status == "accepted" %}
+            <button class="btn btn-primary btn-sm"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "{{ next_status }}"}'>
+                &check; Accept
+            </button>
+            {% else %}
+            <button class="btn btn-primary btn-sm"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "{{ next_status }}"}'>
+                &rarr; {{ next_status|capitalize }}
+            </button>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    {# Status guidance #}
+    {% if goal.status == "idea" %}
+    <div class="status-guidance">
+        <div class="guidance-callout">
+            <div class="guidance-body">
+                <div class="guidance-title">Triage this idea</div>
+                <p class="guidance-desc">Accept it to commit to pursuing, or decline to archive it.</p>
+            </div>
+        </div>
+    </div>
+    {% elif goal.status == "completed" %}
+    <div class="status-guidance">
+        <div class="guidance-callout guidance-ready">
+            <div class="guidance-body">
+                <div class="guidance-title">Goal completed</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 5 Fixed Tabs: Overview + 4 phase tabs #}
+    <div class="tab-container">
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">
+                Overview
+            </button>
+            {% for phase in phases %}
+            <button class="tab-btn" data-tab="{{ phase }}" onclick="switchTab('{{ phase }}')"
+                    {% if goal.status == "accepted" %}title="Click tab to view, or use phase controls to advance"{% endif %}>
+                {% if goal.status == "accepted" and phase_states %}
+                    {% if phase_states[phase] == 'completed' %}
+                    <span class="phase-indicator completed">&#10003;</span>
+                    {% elif phase_states[phase] == 'current' %}
+                    <span class="phase-indicator current">&#9679;</span>
+                    {% else %}
+                    <span class="phase-indicator future">&#9675;</span>
+                    {% endif %}
+                {% endif %}
+                {{ phase|capitalize }}
+                {% if tab_counts.get(phase, 0) > 0 %}
+                <span class="tab-count">{{ tab_completed.get(phase, 0) }}/{{ tab_counts[phase] }}</span>
+                {% endif %}
+            </button>
+            {% endfor %}
+        </div>
+
+        {# Overview tab — all tasks grouped by phase #}
+        <div class="tab-panel active" id="tab-overview">
+            {# Pending task suggestions grouped by phase #}
+            {% if suggestions_by_phase %}
+            {% for phase_name, phase_suggestions in suggestions_by_phase.items() %}
+            <div class="task-suggestions-section" id="task-suggestions-overview-{{ phase_name }}">
+                <h3>Suggested Tasks — {{ phase_name|capitalize }}</h3>
+                {% for suggestion in phase_suggestions %}
+                    {% include "fragments/task_suggestion_card.html" %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div id="task-list-{{ goal.slug }}">
+                {% set goal_slug = goal.slug %}
+                {% set filter_phase = None %}
+                {% set show_phase_badge = true %}
+                {% include "fragments/task_list.html" with context %}
+            </div>
+
+            {# Add task form #}
+            <div class="add-task-form">
+                <h3 class="task-section-header">Add Task</h3>
+                <form hx-post="/api/goals/{{ goal.slug }}/tasks"
+                      hx-target="#task-list-{{ goal.slug }}"
+                      hx-swap="outerHTML"
+                      hx-on::after-request="if(event.detail.successful) this.reset()">
+                    <div class="form-row">
+                        <input type="text" name="title" placeholder="Task title" required class="input-field input-wide">
+                    </div>
+                    <div class="form-row">
+                        <select name="phase" class="input-field">
+                            {% for p in phases %}
+                            <option value="{{ p }}" {% if p == goal.phase %}selected{% endif %}>{{ p|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="tip" placeholder="Tip (optional)" class="input-field">
+                    </div>
+                    <div class="form-row">
+                        <input type="text" name="outcome" placeholder="Outcome (optional)" class="input-field">
+                        <input type="text" name="action" placeholder="Action (optional)" class="input-field">
+                    </div>
+                    <div class="form-row">
+                        <select name="task_type" class="input-field">
+                            <option value="">Type</option>
+                            <option value="Decision">Decision</option>
+                            <option value="Research">Research</option>
+                            <option value="Execution">Execution</option>
+                            <option value="Exploration">Exploration</option>
+                            <option value="Coding">Coding</option>
+                            <option value="Learning">Learning</option>
+                        </select>
+                        <input type="text" name="estimated_time" placeholder="Est. time" class="input-field input-sm">
+                        <select name="energy" class="input-field">
+                            <option value="">Energy</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <select name="assigned_to" class="input-field">
+                            <option value="">Assigned to</option>
+                            <option value="SJ">SJ</option>
+                            <option value="Claude">Claude</option>
+                            <option value="SJ + Claude">SJ + Claude</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <select name="recommended_agent" class="input-field">
+                            <option value="">Agent (optional)</option>
+                            {% for agent in agents %}
+                            <option value="{{ agent.name }}">{{ agent.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">+ Add Task</button>
+                </form>
+            </div>
+        </div>
+
+        {# Phase tabs — loaded lazily via HTMX on first click #}
+        {% for phase in phases %}
+        <div class="tab-panel" id="tab-{{ phase }}">
+            <div class="phase-tab-placeholder"
+                 hx-get="/api/goals/{{ goal.slug }}/tab/{{ phase }}"
+                 hx-trigger="intersect once"
+                 hx-swap="outerHTML">
+                <p class="loading-text">Loading...</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Agent Panel — loaded via HTMX #}
+    <div class="agent-panel-container" style="margin-top: 24px;"
+         hx-get="/api/agents/goals/{{ goal.slug }}/recommendations"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        Loading agents...
+    </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+    history.replaceState(null, '', '#' + tabId);
+}
+
+(function() {
+    var hash = window.location.hash.replace('#', '');
+    if (hash && document.getElementById('tab-' + hash)) {
+        switchTab(hash);
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

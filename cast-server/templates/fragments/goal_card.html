@@ -1,0 +1,90 @@
+{# Renders a goal card. Expects: goal (dict with slug, title, status, phase, in_focus, tags_list) #}
+<div class="goal-card" data-status="{{ goal.status }}" id="goal-card-{{ goal.slug }}">
+    <div class="goal-card-header">
+        <div class="goal-card-title-row">
+            <a href="/goals/{{ goal.slug }}" class="goal-card-title">{{ goal.title }}</a>
+            {% if goal.in_focus %}
+            <button class="focus-star active" title="Remove from focus"
+                    hx-put="/api/goals/{{ goal.slug }}/focus"
+                    hx-vals='{"in_focus": "false"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            {% else %}
+            <button class="focus-star" title="Add to focus"
+                    hx-put="/api/goals/{{ goal.slug }}/focus"
+                    hx-vals='{"in_focus": "true"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            {% endif %}
+        </div>
+        {% include "fragments/status_badge.html" with context %}
+        {% if goal.status in ("accepted", "inactive") and goal.phase %}
+        <span class="phase-badge" data-phase="{{ goal.phase }}">{{ goal.phase }}</span>
+        {% endif %}
+    </div>
+    {% if goal.tags_list %}
+    <div class="goal-card-tags">
+        {% for tag in goal.tags_list %}
+        <span class="tag">{{ tag }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="goal-card-hints">
+        {% if goal.status == "idea" %}
+        <span class="hint">Needs triage — approve or decline</span>
+        <div class="goal-card-actions">
+            <button class="btn btn-sm btn-primary"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "accepted"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">Approve</button>
+            <button class="btn btn-sm btn-danger"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "declined"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">Decline</button>
+        </div>
+        {% elif goal.status == "accepted" %}
+        <span class="hint">Phase: {{ goal.phase|capitalize if goal.phase else "Not set" }}</span>
+        <div class="goal-card-status-actions">
+            <button class="btn-status-action" title="Pause this goal"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "inactive"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                Pause
+            </button>
+            <button class="btn-status-action" title="Mark as complete"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "completed"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Mark this goal as completed?">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Complete
+            </button>
+        </div>
+        {% elif goal.status == "inactive" %}
+        <span class="hint">Paused</span>
+        <div class="goal-card-status-actions">
+            <button class="btn-status-action" title="Reactivate this goal"
+                    hx-put="/api/goals/{{ goal.slug }}/status"
+                    hx-vals='{"status": "accepted"}'
+                    hx-target="#goal-card-{{ goal.slug }}"
+                    hx-swap="outerHTML">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                Reactivate
+            </button>
+        </div>
+        {% elif goal.status == "completed" %}
+        <span class="hint">Done</span>
+        {% elif goal.status == "declined" %}
+        <span class="hint">Declined</span>
+        {% endif %}
+    </div>
+</div>

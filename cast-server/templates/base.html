@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Task OS{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo">Task OS</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/dashboard" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a></li>
+            <li><a href="/scratchpad" class="nav-link {% if active_page == 'scratchpad' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Scratchpad
+            </a></li>
+            <li><a href="/focus" class="nav-link {% if active_page == 'focus' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                Focus
+            </a></li>
+            <li><a href="/runs" class="nav-link {% if active_page == 'runs' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/></svg>
+                Runs
+            </a></li>
+            <li><a href="/agents" class="nav-link {% if active_page == 'agents' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>
+                Agents
+            </a></li>
+            <li><a href="/news" class="nav-link {% if active_page == 'news' %}active{% endif %}">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                    <line x1="10" y1="6" x2="18" y2="6"/><line x1="10" y1="10" x2="18" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/>
+                </svg>
+                News
+            </a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="artifact-sidebar-container"></div>
+    <div id="toast-container"></div>
+
+    <script>
+    function copyPath(path) {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(path).then(function() {
+                showToast("Copied: " + path, "success");
+            }).catch(function() {
+                copyPathFallback(path);
+            });
+        } else {
+            copyPathFallback(path);
+        }
+    }
+
+    function copyPathFallback(path) {
+        var ta = document.createElement("textarea");
+        ta.value = path;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand("copy");
+            showToast("Copied: " + path, "success");
+        } catch(e) {
+            showToast("Copy failed — select manually: " + path, "error");
+        }
+        document.body.removeChild(ta);
+    }
+
+    function showToast(message, type) {
+        type = type || "info";
+        var toast = document.createElement("div");
+        toast.className = "toast " + type;
+        toast.textContent = message;
+        document.getElementById("toast-container").appendChild(toast);
+        setTimeout(function() {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(8px)";
+            setTimeout(function() { toast.remove(); }, 200);
+        }, 3000);
+    }
+
+    document.body.addEventListener("showToast", function(event) {
+        var detail = event.detail;
+        showToast(detail.message || "Done", detail.type || "info");
+    });
+
+    document.body.addEventListener("htmx:responseError", function(event) {
+        var xhr = event.detail.xhr;
+        var message = "Something went wrong";
+        try {
+            var data = JSON.parse(xhr.responseText);
+            message = data.detail || message;
+        } catch(e) {}
+        showToast(message, "error");
+    });
+
+    /* Completed tasks: click to expand/collapse details */
+    document.addEventListener('click', function(e) {
+        var content = e.target.closest('.task-item[data-status="completed"] .task-content');
+        if (content) {
+            content.closest('.task-item').classList.toggle('expanded');
+        }
+    });
+
+    function openArtifactSidebar() {
+        document.body.classList.add('sidebar-active');
+    }
+
+    function closeArtifactSidebar() {
+        document.body.classList.remove('sidebar-active');
+        document.getElementById('artifact-sidebar-container').innerHTML = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.body.classList.contains('sidebar-active')) {
+            closeArtifactSidebar();
+        }
+    });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
+    <script>
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        var textarea = event.detail.target.querySelector('.artifact-editor textarea');
+        if (textarea && !textarea._easymde) {
+            textarea._easymde = new EasyMDE({
+                element: textarea,
+                spellChecker: false,
+                status: false,
+                toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', '|',
+                          'link', 'image', '|', 'preview', 'side-by-side', '|', 'guide'],
+                sideBySideFullscreen: false,
+            });
+        }
+    });
+    </script>
+</body>
+</html>

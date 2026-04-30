@@ -1,0 +1,17 @@
+<div class="artifact-editor">
+    <form hx-put="/api/artifacts/save"
+          hx-target="closest .phase-tab-content"
+          hx-swap="outerHTML"
+          hx-vals='{"goal_slug": "{{ goal_slug }}", "phase": "{{ phase }}"}'>
+        <input type="hidden" name="path" value="{{ path }}">
+        <textarea name="content">{{ content }}</textarea>
+        <div class="editor-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            <button type="button" class="btn btn-ghost btn-sm"
+                    hx-get="/api/goals/{{ goal_slug }}/tab/{{ phase }}"
+                    hx-target="closest .phase-tab-content"
+                    hx-swap="outerHTML">Cancel</button>
+        </div>
+    </form>
+    {# No inline <script> — EasyMDE initialized by global htmx:afterSwap listener in base.html #}
+</div>

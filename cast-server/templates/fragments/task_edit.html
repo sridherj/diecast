@@ -1,0 +1,70 @@
+<div class="task-item task-edit-form" id="task-{{ task.id }}">
+    <form hx-put="/api/tasks/{{ task.id }}"
+          hx-target="closest .task-item"
+          hx-swap="outerHTML">
+        <div class="form-row">
+            <input type="text" name="title" value="{{ task.title }}" required
+                   class="input-field input-wide" placeholder="Task title">
+        </div>
+        <div class="form-row">
+            <select name="phase" class="input-field">
+                {% for p in ["requirements", "exploration", "plan", "execution"] %}
+                <option value="{{ p }}" {% if task.phase == p %}selected{% endif %}>{{ p|capitalize }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="tip" value="{{ task.tip or '' }}"
+                   class="input-field" placeholder="Tip (optional)">
+        </div>
+        <div class="form-row">
+            <input type="text" name="outcome" value="{{ task.outcome or '' }}"
+                   class="input-field" placeholder="Outcome (optional)">
+            <input type="text" name="action" value="{{ task.action or '' }}"
+                   class="input-field" placeholder="Action (optional)">
+        </div>
+        <div class="form-row">
+            <select name="task_type" class="input-field">
+                <option value="">Type</option>
+                {% for opt in ["Decision", "Research", "Execution", "Exploration", "Coding", "Learning"] %}
+                <option value="{{ opt }}" {% if task.task_type == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="estimated_time" value="{{ task.estimated_time or '' }}"
+                   class="input-field input-sm" placeholder="Est. time">
+            <select name="energy" class="input-field">
+                <option value="">Energy</option>
+                {% for opt in ["High", "Medium", "Low"] %}
+                <option value="{{ opt }}" {% if task.energy == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+            </select>
+            <select name="assigned_to" class="input-field">
+                <option value="">Assigned to</option>
+                {% for opt in ["SJ", "Claude", "SJ + Claude"] %}
+                <option value="{{ opt }}" {% if task.assigned_to == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row">
+            <select name="recommended_agent" class="input-field">
+                <option value="">Agent (optional)</option>
+                {% for agent in agents %}
+                <option value="{{ agent.name }}" {% if task.recommended_agent == agent.name %}selected{% endif %}>{{ agent.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row">
+            <input type="text" name="task_artifacts"
+                   value="{{ (task.task_artifacts or [])|join(', ') }}"
+                   class="input-field input-wide"
+                   placeholder="Artifacts (comma-separated paths, e.g. exploration/summary.ai.md)">
+        </div>
+        <div class="task-edit-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            <button type="button" class="btn btn-ghost btn-sm"
+                    hx-get="/api/tasks/{{ task.id }}"
+                    hx-target="closest .task-item"
+                    hx-swap="outerHTML">
+                Cancel
+            </button>
+        </div>
+    </form>
+</div>

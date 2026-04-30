@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Task OS{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <div class="dashboard-main">
+        <div class="dashboard-title-row">
+            <h2 class="page-title">Dashboard</h2>
+            <button class="btn btn-sm btn-primary"
+                    onclick="document.getElementById('create-goal-form').toggleAttribute('hidden')"
+                    aria-label="Create new goal">
+                + New Goal
+            </button>
+        </div>
+
+        <form id="create-goal-form"
+              hx-post="/api/goals"
+              hx-target="#dashboard-goals"
+              hx-swap="afterbegin"
+              hx-on::after-request="if(event.detail.successful) { this.reset(); this.querySelector('[name=title]').focus(); }"
+              hidden>
+            <div class="create-goal-form-row">
+                <label for="goal-title" class="sr-only">Goal title</label>
+                <input id="goal-title" type="text" name="title"
+                       placeholder="What do you want to achieve?"
+                       required class="input-field input-wide"
+                       autocomplete="off">
+                <label for="goal-tags" class="sr-only">Tags</label>
+                <input id="goal-tags" type="text" name="tags"
+                       placeholder="Tags (comma-separated)"
+                       class="input-field" style="max-width: 200px;">
+                <button type="submit" class="btn btn-sm btn-primary">Create</button>
+            </div>
+        </form>
+
+        {# Dashboard tabs #}
+        <div class="dashboard-tabs" role="tablist">
+            <button class="dashboard-tab {% if active_tab == 'active' %}active{% endif %}"
+                    role="tab" aria-selected="{{ 'true' if active_tab == 'active' else 'false' }}"
+                    hx-get="/api/goals/dashboard?tab=active"
+                    hx-target="#dashboard-goals"
+                    hx-swap="outerHTML"
+                    onclick="document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); this.setAttribute('aria-selected', 'true')">
+                Active
+                <span class="dashboard-tab-count" id="tab-count-active">{{ tab_counts.active }}</span>
+            </button>
+            <button class="dashboard-tab {% if active_tab == 'inactive' %}active{% endif %}"
+                    role="tab" aria-selected="{{ 'true' if active_tab == 'inactive' else 'false' }}"
+                    hx-get="/api/goals/dashboard?tab=inactive"
+                    hx-target="#dashboard-goals"
+                    hx-swap="outerHTML"
+                    onclick="document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); this.setAttribute('aria-selected', 'true')">
+                Inactive
+                <span class="dashboard-tab-count" id="tab-count-inactive">{{ tab_counts.inactive }}</span>
+            </button>
+            <button class="dashboard-tab {% if active_tab == 'completed' %}active{% endif %}"
+                    role="tab" aria-selected="{{ 'true' if active_tab == 'completed' else 'false' }}"
+                    hx-get="/api/goals/dashboard?tab=completed"
+                    hx-target="#dashboard-goals"
+                    hx-swap="outerHTML"
+                    onclick="document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); this.setAttribute('aria-selected', 'true')">
+                Completed
+                <span class="dashboard-tab-count" id="tab-count-completed">{{ tab_counts.completed }}</span>
+            </button>
+        </div>
+
+        {# Goal list for active tab — server-rendered initially #}
+        {% include "fragments/dashboard_goal_list.html" %}
+    </div>
+
+    <div class="dashboard-sidebar">
+        <section class="sidebar-section">
+            <h3 class="sidebar-title">Scratchpad</h3>
+            <div id="scratchpad-entries">
+                {% include "fragments/scratchpad_entry.html" %}
+                {% if not entries %}
+                <p class="empty-state">No entries yet</p>
+                {% endif %}
+            </div>
+            <a href="/scratchpad" class="sidebar-link">View all</a>
+        </section>
+
+        <section class="sidebar-section" id="suggestions-section">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 class="sidebar-title" style="margin-bottom: 0;">Goal Suggestions</h3>
+                <button class="btn btn-sm btn-primary"
+                        hx-post="/api/goals/detector/run"
+                        hx-target="#detector-status"
+                        hx-swap="innerHTML">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                    </svg>
+                    Detect Goals
+                </button>
+            </div>
+            <div id="detector-status"></div>
+            <div id="suggestions-list">
+                {% if suggestions %}
+                    {% for suggestion in suggestions %}
+                        {% include "fragments/suggestion_card.html" %}
+                    {% endfor %}
+                {% else %}
+                <p class="empty-state">No suggestions</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
