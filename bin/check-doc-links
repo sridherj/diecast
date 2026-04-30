@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Check that every relative Markdown link in README.md and docs/*.md resolves
+# to an existing file. Fails non-zero on any broken link.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+broken=0
+for f in README.md docs/*.md; do
+  [ -f "$f" ] || continue
+  while read -r link; do
+    [ -z "$link" ] && continue
+    target="$(dirname "$f")/${link#./}"
+    if [ ! -f "$target" ]; then
+      echo "BROKEN: $f → $link (resolved to $target)"
+      broken=$((broken+1))
+    fi
+  done < <(grep -oE '\(\./[a-zA-Z0-9._/-]+\.md\)' "$f" | tr -d '()')
+done
+if [ "$broken" -gt 0 ]; then
+  echo "FAIL: $broken broken doc link(s)"
+  exit 1
+fi
+echo "OK: all doc links resolve"

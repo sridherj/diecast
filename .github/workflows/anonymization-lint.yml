@@ -12,4 +12,5 @@ jobs:
       - run: pip install pytest
       - run: bin/lint-anonymization
       - run: bin/audit-interdependencies
+      - run: bin/check-doc-links
       - run: pytest tests/
