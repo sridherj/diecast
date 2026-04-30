@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# bin/cast-doctor — Diecast prerequisite checker.
+#
+# Run this before ./setup, or any time post-install to diagnose installation issues.
+# Exits 0 when no RED findings; non-zero with per-issue actionable messages otherwise.
+#
+# Usage:
+#   bin/cast-doctor                # human-readable output, exit 0/1
+#   bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
+#   bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
+#   bin/cast-doctor --help         # this help text
+#
+# Required green prerequisites:
+#   * bash >= 4.0          (Decision #4 — Alpine: apk add bash; macOS: brew install bash)
+#   * uv   >= 0.4.0        (curl -LsSf https://astral.sh/uv/install.sh | sh)
+#   * git  >= 2.30
+#   * claude on PATH       (https://claude.com/claude-code)
+#   * write access to ~/.claude/ and ~/.cast/
+#
+# Yellow (warn-only) checks:
+#   * $CAST_TERMINAL set to a value not in the supported list (soft-fallback per Decision #3)
+#   * $CAST_TERMINAL empty, $TERMINAL empty, no supported terminal on PATH
+#
+# Direct callability (Decision #2): this script is intentionally usable post-install.
+# The setup wrapper sources bin/_lib.sh and then invokes us; standalone callers do
+# the same automatically via the SCRIPT_DIR resolution below.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck source=./_lib.sh
+source "${SCRIPT_DIR}/_lib.sh"
+
+JSON_OUTPUT=0
+QUIET=0
+SUPPORTED_TERMINALS=(ptyxis gnome-terminal kitty alacritty wezterm iterm2 terminal)
+
+print_help() {
+  cat <<'EOF'
+bin/cast-doctor — Diecast prerequisite checker.
+
+Run this before ./setup, or any time post-install to diagnose installation issues.
+Exits 0 when no RED findings; non-zero with per-issue actionable messages otherwise.
+
+Usage:
+  bin/cast-doctor                # human-readable output, exit 0/1
+  bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
+  bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
+  bin/cast-doctor --help         # this help text
+
+Required green prerequisites:
+  * bash >= 4.0          (Decision #4 — Alpine: apk add bash; macOS: brew install bash)
+  * uv   >= 0.4.0        (curl -LsSf https://astral.sh/uv/install.sh | sh)
+  * git  >= 2.30
+  * claude on PATH       (https://claude.com/claude-code)
+  * write access to ~/.claude/ and ~/.cast/
+
+Yellow (warn-only) checks:
+  * $CAST_TERMINAL set to a value not in the supported list (soft-fallback per Decision #3)
+  * $CAST_TERMINAL empty, $TERMINAL empty, no supported terminal on PATH
+
+Direct callability (Decision #2): this script is intentionally usable post-install
+to diagnose installation issues — it's also the gate ./setup runs in Step 1.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --json)  JSON_OUTPUT=1 ;;
+    --quiet) QUIET=1 ;;
+    -h|--help) print_help; exit 0 ;;
+    *) fail "Unknown flag: $1 (try --help)" ;;
+  esac
+  shift
+done
+
+declare -a RED=()
+declare -a YELLOW=()
+declare -a GREEN=()
+
+note_red()    { RED+=("$1"); }
+note_yellow() { YELLOW+=("$1"); }
+note_green()  { GREEN+=("$1"); }
+
+# ── Version helpers ────────────────────────────────────────────────
+# version_ge "A.B.C" "X.Y.Z" → exit 0 when A.B.C >= X.Y.Z (semantic, dot-segment).
+version_ge() {
+  local have="$1" want="$2"
+  local IFS=.
+  local -a a=($have) b=($want)
+  local i
+  for ((i=0; i<${#b[@]}; i++)); do
+    local av="${a[i]:-0}" bv="${b[i]}"
+    av="${av//[^0-9]/}"; bv="${bv//[^0-9]/}"
+    : "${av:=0}"; : "${bv:=0}"
+    if (( 10#$av > 10#$bv )); then return 0; fi
+    if (( 10#$av < 10#$bv )); then return 1; fi
+  done
+  return 0
+}
+
+extract_version() {
+  printf '%s' "$1" | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1
+}
+
+# ── Checks ─────────────────────────────────────────────────────────
+check_bash() {
+  local ver="${BASH_VERSION%%[!0-9.]*}"
+  if [[ -n "$ver" ]] && version_ge "$ver" "4.0"; then
+    note_green "bash ${ver}"
+  else
+    note_red "bash ${ver:-unknown} found (need >= 4.0). Install bash >= 4.0. On Alpine: apk add bash. On macOS: brew install bash."
+  fi
+}
+
+check_uv() {
+  if ! command -v uv >/dev/null 2>&1; then
+    note_red "uv not found. Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    return
+  fi
+  local raw ver
+  raw="$(uv --version 2>&1 || true)"
+  ver="$(extract_version "$raw")"
+  if [[ -n "$ver" ]] && version_ge "$ver" "0.4.0"; then
+    note_green "uv ${ver}"
+  else
+    note_red "uv ${ver:-unknown} found (need >= 0.4.0). Upgrade uv: curl -LsSf https://astral.sh/uv/install.sh | sh"
+  fi
+}
+
+check_git() {
+  if ! command -v git >/dev/null 2>&1; then
+    note_red "git not found. Install git >= 2.30 (apt: sudo apt-get install git; macOS: brew install git)."
+    return
+  fi
+  local raw ver
+  raw="$(git --version 2>&1 || true)"
+  ver="$(extract_version "$raw")"
+  if [[ -n "$ver" ]] && version_ge "$ver" "2.30"; then
+    note_green "git ${ver}"
+  else
+    note_red "git ${ver:-unknown} found (need >= 2.30). Upgrade git from your package manager."
+  fi
+}
+
+check_claude() {
+  if command -v claude >/dev/null 2>&1; then
+    note_green "claude on PATH ($(command -v claude))"
+  else
+    note_red "claude not on PATH. Install Claude Code from https://claude.com/claude-code"
+  fi
+}
+
+check_writable() {
+  local dir="$1"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    note_green "${dir} (DRY: not creating)"
+    return
+  fi
+  mkdir -p "$dir" 2>/dev/null || {
+    note_red "${dir} not writable. chmod/chown so your user can create it."
+    return
+  }
+  if [[ -w "$dir" ]]; then
+    note_green "${dir} writable"
+  else
+    note_red "${dir} not writable. chmod/chown so your user can create it."
+  fi
+}
+
+is_supported_terminal() {
+  local needle="$1"
+  local t
+  for t in "${SUPPORTED_TERMINALS[@]}"; do
+    [[ "$needle" == "$t" ]] && return 0
+  done
+  return 1
+}
+
+check_terminal() {
+  local cast="${CAST_TERMINAL:-}"
+  local sysnal="${TERMINAL:-}"
+
+  if [[ -n "$cast" ]]; then
+    if is_supported_terminal "$cast"; then
+      note_green "\$CAST_TERMINAL=${cast} (supported)"
+      return
+    fi
+    note_yellow "\$CAST_TERMINAL=${cast} is not a supported terminal. Diecast will soft-fall-back to the first supported terminal in PATH. See docs/terminals.md."
+    return
+  fi
+
+  if [[ -n "$sysnal" ]]; then
+    note_green "\$TERMINAL=${sysnal} (will be used as fallback)"
+    return
+  fi
+
+  local t
+  for t in "${SUPPORTED_TERMINALS[@]}"; do
+    if command -v "$t" >/dev/null 2>&1; then
+      note_green "supported terminal on PATH: ${t}"
+      return
+    fi
+  done
+
+  note_yellow "No supported terminal found. Set \$CAST_TERMINAL or run ./setup to configure interactively. (Supported: ${SUPPORTED_TERMINALS[*]})"
+}
+
+# ── Run all checks ─────────────────────────────────────────────────
+check_bash
+check_uv
+check_git
+check_claude
+check_writable "${HOME}/.claude"
+check_writable "${HOME}/.cast"
+check_terminal
+
+# ── Output ─────────────────────────────────────────────────────────
+emit_json() {
+  local first sep
+  printf '{"red":['
+  first=1
+  for item in "${RED[@]}"; do
+    [[ $first -eq 1 ]] && first=0 || printf ','
+    printf '%s' "$(printf '%s' "$item" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
+  done
+  printf '],"yellow":['
+  first=1
+  for item in "${YELLOW[@]}"; do
+    [[ $first -eq 1 ]] && first=0 || printf ','
+    printf '%s' "$(printf '%s' "$item" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
+  done
+  printf '],"green":['
+  first=1
+  for item in "${GREEN[@]}"; do
+    [[ $first -eq 1 ]] && first=0 || printf ','
+    printf '%s' "$(printf '%s' "$item" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
+  done
+  printf ']}\n'
+  unset sep
+}
+
+emit_human() {
+  local item
+  if [[ "${QUIET}" -eq 0 ]]; then
+    for item in "${GREEN[@]}"; do printf '  [GREEN] %s\n' "$item"; done
+  fi
+  for item in "${YELLOW[@]}"; do printf '  [YELLOW] %s\n' "$item" >&2; done
+  for item in "${RED[@]}"; do printf '  [RED] %s\n' "$item" >&2; done
+  if [[ ${#RED[@]} -eq 0 ]]; then
+    [[ "${QUIET}" -eq 0 ]] && printf '\n[cast-doctor] All required prerequisites satisfied.\n'
+  else
+    printf '\n[cast-doctor] %d required prerequisite(s) missing.\n' "${#RED[@]}" >&2
+  fi
+}
+
+if [[ "${JSON_OUTPUT}" -eq 1 ]]; then
+  emit_json
+else
+  emit_human
+fi
+
+[[ ${#RED[@]} -eq 0 ]] || exit 1
+exit 0

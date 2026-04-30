@@ -95,3 +95,41 @@ For yes/no questions or open-ended input where options don't apply, simplify:
 6. **The Redundant Question** -- Asking about something the requirements or exploration
    already answered clearly. Fix: check artifacts before asking. Only ask when genuinely
    ambiguous.
+
+## Close-out Discipline (US13)
+
+Every interactive cast-* agent that uses this skill MUST honor the no-open-questions rule
+at end-of-interactive-phase, immediately before writing its terminal output JSON:
+
+1. **Enumerate** any in-conversation ambiguity still tracked as "open" in the agent's
+   working memory (e.g., decisions deferred during interactive flow, options the agent
+   considered but didn't pick, clarifications the user only partially answered).
+
+2. **For each open ambiguity, resolve via `cast-interactive-questions`** -- render an
+   AskUserQuestion, capture the answer, fold the resolution into the artifact.
+
+3. **Trailing `Open Questions` section in the artifact** is allowed ONLY for items that
+   are genuinely unresolvable through in-conversation Q&A. Each such item MUST be tagged:
+
+   - `[EXTERNAL]` -- requires availability probe, third-party decision, or hardware in
+     user's hand. Examples: "needs LinkedIn API key", "depends on vendor's roadmap",
+     "requires production-grade hardware to test".
+   - `[USER-DEFERRED]` -- user explicitly said "leave it open", "we'll come back to this",
+     or "skip for now". Examples: "deferred at user request", "punt to v1.1 per user".
+
+   Each tagged item MUST include a one-line reason after the tag. Format:
+   `- **[TAG]** <one-line item>. Reason: <one-line reason>.`
+
+4. **Untagged items in `Open Questions` are violations.** The integration test catches
+   these on CI; runtime enforcement happens via the skill's own LLM call.
+
+The two tags are recognized by output-JSON consumers (cast-server, downstream agents)
+and surface differently in the UI: `[EXTERNAL]` items become tracked TODOs;
+`[USER-DEFERRED]` items become low-priority backlog hints.
+
+`[EXTERNAL]` items SHOULD be lifted into the terminal output JSON's `human_action_items[]`
+and the agent SHOULD set `human_action_needed: true`. `[USER-DEFERRED]` items remain in
+the artifact only -- they are NOT lifted to `human_action_items[]`.
+
+> Tag schema documented in `docs/specs/cast-delegation-contract.collab.md` under
+> "Per-Agent Output Extensions" -> "Open-Question Tags (US13)".

@@ -2,5 +2,7 @@ model: opus
 headless: true
 timeout_minutes: 45
 context_mode: lightweight
-allowed_delegations: []
+allowed_delegations:
+- cast-review-code
 artifact_directory: external_project_dir
+proactive: false

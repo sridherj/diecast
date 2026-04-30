@@ -1,6 +1,6 @@
 # Diecast Scope-Prune
 
-> Status: first pass (sp2). Stubbed modules raise `NotImplementedError` at runtime; nothing is deleted yet. Second pass (sp13) deletes the files and folders listed below.
+> Status: complete. Second pass (sp13) executed 2026-04-30 — stubs deleted, callers fixed.
 
 ## 1. Why
 
@@ -103,3 +103,30 @@ sp13 removes these exception entries explicitly when the corresponding files are
 - Phase 3b detailed plan: `taskos/goals/diecast-open-source/phase-3b-detailed-plan.collab.md`
 - Phase 3b shared context: `docs/execution/diecast-open-source/phase-3b/_shared_context.md`
 - Sub-phase 2 plan: `docs/execution/diecast-open-source/phase-3b/sp2_stub_prune/plan.md`
+- Sub-phase 13 plan: `docs/execution/diecast-open-source/phase-3b/sp13_second_prune/plan.md`
+
+## 7. Final delete pass (sp13 — 2026-04-30)
+
+Deleted in this pass:
+
+- `cast-server/cast_server/news_digest/` (directory + contents).
+- `cast-server/cast_server/goal_detector/` (directory + contents).
+- `cast-server/cast_server/sync/` (directory + contents — `engine.py`, `parsers/`, `__init__.py`).
+- `cast-server/cast_server/routes/api_news.py`.
+- `cast-server/cast_server/routes/api_sync.py`.
+- `cast-server/cast_server/templates/pages/news.html`.
+- `cast-server/cast_server/templates/fragments/news_status.html`.
+
+Caller fixes:
+
+- `cast-server/cast_server/app.py` — removed `api_sync_router` import + `app.include_router(api_sync_router)`.
+- `cast-server/cast_server/routes/api_goals.py` — removed `from cast_server.goal_detector.runner import run_detector, get_detector_status`, the unused `asyncio` import, the `POST /api/goals/detector/run` endpoint, and the `GET /api/goals/detector/status` endpoint.
+- `cast-server/cast_server/templates/pages/dashboard.html` — removed the "Detect Goals" button and `#detector-status` placeholder div from the Goal Suggestions sidebar section. The section continues to render any pending suggestions persisted in `goal_suggestions` (which are no longer auto-generated; the table stays for backward compatibility with any legacy rows and for future manual seeding).
+
+Lint exceptions removed:
+
+- §5 documented entries for `cast-server/news_digest/`, `goal_detector/`, `sync/`, `routes/api_news.py` were never wired into `bin/lint-anonymization` (the script ships a closed `FORBIDDEN_PATTERNS` list with no per-path exclusions), so there is nothing to remove here. The pin-to-zero list (§4) is now enforced solely via grep sweep — see Phase 3b sp13 verification.
+
+Pin-to-zero list (§4) remains active forever:
+
+- `news`, `cron`, `n8n`, `RemoteTrigger`, `linkedin`, `reachout`, `hook`.

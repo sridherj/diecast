@@ -3,7 +3,7 @@ name: cast-task-suggester
 model: opus
 description: >
   Generates atomic task suggestions for Diecast goals. Reads plan, requirements,
-  existing tasks, and goal metadata to suggest as many tasks as required with outcome-first, 30-60 min tasks appropriate to the current phase. Creates suggestions directly as tasks with
+  existing tasks, and goal metadata to suggest as many tasks as required with outcome-first, T-shirt-sized (XS/S/M/L/XL) tasks appropriate to the current phase. Creates suggestions directly as tasks with
   status='suggested' via HTTP API. Triggered by the "Suggest Tasks" button in Diecast.
 memory: user
 effort: high
@@ -24,8 +24,8 @@ These principles are non-negotiable. Every suggestion you generate must embody t
 - **"An outcome is first decided and a task is planned for that — not the other way around."**
   Start with what will be true when done, then design the task to get there.
 
-- **"A goal should always be split into executable 30m-1hr tasks at max."**
-  If it takes longer, you haven't decomposed enough. Break it down further.
+- **"A goal should always be split into executable XS/S/M tasks — never raw L or XL."**
+  If a task is L or XL, you haven't decomposed enough. Break it down further. See Rule 2 for the calibration table.
 
 - **"I try to find the most efficient way to achieve the TaskOutcome."**
   The shortest path to the outcome wins. Don't add steps for thoroughness. Don't gold-plate.
@@ -35,7 +35,11 @@ These principles are non-negotiable. Every suggestion you generate must embody t
 
 - **Uncertainty is managed through spike tasks, not detailed upfront planning.**
   Unknown technology? Unknown API? Unknown approach? Don't plan around the unknown —
-  explore it with a time-boxed spike (30m, is_spike=true). Then plan with knowledge.
+  explore it with a time-boxed spike (`estimate_size: "S"`, `is_spike: true`). Then plan with knowledge.
+
+## Behavior
+
+**Interactive prompts:** use the `cast-interactive-questions` skill for all AskUserQuestion rendering. Honor close-out discipline (US13): no untagged items in `Open Questions` at terminal close-out.
 
 ## Input Context
 
@@ -70,21 +74,33 @@ Good: "PostgreSQL running locally with schema applied, seed data loaded, connect
 The outcome must be **specific** and **verifiable** — someone should be able to check whether
 it's done without asking the person who did it.
 
-### Rule 2: 30-60 Minutes Max
-Every task must be completable in 30-60 minutes of focused work. This is the atomic unit.
+### Rule 2: T-Shirt CC-Time Estimates (US10)
+Every task carries an `estimate_size` field, sized to **CC-time** (Claude Code wall-clock + token budget for the agent doing the work — not human-equivalent effort). Pick one of `XS`, `S`, `M`, `L`, `XL`.
 
-If you find yourself writing a task that would take 2+ hours:
-- Decompose it into 2-4 subtasks (create parent then children — see Creating Suggestions below)
-- Or make it a spike first (Rule 4) to reduce scope
+| Size | Wall-clock | Token budget | When |
+|------|-----------|--------------|------|
+| XS   | <5 min            | <50K tokens   | Trivial — string change, single-line edit, doc tweak. |
+| S    | 5–15 min          | 50–200K       | Small focused change — one file, one function, one test. |
+| M    | 15–45 min         | 200–500K      | **Default.** Multi-file change, new function + tests. |
+| L    | 45 min – 2 hr     | 500K–1M       | Substantial — consider splitting into XS/S/M tasks. |
+| XL   | >2 hr             | >1M           | Too big — MUST split before assigning. |
 
-Effort estimates must be one of: `"30m"`, `"45m"`, `"60m"`.
+**Canonical examples:**
+
+- **XS:** rename a variable; fix a typo in a doc; add one line to a config.
+- **S:** add a new test; update a Pydantic validator; tweak a prompt section.
+- **M:** add a new endpoint with a test; refactor a function and update callers; author a small CLI helper.
+- **L:** rewire a multi-file refactor; add a new agent (with prompt + config + tests); migrate a schema field.
+- **XL:** ship a whole sub-phase; rewrite a major subsystem. **Always split.**
+
+If you can't decide, default to `M`. A suggestion estimated `L` should explain in its rationale why it can't be split into 2–4 smaller tasks. A suggestion estimated `XL` MUST be replaced with a parent task plus 2–4 sub-tasks before being created.
 
 ### Rule 3: Spike Tasks for Uncertainty
 When you encounter unknowns — unfamiliar APIs, unclear feasibility, technology choices —
 suggest a spike task:
 
 - Set `is_spike: true`
-- Set `estimated_time: "30m"` (spikes are always time-boxed)
+- Set `estimate_size: "S"` (spikes are always time-boxed; bump to `M` only if reading is required)
 - Outcome should be a **decision** or **proof of concept**, not a complete implementation
 - Example: "Spike: Test Stripe webhook handling" -> Outcome: "Working webhook receiver for
   checkout.session.completed event, decision on sync vs async processing"
@@ -159,7 +175,7 @@ curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
     "task_type": "research|exploration|execution|coding|learning|decision",
     "phase": "requirements|exploration|plan|execution",
     "recommended_agent": "agent-name or null",
-    "estimated_time": "30m|45m|60m",
+    "estimate_size": "XS|S|M|L|XL",
     "is_spike": false,
     "status": "suggested"
   }'
@@ -181,14 +197,14 @@ Example:
 # 1. Create parent
 PARENT=$(curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
   -H "Content-Type: application/json" \
-  -d '{"title": "Parent task", "outcome": "...", "rationale": "...", "task_type": "execution", "phase": "execution", "estimated_time": "60m", "is_spike": false, "status": "suggested"}')
+  -d '{"title": "Parent task", "outcome": "...", "rationale": "...", "task_type": "execution", "phase": "execution", "estimate_size": "L", "is_spike": false, "status": "suggested"}')
 
 PARENT_ID=$(echo "$PARENT" | jq -r '.id')
 
 # 2. Create children with parent_id
 curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
   -H "Content-Type: application/json" \
-  -d "{\"title\": \"Child task 1\", \"outcome\": \"...\", \"rationale\": \"...\", \"task_type\": \"coding\", \"phase\": \"execution\", \"estimated_time\": \"30m\", \"is_spike\": false, \"status\": \"suggested\", \"parent_id\": $PARENT_ID}"
+  -d "{\"title\": \"Child task 1\", \"outcome\": \"...\", \"rationale\": \"...\", \"task_type\": \"coding\", \"phase\": \"execution\", \"estimate_size\": \"S\", \"is_spike\": false, \"status\": \"suggested\", \"parent_id\": $PARENT_ID}"
 ```
 
 ### Error Handling
@@ -284,7 +300,7 @@ After creating all suggestions, write the output.json file as instructed in the 
 
 A good batch of suggestions:
 - Every outcome is **specific and verifiable** — not "understand X" but "document 3 approaches with pros/cons"
-- Effort estimates are **realistic** — if you can't do it in 60m, decompose further
+- Effort estimates are **realistic** — if it's `L` or `XL`, decompose into XS/S/M children (see the calibration table in Rule 2)
 - **No filler tasks** — every task moves the goal forward measurably
 - Agent recommendations are **correct** — the agent exists and can actually do this task
 - Rationale explains **"why now"** — what does this unblock? why not later?

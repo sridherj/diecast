@@ -1,5 +1,346 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# setup — Diecast installer.
+#
+# Mirrors ~/workspace/linkedout-oss/setup. Takes a fresh clone of
+# github.com/sridherj/diecast on a machine with `uv` + `git` + Claude Code
+# and produces a usable Diecast install in under 90 seconds.
+#
+# Usage:
+#   ./setup                # full install with $CAST_TERMINAL prompt
+#   ./setup --dry-run      # print the action plan without touching the filesystem
+#   ./setup --upgrade      # rerun path used by /cast-upgrade (sp2b)
+#   ./setup --no-prompt    # skip the $CAST_TERMINAL prompt (CI / non-interactive)
+#   ./setup --help         # this help
+#
+# Pre-existing files at install targets are backed up under
+# ~/.claude/.cast-bak-<UTC-timestamp>/ before being overwritten.
+# The 5 newest backup directories are retained; the rest are pruned.
+#
+# ── $CAST_TERMINAL prompt: dual interactive paths ──
+# 1. Claude Code branch: ./setup invoked from inside a Claude Code session that
+#    has the diecast repo loaded (CAST_INTERACTIVE=1) → use cast-interactive-questions
+#    (richer rendering via AskUserQuestion).
+# 2. Pure shell branch: ./setup invoked from a plain terminal → use bash `read -rp`.
+# Do NOT collapse the two paths. Pure shell installs are the dominant first-touch case.
+
 set -euo pipefail
 
-echo "Diecast setup is implemented in Phase 4. See docs/install.md when published."
-exit 0
+REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck source=bin/_lib.sh
+source "${REPO_DIR}/bin/_lib.sh"
+
+DRY_RUN="${DRY_RUN:-0}"
+UPGRADE_MODE=0
+NO_PROMPT=0
+
+print_help() {
+  cat <<'EOF'
+setup — Diecast installer.
+
+Usage:
+  ./setup                # full install with $CAST_TERMINAL prompt
+  ./setup --dry-run      # print the action plan without touching the filesystem
+  ./setup --upgrade      # rerun path used by /cast-upgrade (sp2b)
+  ./setup --no-prompt    # skip the $CAST_TERMINAL prompt (CI / non-interactive)
+  ./setup --help         # this help
+
+Pre-existing files at install targets are backed up under
+~/.claude/.cast-bak-<UTC-timestamp>/ before being overwritten. The 5 newest
+backup directories are retained; the rest are pruned. See docs/config.md
+for the full ~/.cast/config.yaml schema.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --dry-run)   DRY_RUN=1 ;;
+    --upgrade)   UPGRADE_MODE=1 ;;
+    --no-prompt) NO_PROMPT=1 ;;
+    -h|--help)   print_help; exit 0 ;;
+    *) fail "Unknown flag: $1 (try --help)" ;;
+  esac
+  shift
+done
+export DRY_RUN UPGRADE_MODE NO_PROMPT REPO_DIR
+
+if [[ "${UPGRADE_MODE}" == "1" ]]; then
+  log "Upgrade run (called by /cast-upgrade or rerun)."
+else
+  log "First install (or manual rerun)."
+fi
+[[ "${DRY_RUN}" == "1" ]] && log "Dry-run mode — no filesystem changes."
+
+# ── Helper: run a step in dry-run-aware fashion ───────────────────
+run_or_dry() {
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY: $*"
+  else
+    "$@"
+  fi
+}
+
+# ── Step 1: prereqs via cast-doctor ────────────────────────────────
+step1_doctor() {
+  log "Step 1/7: prerequisite check (bin/cast-doctor)"
+  if ! "${REPO_DIR}/bin/cast-doctor"; then
+    fail "Prerequisites missing. Resolve the [RED] items above and re-run ./setup."
+  fi
+}
+
+# ── Step 2: generate-skills + anti-leak grep ───────────────────────
+step2_generate_skills() {
+  log "Step 2/7: generate Claude Code skill files (bin/generate-skills)"
+  local skills_target="${HOME}/.claude/skills"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    "${REPO_DIR}/bin/generate-skills" --dry-run --target-dir "${skills_target}"
+  else
+    "${REPO_DIR}/bin/generate-skills" --target-dir "${skills_target}"
+  fi
+
+  # Anti-leak: bail if any generated skill still references 'taskos-'.
+  local leak_root="${REPO_DIR}/skills/claude-code"
+  if [[ -d "${leak_root}" ]]; then
+    if grep -rl 'taskos-' "${leak_root}"/cast-* >/dev/null 2>&1; then
+      fail "Anonymization leak: generated skills still reference 'taskos-'. See docs/troubleshooting.md."
+    fi
+  fi
+}
+
+# ── Step 2.5: schema migrations (upgrade-only) ─────────────────────
+# Runs only on `./setup --upgrade`. Fresh installs have no schema to
+# migrate. The runner reads ~/.cast/migrations.applied, computes the
+# diff against migrations/*.py, and applies un-applied migrations in
+# lex order. v1 ships zero migrations; this seam keeps the v1.1 hook
+# wired without later install-flow surgery.
+step2_5_migrations() {
+  if [[ "${UPGRADE_MODE}" != "1" ]]; then
+    return 0
+  fi
+  log "Step 2.5/7: run schema migrations (bin/run-migrations.py)"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    "${REPO_DIR}/bin/run-migrations.py" --dry-run
+  else
+    "${REPO_DIR}/bin/run-migrations.py"
+  fi
+}
+
+# ── Step 3: install agents under ~/.claude/agents/cast-* ───────────
+step3_install_agents() {
+  log "Step 3/7: install agents -> ~/.claude/agents/"
+  local target_root="${HOME}/.claude/agents"
+  run_or_dry mkdir -p "${target_root}"
+
+  local agent_dir name
+  for agent_dir in "${REPO_DIR}/agents"/cast-*/; do
+    [[ -d "${agent_dir}" ]] || continue
+    name="$(basename "${agent_dir}")"
+    backup_if_exists "${target_root}/${name}"
+    if [[ "${DRY_RUN}" == "1" ]]; then
+      log "DRY: cp -R ${agent_dir} ${target_root}/${name}"
+    else
+      cp -R "${agent_dir}" "${target_root}/${name}"
+    fi
+  done
+}
+
+# ── Step 4: install authored skills under ~/.claude/skills/cast-* ──
+step4_install_skills() {
+  log "Step 4/7: install hand-authored skills -> ~/.claude/skills/"
+  local source_root="${REPO_DIR}/skills/claude-code"
+  local target_root="${HOME}/.claude/skills"
+  [[ -d "${source_root}" ]] || { log "  (no skills/claude-code/ in repo, skipping)"; return 0; }
+  run_or_dry mkdir -p "${target_root}"
+
+  local skill_dir name
+  for skill_dir in "${source_root}"/cast-*/; do
+    [[ -d "${skill_dir}" ]] || continue
+    name="$(basename "${skill_dir}")"
+    backup_if_exists "${target_root}/${name}"
+    if [[ "${DRY_RUN}" == "1" ]]; then
+      log "DRY: cp -R ${skill_dir} ${target_root}/${name}"
+    else
+      cp -R "${skill_dir}" "${target_root}/${name}"
+    fi
+  done
+}
+
+# ── Step 5: ~/.local/bin/cast-server wrapper ───────────────────────
+step5_install_cast_server() {
+  log "Step 5/7: install ~/.local/bin/cast-server wrapper"
+  local bin_dir="${HOME}/.local/bin"
+  local wrapper="${bin_dir}/cast-server"
+  run_or_dry mkdir -p "${bin_dir}"
+  backup_if_exists "${wrapper}"
+
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY: write ${wrapper} (exec uv run --project ${REPO_DIR} cast-server \"\$@\")"
+  else
+    cat > "${wrapper}" <<EOF
+#!/usr/bin/env bash
+# Generated by diecast/setup. Do not edit by hand.
+exec uv run --project "${REPO_DIR}" cast-server "\$@"
+EOF
+    chmod +x "${wrapper}"
+  fi
+
+  if [[ ":${PATH}:" != *":${bin_dir}:"* ]]; then
+    warn "${bin_dir} is not on PATH. Add: export PATH=\"\${HOME}/.local/bin:\${PATH}\""
+  fi
+}
+
+# ── Step 6: write ~/.cast/config.yaml on first run ─────────────────
+# Canonical schema lives in docs/config.md and _shared_context.md.
+# If the file exists, fill in any missing keys with defaults but preserve user values.
+step6_write_config() {
+  log "Step 6/7: ~/.cast/config.yaml"
+  local cfg_dir="${HOME}/.cast"
+  local cfg_file="${cfg_dir}/config.yaml"
+  run_or_dry mkdir -p "${cfg_dir}"
+
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    if [[ -f "${cfg_file}" ]]; then
+      log "DRY: merge missing default keys into ${cfg_file}"
+    else
+      log "DRY: write canonical schema to ${cfg_file}"
+    fi
+    return 0
+  fi
+
+  # Use uv-managed Python so we don't depend on system PyYAML.
+  local merger
+  merger="$(mktemp)"
+  cat > "${merger}" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+
+DEFAULTS = {
+    "terminal": "",
+    "auto_upgrade": False,
+    "upgrade_snooze_until": None,
+    "upgrade_snooze_streak": 0,
+    "upgrade_never_ask": False,
+    "last_upgrade_check_at": None,
+    "proactive_global": None,
+    "proactive_overrides": {},
+}
+
+HEADER = (
+    "# ~/.cast/config.yaml — Diecast user-level config.\n"
+    "# Schema reference: docs/config.md inside the diecast repo.\n"
+    "# Edits here are preserved by ./setup re-runs and /cast-upgrade.\n"
+)
+
+
+def main(path: str, terminal_seed: str = "") -> None:
+    p = Path(path)
+    if p.exists():
+        raw = yaml.safe_load(p.read_text()) or {}
+        if not isinstance(raw, dict):
+            raw = {}
+    else:
+        raw = {}
+    merged = {}
+    for key, default in DEFAULTS.items():
+        if key in raw:
+            merged[key] = raw[key]
+        else:
+            merged[key] = default
+    if terminal_seed and not merged.get("terminal"):
+        merged["terminal"] = terminal_seed
+    p.write_text(HEADER + yaml.safe_dump(merged, sort_keys=False))
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])
+PY
+
+  uv run --project "${REPO_DIR}" python "${merger}" "${cfg_file}" "${CAST_TERMINAL:-}" \
+    || { rm -f "${merger}"; fail "Failed to write ${cfg_file}. Check that uv + pyyaml are available."; }
+  rm -f "${merger}"
+  log "  wrote/merged ${cfg_file}"
+}
+
+# ── Step 7: $CAST_TERMINAL prompt ──────────────────────────────────
+persist_terminal_choice() {
+  local choice="$1"
+  [[ -z "${choice}" || "${choice}" == "skip" ]] && return 0
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY: persist terminal=${choice} into ~/.cast/config.yaml"
+    return 0
+  fi
+  local merger
+  merger="$(mktemp)"
+  cat > "${merger}" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+
+p = Path(sys.argv[1])
+choice = sys.argv[2]
+data = {}
+if p.exists():
+    data = yaml.safe_load(p.read_text()) or {}
+    if not isinstance(data, dict):
+        data = {}
+data["terminal"] = choice
+p.write_text(yaml.safe_dump(data, sort_keys=False))
+PY
+  uv run --project "${REPO_DIR}" python "${merger}" "${HOME}/.cast/config.yaml" "${choice}" \
+    || warn "Failed to persist terminal=${choice}"
+  rm -f "${merger}"
+}
+
+step7_terminal_prompt() {
+  log "Step 7/7: \$CAST_TERMINAL preference"
+  if [[ -n "${CAST_TERMINAL:-}" ]]; then
+    log "  \$CAST_TERMINAL already set to '${CAST_TERMINAL}' — skipping prompt."
+    return 0
+  fi
+  if [[ "${NO_PROMPT}" == "1" ]]; then
+    log "  --no-prompt: leaving terminal preference empty."
+    return 0
+  fi
+  if [[ ! -t 0 ]]; then
+    warn "Non-interactive shell — terminal preference left empty. Override via CAST_TERMINAL=... ./setup."
+    return 0
+  fi
+
+  if [[ "${CAST_INTERACTIVE:-0}" == "1" ]] && command -v claude >/dev/null 2>&1; then
+    log "  Claude Code branch: invoke /cast-interactive-questions for terminal selection."
+    log "  (Setup defers — the host runs the AskUserQuestion prompt separately.)"
+    return 0
+  fi
+
+  local choice=""
+  printf '\n[cast] Select default terminal for child agent dispatch:\n' >&2
+  printf '  Options: gnome-terminal, iterm2, kitty, alacritty, wezterm, ptyxis, skip\n' >&2
+  read -rp "Choice [skip]: " choice
+  choice="${choice:-skip}"
+  persist_terminal_choice "${choice}"
+}
+
+# ── Typed next_steps printout (US14 / sp4d) ────────────────────────
+print_next_steps() {
+  cat <<'EOF'
+
+[cast] Install complete. Suggested next steps:
+  1. /cast-init   — scaffold a new project (writes CLAUDE.md + cast-* dirs)
+  2. /cast-runs   — open the cast-server runs dashboard
+
+Docs: docs/config.md (config keys) · docs/troubleshooting.md (recovery & FAQ)
+EOF
+}
+
+# ── Run ────────────────────────────────────────────────────────────
+step1_doctor
+step2_generate_skills
+step2_5_migrations
+step3_install_agents
+step4_install_skills
+step5_install_cast_server
+step6_write_config
+step7_terminal_prompt
+prune_old_backups
+print_next_steps

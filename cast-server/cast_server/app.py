@@ -55,7 +55,6 @@ from cast_server.routes.api_goals import router as api_goals_router
 from cast_server.routes.api_tasks import router as api_tasks_router
 from cast_server.routes.api_agents import router as api_agents_router
 from cast_server.routes.api_scratchpad import router as api_scratchpad_router
-from cast_server.routes.api_sync import router as api_sync_router
 from cast_server.routes.api_task_suggestions import router as api_task_suggestions_router
 from cast_server.routes.api_artifacts import router as api_artifacts_router
 app.include_router(pages_router)
@@ -63,6 +62,5 @@ app.include_router(api_goals_router)
 app.include_router(api_tasks_router)
 app.include_router(api_scratchpad_router)
 app.include_router(api_agents_router)
-app.include_router(api_sync_router)
 app.include_router(api_task_suggestions_router)
 app.include_router(api_artifacts_router)

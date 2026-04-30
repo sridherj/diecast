@@ -1,0 +1,6 @@
+model: sonnet
+timeout_minutes: 30
+context_mode: lightweight
+interactive: false
+allowed_delegations: []
+proactive: false

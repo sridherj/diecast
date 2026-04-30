@@ -49,7 +49,66 @@ Execute ALL verification steps from the sub-phase file:
 3. Check manual verification items
 4. Evaluate all success criteria
 
-### Step 4: Report Results
+### Step 4: Post-Execution Review (B4)
+
+After the sub-phase's primary work completes, before reporting results:
+
+#### Step R.1: Classify per the heuristic doc
+
+Read `docs/reference/subphase-coding-classifier.ai.md`. Apply the rules to the sub-phase that
+just executed. Output: `coding | non-coding | ambiguous`.
+
+If `ambiguous` → ask the user via the `/cast-interactive-questions` skill whether to treat as
+coding or non-coding. Log the decision so future contributors can extend the classifier doc.
+
+#### Step R.2a: If non-coding → skip and log
+
+Append to the run log: `non-coding sub-phase, code review skipped (rationale: <which rule>)`.
+Cite the matching rule from the classifier doc. Continue to Step 5.
+
+#### Step R.2b: If coding → dispatch cast-review-code
+
+```python
+files_touched = scan_goal_dir_for_modified_files(start_time=sub_phase_start, end_time=now)
+
+child_run_id = invoke_skill(
+    "cast-child-delegation",
+    target="cast-review-code",
+    context={
+        "sub_phase_file": sub_phase_path,
+        "files_touched": files_touched,
+        "parent_run_id": current_run_id,
+    },
+)
+review_result = poll_child_until_terminal(child_run_id)
+```
+
+#### Step R.3: Process review output
+
+For each issue in `review_result.errors[]` and `review_result.next_steps[]`:
+
+- **`confidence: high` AND Edit-tool-applicable** (string replacement, single-line addition)
+  AND **path under `goal_dir` or `docs/` tree**:
+  - Auto-apply via Edit tool.
+  - Log the auto-fix in the run log.
+
+- **`confidence: high` BUT not Edit-tool-applicable** (file creation, file deletion, multi-line
+  refactor) → bump to `<sub_phase_file>.followup.md`. Auto-fix is restricted to safe single-Edit
+  patches.
+
+- **`confidence: medium | low`** → bump to `<sub_phase_file>.followup.md` regardless of fix shape.
+
+- **Path-traversal violation** (review wants to Edit a file outside `goal_dir`/`docs/` tree) →
+  reject the auto-Edit, record the rejection in `<sub_phase_file>.followup.md` with a clear
+  "out-of-tree edit refused" message. Do NOT crash the runner.
+
+#### Step R.4: Failure handling
+
+If `cast-review-code` itself fails (idle timeout, malformed output) → record the failure in
+`<sub_phase_file>.followup.md` with "review unavailable; manually run `/cast-review-code <file>`"
+and continue. Does NOT block the sub-phase pipeline.
+
+### Step 5: Report Results
 
 After completion, provide a structured summary:
 
@@ -59,6 +118,18 @@ After completion, provide a structured summary:
 4. **Test results**: Pass/fail counts, any failures
 5. **Issues or notes for dependent sub-phases**: Anything the next sub-phase needs to know
 6. **Success criteria checklist**: Each criterion marked pass/fail
+
+## Output Contract
+
+**Output schema:** see `docs/specs/cast-output-json-contract.collab.md`. Emit the contract-v2 shape per that spec — write to `<goal_dir>/.agent-run_<RUN_ID>.output.json` via the atomic-write pattern (`<...>.output.json.tmp` then `os.rename`).
+
+**Delegation/polling:** any child dispatch this runner makes (per its `allowed_delegations`) MUST go through the `/cast-child-delegation` skill. Polling, idle-timeout, and heartbeat semantics are defined in `docs/specs/cast-delegation-contract.collab.md` — treat that spec as canonical.
+
+Minimal example (full schema lives in the spec):
+
+```json
+{"contract_version": "2", "agent_name": "cast-subphase-runner", "status": "completed", ...}
+```
 
 ## Error Handling
 

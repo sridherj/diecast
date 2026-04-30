@@ -37,6 +37,26 @@ fixes; older alpha and pre-release versions do not.
 - A best-effort target of **90 days from acknowledgement to public
   disclosure** applies. We will coordinate if more time is needed.
 
+## Install-time trust model
+
+Diecast install grants the cloned repo execution under your user account.
+The `~/.local/bin/cast-server` wrapper that `./setup` writes invokes
+`uv run --project <repo>` against the very directory you cloned — a
+malicious replacement of the repo (or any of its dependencies) could
+execute arbitrary code as your user the next time `cast-server` runs.
+
+For production environments, pin the install to a tagged release rather
+than tracking `main`:
+
+```bash
+git checkout v0.1.0    # whichever tag you intend to run
+./setup
+```
+
+Per-branch tracking (`upgrade_branch:` in `~/.cast/config.yaml`) is
+deferred to v1.1; until then, every `/cast-upgrade` run pulls `main` from
+the configured remote.
+
 ## Out of scope
 
 - Issues in third-party agents or skills installed by Diecast users.

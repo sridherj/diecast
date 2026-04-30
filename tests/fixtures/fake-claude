@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# tests/fixtures/fake-claude — minimal `claude` CLI stand-in for tests.
+#
+# Logs every invocation to /tmp/claude-invocations.log so tests can assert
+# what `./setup` and downstream skills called. Always exits 0 unless a
+# specific flag explicitly tests a failure path.
+#
+# Supported surface (keep in sync with tests/README.md):
+#   claude --skill <name>       → log "skill <name>"
+#   claude -p '<prompt>'         → log "prompt <summary>"
+#   claude --version             → print "claude-fake 0.0.1-fake"
+set -eu
+
+LOG="${CLAUDE_FAKE_LOG:-/tmp/claude-invocations.log}"
+mkdir -p "$(dirname "${LOG}")"
+touch "${LOG}"
+
+case "${1:-}" in
+  --version)
+    echo "claude-fake 0.0.1-fake"
+    echo "version" >> "${LOG}"
+    exit 0
+    ;;
+  --skill)
+    shift
+    name="${1:-<missing>}"
+    echo "skill ${name}" >> "${LOG}"
+    exit 0
+    ;;
+  -p)
+    shift
+    summary="${1:-<empty>}"
+    summary="${summary:0:80}"
+    echo "prompt ${summary}" >> "${LOG}"
+    exit 0
+    ;;
+  "")
+    echo "args=" >> "${LOG}"
+    exit 0
+    ;;
+  *)
+    echo "args=$*" >> "${LOG}"
+    exit 0
+    ;;
+esac

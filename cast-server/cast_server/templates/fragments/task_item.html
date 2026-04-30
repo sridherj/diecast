@@ -25,6 +25,13 @@
          style="cursor: pointer;">
         <div class="task-title-row">
             <span class="task-title {% if task.status == 'completed' %}completed{% endif %}">{{ task.title }}</span>
+            {% set _size = task.estimate_size if task.estimate_size is defined else None %}
+            {% if _size %}
+              <span class="estimate-pill">{{ _size }}</span>
+              {% if _size in ['L', 'XL'] %}
+                <span class="estimate-warn" title="Consider splitting">Split?</span>
+              {% endif %}
+            {% endif %}
             {% if show_phase_badge is not defined or show_phase_badge %}
             {% if task.phase %}
             <span class="phase-badge" data-phase="{{ task.phase }}">{{ task.phase }}</span>

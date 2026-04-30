@@ -1,0 +1,5 @@
+entity_name: Note
+fields:
+  id: int
+  title: str
+  body: str

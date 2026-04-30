@@ -1,0 +1,9 @@
+slug: b3-minimal-goal
+title: B3 Auto-Review Fixture Goal
+status: active
+phase: phase-1
+tags:
+  - fixture
+  - dry-run
+  - b3
+external_project_dir: /tmp/diecast-b3-external

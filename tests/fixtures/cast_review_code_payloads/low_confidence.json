@@ -1,0 +1,34 @@
+{
+  "contract_version": "2",
+  "agent_name": "cast-review-code",
+  "task_title": "Review b4_ambiguous_target.py",
+  "status": "completed",
+  "summary": "Found one judgment-required issue (low confidence): function name `do_thing` is non-descriptive.",
+  "artifacts": [
+    {
+      "path": "tests/fixtures/subphases/b4_coding_ambiguous/b4_ambiguous_target.py",
+      "type": "code",
+      "description": "Reviewed source file",
+      "metadata": {
+        "issues": [
+          {
+            "file": "tests/fixtures/subphases/b4_coding_ambiguous/b4_ambiguous_target.py",
+            "line": 4,
+            "summary": "Function name `do_thing` is non-descriptive",
+            "details": "Consider renaming to reflect intent. May be acceptable in a fixture; flagging for human review.",
+            "suggested_fix": "Rename `do_thing` to something domain-specific.",
+            "old_string": "def do_thing(value):",
+            "new_string": "def double(value):",
+            "confidence": "low"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "next_steps": [],
+  "human_action_needed": false,
+  "human_action_items": [],
+  "started_at": "2026-04-30T01:31:00Z",
+  "completed_at": "2026-04-30T01:31:30Z"
+}

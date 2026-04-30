@@ -256,3 +256,13 @@ def preso_review(goal_slug: str):
             status_code=404,
         )
     return HTMLResponse(path.read_text(encoding="utf-8"))
+
+
+@router.get("/about")
+async def about(request: Request):
+    version_path = Path(__file__).resolve().parents[3] / "VERSION"
+    version = version_path.read_text(encoding="utf-8").strip() if version_path.exists() else "dev"
+    return templates.TemplateResponse(request, "pages/about.html", {
+        "version": version,
+        "active_page": "about",
+    })

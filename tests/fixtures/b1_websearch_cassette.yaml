@@ -1,0 +1,24 @@
+# VCR-style cassette for B1 Domain Web Search tests.
+#
+# Records one WebSearch interaction so tests are deterministic. The diecast
+# repo does not depend on the `vcrpy` package; the test loads this YAML
+# directly and stubs the WebSearch callable to return the recorded body.
+#
+# To regenerate: capture a fresh search response and replace `interactions`
+# below. URLs and snippets must be public — `bin/lint-anonymization` runs
+# against this fixture in CI.
+interactions:
+  - request:
+      method: POST
+      uri: https://api.example.com/websearch
+      body: '{"query": "best task tracking tools 2026"}'
+    response:
+      status: 200
+      body:
+        results:
+          - title: "Top Task Tracking Tools 2026"
+            url: "https://example.com/best-task-tracking-2026"
+            snippet: "Linear, Jira, Asana, and Height continue to lead in 2026; Linear's command-bar UX is widely cited as the modern reference."
+          - title: "Linear vs Jira 2026"
+            url: "https://example.com/linear-vs-jira-2026"
+            snippet: "Linear's keyboard-first UX is the dominant reference for new PM tooling."

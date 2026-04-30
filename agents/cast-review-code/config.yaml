@@ -2,3 +2,4 @@ model: opus
 timeout_minutes: 120
 context_mode: lightweight
 interactive: true
+proactive: false

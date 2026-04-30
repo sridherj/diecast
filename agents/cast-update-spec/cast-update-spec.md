@@ -118,6 +118,35 @@ Tell the user what was changed and the new version number.
 
 ---
 
+### Spec-Kit Shape Emit (US7) — all modes
+
+Read `templates/cast-spec.template.md` at run start. The template defines the
+canonical shape — User Stories with Priority (P1/P2/P3), Independent Test,
+EARS-style Acceptance Scenarios, stable `FR-NNN` and `SC-NNN` identifiers, and
+Open Questions linked to inline `[NEEDS CLARIFICATION: <what>]` markers.
+
+Behavior per mode:
+
+- **create**: emit a fresh spec in the template's full shape. The 3 new v1
+  specs (`cast-delegation-contract`, `cast-output-json-contract`,
+  `cast-init-conventions`) are authored against this shape on first write.
+- **update**: preserve the existing spec's shape unless the user explicitly
+  opts into a shape migration. Don't surprise the user by reformatting their
+  hand-authored spec. When asked to migrate, render the existing content into
+  the template shape and present the diff per Step 4.
+- **backfill**: read the source code/docs that should become the spec. Infer
+  User Stories, FR-NNN, SC-NNN, and acceptance scenarios from the
+  implementation. Emit in the canonical template shape. Lean on the
+  `[NEEDS CLARIFICATION: <what>]` markers when inference is ambiguous —
+  surface those same items in the Open Questions section.
+
+`cast-update-spec` MUST NOT produce a spec doc that fails the
+`cast-spec-checker` lint. After writing, run
+`/cast-spec-checker <spec_path>` and fix any errors before confirming
+completion in Step 7.
+
+---
+
 ### Create Mode Workflow
 
 Use when no spec exists and the user describes a **new feature** from scratch.

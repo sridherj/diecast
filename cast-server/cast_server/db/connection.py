@@ -8,8 +8,10 @@ from cast_server.config import DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 
 
-def init_db(db_path: Path | None = None) -> None:
+def init_db(db_path: Path | str | None = None) -> None:
     """Initialize DB schema and run migrations. Call once at startup."""
+    if isinstance(db_path, str):
+        db_path = Path(db_path)
     conn = get_connection(db_path)
     try:
         with open(SCHEMA_PATH) as f:
@@ -25,8 +27,10 @@ def init_db(db_path: Path | None = None) -> None:
         conn.close()
 
 
-def get_connection(db_path: Path | None = None) -> sqlite3.Connection:
+def get_connection(db_path: Path | str | None = None) -> sqlite3.Connection:
     """Get a SQLite connection. Auto-creates schema if DB file is new."""
+    if isinstance(db_path, str):
+        db_path = Path(db_path)
     path = db_path or DB_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     is_new = not path.exists() or path.stat().st_size == 0

@@ -3,6 +3,21 @@ name: cast-mvcs-compliance
 user_invocable: true
 description: Apply MVCS architecture compliance rules when creating or reviewing service, repository, or controller code. Use when ensuring services return schemas (not entities), proper transaction management, and correct layer responsibilities.
 ---
+<!--
+SCOPE BOUNDARY (v1 — both checkers ship per Q#24, approved 2026-04-30):
+
+- cast-mvcs-compliance: layer-responsibility rules across ANY MVCS code (including code authored by humans, not just the cast-crud maker chain). Enforces:
+  - Repository methods return entities; services return schemas; controllers return HTTP responses.
+  - Transaction boundaries live at service layer.
+  - Controllers do not bypass services.
+
+- cast-crud-compliance-checker: CRUD-pattern conformance for maker-chain OUTPUT specifically. Enforces:
+  - Maker output structure (every CRUD verb present: create, read, list, update, delete).
+  - Entity-shape consistency across schema/entity/repository/service/controller for one user-supplied entity.
+  - Naming convention adherence (`<entity>_repository.py`, `<entity>_service.py`, etc.).
+
+Consolidation revisit: v1.1 retro per Q#24. If real-use overlap surfaces, merge into one checker; otherwise keep both for readability and incremental adoption (a user-authored MVCS module without using cast-crud still benefits from cast-mvcs-compliance).
+-->
 # MVCSCompliance Skill
 
 Apply these MVCS (Model-View-Controller-Service) architecture rules when writing or reviewing code.

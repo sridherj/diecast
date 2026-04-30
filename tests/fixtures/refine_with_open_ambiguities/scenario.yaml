@@ -1,0 +1,20 @@
+# Fixture: a refine run that ends with two ambiguities the agent left
+# open during the interactive flow. The harness drives the agent's
+# close-out discipline against this scenario.
+#
+# Each ambiguity is keyed by id; the harness pulls the user's answer from
+# the test's stub_user_answers queue (matched by question prompt prefix).
+artifact_path: refined_requirements.collab.md
+artifact_preamble: |
+  # Refined Requirements
+
+  This is a synthetic refine run used to exercise the US13 close-out
+  discipline. The body is intentionally minimal.
+
+ambiguities:
+  - id: ambiguity_1
+    prompt: "ambiguity 1: pick option A or B?"
+    section: scope
+  - id: ambiguity_2
+    prompt: "ambiguity 2: needs vendor decision"
+    section: integrations

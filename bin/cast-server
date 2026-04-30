@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Preflight (CQ5): fail fast with a Diecast-branded message if uvicorn is missing.
+command -v uvicorn >/dev/null || {
+  echo "Diecast: uvicorn missing — run ./setup or 'pip install uvicorn'" >&2
+  exit 1
+}
+
+# The cast_server package lives at cast-server/cast_server/. The cast-server
+# directory itself is hyphenated and not importable; resolve it relative to
+# this script so the launcher works from any cwd.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${SCRIPT_DIR%/bin}/cast-server"
+
+exec uvicorn cast_server.app:app \
+  --app-dir "$APP_DIR" \
+  --host "${CAST_HOST:-127.0.0.1}" \
+  --port "${CAST_PORT:-8000}" \
+  "$@"

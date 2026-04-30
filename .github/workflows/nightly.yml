@@ -1,0 +1,35 @@
+name: B5 nightly (real cast-server kill)
+
+# Nightly variant of the B5 file-based polling suite.
+#
+# Per-PR CI runs the same tests with CAST_DISABLE_SERVER=1 (env-var simulation),
+# which is fast and hermetic but does NOT exercise the real-environment path.
+# This nightly workflow runs the same suite after explicitly killing any
+# cast-server process — catching divergence between simulation and reality
+# at-cadence without slowing every PR.
+#
+# Per Q#21 (Phase 3a sub-phase 1): per-run tests env-sim; nightly real-kill.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"  # 06:17 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  b5-real-kill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        run: pip install pytest pyyaml
+      - name: Kill cast-server (if running)
+        run: pkill -f cast-server || true
+      - name: Run B5 suite without env-var simulation
+        env:
+          CAST_DELEGATION_IDLE_TIMEOUT_SECONDS: "30"
+          CAST_DELEGATION_BACKOFF_OVERRIDE: "100ms,500ms,1s"
+        run: pytest tests/test_b5_file_polling.py tests/test_b5_atomic_write.py -v

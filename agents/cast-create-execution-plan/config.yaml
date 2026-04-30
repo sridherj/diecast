@@ -4,3 +4,4 @@ context_mode: lightweight
 interactive: true
 allowed_delegations: []
 artifact_directory: external_project_dir
+proactive: true

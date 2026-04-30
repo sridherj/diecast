@@ -27,7 +27,7 @@ and relevant specs, then launches a separate Claude Code instance to perform the
 1. **Gather files** — uses provided paths or `git diff --name-only`
 2. **Find specs** — matches changed files against `docs/specs/_registry.md` linked_files
 3. **Build review brief** — writes a self-contained brief to `/tmp/` with intent, dependencies, session context, specs, diff summary, and recent commits
-4. **Launch review tab** — opens a new terminal tab running `claude --permission-mode acceptEdits` with the brief as context and `/review` as the workflow
+4. **Launch review tab** — resolves the terminal binary via `agents/_shared/terminal.py:resolve_terminal()` (walks `$CAST_TERMINAL` → `$TERMINAL` → `~/.cast/config.yaml:terminal_default`; raises `ResolutionError` linked to `docs/reference/supported-terminals.md` if all three are empty), then opens a new tab running `claude --permission-mode acceptEdits` with the brief as context and `/review` as the workflow
 
 ## Notes
 

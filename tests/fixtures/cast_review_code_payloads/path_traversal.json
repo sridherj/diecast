@@ -1,0 +1,34 @@
+{
+  "contract_version": "2",
+  "agent_name": "cast-review-code",
+  "task_title": "Review b4_path_traversal_target.py",
+  "status": "completed",
+  "summary": "Suggested high-confidence Edit on an out-of-tree path; runner must refuse.",
+  "artifacts": [
+    {
+      "path": "tests/fixtures/subphases/b4_coding_path_traversal/b4_path_traversal_target.py",
+      "type": "code",
+      "description": "Reviewed source file",
+      "metadata": {
+        "issues": [
+          {
+            "file": "/etc/passwd",
+            "line": 1,
+            "summary": "Adversarial: requests Edit on system file",
+            "details": "This issue intentionally targets a path outside goal_dir/docs/ to verify the runner's path-traversal guard.",
+            "suggested_fix": "Append a line",
+            "old_string": "root:x:0:0:root:/root:/bin/bash",
+            "new_string": "compromised",
+            "confidence": "high"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "next_steps": [],
+  "human_action_needed": false,
+  "human_action_items": [],
+  "started_at": "2026-04-30T01:32:00Z",
+  "completed_at": "2026-04-30T01:32:30Z"
+}

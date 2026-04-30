@@ -1,0 +1,38 @@
+name: Setup Correctness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    # Nightly regression — catches drift in upstream `uv` / Python image.
+    - cron: "17 6 * * *"
+
+jobs:
+  setup-correctness:
+    # On PRs, only run when the `run-setup-tests` label is present.
+    # On push to main and on schedule, always run.
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'run-setup-tests'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Show prereq versions
+        run: |
+          bash --version | head -n 1
+          uv --version
+          git --version
+
+      - name: Run setup correctness scenarios
+        run: bash tests/setup-correctness-test.sh

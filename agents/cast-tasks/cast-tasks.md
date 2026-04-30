@@ -73,7 +73,7 @@ t = create_task(
     outcome='What success looks like',
     action='Concrete next action',
     task_type='build',
-    estimated_time='30m',
+    estimate_size='S',  # T-shirt size: XS|S|M|L|XL — see cast-task-suggester Rule 2
     energy='medium',
     assigned_to='ai',
     phase='execution',
@@ -131,7 +131,7 @@ print(json.dumps(t, indent=2, default=str))
 "
 ```
 
-Editable fields: `title`, `outcome`, `action`, `task_type`, `estimated_time`, `energy`, `assigned_to`, `phase`, `tip`, `recommended_agent`, `task_artifacts`.
+Editable fields: `title`, `outcome`, `action`, `task_type`, `estimate_size` (XS|S|M|L|XL — see cast-task-suggester Rule 2 for the calibration table), `energy`, `assigned_to`, `phase`, `tip`, `recommended_agent`, `task_artifacts`.
 
 ### Change Task Status
 
@@ -165,6 +165,7 @@ print(json.dumps(t, indent=2, default=str))
 | Field | Values |
 |-------|--------|
 | `task_type` | `build`, `research`, `spike`, `decision`, `write`, `review`, `refactor`, `test`, `ops` |
+| `estimate_size` | `XS`, `S`, `M`, `L`, `XL` (T-shirt CC-time; see `cast-task-suggester` Rule 2) |
 | `energy` | `low`, `medium`, `high` |
 | `assigned_to` | `human`, `ai`, `pair` |
 | `phase` | `requirements`, `exploration`, `plan`, `execution` |

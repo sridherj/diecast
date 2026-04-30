@@ -1,6 +1,5 @@
 """Goal API endpoints — HTMX fragment responses."""
 
-import asyncio
 import logging
 from pathlib import Path
 
@@ -13,7 +12,6 @@ from cast_server.services.goal_service import (
 )
 from cast_server.services import agent_service, goal_service, task_service
 from cast_server.services.suggestion_service import approve_suggestion, decline_suggestion
-from cast_server.goal_detector.runner import run_detector, get_detector_status
 from cast_server.utils.responses import toast_header
 
 logger = logging.getLogger(__name__)
@@ -344,18 +342,3 @@ async def decline(request: Request, suggestion_id: int):
     return Response(content="", media_type="text/html")
 
 
-@router.post("/detector/run")
-async def trigger_detector(request: Request):
-    """Trigger the GoalDetector subprocess."""
-    asyncio.create_task(run_detector())
-    return Response(
-        content='<p class="empty-state">Detecting goals... refresh in a moment.</p>',
-        media_type="text/html",
-    )
-
-
-@router.get("/detector/status")
-async def detector_status():
-    """Get current detector job status."""
-    status = get_detector_status()
-    return {"status": status}

@@ -53,6 +53,8 @@ requirements.human.md). Identify:
 
 If the goal is ambiguous, ask 1-2 clarifying questions before proceeding.
 
+**Interactive prompts:** use the `cast-interactive-questions` skill for all AskUserQuestion rendering. Honor close-out discipline (US13): no untagged items in `Open Questions` at terminal close-out.
+
 ### Step 2: Multi-Lens Analysis
 
 **BEFORE writing a single step**, force yourself through these 4 lenses. Each lens

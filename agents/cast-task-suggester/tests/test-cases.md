@@ -2,7 +2,7 @@
 
 ## Scenario 1: Exploration phase with no existing tasks
 **Input:** Goal with requirements.human.md + plan.collab.md, phase=exploration, empty tasks.md
-**Expected:** 3-5 research/spike tasks, all with outcomes, effort_estimate 30-60m, recommended_agent where applicable
+**Expected:** 3-5 research/spike tasks, all with outcomes, estimate_size in {XS,S,M,L,XL}, recommended_agent where applicable
 **Status:** Not tested
 
 ## Scenario 2: Execution phase with existing tasks
@@ -12,7 +12,7 @@
 
 ## Scenario 3: Spike task generation
 **Input:** Goal with requirements mentioning "evaluate unknown API X"
-**Expected:** At least one task with is_spike=true, effort_estimate=30m, outcome includes "decision on feasibility"
+**Expected:** At least one task with is_spike=true, estimate_size="S", outcome includes "decision on feasibility"
 **Status:** Not tested
 
 ## Scenario 4: Course correction
@@ -22,7 +22,7 @@
 
 ## Scenario 5: Output schema compliance
 **Input:** Any goal
-**Expected:** Valid JSON array, every object has title+outcome+phase (required fields), effort_estimate is "30m"|"45m"|"60m"
+**Expected:** Valid JSON array, every object has title+outcome+phase (required fields), estimate_size is "XS"|"S"|"M"|"L"|"XL"
 **Status:** Not tested
 
 ## Scenario 6: No duplicate suggestions

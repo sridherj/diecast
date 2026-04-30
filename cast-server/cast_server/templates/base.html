@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Diecast{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.css">
+    <link rel="stylesheet" href="/static/vendor/easymde/easymde.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     <script src="/static/htmx.min.js"></script>
 </head>
 <body>
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h1 class="logo">Diecast</h1>
+            <a href="/" class="logo-link">
+                <img src="/static/wordmark.png" alt="Diecast" class="logo-img">
+                <h1 class="logo visually-hidden">Diecast</h1>
+            </a>
         </div>
         <ul class="nav-links">
             <li><a href="/dashboard" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
@@ -45,6 +49,8 @@
 
     <div id="artifact-sidebar-container"></div>
     <div id="toast-container"></div>
+
+    {% include "fragments/footer.html" %}
 
     <script>
     function copyPath(path) {
@@ -127,7 +133,7 @@
     });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/easymde@2.20.0/dist/easymde.min.js"></script>
+    <script src="/static/vendor/easymde/easymde.min.js"></script>
     <script>
     document.body.addEventListener('htmx:afterSwap', function(event) {
         var textarea = event.detail.target.querySelector('.artifact-editor textarea');

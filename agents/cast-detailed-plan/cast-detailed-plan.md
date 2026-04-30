@@ -234,6 +234,12 @@ Read from the goal directory at `goals/{goal-slug}/`:
 - `tasks.md` — Existing tasks (what work is already done or planned)
 - `plan.collab.md` — Existing high-level plan (provides phased structure context)
 
+### CLI Flags
+
+| Flag | Required? | Behavior |
+|------|-----------|----------|
+| `--no-review` | optional | Skip the Step 10 auto-trigger of `cast-plan-review` at end of run. Default: false (auto-review fires). The flag is consumed by this agent itself: read from the delegation `context` field (`no_review: true`) when dispatched as a child, or from CLI args when invoked directly via `/cast-detailed-plan`. |
+
 ### How to Read Input
 
 1. **Always start with `goal.yaml`** — understand title, current phase, status
@@ -422,6 +428,77 @@ Naming examples:
 
 `{descriptive-suffix}` is a kebab-case slug derived from the meaningful sub-phase name(s)
 being planned. If covering multiple sub-phases, combine them (e.g., `foundation-and-plumbing`).
+
+### Step 10: Auto-Dispatch cast-plan-review (B3)
+
+Unless the `--no-review` flag is set, auto-dispatch `cast-plan-review` against the plan
+file just written. This is the "no human reminders" half of US6: every detailed plan
+ships review-checked by default. The auto-trigger uses the `cast-child-delegation`
+skill — runtime semantics (backoff, idle timeout, heartbeat-by-mtime, atomic write)
+live in `docs/specs/cast-delegation-contract.collab.md`. Do not reverse-engineer
+polling from this prompt.
+
+**Pre-requisite (mandatory):** `agents/cast-detailed-plan/config.yaml` MUST list
+`cast-plan-review` under `allowed_delegations`. Without it, the dispatcher rejects
+the trigger with `"Agent X is not allowed to delegate to Y. Allowed: []"` (the
+empirical bug from 2026-04-30 that motivated this Step). The `cast-agent-compliance`
+allow-list audit (sp3c) catches this footgun at lint time.
+
+**Pseudocode:**
+
+```python
+# Read --no-review from delegation context (if dispatched as child) or CLI args (direct).
+no_review = context.get("no_review", False) or "--no-review" in cli_args
+
+if not no_review:
+    child_run_id = invoke_skill(
+        "cast-child-delegation",
+        target="cast-plan-review",
+        context={
+            "plan_file": plan_path_just_written,
+            "goal_slug": goal_slug,
+            "parent_run_id": current_run_id,
+        },
+    )
+    # Polling per cast-delegation-contract spec — sp1 owns the primitive.
+    child_result = poll_child_until_terminal(child_run_id)
+
+    if child_result["status"] == "completed":
+        next_steps.append({
+            "command": f"# Review applied: see Decisions appendix in {plan_path_just_written}",
+            "rationale": "cast-plan-review processed all decisions inline (B2 single-Write contract)",
+            "artifact_anchor": str(plan_path_just_written),
+        })
+        # If a downstream cast-* command is the natural next move (e.g., /cast-task-suggester),
+        # append it as a separate next_steps[] entry — keep one suggestion per entry.
+    else:
+        # status in {"partial", "failed"} or child timed out
+        next_steps.append({
+            "command": f"/cast-plan-review {plan_path_just_written}",
+            "rationale": "auto-review did not complete; rerun manually",
+            "artifact_anchor": str(plan_path_just_written),
+        })
+        # IMPORTANT: do NOT mark this run as failed. The primary plan output is still
+        # valid; only the review check failed. Parent stays "completed".
+```
+
+**`--no-review` flag** is documented in the Inputs > CLI Flags subsection. The flag is
+consumed by this agent itself (not the dispatcher); it's read from the delegation
+`context` field (`no_review: true`) when dispatched as a child, or from CLI args when
+invoked directly.
+
+**Failure handling.** If the child fails (idle timeout, malformed output, status
+`failed`/`partial`), the parent records the failure in `next_steps` with a clear
+rerun-manually message. The parent does NOT fail its own run — the primary plan
+output is still valid; only the review check failed.
+
+**No recursive-trigger guard.** Plan-review Issue #2 (resolved 2026-04-30) explicitly
+dropped the recursive guard: `cast-plan-review` has no auto-trigger logic of its own,
+so there is nothing to recurse on. Reinstate defensively only if that changes.
+
+**Spec cross-reference.** This auto-trigger is the worked example for the dispatcher
+allow-list contract documented in `cast-agent-design-guide`. If you ever question why
+`config.yaml:allowed_delegations` is mandatory, this Step is why.
 
 ## Output Format
 
@@ -618,3 +695,18 @@ Avoid these common planning mistakes:
 
 4. **Spec references use heading names** (e.g., `Task Creation > Required Fields`),
    not numbered sections. Heading names are human-readable and already in the specs.
+
+## Output Contract
+
+**Output schema:** see `docs/specs/cast-output-json-contract.collab.md`. Emit the contract-v2 shape per that spec — terminal payload at `<goal_dir>/.agent-run_<RUN_ID>.output.json` via the atomic-write pattern. The plan document path goes in `artifacts[]` with `type: plan`; review-related follow-ups belong in `next_steps[]`.
+
+**Auto-trigger to cast-plan-review** is documented in **Step 10** above (B3, codified in
+sp3c). The full pseudocode, `--no-review` semantics, and child-failure handling live
+there. Runtime polling semantics live in `docs/specs/cast-delegation-contract.collab.md`
+— do not reverse-engineer them from prompt fragments.
+
+Minimal example (full schema lives in the spec):
+
+```json
+{"contract_version": "2", "agent_name": "cast-detailed-plan", "status": "completed", ...}
+```

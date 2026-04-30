@@ -227,6 +227,71 @@ Priority order:
 - Ask "what if this fails?" for every happy path assumption
 - Push back on "it should just work" — demand concrete scenarios
 
+#### Step 2.2.1: Domain Web Search (B1, opportunistic)
+
+When forming an AskUserQuestion whose options reference a product category with well-known
+real-world products (PM tooling, analytics, observability, design systems, CI providers,
+feature flags, error tracking, etc.), fire a targeted 1–2 query WebSearch **just for that
+option** before forming the recommendation. Cite the source URL in the question's evidence /
+"why this option" line via the existing `cast-interactive-questions` rendering convention.
+
+**Trigger (positive examples — DO search):**
+- "What task tracking tool should we model the UX after?" → search "best task tracking tools 2026"
+- "Which feature-flag service?" → search "LaunchDarkly vs Statsig 2026"
+- "Analytics platform reference?" → search "PostHog vs Amplitude 2026"
+- "Observability stack?" → search "Datadog vs Honeycomb vs SigNoz 2026"
+- "Design system reference?" → search "design systems Linear Notion 2026"
+- "Error tracking service?" → search "Sentry vs Rollbar vs Bugsnag 2026"
+- "CI provider for a small team?" → search "GitHub Actions vs CircleCI vs Buildkite 2026"
+
+**Trigger (negative examples — DO NOT search):**
+- "Should we use POST or PUT?" — no product reference value; HTTP semantics, not UX.
+- "What's the table primary key?" — internal data modeling, not a product UX choice.
+- "How many retries before giving up?" — internal tuning, no real-world reference.
+- "Is the field nullable?" — schema detail, no product reference.
+
+**Cost guard:** the trigger heuristic above IS the cost guard. There are NO per-question
+or per-conversation numeric caps — under-grounding from caps was worse than over-searching.
+The agent only searches when an option is genuinely product-reference-relevant.
+
+**Evidence rendering:** when a recommendation is grounded in a search hit, the AskUserQuestion's
+"grounded rationale" line cites the source URL inline (e.g., "Linear's command-bar UX
+[https://linear.app/method] is the dominant reference here"). Use the existing
+`cast-interactive-questions` rendering convention. Do NOT add a new field to the
+AskUserQuestion contract.
+
+**Failure handling:** if WebSearch returns empty or errors, fall back to ungrounded
+recommendation and append "(unable to find product references; recommendation is from
+training data)" to the rationale line. Do NOT fail the question.
+
+→ This section's behavior is verified by `tests/test_b1_domain_search.py`.
+
+#### Step 2.2.2: Spec-Kit Shape Emit (US7)
+
+The Behavior section is emitted against `templates/cast-spec.template.md`.
+Specifically:
+
+- Each behavior maps to a User Story with Priority (`P1` / `P2` / `P3`)
+  chosen at refinement time. Use the JTBD job statement from Phase 1.2
+  to write the "As a ... I want to ... so that ..." line.
+- Each User Story carries an **Independent test** line — the smallest
+  scenario that proves it works in isolation.
+- Functional requirements use stable identifiers `FR-001`, `FR-002`, ...
+  scoped per spec.
+- Success criteria use stable identifiers `SC-001`, `SC-002`, ... scoped
+  per spec.
+- Acceptance scenarios use EARS-style shape: `WHEN <trigger>, THE SYSTEM
+  SHALL <response>.` (or the conditional variant `WHEN <trigger>, IF
+  <precondition>, THE SYSTEM SHALL <response>.`).
+- Open items are marked inline as `[NEEDS CLARIFICATION: <what>]` AND
+  surfaced as a matching entry in the Open Questions section. The
+  US13 close-out discipline applies — see sp4c; tag genuinely-unresolvable
+  items with `[EXTERNAL]` or `[USER-DEFERRED]` in `human_action_items[]`.
+
+→ Validated by `cast-spec-checker` (lint). Run
+`/cast-spec-checker <output_path>` after writing the refined-requirements
+file to confirm shape compliance.
+
 #### Step 2.3: Update and Re-check
 
 After each answer:
@@ -249,7 +314,8 @@ explicitly in Open Questions.
 
 #### Step 3.1: Write refined_requirements.collab.md
 
-Write the final spec to `goals/{goal-slug}/refined_requirements.collab.md`:
+Render the final spec against `templates/cast-spec.template.md`. Write to
+`goals/{goal-slug}/refined_requirements.collab.md`:
 
 ```yaml
 ---
@@ -265,22 +331,46 @@ questions_asked: 5
 ```
 
 ```markdown
+# {{Spec Title}}
+
+> **Spec maturity:** draft
+> **Version:** 0.1.0
+> **Linked files:** {{path1}}, {{path2}}
+
 ## Intent
 
 [Job statement + expanded context. What the user wants to achieve and why.]
 
-## Behavior
+## User Stories
 
-### Scenario: [Happy path name]
-- **When** [trigger], the system shall [response]
+### US1 — {{One-line user story}} (Priority: P1)
 
-### Scenario: [Edge case name]
-- **If** [trigger], **then** the system shall [response]
+**As a** [role], **I want to** [capability], **so that** [benefit].
 
-### Scenario: [State-dependent name]
-- **While** [precondition], **when** [trigger], the system shall [response]
+**Independent test:** [smallest scenario that proves this user story works in
+isolation]
 
-[3-10 EARS scenarios]
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN [trigger], THE SYSTEM SHALL [response].
+- **Scenario 2:** WHEN [trigger], IF [precondition], THE SYSTEM SHALL [response].
+
+### US2 — {{One-line user story}} (Priority: P2)
+
+[More user stories — one per top-level behavior.]
+
+## Functional Requirements
+
+| ID | Requirement | Notes |
+|----|-------------|-------|
+| FR-001 | [requirement] | [notes] |
+| FR-002 | [requirement] | [notes] |
+
+## Success Criteria
+
+| ID | Criterion | How verified |
+|----|-----------|--------------|
+| SC-001 | [measurable success] | [test or metric] |
 
 ## Constraints
 
@@ -292,8 +382,13 @@ questions_asked: 5
 
 ## Open Questions
 
-- [Unresolved items needing future input]
+- **[NEEDS CLARIFICATION: <topic>]** — what specifically is unclear and who
+  should resolve it.
 ```
+
+The shape above is the canonical spec-kit shape adopted in US7. Every inline
+`[NEEDS CLARIFICATION: <what>]` marker MUST also appear as a matching entry in
+the Open Questions section (the `cast-spec-checker` lint enforces this).
 
 #### Step 3.2: Confirm Completion
 

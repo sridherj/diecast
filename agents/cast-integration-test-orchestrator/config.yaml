@@ -1,0 +1,10 @@
+model: opus
+timeout_minutes: 90
+context_mode: full
+interactive: true
+allowed_delegations:
+- cast-repository-test
+- cast-service-test
+- cast-controller-test
+- cast-integration-test-creator
+proactive: false

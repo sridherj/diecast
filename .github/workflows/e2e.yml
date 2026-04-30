@@ -1,0 +1,40 @@
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    # Nightly regression, off-peak from setup-correctness so logs don't collide.
+    - cron: "47 6 * * *"
+
+jobs:
+  e2e:
+    # On PRs, only run when the `run-e2e` label is present.
+    # On push to main and on schedule, always run.
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'run-e2e'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build e2e image
+        run: docker build -t diecast-e2e -f tests/Dockerfile.test-e2e .
+
+      - name: Run e2e test
+        run: docker run --rm -v "$(pwd):/work" diecast-e2e
+
+      - name: Show fake-claude log on failure
+        if: failure()
+        run: |
+          echo "── fake-claude invocations ──"
+          # The log lives inside the container's HOME, which is ephemeral.
+          # If a rerun is needed, drop into the container interactively:
+          #   docker run --rm -it -v "$(pwd):/work" --entrypoint bash diecast-e2e
+          echo "(log not persisted — drop into the container to debug)"

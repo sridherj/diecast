@@ -1,0 +1,5 @@
+# Legacy DB location from the upstream fork (pre-3b)
+data/
+
+# User-local Diecast DB lives at ~/.cast/diecast.db (not in repo).
+# Override with CAST_DB env var.

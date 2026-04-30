@@ -22,11 +22,60 @@ cd diecast
 
 ## Run tests
 
-> Test harness lands in Phase 4 alongside the installer.
+Diecast ships three layers of tests. Run them in this order when working
+on `./setup` / `/cast-init` / `/cast-upgrade` changes:
+
+1. **Python unit tests + bash smoke tests (fast, ~10 s).**
+
+   ```bash
+   uv run pytest -q
+   bash tests/setup-correctness-test.sh
+   ```
+
+2. **End-to-end Docker integration test (slow, 90-120 s).** See the
+   "Running the e2e test" section below. Skip on local development
+   unless you are touching install / upgrade plumbing; CI runs it on
+   every push to `main` and on PRs labelled `run-e2e`.
+
+3. **Anonymization lint (instant).** Always run before opening a PR:
+
+   ```bash
+   bin/lint-anonymization
+   ```
+
+## Running the e2e test
+
+`tests/e2e-test.sh` orchestrates a full install → `/cast-init` →
+`/cast-upgrade` → migration-runner walk inside a Docker container. It
+uses the fake `claude` binary at `tests/fixtures/fake-claude` (Decision
+#8) so no API key is needed. Expected runtime: 90-120 s.
+
+Run locally:
 
 ```bash
-# Placeholder — test runner not wired up yet.
+docker build -t diecast-e2e -f tests/Dockerfile.test-e2e .
+docker run --rm -v "$(pwd):/work" diecast-e2e
 ```
+
+The repo is mounted at `/work` at runtime; rebuild the image only when
+the `Dockerfile.test-e2e` itself changes.
+
+To gate the test on a pull request before merge, add the `run-e2e`
+label. Without the label, only `tests/setup-correctness-test.sh` runs
+on PRs (see `.github/workflows/setup-correctness.yml`).
+
+### Common failure modes
+
+| Symptom                                                      | Likely cause                                                 |
+|--------------------------------------------------------------|--------------------------------------------------------------|
+| `claude: command not found`                                  | Image built without `tests/fixtures/fake-claude` mounted     |
+| `bin/run-migrations.py: Permission denied`                   | File lost its `+x` bit on checkout (run `chmod +x`)          |
+| Test exits 1 with `assert_grep miss: skill cast-init …`      | `/cast-init` invocation never reached fake-claude            |
+| Runtime > 180 s                                              | Docker image cache cold; first build is ~120 s on top of run |
+| `bin/lint-anonymization reports findings`                    | Internal name leaked into a generated skill or config        |
+
+If the test fails for a reason not covered here, file an issue with the
+full output of `docker run --rm -v "$(pwd):/work" diecast-e2e 2>&1`.
 
 ## Naming conventions
 

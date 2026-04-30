@@ -7,6 +7,13 @@ description: Comprehensive delegation mechanics for Diecast parent-child agent c
 
 Complete reference for Diecast agent delegation: parent mechanics (dispatch, polling, status checks, failure handling, async patterns) and child mechanics (reading delegation context, writing output contracts).
 
+> **Canonical specs.** This skill is the runtime encoding of two specs. If the skill and the specs ever diverge, the **specs are canonical** and this skill MUST be patched.
+>
+> - **Delegation runtime:** [`docs/specs/cast-delegation-contract.collab.md`](../../../docs/specs/cast-delegation-contract.collab.md) — file-based polling, backoff, idle timeout, heartbeat-by-mtime, atomic write, RUN_ID-scoped path validation, test hooks.
+> - **Output JSON shape:** [`docs/specs/cast-output-json-contract.collab.md`](../../../docs/specs/cast-output-json-contract.collab.md) — contract-v2 field-by-field schema, allowed status set, artifacts[] item shape.
+
+> **File is canonical.** The child's terminal output JSON file at `<goal_dir>/.agent-run_<RUN_ID>.output.json` is authoritative. cast-server is a read-through HTTP API — it observes the file but never writes it. This skill MUST never `import requests | httpx | urllib` from a Python implementation; bash-based curl is permitted only as a best-effort dispatch primitive. When `CAST_DISABLE_SERVER=1` is set, parents skip HTTP entirely and drive state from the file alone.
+
 ---
 
 ## PART A: Parent-Side Mechanics
@@ -161,6 +168,68 @@ Use the timeout from your own agent instructions, not this table.
 - If tmux pane doesn't exist (child launched independently), hash comparison is skipped
 
 **Tip:** If a child appears stuck (5+ no-progress), try the Recovery Flow (Section 8) before killing and restarting.
+
+---
+
+### Section 2b: File-Based Polling Loop (canonical)
+
+The bash polling loop in Section 2 is a convenience wrapper over the canonical algorithm encoded below. Any non-bash parent (e.g., a Python orchestrator) MUST implement the algorithm in this section verbatim. The HTTP status check in Section 3 is best-effort augmentation; it MUST NOT be a precondition for terminal-state recognition.
+
+This is the runtime encoding of `docs/specs/cast-delegation-contract.collab.md` — the spec is authoritative.
+
+**Env-var contract** (from the spec's "Test Hooks" subsection):
+
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `CAST_DELEGATION_IDLE_TIMEOUT_SECONDS` | `300` | Idle timeout before parent returns synthetic `failed` with `human_action_needed=true`. |
+| `CAST_DELEGATION_BACKOFF_OVERRIDE` | (unset → use `1,2,5,10,30`) | CSV polling ladder. Suffixes `ms`, `s` recognized; bare numbers default to seconds. Final value of CSV is steady-state. |
+| `CAST_DISABLE_SERVER` | (unset) | When `1`, parent skips HTTP-API attempts; file path drives all state. |
+
+**Pseudocode** (parent-side, post-dispatch):
+
+```python
+# Polling loop (executed by parent agent after dispatch)
+backoff = parse_backoff_or_default(env.CAST_DELEGATION_BACKOFF_OVERRIDE, [1, 2, 5, 10, 30])
+idle_timeout = int(env.CAST_DELEGATION_IDLE_TIMEOUT_SECONDS or 300)
+output_path = f"{goal_dir}/.agent-run_{run_id}.output.json"
+last_mtime = None
+last_progress = time.now()
+i = 0
+
+while True:
+    if exists(output_path):
+        try:
+            data = json.load(output_path)
+        except JSONDecodeError as e:
+            return {"status": "failed", "errors": [f"malformed child output: {e}"]}
+        if data.status in {"completed", "partial", "failed"}:
+            return data
+
+        # Heartbeat: mtime changed → child still alive
+        mtime = stat(output_path).mtime
+        if mtime != last_mtime:
+            last_mtime = mtime
+            last_progress = time.now()
+
+    if cancellation_requested():
+        return {"status": "failed", "errors": ["cancelled"]}
+
+    if time.now() - last_progress > idle_timeout:
+        return {
+            "status": "failed",
+            "human_action_needed": True,
+            "errors": [f"child idle for {idle_timeout}s; check {output_path}"]
+        }
+
+    sleep(backoff[min(i, len(backoff) - 1)])
+    i += 1
+```
+
+**Heartbeat contract for long-running children.** A child that holds the run open for >150s without writing any progressive partial output MUST `os.utime`-touch the output file (or write a `status="running"`-equivalent partial JSON only as a last resort — note that `running` is a non-terminal value the parent will treat as malformed if it sees it, so prefer mtime touch). Default cadence: at least once per `idle_timeout / 2` seconds.
+
+**Atomic write reminder.** Children write to `<output_path>.tmp` then `os.rename` to `<output_path>`. Parents never read `*.tmp`. See spec § Atomic Write Contract.
+
+**RUN_ID scoping.** Parent reads only the exact `output_path` it constructed from its own dispatched RUN_ID. Never glob `*.output.json` — see Section 2's DANGER block.
 
 ---
 
@@ -360,6 +429,44 @@ NEW_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/cast-subphase-runn
 # Poll the new run_id
 while [ ! -f "{goal_dir}/.agent-$NEW_RUN_ID.output.json" ]; do sleep 10; done
 ```
+
+---
+
+### Terminal Resolution
+
+When dispatching a child agent that spawns a new terminal tab, the dispatcher MUST resolve the terminal binary via `agents/_shared/terminal.py:resolve_terminal()`. Never hardcode a specific terminal binary in a cast-* agent or in cast-server.
+
+**Env-var contract (resolution order):**
+
+1. `$CAST_TERMINAL` — preferred. Project-scoped override.
+2. `$TERMINAL` — POSIX convention.
+3. `~/.cast/config.yaml:terminal_default` — written by `/cast-setup` on first run.
+4. `ResolutionError` — raised when all three are empty.
+
+**Usage:**
+
+```python
+from agents._shared.terminal import resolve_terminal, ResolutionError
+
+try:
+    term = resolve_terminal()
+except ResolutionError as exc:
+    # Surface the error to the user with the docs link from the message.
+    # NEVER fall back to xterm or any "safe default" silently.
+    raise SystemExit(str(exc))
+
+# term.command, term.args, term.flags drive the spawn.
+# Pass as a list — NEVER use shell=True.
+subprocess.Popen([term.command, *term.args, *spawn_args])
+```
+
+If `resolve_terminal()` raises, surface the error to the user with the link to `docs/reference/supported-terminals.md` (already embedded in the error message). Do **not** fall back to a hardcoded terminal silently — that produces a confusing UX and hides the missing configuration.
+
+**Security:** the resolved command is always passed as `args=[...]` to `subprocess.Popen`. NEVER use `shell=True` — both env vars and the config file are user-writable, and `shell=True` would expand them through the shell, opening an injection surface.
+
+**First-run prompt:** `agents/_shared/terminal.needs_first_run_setup()` returns `True` when none of the three sources is set. The `/cast-setup` script (Phase 4) calls this helper to decide whether to prompt the user.
+
+See `docs/reference/supported-terminals.md` for the per-terminal flag table, supported-platform notes, and contributor instructions for adding a new terminal.
 
 ---
 

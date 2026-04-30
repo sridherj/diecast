@@ -1,0 +1,12 @@
+model: opus
+timeout_minutes: 120
+context_mode: full
+interactive: true
+allowed_delegations:
+- cast-schema-creation
+- cast-entity-creation
+- cast-repository
+- cast-service
+- cast-controller
+- cast-custom-controller
+proactive: false

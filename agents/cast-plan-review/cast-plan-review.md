@@ -64,9 +64,11 @@ raise this as an issue in the Architecture section:
 - Recommend the plan be updated to say `-> Delegate: /skill-name -- [context]` instead of
   expanding the work into manual steps
 
-## Step 4: Review Sections
+## Step 4: Review Sections (B2 — in-memory decision buffer)
 
 Work through each section one at a time. For each issue found, **present ONE issue at a time** via AskUserQuestion. Wait for the user's decision on that issue before presenting the next one. When all issues in a section are resolved, move to the next section.
+
+**Buffer, do not write.** Decisions accumulate in an in-memory list during the entire review. The plan file is rewritten exactly ONCE at end-of-review (Step 5). Do not Edit or Write the plan file per decision — that is the legacy pattern this agent has retired.
 
 ### Section 1: Architecture
 Evaluate:
@@ -115,34 +117,122 @@ Follow the `cast-interactive-questions` skill protocol. Key points:
 - Option labels: `"#1: Option A -- <short description> (Recommended)"`, `"#1: Option B -- <short description>"`, etc.
 - Recommendation first with grounded reasoning (cite specific code, spec, or pattern evidence)
 
-## Step 5: Document Feedback
+## Step 5: Apply Decisions (single end-of-review rewrite)
 
-**Critical:** After each section, when the user provides feedback or makes decisions, append a record to the **bottom** of the plan document under a `## Review Decisions` section.
+The agent runs the following workflow. There is exactly ONE Write call against the plan
+file per review run.
 
-Format:
-```markdown
-## Review Decisions
+### 5.1 Initialize the buffer
 
-> This section documents decisions made during plan review. The execution phase should
-> treat these as context only -- the plan above is the source of truth for implementation.
-
-### <Date> -- Plan Review
-
-**Section: Architecture**
-- Issue #1: <brief description> -> Decision: <what was decided and why>
-- Issue #2: <brief description> -> Decision: <what was decided and why>
-
-**Section: Code Quality**
-- Issue #3: <brief description> -> Decision: <what was decided and why>
-
-**Section: Tests**
-- (No issues raised)
-
-**Section: Performance**
-- Issue #4: <brief description> -> Decision: <what was decided and why>
+```
+decisions = []  # in-memory only; never persisted mid-review
 ```
 
-If the `## Review Decisions` section already exists (from a prior review), append a new dated subsection -- do not overwrite previous decisions.
+### 5.2 Per issue, append to the buffer
+
+Each AskUserQuestion answer extends the buffer:
+
+```python
+decisions.append({
+    "timestamp": iso8601_utc_now(),                # e.g. 2026-04-30T18:42:00Z
+    "question": one_line_question,                  # used for the appendix entry
+    "decision": answer,                             # the user's chosen option text
+    "rationale": rationale_or_empty,                # one-line "why"
+    "target_marker": marker_text_in_plan,           # nullable; substring anchor for body patch
+    "body_patch": patch_to_apply_at_end,            # nullable; instructions for body rewrite
+    "key": question_hash_or_first_80_chars,         # idempotency dedup key
+})
+```
+
+Do **not** call Edit or Write on the plan file at this point.
+
+### 5.3 Per-section confirm-and-commit checkpoint
+
+At the end of each of the four sections (Architecture, Code Quality, Tests, Performance),
+ask via `cast-interactive-questions`:
+
+> "Section <name> complete with N issue(s) resolved. Ready to continue to the next section,
+> or stop here?"
+
+- **Continue** → keep the buffer in memory; advance to the next section.
+- **Stop**     → commit the buffered decisions immediately by jumping to Step 5.5 below.
+                  This is the documented mitigation for the interruption tradeoff: a Ctrl-C
+                  or crash mid-review otherwise loses the entire buffer.
+
+### 5.4 End-of-review preflight (stale-target check)
+
+Before the final Write, re-read the plan file fresh from disk. For every decision with a
+`target_marker`, verify the marker substring is still present.
+
+- If the marker is missing (because a later decision in the same buffer rewrote that
+  paragraph), append `[stale-target]` to the decision and surface a follow-up via
+  `cast-interactive-questions` describing what the user must manually patch. Wait for the
+  user to acknowledge before proceeding to the next step. The decision still records in the
+  appendix with the `[stale-target]` flag — never silently drop it.
+
+### 5.5 Idempotency: re-running on a plan with an existing Decisions appendix
+
+Read the existing `## Decisions` appendix (if present). For every new decision whose `key`
+matches an existing entry's key, replace that entry in-place. New decisions append to the
+appendix in chronological order. Re-running the review with the same answers must be a
+no-op; re-running with a different answer to the same question must update the entry, not
+duplicate it. The dedup key is `sha256(question)[:16]` OR the first 80 characters of the
+question text, whichever the implementation chooses — the choice is fixed across runs.
+
+### 5.6 Path-traversal guard (BEFORE the Write)
+
+```python
+plan_path    = Path(plan_file).resolve()
+allowed_roots = [goal_dir.resolve(), Path("docs/plan").resolve()]
+assert any(plan_path.is_relative_to(r) for r in allowed_roots), \
+    f"refusing to edit {plan_path}: outside allowed roots"
+```
+
+If the assertion fails, abort with `status: failed` in the output JSON. Never edit a plan
+path outside `goal_dir/` or `docs/plan/`.
+
+### 5.7 Build the final buffer in memory, then Write once
+
+```python
+buffer = original_plan_content
+for decision in decisions:
+    if decision["body_patch"] and "[stale-target]" not in (decision.get("flags") or []):
+        buffer = apply_body_patch(buffer, decision["body_patch"])
+buffer = upsert_decisions_appendix(buffer, decisions)
+Write(plan_path, buffer)   # exactly one Write call per review run
+```
+
+### Decision-Entry Format (canonical)
+
+The `## Decisions` appendix uses one bullet per decision in this exact format:
+
+```
+- **2026-04-30T18:42:00Z — Should we drop the recursive auto-trigger guard?** — Decision: Yes, drop it. Rationale: YAGNI; cast-plan-review has no auto-trigger to recurse on.
+```
+
+Format spec: `- **<ISO-8601-UTC> — <one-line question>** — Decision: <answer>. Rationale: <why>.`
+
+### Interruption Tradeoff (must be surfaced to the user)
+
+A single end-of-review Write means an interrupted review (Ctrl-C, terminal crash, network
+loss mid-AskUserQuestion) loses every decision still buffered in memory. This is an
+accepted tradeoff: per-decision writes were retired because they triggered O(N) file
+rewrites and confused diff review.
+
+The mitigation is the per-section confirm-and-commit checkpoint in Step 5.3 — replying
+"stop" commits the buffer immediately so the user keeps progress through the last
+completed section. Surface this tradeoff explicitly in the agent's user-facing help and
+in the opening message of every review run.
+
+### Path & re-entry rules (summary)
+
+| Concern              | Behavior                                                              |
+|----------------------|-----------------------------------------------------------------------|
+| Plan write count     | Exactly 1 per run (or 1 per "stop" checkpoint if interrupted early).  |
+| Path-traversal       | Guard rejects anything outside `goal_dir/` or `docs/plan/`.           |
+| Idempotent rerun     | Same key → in-place update; no duplicates in the appendix.            |
+| Stale target marker  | `[stale-target]` flag + follow-up surfaced via cast-interactive-questions. |
+| Concurrent writers   | N/A — cast-plan-review is the sole writer of the plan during its run. |
 
 ## Step 6: Summary
 
@@ -155,10 +245,26 @@ After all sections are reviewed, present a summary table:
 | Tests | X | Y | Z |
 | Performance | X | Y | Z |
 
-Then update the plan document with any agreed changes and the Review Decisions log.
+The summary table is rendered in conversation only — it does not need to be embedded in
+the plan file (Step 5 already wrote the appendix and any body patches in a single pass).
+
+## Output Contract
+
+**Output schema:** see `docs/specs/cast-output-json-contract.collab.md`. Emit the contract-v2 shape per that spec — terminal payload is written to `<goal_dir>/.agent-run_<RUN_ID>.output.json` via the atomic-write pattern. The `summary` field captures the human-readable review outcome; `artifacts[]` lists the modified plan file (`type: plan`); `human_action_needed` is `true` whenever an Open issue remains unresolved at session close.
+
+Delegation/polling rules live in `docs/specs/cast-delegation-contract.collab.md` — that spec is canonical for any auto-trigger this agent participates in (e.g., the cast-detailed-plan → cast-plan-review chain in sp3c's worked example).
+
+Minimal example (full schema lives in the spec):
+
+```json
+{"contract_version": "2", "agent_name": "cast-plan-review", "status": "completed", ...}
+```
 
 ## Notes
 - Do not assume priorities on timeline or scale -- ask
 - The recommended option should always be listed first in AskUserQuestion
 - If no issues are found in a section, say so and move on
 - Plan modifications from review should be made inline in the plan, not as a separate document
+- **Single Write contract:** never write or edit the plan file mid-review. Every decision
+  buffers in memory until Step 5.7 (or a "stop" checkpoint). Regression to per-decision
+  writes is what this agent's B2 redesign retired — see plan-review Issue #15.

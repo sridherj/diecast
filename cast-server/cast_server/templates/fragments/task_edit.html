@@ -38,7 +38,7 @@
             </select>
             <select name="assigned_to" class="input-field">
                 <option value="">Assigned to</option>
-                {% for opt in ["SJ", "Claude", "SJ + Claude"] %}
+                {% for opt in ["Me", "Claude", "Me + Claude"] %}
                 <option value="{{ opt }}" {% if task.assigned_to == opt %}selected{% endif %}>{{ opt }}</option>
                 {% endfor %}
             </select>

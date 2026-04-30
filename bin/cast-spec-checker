@@ -1,0 +1,318 @@
+#!/usr/bin/env python3
+"""cast-spec-checker — lint a spec doc against templates/cast-spec.template.md.
+
+Validates BOTH cast-refine-requirements output AND cast-update-spec output.
+The shape rules are documented in agents/cast-spec-checker/cast-spec-checker.md.
+
+Exit codes:
+  0 — no errors (warnings allowed, or --warn-only is set)
+  1 — at least one error
+  2 — invocation error (file not found, no path passed)
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+REQUIRED_SECTIONS = (
+    "User Stories",
+    "Functional Requirements",
+    "Success Criteria",
+    "Open Questions",
+)
+
+PRIORITY_RE = re.compile(r"\bPriority:\s*(P1|P2|P3)\b")
+US_HEADING_RE = re.compile(r"^###\s+(US\S+)\s*[—-]\s*(.+)$")
+INDEPENDENT_TEST_RE = re.compile(r"\*\*Independent test:?\*\*", re.IGNORECASE)
+ACCEPTANCE_SCENARIO_HEADER_RE = re.compile(
+    r"\*\*Acceptance scenarios?\b", re.IGNORECASE
+)
+EARS_SCENARIO_RE = re.compile(
+    r"\bWHEN\b.+?\bTHE\s+SYSTEM\s+SHALL\b", re.IGNORECASE | re.DOTALL
+)
+NEEDS_CLAR_INLINE_RE = re.compile(r"\[NEEDS CLARIFICATION:\s*([^\]]+)\]")
+FR_ID_RE = re.compile(r"\bFR-(\d{3,})\b")
+SC_ID_RE = re.compile(r"\bSC-(\d{3,})\b")
+SECTION_HEADING_RE = re.compile(r"^##\s+(.+?)\s*$")
+
+
+@dataclass
+class Finding:
+    file: str
+    line: int
+    severity: str  # "error" | "warning"
+    rule: str
+    message: str
+
+    def render(self) -> str:
+        return f"{self.file}:{self.line}: {self.severity} {self.rule}: {self.message}"
+
+
+def _section_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
+    """Map H2 section name -> (start_line, end_line) inclusive (1-indexed)."""
+    spans: dict[str, tuple[int, int]] = {}
+    current: tuple[str, int] | None = None
+    for idx, raw in enumerate(lines, start=1):
+        m = SECTION_HEADING_RE.match(raw.rstrip())
+        if not m:
+            continue
+        name = m.group(1).strip()
+        if current is not None:
+            spans[current[0]] = (current[1], idx - 1)
+        current = (name, idx)
+    if current is not None:
+        spans[current[0]] = (current[1], len(lines))
+    return spans
+
+
+def _collect_user_stories(
+    lines: list[str], section_span: tuple[int, int]
+) -> list[tuple[int, str, str, list[str]]]:
+    """Return list of (start_line, identifier, heading_text, story_lines)."""
+    start, end = section_span
+    out: list[tuple[int, str, str, list[str]]] = []
+    current: tuple[int, str, str, list[str]] | None = None
+    for offset, raw in enumerate(lines[start - 1 : end]):
+        line_no = start + offset
+        m = US_HEADING_RE.match(raw.rstrip())
+        if m:
+            if current is not None:
+                out.append(current)
+            current = (line_no, m.group(1), m.group(2).strip(), [])
+            continue
+        if current is not None:
+            current[3].append(raw)
+    if current is not None:
+        out.append(current)
+    return out
+
+
+def lint_spec(path: Path, *, warn_only: bool = False) -> tuple[list[Finding], int]:
+    if not path.exists():
+        print(f"{path}: invocation-error: file not found", file=sys.stderr)
+        return ([], 2)
+
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    spans = _section_spans(lines)
+    findings: list[Finding] = []
+    file_label = str(path)
+
+    # R1 — required sections present
+    for required in REQUIRED_SECTIONS:
+        if required not in spans:
+            findings.append(
+                Finding(
+                    file=file_label,
+                    line=1,
+                    severity="error",
+                    rule="R1",
+                    message=f"missing required section: ## {required}",
+                )
+            )
+
+    # User-story-scoped checks need the User Stories section.
+    user_stories_span = spans.get("User Stories")
+    if user_stories_span is not None:
+        stories = _collect_user_stories(lines, user_stories_span)
+        if not stories:
+            findings.append(
+                Finding(
+                    file=file_label,
+                    line=user_stories_span[0],
+                    severity="error",
+                    rule="R1",
+                    message="User Stories section has no '### USx — ...' entries",
+                )
+            )
+        for line_no, ident, heading, body in stories:
+            blob = "\n".join(body)
+
+            # R2 — priority present
+            if not (PRIORITY_RE.search(heading) or PRIORITY_RE.search(blob)):
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=line_no,
+                        severity="error",
+                        rule="R2",
+                        message=(
+                            f'User Story "{ident}" missing Priority '
+                            f"(expected one of P1|P2|P3)"
+                        ),
+                    )
+                )
+
+            # R3 — independent test line
+            if not INDEPENDENT_TEST_RE.search(blob):
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=line_no,
+                        severity="warning",
+                        rule="R3",
+                        message=(
+                            f'User Story "{ident}" missing **Independent test:** line'
+                        ),
+                    )
+                )
+
+            # R4 — at least one EARS-style acceptance scenario
+            has_header = ACCEPTANCE_SCENARIO_HEADER_RE.search(blob) is not None
+            has_ears = EARS_SCENARIO_RE.search(blob) is not None
+            if not (has_header and has_ears):
+                missing = []
+                if not has_header:
+                    missing.append("Acceptance scenarios header")
+                if not has_ears:
+                    missing.append("EARS-style 'WHEN ..., THE SYSTEM SHALL ...' line")
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=line_no,
+                        severity="error",
+                        rule="R4",
+                        message=(
+                            f'User Story "{ident}" missing '
+                            + " and ".join(missing)
+                        ),
+                    )
+                )
+
+    # R5 — duplicate FR / SC identifiers within the spec
+    fr_seen: dict[str, int] = {}
+    sc_seen: dict[str, int] = {}
+    for idx, raw in enumerate(lines, start=1):
+        for match in FR_ID_RE.finditer(raw):
+            ident = f"FR-{match.group(1)}"
+            if ident in fr_seen and "|" in raw:
+                # Only flag table rows (definitions) as duplicates, not prose refs.
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=idx,
+                        severity="error",
+                        rule="R5",
+                        message=(
+                            f"duplicate functional-requirement identifier {ident} "
+                            f"(first defined at line {fr_seen[ident]})"
+                        ),
+                    )
+                )
+            elif "|" in raw:
+                fr_seen.setdefault(ident, idx)
+        for match in SC_ID_RE.finditer(raw):
+            ident = f"SC-{match.group(1)}"
+            if ident in sc_seen and "|" in raw:
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=idx,
+                        severity="error",
+                        rule="R5",
+                        message=(
+                            f"duplicate success-criterion identifier {ident} "
+                            f"(first defined at line {sc_seen[ident]})"
+                        ),
+                    )
+                )
+            elif "|" in raw:
+                sc_seen.setdefault(ident, idx)
+
+    # R6 — orphan [NEEDS CLARIFICATION] markers
+    open_q_span = spans.get("Open Questions")
+    open_q_blob = ""
+    if open_q_span is not None:
+        open_q_blob = "\n".join(lines[open_q_span[0] - 1 : open_q_span[1]])
+    open_q_topics: set[str] = set(
+        m.group(1).strip().lower() for m in NEEDS_CLAR_INLINE_RE.finditer(open_q_blob)
+    )
+
+    # We deliberately exempt blocks that are illustrative worked examples
+    # (i.e., live under an H2 starting with "Worked Example").
+    worked_example_spans: list[tuple[int, int]] = [
+        span for name, span in spans.items() if name.lower().startswith("worked example")
+    ]
+
+    def _in_worked_example(line_no: int) -> bool:
+        return any(start <= line_no <= end for start, end in worked_example_spans)
+
+    for idx, raw in enumerate(lines, start=1):
+        if open_q_span is not None and open_q_span[0] <= idx <= open_q_span[1]:
+            continue
+        if _in_worked_example(idx):
+            continue
+        for match in NEEDS_CLAR_INLINE_RE.finditer(raw):
+            topic = match.group(1).strip().lower()
+            if topic not in open_q_topics:
+                findings.append(
+                    Finding(
+                        file=file_label,
+                        line=idx,
+                        severity="error",
+                        rule="R6",
+                        message=(
+                            f"orphan [NEEDS CLARIFICATION: {match.group(1).strip()}] — "
+                            f"add a matching entry in the Open Questions section"
+                        ),
+                    )
+                )
+
+    # R7 — no mixed shape (FR/SC tables present but no User Stories section)
+    has_fr_or_sc = any(FR_ID_RE.search(line) or SC_ID_RE.search(line) for line in lines)
+    if has_fr_or_sc and "User Stories" not in spans:
+        findings.append(
+            Finding(
+                file=file_label,
+                line=1,
+                severity="error",
+                rule="R7",
+                message=(
+                    "spec has FR-NNN or SC-NNN identifiers but no User Stories "
+                    "section — half-migrated shape detected"
+                ),
+            )
+        )
+
+    has_error = any(f.severity == "error" for f in findings)
+    if warn_only:
+        exit_code = 0
+    else:
+        exit_code = 1 if has_error else 0
+    return findings, exit_code
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="cast-spec-checker",
+        description=(
+            "Lint spec documents against templates/cast-spec.template.md. "
+            "Validates both cast-refine-requirements output and "
+            "cast-update-spec output."
+        ),
+    )
+    parser.add_argument("paths", nargs="+", help="Spec doc paths")
+    parser.add_argument(
+        "--warn-only",
+        action="store_true",
+        help="Exit 0 even if errors are present (v1.0 rollout flag).",
+    )
+    args = parser.parse_args(argv)
+
+    overall_exit = 0
+    for raw_path in args.paths:
+        path = Path(raw_path)
+        findings, code = lint_spec(path, warn_only=args.warn_only)
+        for finding in findings:
+            print(finding.render())
+        if code > overall_exit:
+            overall_exit = code
+    return overall_exit
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

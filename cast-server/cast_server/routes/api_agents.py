@@ -1,13 +1,17 @@
 """Agent API endpoints — DB-backed agent run tracking."""
 
-from fastapi import APIRouter, Request
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
 
+from cast_server import config as _config
 from cast_server.deps import templates
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
 from cast_server.services import agent_service
+from cast_server.services.agent_service import MalformedOutputError, load_canonical_file
 from cast_server.services.error_memory_service import resolve_memory
 
 
@@ -84,11 +88,45 @@ async def trigger_agent(request: Request, name: str):
 
 @router.get("/jobs/{run_id}")
 async def get_run_status(run_id: str):
-    """Get agent run status by ID."""
-    run = agent_service.get_agent_run(run_id)
-    if not run:
-        return Response(status_code=404, content="Run not found")
-    return run
+    """Get agent run status by ID — file-canonical read-through.
+
+    Precedence (Phase 3b sp5; references docs/specs/cast-delegation-contract.collab.md):
+      * File present + parseable → file fields win (DB fills gaps); ``source: "file"``.
+      * File missing → DB-only state; ``source: "db"``.
+      * File malformed → 502 + ``source: "file_invalid"`` and parse error in ``error``.
+      * Unknown run_id (no DB row) → 404. Server-dispatched-only carve-out per
+        Q#17/A3 lock — no filesystem fallback resolver in v1.
+
+    File is read on every request; no caching. The canonical-file rule
+    supersedes any future caching layer.
+    """
+    db_row = agent_service.get_agent_run(run_id)
+    if db_row is None:
+        raise HTTPException(status_code=404, detail=f"Unknown run_id: {run_id}")
+
+    goal_slug = db_row.get("goal_slug") or ""
+    goal_dir = Path(_config.GOALS_DIR) / goal_slug if goal_slug else Path(_config.GOALS_DIR)
+
+    try:
+        file_data = load_canonical_file(goal_dir, run_id)
+    except MalformedOutputError as e:
+        return JSONResponse(
+            status_code=502,
+            content={
+                "run_id": run_id,
+                "source": "file_invalid",
+                "error": str(e),
+                "db_state": db_row,
+            },
+        )
+
+    if file_data is None:
+        return {**db_row, "source": "db"}
+
+    # Field-by-field merge: file wins where present; DB fills gaps
+    # (created_at, parent_run_id, worktree_path, etc.).
+    merged = {**db_row, **file_data, "source": "file"}
+    return merged
 
 
 @router.post("/jobs/{run_id}/recheck")
