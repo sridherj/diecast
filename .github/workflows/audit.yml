@@ -1,0 +1,32 @@
+name: Interdependency Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        run: pip install pytest
+      - name: Run audit on real fleet (diagnostic; --fail-on=none until issue #2 closes)
+        run: bin/audit-interdependencies
+      - name: Run planted-fixture regression tests
+        run: pytest tests/test_audit_interdependencies.py -v
+      - name: Dump audit JSON on failure
+        if: failure()
+        run: bin/audit-interdependencies --json > audit-report.json || true
+      - name: Upload audit JSON artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit-report.json

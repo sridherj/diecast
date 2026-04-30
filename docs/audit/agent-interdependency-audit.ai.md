@@ -1340,3 +1340,131 @@ After 2.4 remediation: red count outside the deferred-issue set = **0** (Gate G2
 - Per-agent dry-run logs: `tests/dry-runs/cast-*.log` (36 logs) ✓
 - Real-world sanity pass: `tests/dry-runs/_real_world_sanity.log` (cast-preso-orchestrator, cast-orchestrate, cast-explore) ✓
 - Spike artifact: `docs/audit/linkedout-coupling-spike.ai.{md,json}` (15 rows, locked schema) ✓
+
+## Maintenance
+
+> Appended by sub-phase 2.5 — the audit script is now wired into CI via
+> `.github/workflows/audit.yml` and protected by planted-fixture regression
+> tests at `tests/fixtures/audit-interdependencies/`. This section documents
+> how to evolve the script without breaking the gate.
+
+### How to add a new check
+
+1. **Pick a mode.** A new sub-audit either fits an existing mode (`naming`,
+   `folder`, `recovery`, `cross-skill`) or warrants a new `--mode` value.
+   Adding a new mode requires updating `_MODES` in
+   `bin/audit-interdependencies` and the `--mode` choices in `argparse`.
+2. **Implement the classifier.** Each classifier returns `(status, reason)`
+   where `status ∈ {green, yellow, red}` and `reason` is a short, stable
+   string. The reason becomes part of the JSON contract, so treat it as
+   semi-public — pytest assertions in
+   `tests/test_audit_interdependencies.py` match on substrings.
+3. **Add a planted fixture.** Mirror the existing pattern under
+   `tests/fixtures/audit-interdependencies/should-fail-<check>/agents/cast-foo/cast-foo.md`.
+   Document the intentional failure mode in a sibling `README.md`.
+4. **Extend the parametrized test.** Add a row to `FAIL_FIXTURES` in
+   `tests/test_audit_interdependencies.py` with the new fixture name and
+   the marker reason string.
+5. **Re-run locally:**
+   ```bash
+   pytest tests/test_audit_interdependencies.py -v
+   bin/audit-interdependencies   # confirm no surprise reds on real fleet
+   ```
+6. **Open a PR.** CI runs both the real-fleet audit (diagnostic) and the
+   planted-fixture suite (gating). A regression in the new check will
+   flip the matching fixture and fail the build.
+
+### How to add a new agent
+
+The script auto-discovers any directory matching `agents/cast-*/` whose
+`cast-*.md` prompt file (or, for `python-script` agents, any `*.py` file)
+exists. **No script update is required** when a new agent lands. Cross-
+references from existing agents to the new agent will turn green
+automatically; references to the new agent's own slash command will resolve
+on the next CI run.
+
+For shared skills (`skills/claude-code/cast-*/SKILL.md`), the same auto-
+discovery applies.
+
+### How to handle false-positives
+
+When the auditor flags a legitimate construct as red:
+
+1. **Open a GitHub issue** describing the false-positive class. Issue #2
+   (recovery classifier) and Issue #3 (cross-skill canonical form) are the
+   precedents — both deferred to Phase 3a for a tightening pass.
+2. **For one-off cases**, prefer fixing the prompt to make the construct
+   conform (e.g., add an explicit fallback sentence near a `Read` verb)
+   over carving exceptions in the script.
+3. **For systemic false-positives**, consider an opt-in `.audit-ignore`
+   allowlist:
+   - Format: one path-glob per line, optional `# reason` comment.
+   - Loader: `bin/audit-interdependencies` reads `.audit-ignore` from the
+     fixture-dir or repo-root and skips matching `source_file` entries
+     before classification.
+   - Status: **not yet implemented** (v1.1 candidate). Until then, surface
+     the class via a deferred issue and document the deferral in this
+     audit doc.
+
+### How to update planted fixtures
+
+The fixture markdown is intentionally minimal — every word is a potential
+regex match. When editing a fixture:
+
+1. **Avoid trigger-word collisions.** The recovery regex matches words like
+   `fallback`, `early-exit`, `default to`, etc. A fixture asserting a
+   recovery red must not contain those words (the auditor would classify it
+   green and the fixture would silently pass when the gate breaks). The
+   `should-fail-recovery` fixture's prose was tightened during 2.5 for
+   exactly this reason.
+2. **Re-run the assertion locally** after any fixture edit:
+   ```bash
+   bin/audit-interdependencies --fail-on=red --fixture-dir tests/fixtures/audit-interdependencies/should-fail-<name>
+   echo "exit=$?   # must be 1 for should-fail-*, 0 for green-baseline"
+   ```
+3. **Update the README.md** alongside the fixture so the documented failure
+   mode stays in sync with the assertion.
+
+### Expected runtime + CI cost
+
+On the v1 fleet (~36 agents + 10 skills, 1392 graph edges), `bin/audit-
+interdependencies --mode=all` completes in **under 1 second** locally
+(single-pass-per-file architecture). The pytest suite (8 tests) finishes in
+~4 seconds.
+
+GitHub Actions cost per run on `ubuntu-latest`:
+- Checkout + Python setup with pip cache: ~15s.
+- Audit run: <2s.
+- Pytest run: <5s.
+- Total: ~25s wall-clock; well under the free-tier minutes budget.
+
+### Locked flag surface (Gate G2.5.a)
+
+The audit script's CLI is **frozen** as of sub-phase 2.3a. Any change to
+the following surface is a breaking change and must bump a version marker
+in the script's docstring:
+
+| Flag | Values | Default | Purpose |
+|------|--------|---------|---------|
+| `--mode` | `naming` / `folder` / `recovery` / `cross-skill` / `all` | `all` | Which sub-audit to run. |
+| `--json` | flag | off | Emit machine-readable JSON to stdout. |
+| `--fail-on` | `red` / `yellow` / `none` | `none` | Severity threshold for non-zero exit. |
+| `--fixture-dir` | path | (live repo) | Run against a fixture tree instead of the real fleet. |
+
+Exit codes: `0` (clean), `1` (findings ≥ `--fail-on`), `2` (script error).
+
+### Deferred issues active during 2.5
+
+- **Issue #2** — recovery classifier emits ~464 reds on real markdown.
+  CI runs the audit at `--fail-on=none` until Phase 3a tightens the regex.
+  The planted-fixture `should-fail-recovery` still asserts the existing
+  classifier's red-emission path so a regression in the underlying check
+  is caught even while the class is deferred.
+- **Issue #3** — 26 yellow cross-skill mixed-pattern findings on real fleet.
+  The `should-fail-cross-skill` fixture exercises the missing-skill red
+  path (surfaced via naming mode) — distinct from the deferred yellow
+  class.
+- **Issue #4** — `NON_AGENT_TOKENS` allowlist is hard-coded; Phase 3a
+  replaces with a regex/config + unit test. Until then, additions to the
+  set require a manual edit of `bin/audit-interdependencies`.
+
