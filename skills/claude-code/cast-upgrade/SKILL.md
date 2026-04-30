@@ -189,7 +189,7 @@ ecosystems will recognise the surface; consistency reduces friction.
 ```bash
 SERVER_PID=$(pgrep -f cast-server || true)
 if [[ -n "$SERVER_PID" ]]; then
-  RUNS=$(curl -s --max-time 2 'http://localhost:8000/api/agents/runs?status=running' || echo '[]')
+  RUNS=$(curl -s --max-time 2 'http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/runs?status=running' || echo '[]')
   ACTIVE_COUNT=$(echo "$RUNS" | jq 'length' 2>/dev/null || echo 0)
   if [[ "$ACTIVE_COUNT" -gt 0 ]]; then
     # Delegate to cast-interactive-questions:

@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, field_validator
 import yaml
 
-from cast_server.config import SECOND_BRAIN_ROOT
+from cast_server.config import DIECAST_ROOT
 
 KNOWN_MODELS = {"opus", "sonnet", "haiku"}
 VALID_ARTIFACT_DIRECTORIES = {None, "goal_dir", "external_project_dir"}
@@ -61,7 +61,7 @@ _config_cache: dict[str, tuple[float, AgentConfig]] = {}
 
 def load_agent_config(agent_id: str) -> AgentConfig:
     """Load agent config from agents/<agent_id>/config.yaml with mtime-based cache."""
-    config_path = Path(SECOND_BRAIN_ROOT) / "agents" / agent_id / "config.yaml"
+    config_path = Path(DIECAST_ROOT) / "agents" / agent_id / "config.yaml"
 
     if config_path.exists():
         mtime = os.stat(config_path).st_mtime

@@ -40,7 +40,7 @@ proven fan-out pattern from `cast-explore`.
 
 ### Step 0: Prerequisites
 
-1. Verify Diecast server is running: `curl -s http://localhost:8000/api/agents | head`
+1. Verify Diecast server is running: `curl -s http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents | head`
 2. Require `--goal <slug>` argument. If missing, ask for it.
 3. Read `goal.yaml` from `goals/{goal-slug}/` for goal metadata.
 4. Read the high-level plan file provided as input.

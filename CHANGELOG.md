@@ -12,6 +12,17 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 > parent-child delegation primitive, cast-server with Diecast design tokens,
 > the cast-crud reference family (Layer-1), and one-command setup.
 
+### Port + env-var seam (sp1, first-run launch)
+- Default cast-server port shifted from `8000` to `8005`.
+- New env-var `CAST_HOST` (client-side connect target, default `localhost`).
+- The pre-existing `CAST_HOST` (server bind) is renamed to `CAST_BIND_HOST`
+  (default `127.0.0.1`).
+- New `host` / `port` keys in `~/.cast/config.yaml`. `bind_host` is
+  intentionally env-var-only via `CAST_BIND_HOST`.
+- If you have an old cast-server still running on `:8000`, kill it manually
+  (`lsof -ti:8000 | xargs kill`) before re-running `./setup`. No automatic
+  detection.
+
 ### Setup
 - **US1:** One-command `./setup` installs cast-* agents and skills to
   `~/.claude/` and puts `cast-server` on PATH. Surfaces a one-time

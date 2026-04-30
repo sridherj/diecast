@@ -12,6 +12,8 @@ here is honored by Diecast — extra keys are tolerated but ignored.
 # Schema reference: docs/config.md inside the diecast repo.
 # Edits here are preserved by ./setup re-runs and /cast-upgrade.
 terminal: ""
+host: localhost
+port: 8005
 auto_upgrade: false
 upgrade_snooze_until: null
 upgrade_snooze_streak: 0
@@ -36,6 +38,37 @@ proactive_overrides: {}
 - **Set by:** `./setup` Step 7 (interactive prompt or `read -rp`), or by hand.
   An unsupported value soft-falls back to the first supported terminal on
   `PATH` (Decision #3) and prints a warning.
+
+### `host`
+
+- **Default:** `localhost`.
+- **Valid values:** any hostname or IP literal Diecast clients can resolve.
+- **When read:** the *client side* of the wire — skills, agents, and the
+  cast-server's own callback URLs in agent prompts. Read by
+  `cast-server/cast_server/config.py` as `DEFAULT_CAST_HOST` (env var
+  `CAST_HOST` overrides).
+- **Asymmetry:** the server-side bind address is **not** in this file. It is
+  controlled exclusively by the `CAST_BIND_HOST` env var (default `127.0.0.1`)
+  to keep advanced overrides (`0.0.0.0` for LAN exposure, etc.) out of the
+  per-user config schema.
+- **Set by:** the user, or `./setup` Step 6 on first run.
+
+### `port`
+
+- **Default:** `8005`.
+- **Valid values:** integer 1–65535.
+- **When read:** both client and server. Read by
+  `cast-server/cast_server/config.py` as `DEFAULT_CAST_PORT` (env var
+  `CAST_PORT` overrides). The launcher `bin/cast-server` and every
+  Diecast-aware skill or agent default to this port.
+- **Set by:** the user, or `./setup` Step 6 on first run.
+
+> **Env-var summary**
+>
+> - `CAST_HOST` — client-side connect target (default `localhost`).
+> - `CAST_BIND_HOST` — server-side uvicorn bind (default `127.0.0.1`,
+>   env-var-only, intentionally not in `config.yaml`).
+> - `CAST_PORT` — shared by both sides (default `8005`).
 
 ### `auto_upgrade`
 

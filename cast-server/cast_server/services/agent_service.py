@@ -14,7 +14,12 @@ from cast_server.config import (
     GOALS_DIR, DIECAST_ROOT, MAX_CONCURRENT_AGENTS, OFF_PEAK_HOUR,
     AGENT_MONITOR_INTERVAL, AGENT_READY_TIMEOUT, AGENT_IDLE_WARNING,
     AGENT_IDLE_STUCK, AGENT_SESSION_CLEANUP_DELAY, AGENT_SENDKEY_DELAY,
+    DEFAULT_CAST_HOST, DEFAULT_CAST_PORT,
 )
+
+# Server-emitted callback URLs use literal constants — server is telling the
+# child where to call back; no env-var indirection needed (Decision #2).
+SERVER_URL = f"http://{DEFAULT_CAST_HOST}:{DEFAULT_CAST_PORT}"
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
 from cast_server.db.connection import get_connection
@@ -928,7 +933,7 @@ def _quick_reference_curl(goal_dir: str) -> str:
     return f"""
 Quick reference (full patterns in the skill):
 
-  CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{{agent}}/trigger \\
+  CHILD_RUN_ID=$(curl -s -X POST {SERVER_URL}/api/agents/{{agent}}/trigger \\
     -H "Content-Type: application/json" \\
     -d '{{
       "goal_slug": "{{GOAL_SLUG}}",
@@ -954,7 +959,7 @@ Quick reference (full patterns in the skill):
     [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
     sleep 10; ELAPSED=$((ELAPSED + 10))
   done
-  # On timeout, check: curl http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
+  # On timeout, check: curl {SERVER_URL}/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
 """
 
 
@@ -1031,7 +1036,7 @@ giving the user a chance to weigh in.
     preamble = f"""Your run ID: {run_id}
 Goal slug: {goal_slug}
 
-Diecast API routes (http://localhost:8000):
+Diecast API routes ({SERVER_URL}):
   POST /api/agents/{{name}}/trigger        — dispatch a child agent
   GET  /api/agents/jobs/{{run_id}}          — get run details/status
   POST /api/agents/jobs/{{run_id}}/recheck  — recheck a completed/failed run
@@ -1044,7 +1049,7 @@ Diecast API routes (http://localhost:8000):
   GET  /api/agents/runs?status=running      — filter runs by status
   GET  /api/agents/runs/{{run_id}}/children — list child runs
   POST /api/tasks/{{task_id}}/run-agent     — trigger agent for a task
-  Health check: curl -s http://localhost:8000/api/agents/runs?status=running | head -1
+  Health check: curl -s {SERVER_URL}/api/agents/runs?status=running | head -1
 """
 
     http_targets, subagent_targets = _partition_delegations_by_mode(allowed_delegations)

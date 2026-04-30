@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """bin/run-migrations.py — Diecast schema-migration runner.
 
+Internal use; not on user PATH. **Deprecated by Alembic (sp3).** Will be
+removed once all known DBs have been migrated. Do not invoke for new schema
+changes — use ``cast-server/alembic/`` instead.
+
 Invoked by `./setup --upgrade` between Step 2 (generate-skills) and Step 3
 (install agents). v1 ships zero production migrations under `migrations/`,
 so against the published set this runner is a no-op. The trivial fixture

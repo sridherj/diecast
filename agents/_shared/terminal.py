@@ -4,7 +4,8 @@ Resolution order (during dispatch — never auto-detects):
     1. $CAST_TERMINAL (preferred, project-scoped)
     2. $TERMINAL (POSIX convention)
     3. ~/.cast/config.yaml: terminal_default (canonical) or terminal (alias)
-    4. raise ResolutionError pointing at bin/cast-doctor --fix-terminal
+    4. raise ResolutionError pointing at /cast-doctor (shell fallback:
+       bin/cast-doctor --fix-terminal)
 
 Returns: ResolvedTerminal(command, args, flags).
 
@@ -50,8 +51,8 @@ class ResolutionError(RuntimeError):
     """Raised when no terminal can be resolved.
 
     The error message names every resolution source actually checked and
-    points the user at `bin/cast-doctor --fix-terminal` and
-    docs/reference/supported-terminals.md.
+    points the user at `/cast-doctor` (with `bin/cast-doctor --fix-terminal`
+    as the shell fallback) and docs/reference/supported-terminals.md.
     """
 
 
@@ -96,8 +97,8 @@ def resolve_terminal(config_path: Optional[Path] = None) -> ResolvedTerminal:
 
     Raises:
         ResolutionError: if no source provides a terminal name. The message
-            names every source checked and points at
-            ``bin/cast-doctor --fix-terminal``.
+            names every source checked and points at ``/cast-doctor`` (with
+            ``bin/cast-doctor --fix-terminal`` as the shell fallback).
     """
     cast_term = os.environ.get("CAST_TERMINAL")
     sys_term = os.environ.get("TERMINAL")
@@ -118,7 +119,8 @@ def resolve_terminal(config_path: Optional[Path] = None) -> ResolvedTerminal:
             f"  tried: $CAST_TERMINAL ({cast_state}), "
             f"$TERMINAL ({sys_state}),\n"
             f"         {cfg_path} ({cfg_state}).\n"
-            "  fix:   run `bin/cast-doctor --fix-terminal` to auto-detect and configure,\n"
+            "  fix:   run `/cast-doctor` from inside Claude Code to auto-detect and configure\n"
+            "         (or `bin/cast-doctor --fix-terminal` from a shell as fallback),\n"
             "         or set $CAST_TERMINAL=<your-terminal> manually.\n"
             "         See docs/reference/supported-terminals.md."
         )

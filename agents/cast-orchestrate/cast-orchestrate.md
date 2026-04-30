@@ -46,7 +46,7 @@ recommendation first with grounded reasoning.
 Before doing anything else, check that the Diecast server is running:
 
 ```bash
-curl -s --connect-timeout 2 http://localhost:8000/api/agents/runs?status=all > /dev/null 2>&1
+curl -s --connect-timeout 2 http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/runs?status=all > /dev/null 2>&1
 ```
 
 If curl fails (connection refused or timeout), show this error and stop:
@@ -58,6 +58,8 @@ Require the `--goal <slug>` option. If not provided, show this error and stop im
 > "Missing required --goal flag. Usage: `/cast-orchestrate <path> --goal <slug>`"
 
 Do not proceed without it.
+
+**Dispatch precondition.** cast-server refuses every `POST /trigger` for a goal whose `external_project_dir` is unset or points to a missing path, returning HTTP 422 with `error_code: "missing_external_project_dir"`. Resolution is handled by the `cast-child-delegation` skill's Section 0 (Preflight) — it GETs the goal config, prompts the user via `AskUserQuestion` (use cwd / type a path / cancel), `PATCH`es `/api/goals/{slug}/config`, and retries. You should NOT duplicate that logic here; just delegate via the skill and let it surface the prompt. See `docs/specs/cast-delegation-contract.collab.md` § Dispatch Precondition for the full contract.
 
 Your run ID is provided in the prompt preamble (injected by the `/invoke` endpoint). Use it as `parent_run_id` in all child dispatches to link the delegation tree in the dashboard.
 

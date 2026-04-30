@@ -27,14 +27,13 @@ def _resolve_db_path() -> Path:
 
 
 DB_PATH = _resolve_db_path()
+DB_URL = os.environ.get("DIECAST_DB_URL") or f"sqlite:///{DB_PATH}"
 
 _goals_dir_env = os.environ.get("CAST_GOALS_DIR")
 GOALS_DIR = Path(_goals_dir_env) if _goals_dir_env else CAST_ROOT / "goals"
 
 SCRATCHPAD_PATH = CAST_ROOT / "scratchpad.md"
-SECOND_BRAIN_ROOT = CAST_ROOT.parent  # second-brain/
-REGISTRY_PATH = SECOND_BRAIN_ROOT / "agents" / "REGISTRY.md"
-DIGESTS_DIR = SECOND_BRAIN_ROOT / "docs" / "digests"
+DIECAST_ROOT = CAST_ROOT  # repo root, e.g. /data/workspace/diecast
 
 # Template and static paths
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
@@ -96,6 +95,14 @@ STARTER_TASKS = [
      "tip": "Spec-aware planning with inline design review",
      "recommended_agent": "cast-detailed-plan"},
 ]
+
+# Cast-server bind/connect defaults — single source of truth.
+# CAST_HOST: client-side connect target (skills, agents, server-emitted callback URLs).
+# CAST_BIND_HOST: server-side uvicorn bind. Env-var-only; intentionally NOT in config.yaml.
+# CAST_PORT: shared by both sides.
+DEFAULT_CAST_PORT = int(os.environ.get("CAST_PORT", "8005"))
+DEFAULT_CAST_HOST = os.environ.get("CAST_HOST", "localhost")
+DEFAULT_CAST_BIND_HOST = os.environ.get("CAST_BIND_HOST", "127.0.0.1")
 
 # Dispatcher concurrency
 MAX_CONCURRENT_AGENTS = int(os.environ.get("CAST_MAX_CONCURRENT_AGENTS", "7"))

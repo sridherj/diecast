@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Bulk-rewrite legacy ``next_steps: ["...", "..."]`` to the typed shape (US14).
 
+Internal use; not on user PATH. One-shot data migration; obsolete after the
+matching deploy. Kept for users on stale databases.
+
 For each ``.agent-run_*.output.json`` (or ``.agent-<run_id>.output.json``), convert
 string entries to ``{"command": <original>, "rationale": "", "artifact_anchor": null}``.
 

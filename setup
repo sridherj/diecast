@@ -221,6 +221,8 @@ import yaml
 
 DEFAULTS = {
     "terminal": "",
+    "host": "localhost",
+    "port": 8005,
     "auto_upgrade": False,
     "upgrade_snooze_until": None,
     "upgrade_snooze_streak": 0,

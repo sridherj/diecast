@@ -235,7 +235,7 @@ After writing the narrative, dispatch `cast-preso-narrative-checker` to validate
 Use the `/cast-child-delegation` command (`.claude/commands/cast-child-delegation.md`) to dispatch via HTTP:
 
 ```bash
-curl -s -X POST http://localhost:8000/api/agents/cast-preso-narrative-checker/trigger \
+curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/cast-preso-narrative-checker/trigger \
   -H "Content-Type: application/json" \
   -d '{
     "goal_slug": "'"$GOAL_SLUG"'",

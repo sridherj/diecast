@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Set per-agent `proactive` defaults in agents/cast-*/config.yaml (US14).
 
+Internal use; not on user PATH. Invoked by ``setup``'s default-init step.
+
 Idempotent: re-running with the same data is a no-op. Creates `config.yaml`
 when an agent in the table doesn't have one yet.
 """

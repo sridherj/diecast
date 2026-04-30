@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Migrate legacy effort estimates → `estimate_size` (US10).
 
+Internal use; not on user PATH. One-shot data migration; obsolete after the
+matching deploy. Kept for users on stale databases.
+
 Pre-rebrand TaskOS used either:
 - `estimated_time TEXT` carrying values like ``"30m"``, ``"45m"``, ``"60m"`` in
   the DB column and YAML task files, OR

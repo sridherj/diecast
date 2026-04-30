@@ -1,108 +1,52 @@
-# `bin/` — Diecast Developer Scripts
+# `bin/`
 
-## `generate-skills`
+**User-facing:** only `cast-server` (symlinked to `~/.local/bin/cast-server` by
+`./setup`). All other entries are internal tooling — invoked by `setup`, CI, or
+one-shot migrations. Post-install user surface lives in `/cast-*` slash commands
+inside Claude Code.
 
-Materializes Claude Code skill files from `cast-*` agents and skills in this
-repo into `~/.claude/skills/` (overridable via `--target-dir`).
+## User-facing
 
-### Contract
+- `cast-server` — the daemon; the only Diecast binary on your `$PATH`.
 
-- **Reads:**
-  - `agents/cast-*/cast-*.md` — each cast-* agent's primary doc
-  - `skills/claude-code/cast-*/SKILL.md` — each Claude Code skill source
-  - Non-`cast-*` subdirectories are skipped with a stderr warning (forward-compat
-    for future harness adapter directories — e.g., a `gemini/` skill tree).
-- **Writes:**
-  - `<target>/cast-*/SKILL.md` — one file per discovered source. Each output
-    file is prefixed with a generated-by header and a back-reference comment
-    pointing at the source path inside the diecast repo.
-- **Default target:** `~/.claude/skills`. Override with `--target-dir <path>`.
+## Internal — invoked by `setup` or CI
 
-### Flags
+- `cast-doctor` — diagnostic prerequisite checker. User surface: `/cast-doctor`
+  slash command inside Claude Code; this script remains the shell fallback and
+  the gate `setup`'s `step1_doctor` runs.
+- `_lib.sh` — shared bash helpers (`log`, `warn`, `fail`, `backup_if_exists`,
+  `prune_old_backups`). Sourced, not executed.
+- `generate-skills` — produces `~/.claude/skills/cast-*/SKILL.md` from
+  `agents/` and `skills/claude-code/`. Invoked by `step4_install_skills`.
+- `set-proactive-defaults.py` — seeds per-agent `proactive` defaults in
+  `agents/cast-*/config.yaml`. Invoked by setup's default-init step.
+- `sweep-port-refs.py` — markdown-aware port/host sweep (one-shot; see sp1 of
+  the cast-server-first-run-launch plan).
 
-| Flag | Purpose |
-|------|---------|
-| `--dry-run` | Print what would happen; touch no files. |
-| `--target-dir <path>` | Override the output directory. |
-| `--help` | Show usage. |
+## Internal — CI lints
 
-### Backup behavior
+- `cast-spec-checker` — lints spec docs against
+  `templates/cast-spec.template.md`. User surface:
+  `/cast-spec-checker` slash command.
+- `check-doc-links` — validates relative Markdown links across `README.md`
+  and `docs/*.md`.
+- `audit-interdependencies` — cross-reference audit over the cast-* agent and
+  skill fleet.
+- `lint-anonymization` — scans for upstream-private references that must not
+  appear in public Diecast output.
 
-Before overwriting any pre-existing target file, the script moves the original
-into `<target>/.cast-bak-<timestamp>/` preserving the relative path. The
-timestamp is fixed for a single invocation, so all backups from one run land
-in the same folder. The script never deletes backup folders — cleanup is
-deferred to Phase 4 `/cast-upgrade`. Until then, you may safely `rm -rf
-<target>/.cast-bak-*` once you've confirmed the new generation looks right.
+## Internal — one-shot data migrations
 
-### Idempotency
+These are obsolete after their matching deploy but kept for users on stale
+databases:
 
-Two consecutive runs against an unchanged tree produce identical output. The
-underlying file writes are unconditional today — there is no checksum-aware
-short-circuit, so every successful run touches every output file's mtime. A
-checksum-aware overwrite path (and the corresponding "preserve user edits"
-guarantee) is deferred to Phase 4 — see refined-req US8 in
-`refined_requirements.collab.md`.
+- `migrate-legacy-estimates.py` — pre-rebrand TaskOS estimates → Diecast US10
+  T-shirt sizes.
+- `migrate-next-steps-shape.py` — bulk-rewrite legacy `next_steps` lists to
+  the typed shape (US14).
 
-### When to run
+## Deprecated
 
-- After harvesting or editing any `cast-*` agent or skill in this repo.
-- During development with `--dry-run --target-dir /tmp/diecast-out` to
-  preview the materialization without touching `~/.claude/skills`.
-- CI may invoke it with a tmp `--target-dir` to verify the discovery and
-  rendering paths still work.
-
-### Safety
-
-The test suite under `tests/test_generate_skills.py` always uses `tmp_path`
-and `--target-dir`, never the real `~/.claude/skills`. Manual smoke tests
-should follow the same pattern; see the verification block in
-`docs/execution/diecast-open-source/phase-1/1.2-generate-skills-port.md`.
-
-## `lint-anonymization`
-
-Scans the working tree for upstream-private references that must not appear
-in public Diecast output (personal identifiers, internal paths, private agent
-names). Fires on every push and pull request via
-`.github/workflows/anonymization-lint.yml`.
-
-### Contract
-
-- **Reads:** every tracked + untracked file in the repo (respects `.gitignore`
-  via `git ls-files`; falls back to a `pathlib` walk outside a git repo).
-- **Skips by default:** `.git/`, `.venv/`, `__pycache__/`, `node_modules/`,
-  `.cast-bak-*/`, `.pytest_cache/`, and `tests/fixtures/forbidden/`. Pass
-  `--include-fixtures` to also scan `tests/fixtures/forbidden/` for
-  pattern-coverage sweeps.
-- **Writes:** nothing. Hits print to stdout in
-  `<file>:<line>: matched pattern '<regex>' — anonymization rule X violated.`
-  format. Exits 0 on a clean tree, 1 on hits.
-
-### Forbidden patterns
-
-The regex list lives **in the script itself** (`FORBIDDEN_PATTERNS` near the
-top of `bin/lint-anonymization`) — there is no separate pattern file because
-any external file would itself need to be public. When the upstream private
-`## People` table changes, append matching `\b<First Last>\b` entries
-during the quarterly review cadence noted in `CONTRIBUTING.md`.
-
-### Self-exemption
-
-Any line carrying the substring `diecast-lint: ignore-line` (typically as a
-trailing comment) is excluded from the scan. Use sparingly and only for
-provably-legitimate references.
-
-### Flags
-
-| Flag | Purpose |
-|------|---------|
-| `--root <path>` | Scan a different tree (default: cwd). |
-| `--include-fixtures` | Also scan `tests/fixtures/forbidden/`. |
-
-## `audit-interdependencies`
-
-Phase-1 no-op skeleton (D4). Prints `audit-interdependencies stub — Phase 2
-wires the four sub-audits` and exits 0. Wired into the CI workflow now so
-the workflow shape stays stable when Phase 2 lands the actual sub-audits
-(cast-* prefix coverage, shared-module reachability, generated-skill regen
-drift, fixture-tree sanity).
+- `run-migrations.py` — superseded by Alembic (`cast-server/alembic/`).
+  Will be removed once all known DBs have been migrated. Do not invoke for
+  new schema changes.

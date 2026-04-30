@@ -166,7 +166,7 @@ what risk it mitigates.
 For each suggestion, create it as a task via the Diecast HTTP API:
 
 ```bash
-curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
+curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/{goal_slug}/tasks \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Short imperative title (5-10 words)",
@@ -195,14 +195,14 @@ For grouped suggestions (parent + subtasks):
 Example:
 ```bash
 # 1. Create parent
-PARENT=$(curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
+PARENT=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/{goal_slug}/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Parent task", "outcome": "...", "rationale": "...", "task_type": "execution", "phase": "execution", "estimate_size": "L", "is_spike": false, "status": "suggested"}')
 
 PARENT_ID=$(echo "$PARENT" | jq -r '.id')
 
 # 2. Create children with parent_id
-curl -s -X POST http://localhost:8000/api/goals/{goal_slug}/tasks \
+curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/{goal_slug}/tasks \
   -H "Content-Type: application/json" \
   -d "{\"title\": \"Child task 1\", \"outcome\": \"...\", \"rationale\": \"...\", \"task_type\": \"coding\", \"phase\": \"execution\", \"estimate_size\": \"S\", \"is_spike\": false, \"status\": \"suggested\", \"parent_id\": $PARENT_ID}"
 ```
@@ -292,7 +292,7 @@ After creating all suggestions, write the output.json file as instructed in the 
 1. Read goal artifacts (goal.yaml, requirements, plan, tasks.md)
 2. Analyze current phase and existing tasks
 3. Generate 3-5 suggestions following the 10 rules
-4. Create each suggestion via HTTP POST to `http://localhost:8000/api/goals/{goal_slug}/tasks`
+4. Create each suggestion via HTTP POST to `http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/{goal_slug}/tasks`
 5. Track created task IDs and any errors
 6. Write output.json as your final action
 

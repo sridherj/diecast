@@ -210,3 +210,92 @@ def test_help_lists_fix_terminal_flag():
     )
     assert res.returncode == 0
     assert "--fix-terminal" in res.stdout
+
+
+# --- RED-list prerequisite tests ---------------------------------------------
+
+
+def _isolated_env(extra: dict[str, str] | None = None) -> dict[str, str]:
+    env = {
+        "HOME": os.environ.get("HOME", ""),
+        "LANG": "C.UTF-8",
+        "DRY_RUN": "1",  # don't touch real ~/.claude / ~/.cast
+    }
+    if extra:
+        env.update(extra)
+    return env
+
+
+def test_cast_doctor_red_on_missing_tmux(tmp_path):
+    """RED finding when tmux is absent from PATH; install hint surfaces."""
+    fake_bin = tmp_path / "bin"
+    # Provide every essential the script needs EXCEPT tmux.
+    _make_fake_bin(fake_bin, names=[])
+    # Install host tools the script depends on (uv, git, claude shims so the
+    # other RED checks don't bail before we evaluate tmux output).
+    for name in ("uv", "git", "claude"):
+        shim = fake_bin / name
+        shim.write_text("#!/bin/sh\ncase \"$1\" in --version) echo '99.99.99';; esac\n")
+        shim.chmod(0o755)
+
+    env = _isolated_env({"PATH": str(fake_bin)})
+    res = subprocess.run(
+        [str(CAST_DOCTOR)],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=str(REPO_ROOT),
+        timeout=15,
+    )
+    combined = res.stdout + res.stderr
+    assert res.returncode != 0, combined
+    assert "tmux not found" in combined
+    # Hint should reference some installer (brew/apt/dnf/pacman/package manager).
+    assert any(
+        token in combined
+        for token in ("brew install tmux", "apt install tmux", "dnf install tmux",
+                      "pacman -S tmux", "package manager")
+    ), combined
+
+
+def test_cast_doctor_red_on_old_python(tmp_path):
+    """Inject a fake python3 reporting 3.10 → cast-doctor flags it RED."""
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    # Fake python3 that responds to `-c '...'` with a hardcoded 3.10 triple,
+    # mimicking the real interpreter's output shape.
+    fake_python = fake_bin / "python3"
+    fake_python.write_text(
+        "#!/bin/sh\n"
+        "case \"$1\" in\n"
+        "  -c) echo '3.10.12'; exit 0;;\n"
+        "  *)  echo 'Python 3.10.12'; exit 0;;\n"
+        "esac\n"
+    )
+    fake_python.chmod(0o755)
+
+    # Add real essentials so the script runs at all.
+    for tool in ("env", "sh", "bash", "uname", "mkdir", "tr", "grep", "head",
+                 "cat", "dirname", "tmux", "uv", "git", "claude"):
+        real = shutil.which(tool)
+        if real and not (fake_bin / tool).exists():
+            (fake_bin / tool).symlink_to(real)
+
+    env = _isolated_env({"PATH": str(fake_bin)})
+    res = subprocess.run(
+        [str(CAST_DOCTOR)],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=str(REPO_ROOT),
+        timeout=15,
+    )
+    combined = res.stdout + res.stderr
+    assert res.returncode != 0, combined
+    assert "python3" in combined and "3.10" in combined
+    assert "3.11" in combined  # the required-version mention
+    assert any(
+        token in combined
+        for token in ("brew install python", "apt install python",
+                      "dnf install python", "pacman -S python", "package manager")
+    ), combined

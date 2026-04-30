@@ -1,7 +1,7 @@
 # cast-server
 
 Local FastAPI app that serves the Diecast UI and `/api/agents/*` routes on
-`127.0.0.1:8000`.
+`127.0.0.1:8005`.
 
 ## Running cast-server
 
@@ -17,11 +17,12 @@ run it from anywhere.
 
 ### Environment variables
 
-| Variable      | Default                | Purpose                                        |
-|---------------|------------------------|------------------------------------------------|
-| `CAST_HOST`   | `127.0.0.1`            | Bind address. Loopback-only by design.         |
-| `CAST_PORT`   | `8000`                 | TCP port.                                      |
-| `CAST_DB`     | `~/.cast/diecast.db`   | SQLite path. Parent dir is auto-created.       |
+| Variable          | Default                | Purpose                                            |
+|-------------------|------------------------|----------------------------------------------------|
+| `CAST_HOST`       | `localhost`            | Client-side connect target (skills, agent prompts).|
+| `CAST_BIND_HOST`  | `127.0.0.1`            | Server-side bind address. Loopback-only by design. |
+| `CAST_PORT`       | `8005`                 | TCP port (shared by both sides).                   |
+| `CAST_DB`         | `~/.cast/diecast.db`   | SQLite path. Parent dir is auto-created.           |
 
 ### First-run preflight
 

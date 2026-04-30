@@ -2,15 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 # bin/cast-doctor — Diecast prerequisite checker.
 #
-# Run this before ./setup, or any time post-install to diagnose installation issues.
+# Internal: invoked by `setup`'s `step1_doctor` and CI. Post-install diagnosis
+# happens via `/cast-doctor` from inside Claude Code.
 # Exits 0 when no RED findings; non-zero with per-issue actionable messages otherwise.
 #
 # Usage:
 #   bin/cast-doctor                # human-readable output, exit 0/1
 #   bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
 #   bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
-#   bin/cast-doctor --fix-terminal # interactive first-run setup: probe terminals on
-#                                  # PATH, prompt the user, write ~/.cast/config.yaml
+#   bin/cast-doctor --fix-terminal # internal: invoked by `setup` and the `/cast-doctor`
+#                                  # skill; users should run `/cast-doctor` from inside
+#                                  # Claude Code.
 #   bin/cast-doctor --help         # this help text
 #
 # Required green prerequisites:
@@ -31,7 +33,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-# shellcheck source=./_lib.sh
+# shellcheck source=bin/_lib.sh
 source "${SCRIPT_DIR}/_lib.sh"
 
 JSON_OUTPUT=0
@@ -47,15 +49,17 @@ print_help() {
   cat <<'EOF'
 bin/cast-doctor — Diecast prerequisite checker.
 
-Run this before ./setup, or any time post-install to diagnose installation issues.
+Internal: invoked by `setup`'s `step1_doctor` and CI. Post-install diagnosis
+happens via `/cast-doctor` from inside Claude Code.
 Exits 0 when no RED findings; non-zero with per-issue actionable messages otherwise.
 
 Usage:
   bin/cast-doctor                # human-readable output, exit 0/1
   bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
   bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
-  bin/cast-doctor --fix-terminal # interactive first-run setup: probe terminals on
-                                 # PATH, prompt the user, write ~/.cast/config.yaml
+  bin/cast-doctor --fix-terminal # internal: invoked by `setup` and the `/cast-doctor`
+                                 # skill; users should run `/cast-doctor` from inside
+                                 # Claude Code.
   bin/cast-doctor --help         # this help text
 
 Required green prerequisites:
@@ -70,7 +74,8 @@ Yellow (warn-only) checks:
   * $CAST_TERMINAL empty, $TERMINAL empty, no supported terminal on PATH
 
 Direct callability (Decision #2): this script is intentionally usable post-install
-to diagnose installation issues — it's also the gate ./setup runs in Step 1.
+as a fallback — it's the gate ./setup runs in Step 1, and it backs the
+`/cast-doctor` skill when cast-server is down.
 EOF
 }
 
@@ -120,6 +125,7 @@ except Exception:
 version_ge() {
   local have="$1" want="$2"
   local IFS=.
+  # shellcheck disable=SC2206  # word-splitting on '.' is intentional (IFS set above)
   local -a a=($have) b=($want)
   local i
   for ((i=0; i<${#b[@]}; i++)); do
@@ -144,6 +150,78 @@ check_bash() {
   else
     note_red "bash ${ver:-unknown} found (need >= 4.0). Install bash >= 4.0. On Alpine: apk add bash. On macOS: brew install bash."
   fi
+}
+
+# install_hint_python3 / install_hint_tmux
+#   Echo the OS-appropriate install command (no surrounding text). Callers
+#   embed the result in note_red messages — matches the inline-hint style
+#   used by check_bash / check_uv / check_git.
+install_hint_python3() {
+  case "$(uname -s)" in
+    Darwin) printf 'brew install python@3.11' ;;
+    Linux)
+      if [[ -r /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        case "${ID:-}${ID_LIKE:-}" in
+          *debian*|*ubuntu*) printf 'sudo apt install python3.11' ;;
+          *rhel*|*fedora*|*centos*) printf 'sudo dnf install python3.11' ;;
+          *arch*) printf 'sudo pacman -S python' ;;
+          *) printf 'install python >= 3.11 via your package manager' ;;
+        esac
+      else
+        printf 'install python >= 3.11 via your package manager'
+      fi
+      ;;
+    *) printf 'install python >= 3.11 via your package manager' ;;
+  esac
+}
+
+install_hint_tmux() {
+  case "$(uname -s)" in
+    Darwin) printf 'brew install tmux' ;;
+    Linux)
+      if [[ -r /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        case "${ID:-}${ID_LIKE:-}" in
+          *debian*|*ubuntu*) printf 'sudo apt install tmux' ;;
+          *rhel*|*fedora*|*centos*) printf 'sudo dnf install tmux' ;;
+          *arch*) printf 'sudo pacman -S tmux' ;;
+          *) printf 'install tmux via your package manager' ;;
+        esac
+      else
+        printf 'install tmux via your package manager'
+      fi
+      ;;
+    *) printf 'install tmux via your package manager' ;;
+  esac
+}
+
+check_python3() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    note_red "python3 not found (need >= 3.11). Install: $(install_hint_python3)"
+    return
+  fi
+  local raw ver
+  raw="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")' 2>&1 || true)"
+  ver="$(extract_version "$raw")"
+  if [[ -n "$ver" ]] && version_ge "$ver" "3.11"; then
+    note_green "python3 ${ver}"
+  else
+    note_red "python3 ${ver:-unknown} found (need >= 3.11). Install: $(install_hint_python3)"
+  fi
+}
+
+check_tmux() {
+  if ! command -v tmux >/dev/null 2>&1; then
+    note_red "tmux not found (required by the dispatcher). Install: $(install_hint_tmux)"
+    return
+  fi
+  local raw ver
+  raw="$(tmux -V 2>&1 || true)"
+  ver="$(extract_version "$raw")"
+  note_green "tmux ${ver:-present}"
 }
 
 check_uv() {
@@ -221,7 +299,7 @@ check_terminal() {
       note_green "\$CAST_TERMINAL=${cast} (supported)"
       return
     fi
-    note_yellow "\$CAST_TERMINAL=${cast} is not a supported terminal. Run \`bin/cast-doctor --fix-terminal\` to probe and configure interactively, or set \$CAST_TERMINAL to one of: ${supported_str}. See docs/reference/supported-terminals.md."
+    note_yellow "\$CAST_TERMINAL=${cast} is not a supported terminal. Run \`/cast-doctor\` from inside Claude Code to probe and configure (or \`bin/cast-doctor --fix-terminal\` from a shell as fallback), or set \$CAST_TERMINAL to one of: ${supported_str}. See docs/reference/supported-terminals.md."
     return
   fi
 
@@ -238,7 +316,7 @@ check_terminal() {
     fi
   done
 
-  note_yellow "No supported terminal found. Run \`bin/cast-doctor --fix-terminal\` to probe and configure interactively, or set \$CAST_TERMINAL manually. (Supported: ${supported_str})"
+  note_yellow "No supported terminal found. Run \`/cast-doctor\` from inside Claude Code to probe and configure (or \`bin/cast-doctor --fix-terminal\` from a shell as fallback), or set \$CAST_TERMINAL manually. (Supported: ${supported_str})"
 }
 
 # fix_terminal — interactive first-run setup.
@@ -363,6 +441,8 @@ fi
 
 # ── Run all checks ─────────────────────────────────────────────────
 check_bash
+check_python3
+check_tmux
 check_uv
 check_git
 check_claude
@@ -372,7 +452,7 @@ check_terminal
 
 # ── Output ─────────────────────────────────────────────────────────
 emit_json() {
-  local first sep
+  local first
   printf '{"red":['
   first=1
   for item in "${RED[@]}"; do

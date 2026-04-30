@@ -92,7 +92,7 @@ Any `cast-*` agent can spawn a child agent. The child writes its result to a con
 
 If you do run `cast-server`, you get:
 
-- A local web UI at `http://localhost:8000` for goals / tasks / runs
+- A local web UI at `http://localhost:8005` for goals / tasks / runs
 - The HTTP API for richer dispatch state
 - Rate-limit auto-restart on Claude API throttling
 - Concurrent-children cap so the dispatcher behaves under load

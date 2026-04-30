@@ -132,7 +132,7 @@ def test_resolution_error_points_at_fix_terminal(clean_env, tmp_path):
     with pytest.raises(ResolutionError) as exc:
         resolve_terminal(tmp_path / "missing.yaml")
     msg = str(exc.value)
-    assert "bin/cast-doctor --fix-terminal" in msg
+    assert "/cast-doctor" in msg
     assert "supported-terminals.md" in msg
     # Existing assertions still hold:
     assert "$CAST_TERMINAL" in msg

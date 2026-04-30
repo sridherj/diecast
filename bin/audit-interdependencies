@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Diecast interdependency audit (production).
 
+Internal use; not on user PATH. Invoked by CI dependency audits.
+
 Walks the cast-* agent and skill fleet, extracts cross-references, and
 classifies each reference green / yellow / red. Single-pass-per-file with
 check filtering — `--mode=all` opens each source file exactly once.

@@ -15,6 +15,6 @@ APP_DIR="${SCRIPT_DIR%/bin}/cast-server"
 
 exec uvicorn cast_server.app:app \
   --app-dir "$APP_DIR" \
-  --host "${CAST_HOST:-127.0.0.1}" \
-  --port "${CAST_PORT:-8000}" \
+  --host "${CAST_BIND_HOST:-127.0.0.1}" \
+  --port "${CAST_PORT:-8005}" \
   "$@"

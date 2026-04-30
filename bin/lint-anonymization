@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Anonymization lint for the Diecast public repo.
 
+Internal use; not on user PATH. Invoked by CI anonymization linter.
+
 Scans tracked + untracked files (respecting .gitignore via `git ls-files`,
 falling back to a `pathlib` walk outside a git repo) for upstream-private
 references that must not appear in public Diecast output. Run before pushing;

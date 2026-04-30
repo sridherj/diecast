@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Internal use; not on user PATH. Invoked by CI doc-link audits.
 # Check that every relative Markdown link in README.md and docs/*.md resolves
 # to an existing file. Fails non-zero on any broken link.
 set -euo pipefail

@@ -1,0 +1,34 @@
+name: shellcheck
+
+on:
+  pull_request:
+    paths:
+      - "setup"
+      - "bin/**"
+      - ".shellcheckrc"
+      - ".github/workflows/shellcheck.yml"
+  push:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run shellcheck on bash scripts
+        # Shebang-aware sweep over `setup` + `bin/*`. Auto-includes future bash
+        # scripts without CI maintenance. `.shellcheckrc` enables external-sources
+        # so `# shellcheck source=...` directives are followed.
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in setup bin/*; do
+            [ -f "$f" ] || continue
+            if head -1 "$f" | grep -q 'bash'; then
+              echo "::group::shellcheck $f"
+              shellcheck "$f" || fail=1
+              echo "::endgroup::"
+            fi
+          done
+          exit $fail

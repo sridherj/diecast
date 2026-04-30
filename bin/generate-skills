@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Materialize Claude Code skill files from Diecast agents and skills.
 
+Internal use; not on user PATH. Invoked by ``setup``'s ``step4_install_skills``.
+
 Discovers `cast-*` subdirectories under ``agents/`` and ``skills/claude-code/``
 and writes a ``SKILL.md`` per entry into the target directory (default
 ``~/.claude/skills``). Pre-existing target files are moved to

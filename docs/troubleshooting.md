@@ -48,7 +48,7 @@ from `running` to a terminal failure with no output JSON written.
 **Why this happens.** `/cast-upgrade` always restarts `cast-server` after
 `./setup --upgrade` completes (so the new code is actually loaded). At
 runtime, the skill detects active runs via `GET
-http://localhost:8000/api/agents/runs?status=running` and surfaces a
+http://localhost:8005/api/agents/runs?status=running` and surfaces a
 2-option confirm prompt before restarting. If you bypass the prompt by
 picking **Restart anyway**, expect run-state loss.
 
@@ -57,7 +57,7 @@ picking **Restart anyway**, expect run-state loss.
 1. Re-trigger the lost run via the recheck endpoint:
 
    ```bash
-   curl -s -X POST http://localhost:8000/api/agents/jobs/<run_id>/recheck
+   curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/<run_id>/recheck
    ```
 
    The run picks up from its last persisted state. If the child wrote a

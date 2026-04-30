@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """cast-spec-checker — lint a spec doc against templates/cast-spec.template.md.
 
+Internal use; not on user PATH. Invoked by the cast-spec-checker agent and CI.
+Post-install user surface is the `/cast-spec-checker` slash command.
+
 Validates BOTH cast-refine-requirements output AND cast-update-spec output.
 The shape rules are documented in agents/cast-spec-checker/cast-spec-checker.md.
 
