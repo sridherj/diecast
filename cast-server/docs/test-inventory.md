@@ -95,7 +95,7 @@ live until sp13's deletion pass.
 
 | Path | Disposition |
 |------|-------------|
-| `data/taskos.db` | **Not present** in the package source (lives in repo root `data/` in second-brain, not under `src/taskos/`). Nothing to drop in this fork. Diecast persists to `~/.cast/diecast.db` per Phase 3b §1, configured in sp7. |
+| Upstream SQLite db file (`data/<upstream>.db`) | **Not present** in the package source (lives in repo root `data/` in second-brain, not under the package source dir). Nothing to drop in this fork. Diecast persists to `~/.cast/diecast.db` per Phase 3b §1, configured in sp7. |
 
 A `find cast-server -type f \( -name '*.db' -o -name '*.sqlite' -o -name
 '*.sqlite3' \)` returns zero results — confirmed clean.
