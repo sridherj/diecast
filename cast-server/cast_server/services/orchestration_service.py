@@ -68,8 +68,10 @@ def parse_manifest(manifest_path: Path) -> list[Phase]:
         if len(cells) < 5:
             continue
 
-        # Detect header row
-        if cells[0] == "#" and "Phase" in cells[1]:
+        # Detect header row.
+        # Lowercased substring match so producer-side headers like "Sub-phase"
+        # (emitted by cast-create-execution-plan) parse the same as legacy "Phase".
+        if cells[0] == "#" and "phase" in cells[1].lower():
             in_table = True
             _file_col_first = "file" in cells[1].lower()
             continue
