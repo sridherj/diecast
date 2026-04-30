@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from cast_server.config import (
-    GOALS_DIR, SECOND_BRAIN_ROOT, MAX_CONCURRENT_AGENTS, OFF_PEAK_HOUR,
+    GOALS_DIR, DIECAST_ROOT, MAX_CONCURRENT_AGENTS, OFF_PEAK_HOUR,
     AGENT_MONITOR_INTERVAL, AGENT_READY_TIMEOUT, AGENT_IDLE_WARNING,
     AGENT_IDLE_STUCK, AGENT_SESSION_CLEANUP_DELAY, AGENT_SENDKEY_DELAY,
 )
@@ -66,7 +66,7 @@ def _discover_claude_session_id(started_after: str, run_id: str,
     (the prompt includes the run_id in the output.json filename).
     Returns the session ID (filename stem) or None.
     """
-    raw_base = working_dir or str(SECOND_BRAIN_ROOT)
+    raw_base = working_dir or str(DIECAST_ROOT)
     # Claude Code resolves symlinks when naming project dirs, so we must too
     try:
         base = str(Path(raw_base).resolve())
@@ -123,7 +123,7 @@ def _resolve_jsonl_file(session_id: str, session_jsonl_dir: Path | None = None) 
     """Resolve the JSONL file path for a session, returning None if not found."""
     if not session_id:
         return None
-    project_dir = str(SECOND_BRAIN_ROOT).replace("/", "-")
+    project_dir = str(DIECAST_ROOT).replace("/", "-")
     jsonl_dir = session_jsonl_dir or Path.home() / ".claude" / "projects" / project_dir
     jsonl_file = jsonl_dir / f"{session_id}.jsonl"
     return jsonl_file if jsonl_file.exists() else None
@@ -393,6 +393,47 @@ def get_agent_run(run_id: str, db_path=None) -> dict | None:
 
 class MalformedOutputError(ValueError):
     """Raised when a canonical .agent-run_<id>.output.json file exists but cannot be parsed."""
+
+
+class MissingExternalProjectDirError(ValueError):
+    """Raised when a dispatch is attempted for a goal whose external_project_dir is unset
+    or whose configured path does not exist on disk.
+
+    Carries structured context so the route layer can surface a 422 with
+    actionable fields (goal_slug, configured_path).
+    """
+
+    def __init__(self, goal_slug: str, configured_path: str | None) -> None:
+        self.goal_slug = goal_slug
+        self.configured_path = configured_path
+        if configured_path:
+            msg = (
+                f"Goal '{goal_slug}' has external_project_dir set to '{configured_path}' "
+                f"but that path does not exist on disk."
+            )
+        else:
+            msg = (
+                f"Goal '{goal_slug}' has no external_project_dir configured. "
+                f"Set one before dispatching agents on this goal."
+            )
+        super().__init__(msg)
+
+
+def _validate_dispatch_preconditions(goal_slug: str, db_path=None) -> None:
+    """Refuse dispatch when the goal's external_project_dir is unusable.
+
+    Raises ``MissingExternalProjectDirError`` if the goal lacks an
+    ``external_project_dir`` or the configured path does not resolve to an
+    existing directory. The dispatch contract treats both as the same
+    user-facing problem; ``configured_path`` on the exception disambiguates.
+    """
+    from cast_server.services import goal_service
+    goal_data = goal_service.get_goal(goal_slug, db_path=db_path)
+    configured = goal_data.get("external_project_dir") if goal_data else None
+    if not configured:
+        raise MissingExternalProjectDirError(goal_slug, None)
+    if not Path(configured).expanduser().is_dir():
+        raise MissingExternalProjectDirError(goal_slug, configured)
 
 
 def load_canonical_file(goal_dir: Path, run_id: str) -> dict | None:
@@ -785,7 +826,7 @@ def _inject_context(agent_name: str, goal_slug: str,
             context_parts.append(
                 f"\n## External Project Directory (WARNING: directory not found)\n"
                 f"Configured path: {external_project_dir} (expanded: {expanded})\n"
-                f"Directory does not exist. Running in second-brain instead."
+                f"Directory does not exist. Running in diecast root instead."
             )
 
     return "\n".join(context_parts)
@@ -1069,26 +1110,103 @@ Artifact paths must be relative to {goal_dir}.""" + _inject_error_memories(agent
 
 # ---------------------------------------------------------------------------
 # Agent registry lookup
+#
+# The registry is read directly from `agents/<name>/<name>.md` frontmatter at
+# request time. The legacy `agents` SQLite table is intentionally unused (the
+# sync engine that populated it was deleted in Phase 3b sp13 — see
+# cast-server/docs/scope-prune.md). The on-disk frontmatter contract is
+# pinned in agents/README.md.
 # ---------------------------------------------------------------------------
 
-def get_all_agents(db_path=None) -> list[dict]:
-    """Get all agents from DB, ordered by name."""
+_AGENT_REGISTRY_CACHE: tuple[float, dict] | None = None
+
+
+def _parse_frontmatter(md_path: Path) -> dict | None:
+    """Extract the YAML frontmatter from a markdown file."""
+    try:
+        text = md_path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    if not text.startswith("---"):
+        return None
+    end = text.find("\n---", 3)
+    if end == -1:
+        return None
+    import yaml
+    try:
+        data = yaml.safe_load(text[3:end])
+    except yaml.YAMLError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _load_agent_registry(agents_dir: Path | None = None) -> dict[str, dict]:
+    """Scan agents/<name>/<name>.md and return {name: agent_dict}."""
+    global _AGENT_REGISTRY_CACHE
+    root = agents_dir or (DIECAST_ROOT / "agents")
+    if not root.is_dir():
+        return {}
+
+    mtime = root.stat().st_mtime
+    if (
+        agents_dir is None
+        and _AGENT_REGISTRY_CACHE is not None
+        and _AGENT_REGISTRY_CACHE[0] == mtime
+    ):
+        return _AGENT_REGISTRY_CACHE[1]
+
+    registry: dict[str, dict] = {}
+    for entry in sorted(root.iterdir()):
+        if not entry.is_dir() or not entry.name.startswith("cast-"):
+            continue
+        md_path = entry / f"{entry.name}.md"
+        if not md_path.is_file():
+            continue
+        fm = _parse_frontmatter(md_path)
+        if not fm:
+            continue
+        name = fm.get("name") or entry.name
+        registry[name] = {
+            "name": name,
+            "description": (fm.get("description") or "").strip(),
+            "model": fm.get("model", ""),
+            "type": fm.get("type", ""),
+            "tags": fm.get("tags") if isinstance(fm.get("tags"), list) else [],
+            "triggers": fm.get("triggers") if isinstance(fm.get("triggers"), list) else [],
+            "input": fm.get("input", ""),
+            "output": fm.get("output", ""),
+            "last_tested": fm.get("last_tested", ""),
+        }
+
+    if agents_dir is None:
+        _AGENT_REGISTRY_CACHE = (mtime, registry)
+    return registry
+
+
+def get_all_agents(db_path=None, agents_dir: Path | None = None) -> list[dict]:
+    """Get all agents from disk, sorted by name, augmented with run_count."""
+    registry = _load_agent_registry(agents_dir)
     conn = get_connection(db_path)
     try:
-        agents = conn.execute("SELECT * FROM agents ORDER BY name").fetchall()
-        result = []
-        for agent in agents:
-            a = dict(agent)
-            a["tags"] = json.loads(a["tags"]) if a.get("tags") else []
-            a["triggers"] = json.loads(a["triggers"]) if a.get("triggers") else []
-            result.append(a)
-        return result
+        counts = dict(
+            conn.execute(
+                "SELECT agent_name, COUNT(*) FROM agent_runs GROUP BY agent_name"
+            ).fetchall()
+        )
     finally:
         conn.close()
+
+    result = []
+    for name in sorted(registry):
+        agent = dict(registry[name])
+        agent["run_count"] = counts.get(name, 0)
+        result.append(agent)
+    return result
 
 
 def get_recommended_agents(goal_slug: str, db_path=None) -> list[dict]:
     """Get recommended agents for a goal, derived from task-level recommended_agent fields."""
+    registry = _load_agent_registry()
     conn = get_connection(db_path)
     try:
         rows = conn.execute(
@@ -1099,9 +1217,7 @@ def get_recommended_agents(goal_slug: str, db_path=None) -> list[dict]:
         agents = []
         for row in rows:
             agent_name = row["recommended_agent"]
-            agent_info = conn.execute(
-                "SELECT * FROM agents WHERE name = ?", (agent_name,)
-            ).fetchone()
+            agent_info = registry.get(agent_name)
             if agent_info:
                 agents.append(dict(agent_info))
             else:
@@ -1316,6 +1432,11 @@ async def trigger_agent(agent_name: str, goal_slug: str, context: str = "",
     Creates a DB record as 'pending' (or 'scheduled' if scheduled_at is in the future).
     The dispatcher launches it when a slot is available.
     """
+    # Refuse dispatch if the goal has no usable external_project_dir.
+    # Server is the single source of truth for this precondition;
+    # see docs/specs/cast-delegation-contract.collab.md.
+    _validate_dispatch_preconditions(goal_slug, db_path=db_path)
+
     # Validate delegation allowlist and depth
     if parent_run_id:
         parent_run = get_agent_run(parent_run_id, db_path=db_path)
@@ -1414,7 +1535,7 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
     if config.allowed_delegations:
         tmux = _get_tmux()
         session_name = f"agent-{run_id}"
-        tmux.create_session(session_name, "bash", str(SECOND_BRAIN_ROOT))
+        tmux.create_session(session_name, "bash", str(DIECAST_ROOT))
 
     # Assemble prompt with concrete values
     goal_title = _get_goal_title(effective_slug, db_path=db_path)
@@ -1432,7 +1553,7 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
     from cast_server.services import goal_service
     _invoke_goal_data = goal_service.get_goal(effective_slug, db_path=db_path)
     _invoke_ext_proj = _invoke_goal_data.get("external_project_dir") if _invoke_goal_data else None
-    _invoke_working_dir = str(SECOND_BRAIN_ROOT)
+    _invoke_working_dir = str(DIECAST_ROOT)
     _invoke_tracking_dir = goal_dir
     if _invoke_ext_proj:
         _ext_path = Path(_invoke_ext_proj).expanduser()
@@ -1538,19 +1659,18 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         gstack_dir = goal_data.get("gstack_dir") if goal_data else None
         external_project_dir = goal_data.get("external_project_dir") if goal_data else None
 
-        # Determine working directory and cast_goal_dir
-        if external_project_dir:
-            expanded_ext = Path(external_project_dir).expanduser()
-            if expanded_ext.exists():
-                working_dir = str(expanded_ext)
-                goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
-                cast_goal_dir = str(expanded_ext / ".cast")
-            else:
-                working_dir = str(SECOND_BRAIN_ROOT)
-                cast_goal_dir = str(goal_dir)
-        else:
-            working_dir = str(SECOND_BRAIN_ROOT)
-            cast_goal_dir = str(goal_dir)
+        # Determine working directory and cast_goal_dir.
+        # trigger_agent enforces external_project_dir as a dispatch precondition,
+        # so reaching this branch with an unusable value means something bypassed
+        # the API contract — fail loud rather than silently fall back.
+        if not external_project_dir:
+            raise MissingExternalProjectDirError(goal_slug, None)
+        expanded_ext = Path(external_project_dir).expanduser()
+        if not expanded_ext.is_dir():
+            raise MissingExternalProjectDirError(goal_slug, external_project_dir)
+        working_dir = str(expanded_ext)
+        goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
+        cast_goal_dir = str(expanded_ext / ".cast")
 
         # Determine phase-aware output directory
         task = task_service.get_task(task_id, db_path=db_path) if task_id else None

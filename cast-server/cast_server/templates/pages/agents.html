@@ -20,7 +20,10 @@
         {% for agent in agents %}
         <div class="agents-grid-card" data-type="{{ agent.type or '' }}" data-tags="{{ agent.tags|join(',') if agent.tags else '' }}" id="agent-{{ agent.name }}">
             <div class="agents-grid-card-header">
-                <h3 class="agents-grid-card-name">{{ agent.name }}</h3>
+                <h3 class="agents-grid-card-name">
+                    {{ agent.name }}
+                    {% if agent.run_count %}<span class="run-count-badge" title="{{ agent.run_count }} run{{ 's' if agent.run_count != 1 else '' }}">{{ agent.run_count }}</span>{% endif %}
+                </h3>
                 {% if agent.type %}
                 <span class="agent-type-badge type-{{ agent.type|replace('-', '_')|replace(' ', '_') }}">{{ agent.type }}</span>
                 {% endif %}
