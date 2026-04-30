@@ -1,24 +1,30 @@
 """Shared terminal resolver for cast-* agents AND cast-server.
 
-Resolution order:
+Resolution order (during dispatch — never auto-detects):
     1. $CAST_TERMINAL (preferred, project-scoped)
     2. $TERMINAL (POSIX convention)
-    3. ~/.cast/config.yaml:terminal_default
-    4. raise ResolutionError pointing at supported-terminals docs
+    3. ~/.cast/config.yaml: terminal_default (canonical) or terminal (alias)
+    4. raise ResolutionError pointing at bin/cast-doctor --fix-terminal
 
 Returns: ResolvedTerminal(command, args, flags).
 
 NEVER use shell=True with the returned command. Pass `args=[command, *args]`
 as a list to subprocess.Popen — $CAST_TERMINAL is shell-expandable, and
 shell=True would open an injection surface.
+
+Auto-detection (`_autodetect`) is consumed only by `bin/cast-doctor
+--fix-terminal` at first-run setup. `resolve_terminal()` does NOT call
+`_autodetect()` — silent fallback during dispatch is forbidden.
 """
 from __future__ import annotations
 
 import os
+import platform
 import shlex
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import yaml
 
@@ -33,11 +39,19 @@ _SUPPORTED: dict[str, dict[str, str]] = {
 }
 
 
+# Linux probe order — favors GNOME stack, then misc tabbed terminals.
+# Re-ordered at probe time per $XDG_CURRENT_DESKTOP.
+_LINUX_PROBE_ORDER: tuple[str, ...] = tuple(
+    k for k in _SUPPORTED if k not in ("iterm", "terminal")
+)
+
+
 class ResolutionError(RuntimeError):
     """Raised when no terminal can be resolved.
 
-    The error message links to docs/reference/supported-terminals.md and
-    names all three resolution sources so the user can fix it.
+    The error message names every resolution source actually checked and
+    points the user at `bin/cast-doctor --fix-terminal` and
+    docs/reference/supported-terminals.md.
     """
 
 
@@ -58,8 +72,15 @@ def _config_default(config_path: Optional[Path] = None) -> Optional[str]:
         return None
     if not isinstance(cfg, dict):
         return None
-    value = cfg.get("terminal_default")
-    return value if isinstance(value, str) and value else None
+    # Accept both keys for back-compat. `terminal_default` is canonical and wins
+    # when both are present; `terminal:` is the alias originally written by
+    # `cast init` and the docs — the mismatch caused a misleading 30s timeout
+    # before this fix.
+    for key in ("terminal_default", "terminal"):
+        value = cfg.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None
 
 
 def resolve_terminal(config_path: Optional[Path] = None) -> ResolvedTerminal:
@@ -75,19 +96,33 @@ def resolve_terminal(config_path: Optional[Path] = None) -> ResolvedTerminal:
 
     Raises:
         ResolutionError: if no source provides a terminal name. The message
-            links to docs/reference/supported-terminals.md.
+            names every source checked and points at
+            ``bin/cast-doctor --fix-terminal``.
     """
-    raw = (
-        os.environ.get("CAST_TERMINAL")
-        or os.environ.get("TERMINAL")
-        or _config_default(config_path)
-    )
+    cast_term = os.environ.get("CAST_TERMINAL")
+    sys_term = os.environ.get("TERMINAL")
+    cfg_term = _config_default(config_path)
+
+    raw = cast_term or sys_term or cfg_term
     if not raw:
-        raise ResolutionError(
-            "No terminal configured. Set $CAST_TERMINAL, $TERMINAL, or "
-            "terminal_default in ~/.cast/config.yaml. "
-            "See docs/reference/supported-terminals.md for the supported list."
+        cfg_path = config_path or Path.home() / ".cast" / "config.yaml"
+        cast_state = f"set: {cast_term}" if cast_term else "unset"
+        sys_state = f"set: {sys_term}" if sys_term else "unset"
+        cfg_state = (
+            "key 'terminal_default' missing"
+            if cfg_path.exists()
+            else "file missing — would read key 'terminal_default'"
         )
+        msg = (
+            "no terminal configured.\n"
+            f"  tried: $CAST_TERMINAL ({cast_state}), "
+            f"$TERMINAL ({sys_state}),\n"
+            f"         {cfg_path} ({cfg_state}).\n"
+            "  fix:   run `bin/cast-doctor --fix-terminal` to auto-detect and configure,\n"
+            "         or set $CAST_TERMINAL=<your-terminal> manually.\n"
+            "         See docs/reference/supported-terminals.md."
+        )
+        raise ResolutionError(msg)
     parts = shlex.split(raw)
     cmd, *args = parts
     flags = dict(_SUPPORTED.get(Path(cmd).name, {}))
@@ -98,9 +133,58 @@ def needs_first_run_setup(config_path: Optional[Path] = None) -> bool:
     """Return True iff /cast-setup should prompt the user on this run.
 
     True when neither $CAST_TERMINAL nor $TERMINAL is set AND
-    ~/.cast/config.yaml lacks a non-empty terminal_default. The /cast-setup
-    script (Phase 4) calls this helper to decide whether to prompt.
+    ~/.cast/config.yaml lacks a non-empty terminal_default/terminal value.
+    The /cast-setup script (Phase 4) calls this helper to decide whether to
+    prompt.
     """
     if os.environ.get("CAST_TERMINAL") or os.environ.get("TERMINAL"):
         return False
     return _config_default(config_path) is None
+
+
+def _autodetect(
+    *,
+    system: Optional[str] = None,
+    desktop: Optional[str] = None,
+    iterm_app_path: Path = Path("/Applications/iTerm.app"),
+    which: Callable[[str], Optional[str]] = shutil.which,
+) -> list[str]:
+    """Return ordered candidates from `_SUPPORTED.keys()` available on this host.
+
+    Consumed exclusively by `bin/cast-doctor --fix-terminal` at first-run
+    setup. `resolve_terminal()` does NOT call this helper — auto-detect during
+    dispatch would re-introduce the silent-fallback bug this fix removes.
+
+    Args:
+        system: Override `platform.system()`. Tests inject "Darwin" / "Linux".
+        desktop: Override `$XDG_CURRENT_DESKTOP`. Tests inject "GNOME" / "KDE".
+        iterm_app_path: Override iTerm.app probe path (macOS only).
+        which: Override `shutil.which`. Tests inject a fake.
+
+    Returns:
+        Ordered candidate keys from `_SUPPORTED`. Empty list when nothing
+        matches. First entry is the recommended default; caller (cast-doctor)
+        decides whether to confirm-and-write (single candidate) or prompt
+        (multiple).
+    """
+    sys_name = system or platform.system()
+    if sys_name == "Darwin":
+        candidates: list[str] = []
+        if iterm_app_path.exists():
+            candidates.append("iterm")
+        candidates.append("terminal")  # always present on macOS
+        return candidates
+
+    # Linux (and BSD, WSL — anything non-Darwin).
+    desktop = desktop if desktop is not None else os.environ.get("XDG_CURRENT_DESKTOP", "")
+    desktop = desktop.upper()
+    order: list[str] = list(_LINUX_PROBE_ORDER)
+    if "GNOME" in desktop:
+        # ptyxis already first; gnome-terminal already second — keep as-is.  # diecast-lint: ignore-line
+        pass
+    elif "KDE" in desktop and "konsole" in _SUPPORTED:
+        # konsole bumps to front when KDE is detected (only when konsole is in
+        # _SUPPORTED — currently it is not, so this branch is dormant).
+        order.remove("konsole")
+        order.insert(0, "konsole")
+    return [name for name in order if which(name) is not None]

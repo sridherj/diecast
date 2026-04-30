@@ -35,8 +35,10 @@ class TmuxSessionManager:
             logger.info("tmux available: %s", result.stdout.strip())
         except FileNotFoundError:
             raise TmuxError("tmux binary not found")
-        # Lazy-resolved: None = not checked, False = unavailable, ResolvedTerminal = ready.
-        self._terminal: ResolvedTerminal | bool | None = None
+        # Lazy-resolved on first successful resolution. Failures re-raise so the
+        # dispatcher can fail the run with a structured message — no more silent
+        # "visible terminals disabled" fallback that produced a 30s readiness timeout.
+        self._terminal: ResolvedTerminal | None = None
 
     def _run(self, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
         try:
@@ -75,21 +77,27 @@ class TmuxSessionManager:
     def send_enter(self, target: str) -> None:
         self._run(["send-keys", "-t", target, "Enter"])
 
-    def _resolved_terminal(self) -> ResolvedTerminal | None:
-        """Resolve $CAST_TERMINAL once and cache. Returns None if unavailable."""
-        if self._terminal is None:
-            try:
-                resolved = resolve_terminal()
-            except ResolutionError as exc:
-                logger.warning("terminal resolution failed (%s) — visible terminals disabled", exc)
-                self._terminal = False
-                return None
-            if shutil.which(resolved.command) is None:
-                logger.warning("$CAST_TERMINAL=%s not on PATH — visible terminals disabled", resolved.command)
-                self._terminal = False
-                return None
-            self._terminal = resolved
-        return self._terminal if isinstance(self._terminal, ResolvedTerminal) else None
+    def _resolved_terminal(self) -> ResolvedTerminal:
+        """Resolve $CAST_TERMINAL once and cache.
+
+        Raises:
+            ResolutionError: when no terminal is configured, or when the
+                configured command is not on PATH. Callers (agent_service)
+                catch this and fail the run with the structured message —
+                no more silent fallback into a 30s readiness timeout.
+        """
+        if self._terminal is not None:
+            return self._terminal
+        resolved = resolve_terminal()
+        if shutil.which(resolved.command) is None:
+            raise ResolutionError(
+                f"configured terminal '{resolved.command}' is not on PATH. "
+                f"fix: install {resolved.command} or run "
+                "`bin/cast-doctor --fix-terminal` to pick a different one. "
+                "See docs/reference/supported-terminals.md."
+            )
+        self._terminal = resolved
+        return self._terminal
 
     @staticmethod
     def _split_flag(flag: str) -> list[str]:
@@ -99,10 +107,13 @@ class TmuxSessionManager:
         """Open a new terminal window attached to this tmux session.
 
         Uses the configured $CAST_TERMINAL (or $TERMINAL / config default).
+
+        Raises:
+            ResolutionError: propagated from `_resolved_terminal()` when no
+                terminal is configured or the configured command is not on
+                PATH. Callers in agent_service catch this and fail the run.
         """
         resolved = self._resolved_terminal()
-        if resolved is None:
-            return
         cmd = [resolved.command, *resolved.args]
         cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         if title and _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
@@ -116,10 +127,13 @@ class TmuxSessionManager:
 
         For ptyxis, opens via --tab in the active window. For other terminals,  # diecast-lint: ignore-line
         falls back to the same new-window flag as ``open_terminal``.
+
+        Raises:
+            ResolutionError: propagated from `_resolved_terminal()` when no
+                terminal is configured or the configured command is not on
+                PATH.
         """
         resolved = self._resolved_terminal()
-        if resolved is None:
-            return
         cmd = [resolved.command, *resolved.args]
         if _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
             cmd.append("--tab")

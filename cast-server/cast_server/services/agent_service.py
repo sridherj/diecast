@@ -20,6 +20,7 @@ from cast_server.models.delegation import DelegationContext
 from cast_server.db.connection import get_connection
 from cast_server.models.agent_output import AgentOutput
 from cast_server.infra.tmux_manager import TmuxSessionManager, TmuxError
+from cast_server.infra.terminal import ResolutionError
 from cast_server.infra.state_detection import detect_agent_state, AgentState
 from cast_server.infra.rate_limit_parser import parse_rate_limit_reset
 from cast_server.services import task_service
@@ -1671,7 +1672,17 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             if task_title:
                 child_title += f" | {task_title[:40]}"
             child_title = child_title[:80]
-            tmux.open_terminal(session_name, title=child_title)
+            try:
+                tmux.open_terminal(session_name, title=child_title)
+            except ResolutionError as exc:
+                tmux.kill_session(session_name)
+                logger.error(
+                    "Child agent %s could not start — terminal resolution failed: %s",
+                    run_id, exc,
+                )
+                raise TmuxError(
+                    f"Child agent {run_id} could not start: {exc}"
+                ) from exc
 
             if not tmux.wait_for_ready(session_name, timeout_seconds=AGENT_READY_TIMEOUT):
                 tmux.kill_session(session_name)
@@ -1703,7 +1714,9 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         # Warn if both interactive and headless are set — interactive wins
         if config.interactive and config.headless:
             logger.warning(
-                "Agent %s has both interactive and headless set — interactive overrides headless",
+                "Agent %s has both interactive and headless set — interactive overrides headless. "
+                "Note: headless=True alone still requires a configured GUI terminal today; "
+                "real headless dispatch is a separate follow-up.",
                 agent_name,
             )
 
@@ -1713,7 +1726,17 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         # Open visible terminal for all top-level agents (headless = non-interactive, not hidden)
         top_title = f"[Diecast] {agent_name} | goal: {goal_slug}"
         top_title = top_title[:80]
-        tmux.open_terminal(session_name, title=top_title)
+        try:
+            tmux.open_terminal(session_name, title=top_title)
+        except ResolutionError as exc:
+            tmux.kill_session(session_name)
+            logger.error(
+                "Agent %s could not start — terminal resolution failed: %s",
+                run_id, exc,
+            )
+            raise TmuxError(
+                f"Agent {run_id} could not start: {exc}"
+            ) from exc
 
         # Wait for Claude to be ready (input field visible)
         if not tmux.wait_for_ready(session_name, timeout_seconds=AGENT_READY_TIMEOUT):
