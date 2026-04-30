@@ -1,0 +1,61 @@
+# Dry-run log — cast-explore
+timestamp: 2026-04-30T00:03:28.468588+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: all
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 20
+  agent-resolved:  8
+  skill-resolved:  6
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 6
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 61
+  folder-green: 34
+  folder-yellow: 0
+  folder-red:   27
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: True
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-explore/cast-explore.md:78 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:79 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:107 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:107 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:109 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:109 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:181 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:201 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:221 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:238 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:244 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:247 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:250 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:251 (read)
+  RED-PATH  agents/cast-explore/cast-explore.md:399 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:401 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:402 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:403 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:404 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:407 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:408 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:410 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:416 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:418 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:419 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:422 (unknown)
+  RED-PATH  agents/cast-explore/cast-explore.md:424 (unknown)

@@ -1,0 +1,44 @@
+# Dry-run log — cast-create-execution-plan
+timestamp: 2026-04-30T00:03:28.464202+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: both
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 4
+  agent-resolved:  4
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 25
+  folder-green: 15
+  folder-yellow: 0
+  folder-red:   10
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:38 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:92 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:197 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:204 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:242 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:280 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:312 (read)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:313 (read)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:320 (unknown)
+  RED-PATH  agents/cast-create-execution-plan/cast-create-execution-plan.md:325 (unknown)

@@ -1,0 +1,65 @@
+# Dry-run log — cast-preso-assembler
+timestamp: 2026-04-30T00:03:28.487855+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: narrative.collab.md
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 1
+  agent-resolved:  1
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 70
+  folder-green: 17
+  folder-yellow: 19
+  folder-red:   34
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:15 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:24 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:25 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:33 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:34 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:39 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:47 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:47 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:61 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:69 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:71 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:77 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:82 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:107 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:151 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:151 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:155 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:159 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:159 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:170 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:179 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:184 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:187 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:187 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:191 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:192 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:193 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:199 (read)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:224 (unknown)
+  RED-PATH  agents/cast-preso-assembler/cast-preso-assembler.md:231 (unknown)
+  ... +4 more red path edges

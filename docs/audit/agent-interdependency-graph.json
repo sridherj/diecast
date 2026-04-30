@@ -1819,6 +1819,230 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "bare",
+      "line": 31,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 31,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-goal-decomposer"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 31,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 31,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-playbook-synthesizer"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 32,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-detailed-plan"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 32,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-orchestrate"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 81,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 81,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 81,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-playbook-synthesizer"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 83,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-fanout-detailed-plan"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 83,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-detailed-plan"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 146,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 148,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 264,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 348,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-fanout-detailed-plan"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 348,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-detailed-plan"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 350,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 350,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 351,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-playbook-synthesizer"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "slash",
+      "line": 355,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-orchestrate"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 375,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 380,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "slash",
+      "line": 497,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 498,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 502,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 502,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-web-researcher"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 581,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-high-level-planner"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
+      "line": 672,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-explore"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "bare",
       "line": 2,
       "source": "cast-agent-design-guide",
       "status": "green",
@@ -2051,30 +2275,6 @@
     {
       "file": "agents/cast-code-explorer/cast-code-explorer.md",
       "kind": "read",
-      "line": 93,
-      "source": "cast-code-explorer",
-      "status": "yellow",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-code-explorer",
-      "status": "yellow",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "unknown",
-      "line": 95,
-      "source": "cast-code-explorer",
-      "status": "yellow",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "read",
       "line": 103,
       "source": "cast-code-explorer",
       "status": "green",
@@ -2099,30 +2299,6 @@
     {
       "file": "agents/cast-code-explorer/cast-code-explorer.md",
       "kind": "read",
-      "line": 93,
-      "source": "cast-code-explorer",
-      "status": "green",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-code-explorer",
-      "status": "green",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "unknown",
-      "line": 95,
-      "source": "cast-code-explorer",
-      "status": "green",
-      "target": "cast-code-explorer"
-    },
-    {
-      "file": "agents/cast-code-explorer/cast-code-explorer.md",
-      "kind": "read",
       "line": 103,
       "source": "cast-code-explorer",
       "status": "red",
@@ -2146,90 +2322,10 @@
     },
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "write",
-      "line": 21,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 22,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
       "line": 38,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 50,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 50,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 51,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 51,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 90,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 90,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2243,25 +2339,9 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 94,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 103,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 149,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2283,41 +2363,9 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 208,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 209,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 223,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 234,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 234,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2326,14 +2374,6 @@
       "line": 242,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 278,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2363,57 +2403,9 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 314,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 316,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 317,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 318,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 319,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 320,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 320,
-      "source": "cast-create-execution-plan",
-      "status": "yellow",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2427,79 +2419,7 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 22,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 38,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 50,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 50,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 51,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 51,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 90,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 90,
       "source": "cast-create-execution-plan",
       "status": "red",
       "target": "cast-create-execution-plan"
@@ -2515,25 +2435,9 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 94,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 103,
       "source": "cast-create-execution-plan",
       "status": "green",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 149,
-      "source": "cast-create-execution-plan",
-      "status": "red",
       "target": "cast-create-execution-plan"
     },
     {
@@ -2555,22 +2459,6 @@
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
-      "line": 208,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 209,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
       "line": 223,
       "source": "cast-create-execution-plan",
       "status": "green",
@@ -2578,32 +2466,8 @@
     },
     {
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 234,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "read",
-      "line": 234,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "unknown",
       "line": 242,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 278,
       "source": "cast-create-execution-plan",
       "status": "red",
       "target": "cast-create-execution-plan"
@@ -2628,54 +2492,6 @@
       "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
       "kind": "read",
       "line": 313,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 314,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 316,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 317,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 318,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 319,
-      "source": "cast-create-execution-plan",
-      "status": "red",
-      "target": "cast-create-execution-plan"
-    },
-    {
-      "file": "agents/cast-create-execution-plan/cast-create-execution-plan.md",
-      "kind": "unknown",
-      "line": 320,
       "source": "cast-create-execution-plan",
       "status": "red",
       "target": "cast-create-execution-plan"
@@ -2722,26 +2538,10 @@
     },
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "write",
-      "line": 126,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
       "line": 130,
       "source": "cast-detailed-plan",
       "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 132,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
       "target": "cast-detailed-plan"
     },
     {
@@ -2774,14 +2574,6 @@
       "line": 213,
       "source": "cast-detailed-plan",
       "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 213,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
       "target": "cast-detailed-plan"
     },
     {
@@ -2822,14 +2614,6 @@
       "line": 222,
       "source": "cast-detailed-plan",
       "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 225,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
       "target": "cast-detailed-plan"
     },
     {
@@ -2907,14 +2691,6 @@
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
-      "line": 276,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
       "line": 278,
       "source": "cast-detailed-plan",
       "status": "green",
@@ -2939,33 +2715,9 @@
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
-      "line": 357,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
       "line": 363,
       "source": "cast-detailed-plan",
       "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 363,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "write",
-      "line": 411,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
       "target": "cast-detailed-plan"
     },
     {
@@ -2987,54 +2739,6 @@
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
-      "line": 419,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 420,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 421,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "write",
-      "line": 428,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "write",
-      "line": 429,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 492,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
       "line": 510,
       "source": "cast-detailed-plan",
       "status": "green",
@@ -3061,14 +2765,6 @@
       "kind": "write",
       "line": 607,
       "source": "cast-detailed-plan",
-      "status": "yellow",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "write",
-      "line": 607,
-      "source": "cast-detailed-plan",
       "status": "green",
       "target": "cast-detailed-plan"
     },
@@ -3078,14 +2774,6 @@
       "line": 608,
       "source": "cast-detailed-plan",
       "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 609,
-      "source": "cast-detailed-plan",
-      "status": "yellow",
       "target": "cast-detailed-plan"
     },
     {
@@ -3122,14 +2810,6 @@
     },
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 132,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "read",
       "line": 175,
       "source": "cast-detailed-plan",
@@ -3150,14 +2830,6 @@
       "line": 210,
       "source": "cast-detailed-plan",
       "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 213,
-      "source": "cast-detailed-plan",
-      "status": "green",
       "target": "cast-detailed-plan"
     },
     {
@@ -3204,14 +2876,6 @@
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
       "line": 222,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 225,
       "source": "cast-detailed-plan",
       "status": "red",
       "target": "cast-detailed-plan"
@@ -3291,14 +2955,6 @@
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
-      "line": 276,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
       "line": 278,
       "source": "cast-detailed-plan",
       "status": "red",
@@ -3323,22 +2979,6 @@
     {
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
-      "line": 357,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 363,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
       "line": 363,
       "source": "cast-detailed-plan",
       "status": "red",
@@ -3348,38 +2988,6 @@
       "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
       "kind": "unknown",
       "line": 416,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 419,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 420,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 421,
-      "source": "cast-detailed-plan",
-      "status": "red",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 492,
       "source": "cast-detailed-plan",
       "status": "red",
       "target": "cast-detailed-plan"
@@ -3417,22 +3025,6 @@
       "target": "cast-detailed-plan"
     },
     {
-      "file": "agents/cast-detailed-plan/cast-detailed-plan.md",
-      "kind": "unknown",
-      "line": 609,
-      "source": "cast-detailed-plan",
-      "status": "green",
-      "target": "cast-detailed-plan"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 75,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
       "line": 78,
@@ -3454,14 +3046,6 @@
       "line": 98,
       "source": "cast-explore",
       "status": "green",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 98,
-      "source": "cast-explore",
-      "status": "yellow",
       "target": "cast-explore"
     },
     {
@@ -3523,33 +3107,9 @@
     {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
-      "line": 193,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 198,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
       "line": 201,
       "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 217,
-      "source": "cast-explore",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3557,31 +3117,7 @@
       "kind": "unknown",
       "line": 221,
       "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 229,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 233,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 235,
-      "source": "cast-explore",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3589,7 +3125,7 @@
       "kind": "unknown",
       "line": 238,
       "source": "cast-explore",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3605,7 +3141,7 @@
       "kind": "read",
       "line": 247,
       "source": "cast-explore",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3621,7 +3157,7 @@
       "kind": "read",
       "line": 251,
       "source": "cast-explore",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3635,30 +3171,6 @@
     {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
-      "line": 299,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 300,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 398,
-      "source": "cast-explore",
-      "status": "yellow",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
       "line": 399,
       "source": "cast-explore",
       "status": "green",
@@ -3763,14 +3275,6 @@
     {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
-      "line": 75,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
       "line": 78,
       "source": "cast-explore",
       "status": "red",
@@ -3782,14 +3286,6 @@
       "line": 79,
       "source": "cast-explore",
       "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 98,
-      "source": "cast-explore",
-      "status": "green",
       "target": "cast-explore"
     },
     {
@@ -3859,22 +3355,6 @@
     {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
-      "line": 193,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 198,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
       "line": 201,
       "source": "cast-explore",
       "status": "red",
@@ -3883,39 +3363,7 @@
     {
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "unknown",
-      "line": 217,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
       "line": 221,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 229,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 233,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 235,
       "source": "cast-explore",
       "status": "red",
       "target": "cast-explore"
@@ -3956,30 +3404,6 @@
       "file": "agents/cast-explore/cast-explore.md",
       "kind": "read",
       "line": 251,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 299,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 300,
-      "source": "cast-explore",
-      "status": "red",
-      "target": "cast-explore"
-    },
-    {
-      "file": "agents/cast-explore/cast-explore.md",
-      "kind": "unknown",
-      "line": 398,
       "source": "cast-explore",
       "status": "red",
       "target": "cast-explore"
@@ -4106,14 +3530,6 @@
     },
     {
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 43,
-      "source": "cast-fanout-detailed-plan",
-      "status": "yellow",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "read",
       "line": 45,
       "source": "cast-fanout-detailed-plan",
@@ -4126,14 +3542,6 @@
       "line": 93,
       "source": "cast-fanout-detailed-plan",
       "status": "green",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 98,
-      "source": "cast-fanout-detailed-plan",
-      "status": "yellow",
       "target": "cast-fanout-detailed-plan"
     },
     {
@@ -4174,14 +3582,6 @@
       "line": 113,
       "source": "cast-fanout-detailed-plan",
       "status": "green",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 128,
-      "source": "cast-fanout-detailed-plan",
-      "status": "yellow",
       "target": "cast-fanout-detailed-plan"
     },
     {
@@ -4236,14 +3636,6 @@
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "read",
       "line": 197,
-      "source": "cast-fanout-detailed-plan",
-      "status": "green",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "read",
-      "line": 201,
       "source": "cast-fanout-detailed-plan",
       "status": "green",
       "target": "cast-fanout-detailed-plan"
@@ -4285,7 +3677,7 @@
       "kind": "write",
       "line": 250,
       "source": "cast-fanout-detailed-plan",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-fanout-detailed-plan"
     },
     {
@@ -4314,14 +3706,6 @@
     },
     {
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 43,
-      "source": "cast-fanout-detailed-plan",
-      "status": "green",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "read",
       "line": 45,
       "source": "cast-fanout-detailed-plan",
@@ -4332,14 +3716,6 @@
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "unknown",
       "line": 93,
-      "source": "cast-fanout-detailed-plan",
-      "status": "red",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 98,
       "source": "cast-fanout-detailed-plan",
       "status": "red",
       "target": "cast-fanout-detailed-plan"
@@ -4380,14 +3756,6 @@
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "unknown",
       "line": 113,
-      "source": "cast-fanout-detailed-plan",
-      "status": "red",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "unknown",
-      "line": 128,
       "source": "cast-fanout-detailed-plan",
       "status": "red",
       "target": "cast-fanout-detailed-plan"
@@ -4450,14 +3818,6 @@
     },
     {
       "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
-      "kind": "read",
-      "line": 201,
-      "source": "cast-fanout-detailed-plan",
-      "status": "red",
-      "target": "cast-fanout-detailed-plan"
-    },
-    {
-      "file": "agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md",
       "kind": "unknown",
       "line": 238,
       "source": "cast-fanout-detailed-plan",
@@ -4507,14 +3867,6 @@
     {
       "file": "agents/cast-goal-decomposer/cast-goal-decomposer.md",
       "kind": "unknown",
-      "line": 41,
-      "source": "cast-goal-decomposer",
-      "status": "yellow",
-      "target": "cast-goal-decomposer"
-    },
-    {
-      "file": "agents/cast-goal-decomposer/cast-goal-decomposer.md",
-      "kind": "unknown",
       "line": 42,
       "source": "cast-goal-decomposer",
       "status": "green",
@@ -4548,14 +3900,6 @@
       "file": "agents/cast-goal-decomposer/cast-goal-decomposer.md",
       "kind": "unknown",
       "line": 197,
-      "source": "cast-goal-decomposer",
-      "status": "green",
-      "target": "cast-goal-decomposer"
-    },
-    {
-      "file": "agents/cast-goal-decomposer/cast-goal-decomposer.md",
-      "kind": "unknown",
-      "line": 41,
       "source": "cast-goal-decomposer",
       "status": "green",
       "target": "cast-goal-decomposer"
@@ -4623,14 +3967,6 @@
       "source": "cast-goals",
       "status": "red",
       "target": "cast-goals"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 6,
-      "source": "cast-high-level-planner",
-      "status": "yellow",
-      "target": "cast-high-level-planner"
     },
     {
       "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
@@ -4650,14 +3986,6 @@
     },
     {
       "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 19,
-      "source": "cast-high-level-planner",
-      "status": "yellow",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
       "kind": "write",
       "line": 94,
       "source": "cast-high-level-planner",
@@ -4670,14 +3998,6 @@
       "line": 110,
       "source": "cast-high-level-planner",
       "status": "green",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 110,
-      "source": "cast-high-level-planner",
-      "status": "yellow",
       "target": "cast-high-level-planner"
     },
     {
@@ -4838,22 +4158,6 @@
       "line": 164,
       "source": "cast-high-level-planner",
       "status": "green",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 215,
-      "source": "cast-high-level-planner",
-      "status": "yellow",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 215,
-      "source": "cast-high-level-planner",
-      "status": "yellow",
       "target": "cast-high-level-planner"
     },
     {
@@ -4906,14 +4210,6 @@
     },
     {
       "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 6,
-      "source": "cast-high-level-planner",
-      "status": "red",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
       "kind": "read",
       "line": 7,
       "source": "cast-high-level-planner",
@@ -4924,22 +4220,6 @@
       "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
       "kind": "read",
       "line": 16,
-      "source": "cast-high-level-planner",
-      "status": "red",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 19,
-      "source": "cast-high-level-planner",
-      "status": "red",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 110,
       "source": "cast-high-level-planner",
       "status": "red",
       "target": "cast-high-level-planner"
@@ -5114,22 +4394,6 @@
     },
     {
       "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 215,
-      "source": "cast-high-level-planner",
-      "status": "red",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
-      "kind": "unknown",
-      "line": 215,
-      "source": "cast-high-level-planner",
-      "status": "red",
-      "target": "cast-high-level-planner"
-    },
-    {
-      "file": "agents/cast-high-level-planner/cast-high-level-planner.md",
       "kind": "read",
       "line": 232,
       "source": "cast-high-level-planner",
@@ -5155,73 +4419,9 @@
     {
       "file": "agents/cast-orchestrate/cast-orchestrate.md",
       "kind": "unknown",
-      "line": 27,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 28,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 29,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
       "line": 29,
       "source": "cast-orchestrate",
       "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 49,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 49,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 58,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 62,
-      "source": "cast-orchestrate",
-      "status": "yellow",
       "target": "cast-orchestrate"
     },
     {
@@ -5238,30 +4438,6 @@
       "line": 69,
       "source": "cast-orchestrate",
       "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 72,
-      "source": "cast-orchestrate",
-      "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 72,
-      "source": "cast-orchestrate",
-      "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 83,
-      "source": "cast-orchestrate",
-      "status": "yellow",
       "target": "cast-orchestrate"
     },
     {
@@ -5274,46 +4450,6 @@
     },
     {
       "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "read",
-      "line": 103,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 155,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 169,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 219,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 239,
-      "source": "cast-orchestrate",
-      "status": "yellow",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
       "kind": "unknown",
       "line": 239,
       "source": "cast-orchestrate",
@@ -5331,71 +4467,7 @@
     {
       "file": "agents/cast-orchestrate/cast-orchestrate.md",
       "kind": "unknown",
-      "line": 27,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 28,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
       "line": 29,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 29,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 49,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 49,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 58,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 62,
       "source": "cast-orchestrate",
       "status": "red",
       "target": "cast-orchestrate"
@@ -5419,70 +4491,6 @@
     {
       "file": "agents/cast-orchestrate/cast-orchestrate.md",
       "kind": "unknown",
-      "line": 72,
-      "source": "cast-orchestrate",
-      "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 72,
-      "source": "cast-orchestrate",
-      "status": "green",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 83,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "read",
-      "line": 103,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 155,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 169,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 219,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
-      "line": 239,
-      "source": "cast-orchestrate",
-      "status": "red",
-      "target": "cast-orchestrate"
-    },
-    {
-      "file": "agents/cast-orchestrate/cast-orchestrate.md",
-      "kind": "unknown",
       "line": 239,
       "source": "cast-orchestrate",
       "status": "red",
@@ -5499,31 +4507,7 @@
     {
       "file": "agents/cast-plan-review/cast-plan-review.md",
       "kind": "unknown",
-      "line": 21,
-      "source": "cast-plan-review",
-      "status": "yellow",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
       "line": 22,
-      "source": "cast-plan-review",
-      "status": "yellow",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
-      "line": 22,
-      "source": "cast-plan-review",
-      "status": "yellow",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "read",
-      "line": 50,
       "source": "cast-plan-review",
       "status": "yellow",
       "target": "cast-plan-review"
@@ -5539,39 +4523,7 @@
     {
       "file": "agents/cast-plan-review/cast-plan-review.md",
       "kind": "unknown",
-      "line": 64,
-      "source": "cast-plan-review",
-      "status": "yellow",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
-      "line": 21,
-      "source": "cast-plan-review",
-      "status": "red",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
       "line": 22,
-      "source": "cast-plan-review",
-      "status": "red",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
-      "line": 22,
-      "source": "cast-plan-review",
-      "status": "red",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "read",
-      "line": 50,
       "source": "cast-plan-review",
       "status": "red",
       "target": "cast-plan-review"
@@ -5580,14 +4532,6 @@
       "file": "agents/cast-plan-review/cast-plan-review.md",
       "kind": "unknown",
       "line": 58,
-      "source": "cast-plan-review",
-      "status": "red",
-      "target": "cast-plan-review"
-    },
-    {
-      "file": "agents/cast-plan-review/cast-plan-review.md",
-      "kind": "unknown",
-      "line": 64,
       "source": "cast-plan-review",
       "status": "red",
       "target": "cast-plan-review"
@@ -5666,22 +4610,6 @@
     },
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "read",
-      "line": 62,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "unknown",
       "line": 69,
       "source": "cast-preso-assembler",
@@ -5707,30 +4635,6 @@
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "unknown",
-      "line": 78,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 79,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 81,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
       "line": 82,
       "source": "cast-preso-assembler",
       "status": "green",
@@ -5738,112 +4642,8 @@
     },
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 83,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 84,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "read",
       "line": 107,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 113,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 114,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 116,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 118,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 130,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 132,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 133,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 134,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 142,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 149,
       "source": "cast-preso-assembler",
       "status": "yellow",
       "target": "cast-preso-assembler"
@@ -5979,14 +4779,6 @@
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "unknown",
-      "line": 205,
-      "source": "cast-preso-assembler",
-      "status": "yellow",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
       "line": 224,
       "source": "cast-preso-assembler",
       "status": "green",
@@ -6106,22 +4898,6 @@
     },
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "read",
-      "line": 62,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "unknown",
       "line": 69,
       "source": "cast-preso-assembler",
@@ -6147,47 +4923,7 @@
     {
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "unknown",
-      "line": 78,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 79,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 81,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
       "line": 82,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 83,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 84,
       "source": "cast-preso-assembler",
       "status": "red",
       "target": "cast-preso-assembler"
@@ -6196,94 +4932,6 @@
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "read",
       "line": 107,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 113,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 114,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 116,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 118,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 130,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 132,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 133,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 134,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 142,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 149,
       "source": "cast-preso-assembler",
       "status": "red",
       "target": "cast-preso-assembler"
@@ -6396,14 +5044,6 @@
       "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
       "kind": "read",
       "line": 199,
-      "source": "cast-preso-assembler",
-      "status": "red",
-      "target": "cast-preso-assembler"
-    },
-    {
-      "file": "agents/cast-preso-assembler/cast-preso-assembler.md",
-      "kind": "unknown",
-      "line": 205,
       "source": "cast-preso-assembler",
       "status": "red",
       "target": "cast-preso-assembler"
@@ -6650,22 +5290,6 @@
     },
     {
       "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
-      "kind": "unknown",
-      "line": 201,
-      "source": "cast-preso-check-coordinator",
-      "status": "yellow",
-      "target": "cast-preso-check-coordinator"
-    },
-    {
-      "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
-      "kind": "unknown",
-      "line": 201,
-      "source": "cast-preso-check-coordinator",
-      "status": "yellow",
-      "target": "cast-preso-check-coordinator"
-    },
-    {
-      "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
       "kind": "write",
       "line": 204,
       "source": "cast-preso-check-coordinator",
@@ -6754,14 +5378,6 @@
     },
     {
       "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
-      "kind": "write",
-      "line": 306,
-      "source": "cast-preso-check-coordinator",
-      "status": "yellow",
-      "target": "cast-preso-check-coordinator"
-    },
-    {
-      "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
       "kind": "unknown",
       "line": 57,
       "source": "cast-preso-check-coordinator",
@@ -6788,22 +5404,6 @@
       "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
       "kind": "unknown",
       "line": 160,
-      "source": "cast-preso-check-coordinator",
-      "status": "red",
-      "target": "cast-preso-check-coordinator"
-    },
-    {
-      "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
-      "kind": "unknown",
-      "line": 201,
-      "source": "cast-preso-check-coordinator",
-      "status": "red",
-      "target": "cast-preso-check-coordinator"
-    },
-    {
-      "file": "agents/cast-preso-check-coordinator/cast-preso-check-coordinator.md",
-      "kind": "unknown",
-      "line": 201,
       "source": "cast-preso-check-coordinator",
       "status": "red",
       "target": "cast-preso-check-coordinator"
@@ -6890,24 +5490,8 @@
     },
     {
       "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-preso-check-visual",
-      "status": "yellow",
-      "target": "cast-preso-check-visual"
-    },
-    {
-      "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
       "kind": "read",
       "line": 31,
-      "source": "cast-preso-check-visual",
-      "status": "yellow",
-      "target": "cast-preso-check-visual"
-    },
-    {
-      "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
-      "kind": "read",
-      "line": 37,
       "source": "cast-preso-check-visual",
       "status": "yellow",
       "target": "cast-preso-check-visual"
@@ -6930,24 +5514,8 @@
     },
     {
       "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-preso-check-visual",
-      "status": "red",
-      "target": "cast-preso-check-visual"
-    },
-    {
-      "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
       "kind": "read",
       "line": 31,
-      "source": "cast-preso-check-visual",
-      "status": "red",
-      "target": "cast-preso-check-visual"
-    },
-    {
-      "file": "agents/cast-preso-check-visual/cast-preso-check-visual.md",
-      "kind": "read",
-      "line": 37,
       "source": "cast-preso-check-visual",
       "status": "red",
       "target": "cast-preso-check-visual"
@@ -7022,14 +5590,6 @@
       "line": 109,
       "source": "cast-preso-compliance-checker",
       "status": "green",
-      "target": "cast-preso-compliance-checker"
-    },
-    {
-      "file": "agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md",
-      "kind": "read",
-      "line": 133,
-      "source": "cast-preso-compliance-checker",
-      "status": "yellow",
       "target": "cast-preso-compliance-checker"
     },
     {
@@ -7132,14 +5692,6 @@
       "file": "agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md",
       "kind": "read",
       "line": 109,
-      "source": "cast-preso-compliance-checker",
-      "status": "red",
-      "target": "cast-preso-compliance-checker"
-    },
-    {
-      "file": "agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md",
-      "kind": "read",
-      "line": 133,
       "source": "cast-preso-compliance-checker",
       "status": "red",
       "target": "cast-preso-compliance-checker"
@@ -7318,14 +5870,6 @@
       "line": 182,
       "source": "cast-preso-how",
       "status": "green",
-      "target": "cast-preso-how"
-    },
-    {
-      "file": "agents/cast-preso-how/cast-preso-how.md",
-      "kind": "read",
-      "line": 188,
-      "source": "cast-preso-how",
-      "status": "yellow",
       "target": "cast-preso-how"
     },
     {
@@ -7524,14 +6068,6 @@
       "file": "agents/cast-preso-how/cast-preso-how.md",
       "kind": "unknown",
       "line": 182,
-      "source": "cast-preso-how",
-      "status": "red",
-      "target": "cast-preso-how"
-    },
-    {
-      "file": "agents/cast-preso-how/cast-preso-how.md",
-      "kind": "read",
-      "line": 188,
       "source": "cast-preso-how",
       "status": "red",
       "target": "cast-preso-how"
@@ -7771,14 +6307,6 @@
     {
       "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
       "kind": "unknown",
-      "line": 140,
-      "source": "cast-preso-illustration-creator",
-      "status": "yellow",
-      "target": "cast-preso-illustration-creator"
-    },
-    {
-      "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
-      "kind": "unknown",
       "line": 174,
       "source": "cast-preso-illustration-creator",
       "status": "yellow",
@@ -7828,14 +6356,6 @@
       "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
       "kind": "unknown",
       "line": 301,
-      "source": "cast-preso-illustration-creator",
-      "status": "yellow",
-      "target": "cast-preso-illustration-creator"
-    },
-    {
-      "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
-      "kind": "write",
-      "line": 355,
       "source": "cast-preso-illustration-creator",
       "status": "yellow",
       "target": "cast-preso-illustration-creator"
@@ -7924,14 +6444,6 @@
       "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
       "kind": "read",
       "line": 136,
-      "source": "cast-preso-illustration-creator",
-      "status": "red",
-      "target": "cast-preso-illustration-creator"
-    },
-    {
-      "file": "agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md",
-      "kind": "unknown",
-      "line": 140,
       "source": "cast-preso-illustration-creator",
       "status": "red",
       "target": "cast-preso-illustration-creator"
@@ -8042,50 +6554,10 @@
     },
     {
       "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "write",
-      "line": 188,
-      "source": "cast-preso-narrative",
-      "status": "yellow",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 235,
-      "source": "cast-preso-narrative",
-      "status": "yellow",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 238,
-      "source": "cast-preso-narrative",
-      "status": "yellow",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 247,
-      "source": "cast-preso-narrative",
-      "status": "yellow",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
       "kind": "unknown",
       "line": 252,
       "source": "cast-preso-narrative",
       "status": "green",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 292,
-      "source": "cast-preso-narrative",
-      "status": "yellow",
       "target": "cast-preso-narrative"
     },
     {
@@ -8131,39 +6603,7 @@
     {
       "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
       "kind": "unknown",
-      "line": 235,
-      "source": "cast-preso-narrative",
-      "status": "red",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 238,
-      "source": "cast-preso-narrative",
-      "status": "red",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 247,
-      "source": "cast-preso-narrative",
-      "status": "red",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
       "line": 252,
-      "source": "cast-preso-narrative",
-      "status": "red",
-      "target": "cast-preso-narrative"
-    },
-    {
-      "file": "agents/cast-preso-narrative/cast-preso-narrative.md",
-      "kind": "unknown",
-      "line": 292,
       "source": "cast-preso-narrative",
       "status": "red",
       "target": "cast-preso-narrative"
@@ -8194,14 +6634,6 @@
     },
     {
       "file": "agents/cast-preso-narrative-checker/cast-preso-narrative-checker.md",
-      "kind": "unknown",
-      "line": 124,
-      "source": "cast-preso-narrative-checker",
-      "status": "yellow",
-      "target": "cast-preso-narrative-checker"
-    },
-    {
-      "file": "agents/cast-preso-narrative-checker/cast-preso-narrative-checker.md",
       "kind": "read",
       "line": 24,
       "source": "cast-preso-narrative-checker",
@@ -8212,14 +6644,6 @@
       "file": "agents/cast-preso-narrative-checker/cast-preso-narrative-checker.md",
       "kind": "read",
       "line": 110,
-      "source": "cast-preso-narrative-checker",
-      "status": "red",
-      "target": "cast-preso-narrative-checker"
-    },
-    {
-      "file": "agents/cast-preso-narrative-checker/cast-preso-narrative-checker.md",
-      "kind": "unknown",
-      "line": 124,
       "source": "cast-preso-narrative-checker",
       "status": "red",
       "target": "cast-preso-narrative-checker"
@@ -8246,22 +6670,6 @@
       "line": 29,
       "source": "cast-preso-orchestrator",
       "status": "green",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 34,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 35,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
       "target": "cast-preso-orchestrator"
     },
     {
@@ -8467,22 +6875,6 @@
     {
       "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
       "kind": "unknown",
-      "line": 355,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 356,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
       "line": 393,
       "source": "cast-preso-orchestrator",
       "status": "yellow",
@@ -8494,22 +6886,6 @@
       "line": 415,
       "source": "cast-preso-orchestrator",
       "status": "green",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 435,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 437,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
       "target": "cast-preso-orchestrator"
     },
     {
@@ -8858,14 +7234,6 @@
     },
     {
       "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 714,
-      "source": "cast-preso-orchestrator",
-      "status": "yellow",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
       "kind": "read",
       "line": 732,
       "source": "cast-preso-orchestrator",
@@ -8926,22 +7294,6 @@
       "line": 21,
       "source": "cast-preso-orchestrator",
       "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 34,
-      "source": "cast-preso-orchestrator",
-      "status": "green",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 35,
-      "source": "cast-preso-orchestrator",
-      "status": "green",
       "target": "cast-preso-orchestrator"
     },
     {
@@ -9075,22 +7427,6 @@
     {
       "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
       "kind": "unknown",
-      "line": 355,
-      "source": "cast-preso-orchestrator",
-      "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 356,
-      "source": "cast-preso-orchestrator",
-      "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
       "line": 393,
       "source": "cast-preso-orchestrator",
       "status": "red",
@@ -9100,22 +7436,6 @@
       "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
       "kind": "unknown",
       "line": 415,
-      "source": "cast-preso-orchestrator",
-      "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 435,
-      "source": "cast-preso-orchestrator",
-      "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 437,
       "source": "cast-preso-orchestrator",
       "status": "red",
       "target": "cast-preso-orchestrator"
@@ -9442,14 +7762,6 @@
     },
     {
       "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
-      "kind": "unknown",
-      "line": 714,
-      "source": "cast-preso-orchestrator",
-      "status": "red",
-      "target": "cast-preso-orchestrator"
-    },
-    {
-      "file": "agents/cast-preso-orchestrator/cast-preso-orchestrator.md",
       "kind": "read",
       "line": 732,
       "source": "cast-preso-orchestrator",
@@ -9506,14 +7818,6 @@
     },
     {
       "file": "agents/cast-preso-what-checker/cast-preso-what-checker.md",
-      "kind": "unknown",
-      "line": 155,
-      "source": "cast-preso-what-checker",
-      "status": "yellow",
-      "target": "cast-preso-what-checker"
-    },
-    {
-      "file": "agents/cast-preso-what-checker/cast-preso-what-checker.md",
       "kind": "read",
       "line": 28,
       "source": "cast-preso-what-checker",
@@ -9548,14 +7852,6 @@
       "file": "agents/cast-preso-what-checker/cast-preso-what-checker.md",
       "kind": "unknown",
       "line": 132,
-      "source": "cast-preso-what-checker",
-      "status": "red",
-      "target": "cast-preso-what-checker"
-    },
-    {
-      "file": "agents/cast-preso-what-checker/cast-preso-what-checker.md",
-      "kind": "unknown",
-      "line": 155,
       "source": "cast-preso-what-checker",
       "status": "red",
       "target": "cast-preso-what-checker"
@@ -9818,26 +8114,10 @@
     },
     {
       "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 70,
-      "source": "cast-preso-what-worker",
-      "status": "yellow",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
       "kind": "read",
       "line": 74,
       "source": "cast-preso-what-worker",
       "status": "green",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 75,
-      "source": "cast-preso-what-worker",
-      "status": "yellow",
       "target": "cast-preso-what-worker"
     },
     {
@@ -9878,14 +8158,6 @@
       "line": 208,
       "source": "cast-preso-what-worker",
       "status": "green",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 235,
-      "source": "cast-preso-what-worker",
-      "status": "yellow",
       "target": "cast-preso-what-worker"
     },
     {
@@ -9930,24 +8202,8 @@
     },
     {
       "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 70,
-      "source": "cast-preso-what-worker",
-      "status": "green",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
       "kind": "read",
       "line": 74,
-      "source": "cast-preso-what-worker",
-      "status": "red",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 75,
       "source": "cast-preso-what-worker",
       "status": "red",
       "target": "cast-preso-what-worker"
@@ -9990,14 +8246,6 @@
       "line": 208,
       "source": "cast-preso-what-worker",
       "status": "red",
-      "target": "cast-preso-what-worker"
-    },
-    {
-      "file": "agents/cast-preso-what-worker/cast-preso-what-worker.md",
-      "kind": "unknown",
-      "line": 235,
-      "source": "cast-preso-what-worker",
-      "status": "green",
       "target": "cast-preso-what-worker"
     },
     {
@@ -10243,22 +8491,6 @@
     {
       "file": "agents/cast-review-code/cast-review-code.md",
       "kind": "unknown",
-      "line": 19,
-      "source": "cast-review-code",
-      "status": "yellow",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "unknown",
-      "line": 20,
-      "source": "cast-review-code",
-      "status": "yellow",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "unknown",
       "line": 20,
       "source": "cast-review-code",
       "status": "yellow",
@@ -10285,39 +8517,7 @@
       "kind": "write",
       "line": 37,
       "source": "cast-review-code",
-      "status": "red",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "write",
-      "line": 85,
-      "source": "cast-review-code",
       "status": "yellow",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "read",
-      "line": 102,
-      "source": "cast-review-code",
-      "status": "yellow",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "unknown",
-      "line": 19,
-      "source": "cast-review-code",
-      "status": "red",
-      "target": "cast-review-code"
-    },
-    {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "unknown",
-      "line": 20,
-      "source": "cast-review-code",
-      "status": "red",
       "target": "cast-review-code"
     },
     {
@@ -10345,14 +8545,6 @@
       "target": "cast-review-code"
     },
     {
-      "file": "agents/cast-review-code/cast-review-code.md",
-      "kind": "read",
-      "line": 102,
-      "source": "cast-review-code",
-      "status": "red",
-      "target": "cast-review-code"
-    },
-    {
       "file": "agents/cast-runs/cast-runs.md",
       "kind": "unknown",
       "line": 130,
@@ -10367,70 +8559,6 @@
       "source": "cast-runs",
       "status": "red",
       "target": "cast-runs"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "read",
-      "line": 27,
-      "source": "cast-subphase-runner",
-      "status": "yellow",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "read",
-      "line": 28,
-      "source": "cast-subphase-runner",
-      "status": "yellow",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-subphase-runner",
-      "status": "yellow",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "unknown",
-      "line": 37,
-      "source": "cast-subphase-runner",
-      "status": "yellow",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "read",
-      "line": 27,
-      "source": "cast-subphase-runner",
-      "status": "red",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "read",
-      "line": 28,
-      "source": "cast-subphase-runner",
-      "status": "red",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "unknown",
-      "line": 30,
-      "source": "cast-subphase-runner",
-      "status": "red",
-      "target": "cast-subphase-runner"
-    },
-    {
-      "file": "agents/cast-subphase-runner/cast-subphase-runner.md",
-      "kind": "unknown",
-      "line": 37,
-      "source": "cast-subphase-runner",
-      "status": "red",
-      "target": "cast-subphase-runner"
     },
     {
       "file": "agents/cast-task-suggester/cast-task-suggester.md",
@@ -10522,54 +8650,6 @@
     },
     {
       "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 153,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 153,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 182,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 182,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 189,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 189,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
       "kind": "write",
       "line": 248,
       "source": "cast-task-suggester",
@@ -10590,22 +8670,6 @@
       "line": 276,
       "source": "cast-task-suggester",
       "status": "green",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 279,
-      "source": "cast-task-suggester",
-      "status": "yellow",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 279,
-      "source": "cast-task-suggester",
-      "status": "yellow",
       "target": "cast-task-suggester"
     },
     {
@@ -10714,54 +8778,6 @@
     },
     {
       "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 153,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 153,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 182,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 182,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 189,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 189,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
       "kind": "read",
       "line": 276,
       "source": "cast-task-suggester",
@@ -10772,22 +8788,6 @@
       "file": "agents/cast-task-suggester/cast-task-suggester.md",
       "kind": "read",
       "line": 276,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 279,
-      "source": "cast-task-suggester",
-      "status": "red",
-      "target": "cast-task-suggester"
-    },
-    {
-      "file": "agents/cast-task-suggester/cast-task-suggester.md",
-      "kind": "unknown",
-      "line": 279,
       "source": "cast-task-suggester",
       "status": "red",
       "target": "cast-task-suggester"
@@ -10869,15 +8869,7 @@
       "kind": "write",
       "line": 134,
       "source": "cast-update-spec",
-      "status": "yellow",
-      "target": "cast-update-spec"
-    },
-    {
-      "file": "agents/cast-update-spec/cast-update-spec.md",
-      "kind": "write",
-      "line": 135,
-      "source": "cast-update-spec",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-update-spec"
     },
     {
@@ -10925,15 +8917,7 @@
       "kind": "write",
       "line": 155,
       "source": "cast-update-spec",
-      "status": "yellow",
-      "target": "cast-update-spec"
-    },
-    {
-      "file": "agents/cast-update-spec/cast-update-spec.md",
-      "kind": "write",
-      "line": 156,
-      "source": "cast-update-spec",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-update-spec"
     },
     {
@@ -10942,14 +8926,6 @@
       "line": 157,
       "source": "cast-update-spec",
       "status": "green",
-      "target": "cast-update-spec"
-    },
-    {
-      "file": "agents/cast-update-spec/cast-update-spec.md",
-      "kind": "unknown",
-      "line": 190,
-      "source": "cast-update-spec",
-      "status": "yellow",
       "target": "cast-update-spec"
     },
     {
@@ -11025,62 +9001,6 @@
       "target": "cast-update-spec"
     },
     {
-      "file": "agents/cast-update-spec/cast-update-spec.md",
-      "kind": "unknown",
-      "line": 190,
-      "source": "cast-update-spec",
-      "status": "red",
-      "target": "cast-update-spec"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 45,
-      "source": "cast-web-researcher",
-      "status": "yellow",
-      "target": "cast-web-researcher"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 46,
-      "source": "cast-web-researcher",
-      "status": "yellow",
-      "target": "cast-web-researcher"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 47,
-      "source": "cast-web-researcher",
-      "status": "yellow",
-      "target": "cast-web-researcher"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 45,
-      "source": "cast-web-researcher",
-      "status": "green",
-      "target": "cast-web-researcher"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 46,
-      "source": "cast-web-researcher",
-      "status": "green",
-      "target": "cast-web-researcher"
-    },
-    {
-      "file": "agents/cast-web-researcher/cast-web-researcher.md",
-      "kind": "unknown",
-      "line": 47,
-      "source": "cast-web-researcher",
-      "status": "green",
-      "target": "cast-web-researcher"
-    },
-    {
       "file": "agents/cast-wrap-up/cast-wrap-up.md",
       "kind": "write",
       "line": 33,
@@ -11107,14 +9027,6 @@
     {
       "file": "agents/cast-wrap-up/cast-wrap-up.md",
       "kind": "unknown",
-      "line": 57,
-      "source": "cast-wrap-up",
-      "status": "yellow",
-      "target": "cast-wrap-up"
-    },
-    {
-      "file": "agents/cast-wrap-up/cast-wrap-up.md",
-      "kind": "unknown",
       "line": 102,
       "source": "cast-wrap-up",
       "status": "green",
@@ -11139,26 +9051,10 @@
     {
       "file": "agents/cast-wrap-up/cast-wrap-up.md",
       "kind": "unknown",
-      "line": 57,
-      "source": "cast-wrap-up",
-      "status": "red",
-      "target": "cast-wrap-up"
-    },
-    {
-      "file": "agents/cast-wrap-up/cast-wrap-up.md",
-      "kind": "unknown",
       "line": 102,
       "source": "cast-wrap-up",
       "status": "red",
       "target": "cast-wrap-up"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 4,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
     },
     {
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
@@ -11173,47 +9069,7 @@
       "kind": "read",
       "line": 25,
       "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
       "status": "green",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 27,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 27,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
       "target": "cast-agent-compliance"
     },
     {
@@ -11246,14 +9102,6 @@
       "line": 37,
       "source": "cast-agent-compliance",
       "status": "green",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 37,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
       "target": "cast-agent-compliance"
     },
     {
@@ -11275,54 +9123,6 @@
     {
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
       "kind": "unknown",
-      "line": 60,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 61,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 61,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 62,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 64,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 64,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
       "line": 68,
       "source": "cast-agent-compliance",
       "status": "green",
@@ -11346,106 +9146,10 @@
     },
     {
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 82,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 82,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 87,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 106,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 112,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 112,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
       "kind": "read",
       "line": 116,
       "source": "cast-agent-compliance",
       "status": "green",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 116,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 116,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 120,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 120,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
       "target": "cast-agent-compliance"
     },
     {
@@ -11454,102 +9158,6 @@
       "line": 124,
       "source": "cast-agent-compliance",
       "status": "green",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 130,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 143,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 143,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 160,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 161,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 167,
-      "source": "cast-agent-compliance",
-      "status": "yellow",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 4,
-      "source": "cast-agent-compliance",
-      "status": "red",
       "target": "cast-agent-compliance"
     },
     {
@@ -11564,46 +9172,6 @@
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
       "kind": "read",
       "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 25,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 27,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 27,
       "source": "cast-agent-compliance",
       "status": "red",
       "target": "cast-agent-compliance"
@@ -11643,63 +9211,7 @@
     {
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
       "kind": "unknown",
-      "line": 37,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
       "line": 42,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 60,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 61,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 61,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 62,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 64,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 64,
       "source": "cast-agent-compliance",
       "status": "red",
       "target": "cast-agent-compliance"
@@ -11730,104 +9242,8 @@
     },
     {
       "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 82,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 82,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 87,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 94,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 106,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 112,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 112,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
       "kind": "read",
       "line": 116,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 116,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "read",
-      "line": 116,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 120,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 120,
       "source": "cast-agent-compliance",
       "status": "red",
       "target": "cast-agent-compliance"
@@ -11841,94 +9257,6 @@
       "target": "cast-agent-compliance"
     },
     {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 129,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 130,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 143,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 143,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 159,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 160,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 161,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-compliance/SKILL.md",
-      "kind": "unknown",
-      "line": 167,
-      "source": "cast-agent-compliance",
-      "status": "red",
-      "target": "cast-agent-compliance"
-    },
-    {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 9,
@@ -11940,22 +9268,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 9,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 21,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 22,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -11988,22 +9300,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 63,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 74,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 97,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12052,14 +9348,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 126,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 134,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12203,14 +9491,6 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 277,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 279,
       "source": "cast-agent-design-guide",
       "status": "green",
@@ -12222,22 +9502,6 @@
       "line": 292,
       "source": "cast-agent-design-guide",
       "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 303,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 303,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
       "target": "cast-agent-design-guide"
     },
     {
@@ -12267,38 +9531,6 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 355,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 355,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 357,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 359,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 382,
       "source": "cast-agent-design-guide",
       "status": "green",
@@ -12309,7 +9541,7 @@
       "kind": "unknown",
       "line": 442,
       "source": "cast-agent-design-guide",
-      "status": "red",
+      "status": "green",
       "target": "cast-agent-design-guide"
     },
     {
@@ -12355,81 +9587,9 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 497,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 497,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 507,
       "source": "cast-agent-design-guide",
       "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 515,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 517,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 520,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 526,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 526,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 536,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 541,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
       "target": "cast-agent-design-guide"
     },
     {
@@ -12458,42 +9618,10 @@
     },
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 582,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 602,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 603,
-      "source": "cast-agent-design-guide",
-      "status": "yellow",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 604,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "write",
       "line": 622,
       "source": "cast-agent-design-guide",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-agent-design-guide"
     },
     {
@@ -12515,23 +9643,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 664,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 666,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 676,
+      "line": 667,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12547,7 +9659,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 699,
+      "line": 678,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12563,7 +9675,15 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 700,
+      "line": 701,
+      "source": "cast-agent-design-guide",
+      "status": "green",
+      "target": "cast-agent-design-guide"
+    },
+    {
+      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
+      "kind": "unknown",
+      "line": 701,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12571,7 +9691,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "write",
-      "line": 702,
+      "line": 703,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12579,7 +9699,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "write",
-      "line": 705,
+      "line": 706,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12587,7 +9707,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "write",
-      "line": 707,
+      "line": 708,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12595,7 +9715,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 711,
+      "line": 712,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12603,7 +9723,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 727,
+      "line": 728,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12611,7 +9731,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 737,
+      "line": 738,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12619,7 +9739,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 741,
+      "line": 742,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12627,15 +9747,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 744,
-      "source": "cast-agent-design-guide",
-      "status": "green",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 746,
+      "line": 745,
       "source": "cast-agent-design-guide",
       "status": "green",
       "target": "cast-agent-design-guide"
@@ -12651,9 +9763,9 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 749,
+      "line": 748,
       "source": "cast-agent-design-guide",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-agent-design-guide"
     },
     {
@@ -12668,22 +9780,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 9,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 21,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 22,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -12723,22 +9819,6 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 74,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 97,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 103,
       "source": "cast-agent-design-guide",
       "status": "red",
@@ -12756,14 +9836,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 126,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 134,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -12899,14 +9971,6 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 277,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 279,
       "source": "cast-agent-design-guide",
       "status": "red",
@@ -12916,22 +9980,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 292,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 303,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 303,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -12956,38 +10004,6 @@
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
       "line": 338,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 355,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 355,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 357,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 359,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13043,79 +10059,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 497,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 497,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 507,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 515,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 517,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 520,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 526,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 526,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 536,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 541,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13147,38 +10091,6 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 582,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 602,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 603,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 604,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
       "line": 631,
       "source": "cast-agent-design-guide",
       "status": "red",
@@ -13187,23 +10099,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 664,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 666,
-      "source": "cast-agent-design-guide",
-      "status": "red",
-      "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
-      "kind": "unknown",
-      "line": 676,
+      "line": 667,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13219,7 +10115,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 699,
+      "line": 678,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13235,7 +10131,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 700,
+      "line": 701,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13243,7 +10139,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 711,
+      "line": 701,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13251,7 +10147,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 727,
+      "line": 712,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13259,7 +10155,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 737,
+      "line": 728,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13267,7 +10163,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 741,
+      "line": 738,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13275,7 +10171,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 744,
+      "line": 742,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13283,7 +10179,7 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 746,
+      "line": 745,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
@@ -13299,26 +10195,10 @@
     {
       "file": "skills/claude-code/cast-agent-design-guide/SKILL.md",
       "kind": "unknown",
-      "line": 749,
+      "line": 748,
       "source": "cast-agent-design-guide",
       "status": "red",
       "target": "cast-agent-design-guide"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
@@ -13346,54 +10226,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "write",
-      "line": 65,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "write",
-      "line": 65,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 74,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 74,
-      "source": "cast-child-delegation",
-      "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
       "line": 98,
       "source": "cast-child-delegation",
@@ -13403,41 +10235,9 @@
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
-      "line": 104,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 113,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 124,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
       "line": 137,
       "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 172,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13458,14 +10258,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 186,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
       "line": 193,
       "source": "cast-child-delegation",
@@ -13477,31 +10269,7 @@
       "kind": "unknown",
       "line": 198,
       "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 198,
-      "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 205,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 219,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13515,22 +10283,6 @@
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
-      "line": 239,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 257,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
       "line": 257,
       "source": "cast-child-delegation",
       "status": "green",
@@ -13541,31 +10293,7 @@
       "kind": "unknown",
       "line": 278,
       "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 278,
-      "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 298,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 306,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13581,63 +10309,7 @@
       "kind": "unknown",
       "line": 307,
       "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 307,
-      "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 330,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 331,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 332,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 337,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 341,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 348,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13646,22 +10318,6 @@
       "line": 348,
       "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 355,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 361,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13717,7 +10373,7 @@
       "kind": "write",
       "line": 419,
       "source": "cast-child-delegation",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-child-delegation"
     },
     {
@@ -13733,7 +10389,7 @@
       "kind": "unknown",
       "line": 462,
       "source": "cast-child-delegation",
-      "status": "yellow",
+      "status": "green",
       "target": "cast-child-delegation"
     },
     {
@@ -13742,86 +10398,6 @@
       "line": 471,
       "source": "cast-child-delegation",
       "status": "green",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 503,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 507,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 522,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 535,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 548,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 551,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 551,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 582,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 583,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 583,
-      "source": "cast-child-delegation",
-      "status": "yellow",
       "target": "cast-child-delegation"
     },
     {
@@ -13842,14 +10418,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 620,
-      "source": "cast-child-delegation",
-      "status": "yellow",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "read",
       "line": 621,
       "source": "cast-child-delegation",
@@ -13858,56 +10426,8 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 23,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "read",
       "line": 56,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 69,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 74,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 74,
       "source": "cast-child-delegation",
       "status": "red",
       "target": "cast-child-delegation"
@@ -13923,39 +10443,7 @@
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
-      "line": 104,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 113,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 124,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
       "line": 137,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 172,
       "source": "cast-child-delegation",
       "status": "red",
       "target": "cast-child-delegation"
@@ -13978,14 +10466,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 186,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
       "line": 193,
       "source": "cast-child-delegation",
@@ -14002,30 +10482,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 198,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 205,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 219,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "read",
       "line": 224,
       "source": "cast-child-delegation",
@@ -14035,22 +10491,6 @@
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
-      "line": 239,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 257,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
       "line": 257,
       "source": "cast-child-delegation",
       "status": "red",
@@ -14060,30 +10500,6 @@
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
       "line": 278,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 278,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 298,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 306,
       "source": "cast-child-delegation",
       "status": "red",
       "target": "cast-child-delegation"
@@ -14107,79 +10523,7 @@
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
-      "line": 307,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 330,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 331,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 332,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 337,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 341,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
       "line": 348,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 348,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 355,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 361,
       "source": "cast-child-delegation",
       "status": "red",
       "target": "cast-child-delegation"
@@ -14258,86 +10602,6 @@
     },
     {
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "read",
-      "line": 503,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 507,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 522,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 535,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 548,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 551,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 551,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 582,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 583,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 583,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "unknown",
       "line": 588,
       "source": "cast-child-delegation",
@@ -14348,14 +10612,6 @@
       "file": "skills/claude-code/cast-child-delegation/SKILL.md",
       "kind": "read",
       "line": 604,
-      "source": "cast-child-delegation",
-      "status": "red",
-      "target": "cast-child-delegation"
-    },
-    {
-      "file": "skills/claude-code/cast-child-delegation/SKILL.md",
-      "kind": "unknown",
-      "line": 620,
       "source": "cast-child-delegation",
       "status": "red",
       "target": "cast-child-delegation"
@@ -14379,23 +10635,7 @@
     {
       "file": "skills/claude-code/cast-docstring-best-practices/SKILL.md",
       "kind": "unknown",
-      "line": 12,
-      "source": "cast-docstring-best-practices",
-      "status": "yellow",
-      "target": "cast-docstring-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-docstring-best-practices/SKILL.md",
-      "kind": "unknown",
       "line": 11,
-      "source": "cast-docstring-best-practices",
-      "status": "red",
-      "target": "cast-docstring-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-docstring-best-practices/SKILL.md",
-      "kind": "unknown",
-      "line": 12,
       "source": "cast-docstring-best-practices",
       "status": "red",
       "target": "cast-docstring-best-practices"
@@ -14851,14 +11091,6 @@
     {
       "file": "skills/claude-code/cast-pytest-best-practices/SKILL.md",
       "kind": "unknown",
-      "line": 67,
-      "source": "cast-pytest-best-practices",
-      "status": "yellow",
-      "target": "cast-pytest-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-pytest-best-practices/SKILL.md",
-      "kind": "unknown",
       "line": 68,
       "source": "cast-pytest-best-practices",
       "status": "green",
@@ -14883,14 +11115,6 @@
     {
       "file": "skills/claude-code/cast-pytest-best-practices/SKILL.md",
       "kind": "unknown",
-      "line": 67,
-      "source": "cast-pytest-best-practices",
-      "status": "red",
-      "target": "cast-pytest-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-pytest-best-practices/SKILL.md",
-      "kind": "unknown",
       "line": 68,
       "source": "cast-pytest-best-practices",
       "status": "red",
@@ -14907,23 +11131,7 @@
     {
       "file": "skills/claude-code/cast-python-best-practices/SKILL.md",
       "kind": "unknown",
-      "line": 12,
-      "source": "cast-python-best-practices",
-      "status": "yellow",
-      "target": "cast-python-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-python-best-practices/SKILL.md",
-      "kind": "unknown",
       "line": 11,
-      "source": "cast-python-best-practices",
-      "status": "red",
-      "target": "cast-python-best-practices"
-    },
-    {
-      "file": "skills/claude-code/cast-python-best-practices/SKILL.md",
-      "kind": "unknown",
-      "line": 12,
       "source": "cast-python-best-practices",
       "status": "red",
       "target": "cast-python-best-practices"

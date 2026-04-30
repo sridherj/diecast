@@ -1,0 +1,39 @@
+# Dry-run log — cast-preso-narrative
+timestamp: 2026-04-30T00:03:28.507397+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: docs/style/writing-tone.md
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 5
+  agent-resolved:  3
+  skill-resolved:  1
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 1
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 14
+  folder-green: 6
+  folder-yellow: 3
+  folder-red:   5
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-preso-narrative/cast-preso-narrative.md:30 (read)
+  RED-PATH  agents/cast-preso-narrative/cast-preso-narrative.md:31 (read)
+  RED-PATH  agents/cast-preso-narrative/cast-preso-narrative.md:32 (read)
+  RED-PATH  agents/cast-preso-narrative/cast-preso-narrative.md:128 (read)
+  RED-PATH  agents/cast-preso-narrative/cast-preso-narrative.md:252 (unknown)

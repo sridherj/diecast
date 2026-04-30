@@ -1,0 +1,45 @@
+# Dry-run log — cast-preso-compliance-checker
+timestamp: 2026-04-30T00:03:28.498310+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: the
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 13
+  agent-resolved:  13
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 24
+  folder-green: 8
+  folder-yellow: 5
+  folder-red:   11
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:33 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:34 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:35 (unknown)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:41 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:41 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:56 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:57 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:91 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:109 (read)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:167 (unknown)
+  RED-PATH  agents/cast-preso-compliance-checker/cast-preso-compliance-checker.md:210 (unknown)

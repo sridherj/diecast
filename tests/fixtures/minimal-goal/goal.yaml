@@ -1,0 +1,8 @@
+slug: minimal-goal
+title: Minimal Goal Fixture
+status: active
+phase: phase-1
+tags:
+  - fixture
+  - dry-run
+external_project_dir: /tmp/diecast-fixture-external

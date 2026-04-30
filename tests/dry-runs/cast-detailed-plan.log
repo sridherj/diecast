@@ -1,0 +1,56 @@
+# Dry-run log — cast-detailed-plan
+timestamp: 2026-04-30T00:03:28.466475+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: goal.yaml
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 8
+  agent-resolved:  4
+  skill-resolved:  2
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 2
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 64
+  folder-green: 42
+  folder-yellow: 0
+  folder-red:   22
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:17 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:20 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:119 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:130 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:175 (read)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:176 (read)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:210 (read)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:218 (read)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:222 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:222 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:233 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:234 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:235 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:267 (read)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:278 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:284 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:355 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:363 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:416 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:510 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:511 (unknown)
+  RED-PATH  agents/cast-detailed-plan/cast-detailed-plan.md:585 (unknown)

@@ -72,6 +72,18 @@ EXCLUDED_PERSONAL = {
     "cast-startup-pipeline",
 }
 
+# Tokens that share the `cast-` prefix but are not agents and so are not
+# expected to resolve to a fleet node. The bare regex picks these up; the
+# allowlist keeps them out of the red bucket.
+NON_AGENT_TOKENS = {
+    "cast-agent",        # type-class name (vs. python-script / claude-code-skill)
+    "cast-server",       # the dispatch HTTP server (`uv run cast-server`)
+    "cast-v2",           # example goal slug used in design-guide prose
+    "cast-foo",          # example placeholder used in design-guide prose
+    "cast-preso-",       # partial-name pattern caught by the bare regex
+    "cast-foundations",  # design-guide cross-reference scaffold name
+}
+
 LEGACY_PREFIX_RE = re.compile(r"\btaskos-[a-z][a-z0-9-]*", re.IGNORECASE)
 
 
@@ -292,6 +304,12 @@ def _extract_path_findings(
     for idx, line in enumerate(lines, start=1):
         if not line.strip():
             continue
+        # Skip markdown blockquotes — these are documentation callouts (DANGER /
+        # NOTE / etc.) that may reference external paths (e.g., Claude Code's
+        # internal `/tmp/claude-*/tasks/` dir) for explanatory context, not as
+        # paths the agent itself writes to.
+        if line.lstrip().startswith(">"):
+            continue
         for m in PATH_TOKEN_RE.finditer(line):
             tok = m.group(1).strip().rstrip(".,;:)]}\"'")
             if not tok or tok in (".", "/", "..", "..//"):
@@ -503,6 +521,12 @@ def _classify_naming(
     # Self-reference is fine.
     if target == source_id:
         return ("green", "self-reference")
+    # Non-agent tokens that share the cast- prefix but are not agents:
+    # type-class names (cast-agent), infrastructure names (cast-server),
+    # generic placeholder examples (cast-foo, cast-v2), and partial-name
+    # patterns (cast-preso-) caught by the bare regex.
+    if target in NON_AGENT_TOKENS:
+        return ("green", "non-agent token (type-name / placeholder)")
     return ("red", "target not found in fleet")
 
 

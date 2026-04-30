@@ -1,0 +1,54 @@
+# Dry-run log — cast-fanout-detailed-plan
+timestamp: 2026-04-30T00:03:28.470886+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: goal.yaml
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 11
+  agent-resolved:  7
+  skill-resolved:  2
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 2
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 43
+  folder-green: 23
+  folder-yellow: 0
+  folder-red:   20
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: True
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:24 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:33 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:93 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:107 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:109 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:109 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:110 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:113 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:134 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:138 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:141 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:157 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:193 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:194 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:197 (read)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:238 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:239 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:242 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:243 (unknown)
+  RED-PATH  agents/cast-fanout-detailed-plan/cast-fanout-detailed-plan.md:263 (unknown)

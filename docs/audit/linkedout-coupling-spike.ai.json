@@ -1,0 +1,119 @@
+[
+  {
+    "agent_name": "cast-controller",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-controller-test",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-crud-compliance-checker",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-crud-orchestrator",
+    "score": "green",
+    "estimated_sessions": 0.5,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-custom-controller",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-entity-creation",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-integration-test-creator",
+    "score": "yellow",
+    "estimated_sessions": 0.5,
+    "linkedout_isms": [
+      "tests/integration/project_mgmt/label/test_label_controller.py reference path",
+      "from project_mgmt.enums import TaskStatus import line",
+      "tests/integration/project_mgmt/task/test_task_controller.py reference path"
+    ]
+  },
+  {
+    "agent_name": "cast-integration-test-orchestrator",
+    "score": "red",
+    "estimated_sessions": 1.5,
+    "linkedout_isms": [
+      "LinkedOut installation prose throughout",
+      "/linkedout-setup --demo slash command",
+      "/linkedout-setup --full slash command",
+      "/linkedout slash command for queries",
+      "linkedout-sandbox container name",
+      "tests/e2e/fixtures/linkedin-connections-subset.csv fixture path",
+      "tests/e2e/fixtures/gmail-contacts-subset.csv fixture path",
+      "goal_slug: linkedout-opensource",
+      "goal_title: LinkedOut Integration Test",
+      "output_dir: /home/sridherj/workspace/linkedout-oss hard-coded path",
+      "TmuxHarness(\"linkedout-test\") literal session name",
+      "/tmp/linkedout-oss/decisions.jsonl scratch path",
+      "/tmp/linkedout-oss/verdict.json scratch path",
+      "~/workspace/linkedout/.env.local API keys reference",
+      "LinkedIn profiles for Apify enrichment prose and $0.10 cost line"
+    ]
+  },
+  {
+    "agent_name": "cast-repository",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-repository-test",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-schema-creation",
+    "score": "yellow",
+    "estimated_sessions": 0.5,
+    "linkedout_isms": [
+      "./reference_code/src/common/schemas/base_request_schema.py SJ-local reference-codebase path",
+      "./reference_code/src/common/schemas/base_response_schema.py SJ-local reference-codebase path",
+      "./reference_code/src/common/schemas/base_enums.py SJ-local reference-codebase path",
+      "./reference_code/src/projects/schemas/project_enums.py SJ-local reference-codebase path",
+      "./reference_code/src/projects/schemas/project_schema.py SJ-local reference-codebase path",
+      "./reference_code/src/projects/schemas/projects_api_schema.py SJ-local reference-codebase path"
+    ]
+  },
+  {
+    "agent_name": "cast-seed-db-creator",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-seed-test-db-creator",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-service",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  },
+  {
+    "agent_name": "cast-service-test",
+    "score": "green",
+    "estimated_sessions": 0.25,
+    "linkedout_isms": []
+  }
+]

@@ -1,0 +1,42 @@
+# Dry-run log — cast-refine-requirements
+timestamp: 2026-04-30T00:03:28.530471+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: from
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 5
+  agent-resolved:  1
+  skill-resolved:  2
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 2
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 28
+  folder-green: 19
+  folder-yellow: 1
+  folder-red:   8
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:5 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:6 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:18 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:88 (read)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:91 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:92 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:96 (unknown)
+  RED-PATH  agents/cast-refine-requirements/cast-refine-requirements.md:97 (unknown)

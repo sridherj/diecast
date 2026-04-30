@@ -1,0 +1,53 @@
+# Dry-run log — cast-high-level-planner
+timestamp: 2026-04-30T00:03:28.478722+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: from
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 2
+  agent-resolved:  2
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 56
+  folder-green: 35
+  folder-yellow: 2
+  folder-red:   19
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:7 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:16 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:110 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:111 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:112 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:112 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:115 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:116 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:117 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:118 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:119 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:120 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:121 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:122 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:152 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:164 (unknown)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:232 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:363 (read)
+  RED-PATH  agents/cast-high-level-planner/cast-high-level-planner.md:435 (unknown)

@@ -1,0 +1,51 @@
+# Dry-run log — cast-preso-illustration-creator
+timestamp: 2026-04-30T00:03:28.505460+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: references/style-bible-watercolor.md
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 4
+  agent-resolved:  4
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 37
+  folder-green: 4
+  folder-yellow: 16
+  folder-red:   17
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:22 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:40 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:41 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:42 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:43 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:44 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:75 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:76 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:88 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:107 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:136 (read)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:174 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:244 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:249 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:254 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:255 (unknown)
+  RED-PATH  agents/cast-preso-illustration-creator/cast-preso-illustration-creator.md:301 (unknown)

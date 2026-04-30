@@ -1,0 +1,41 @@
+# Dry-run log — cast-update-spec
+timestamp: 2026-04-30T00:03:28.543944+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: docs/specs/_registry.md
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 4
+  agent-resolved:  2
+  skill-resolved:  1
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 1
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 21
+  folder-green: 14
+  folder-yellow: 0
+  folder-red:   7
+
+## Output-JSON schema validation
+  contract_version=2 literal present: False
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:48 (unknown)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:55 (read)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:113 (unknown)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:146 (read)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:147 (unknown)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:148 (unknown)
+  RED-PATH  agents/cast-update-spec/cast-update-spec.md:151 (read)

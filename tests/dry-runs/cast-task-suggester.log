@@ -1,0 +1,48 @@
+# Dry-run log — cast-task-suggester
+timestamp: 2026-04-30T00:03:28.539582+00:00
+fixture:   tests/fixtures/minimal-goal
+graph:     docs/audit/agent-interdependency-graph.json
+
+## First-read attempt
+  expected source: the
+  fixture has goal.yaml: True
+  fixture has requirements.human.md: True
+
+## First-delegation target check (naming edges only — slash/bare)
+  total naming edges: 6
+  agent-resolved:  6
+  skill-resolved:  0
+  runtime-only:    0
+  unresolved-red:  0
+  unresolved-yellow: 0
+
+## Folder-path edge tally (read/write/unknown — Section 2)
+  total folder edges: 30
+  folder-green: 16
+  folder-yellow: 0
+  folder-red:   14
+
+## Output-JSON schema validation
+  contract_version=2 literal present: True
+
+## Dynamic-dispatch flag (Section 0 known false-negative class)
+  flagged for runtime-only verification: False
+
+## Red findings (deferred until 2.4 remediation lands)
+  (none)
+
+## Path-audit red findings (Section 2)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:46 (read)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:47 (read)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:48 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:49 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:51 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:54 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:55 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:56 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:57 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:107 (read)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:137 (unknown)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:276 (read)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:276 (read)
+  RED-PATH  agents/cast-task-suggester/cast-task-suggester.md:297 (read)
