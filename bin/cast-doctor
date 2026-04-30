@@ -9,6 +9,8 @@
 #   bin/cast-doctor                # human-readable output, exit 0/1
 #   bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
 #   bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
+#   bin/cast-doctor --fix-terminal # interactive first-run setup: probe terminals on
+#                                  # PATH, prompt the user, write ~/.cast/config.yaml
 #   bin/cast-doctor --help         # this help text
 #
 # Required green prerequisites:
@@ -34,7 +36,12 @@ source "${SCRIPT_DIR}/_lib.sh"
 
 JSON_OUTPUT=0
 QUIET=0
-SUPPORTED_TERMINALS=(ptyxis gnome-terminal kitty alacritty wezterm iterm2 terminal)
+FIX_TERMINAL=0
+# KEEP IN SYNC WITH _SUPPORTED in agents/_shared/terminal.py.
+# CI parity test (tests/test_cast_doctor.py::test_fallback_list_matches_supported)
+# asserts equality. Used only when python3 / agents._shared.terminal is not
+# importable (e.g., install-time gate before deps are installed).
+SUPPORTED_TERMINALS_FALLBACK=(ptyxis gnome-terminal kitty alacritty iterm terminal)  # diecast-lint: ignore-line
 
 print_help() {
   cat <<'EOF'
@@ -47,6 +54,8 @@ Usage:
   bin/cast-doctor                # human-readable output, exit 0/1
   bin/cast-doctor --json         # minimal JSON: {"red":[...],"yellow":[...],"green":[...]}
   bin/cast-doctor --quiet        # suppress GREEN lines; print RED/YELLOW only
+  bin/cast-doctor --fix-terminal # interactive first-run setup: probe terminals on
+                                 # PATH, prompt the user, write ~/.cast/config.yaml
   bin/cast-doctor --help         # this help text
 
 Required green prerequisites:
@@ -67,10 +76,11 @@ EOF
 
 while (($#)); do
   case "$1" in
-    --json)  JSON_OUTPUT=1 ;;
-    --quiet) QUIET=1 ;;
-    -h|--help) print_help; exit 0 ;;
-    *) fail "Unknown flag: $1 (try --help)" ;;
+    --json)         JSON_OUTPUT=1 ;;
+    --quiet)        QUIET=1 ;;
+    --fix-terminal) FIX_TERMINAL=1 ;;
+    -h|--help)      print_help; exit 0 ;;
+    *)              fail "Unknown flag: $1 (try --help)" ;;
   esac
   shift
 done
@@ -82,6 +92,28 @@ declare -a GREEN=()
 note_red()    { RED+=("$1"); }
 note_yellow() { YELLOW+=("$1"); }
 note_green()  { GREEN+=("$1"); }
+
+# get_supported_terminals
+#   Echo space-separated supported terminal keys. Prefers the canonical Python
+#   source of truth (`agents._shared.terminal._SUPPORTED.keys()`); falls back
+#   to the hardcoded SUPPORTED_TERMINALS_FALLBACK array when python3 / the
+#   agents package is not importable (e.g., install-time gate before deps are
+#   installed).
+get_supported_terminals() {
+  if command -v python3 >/dev/null 2>&1; then
+    local out
+    out=$(python3 -c '
+import sys
+sys.path.insert(0, "'"${SCRIPT_DIR}"'/..")
+try:
+    from agents._shared.terminal import _SUPPORTED
+    print(" ".join(_SUPPORTED.keys()))
+except Exception:
+    sys.exit(2)
+' 2>/dev/null) && [[ -n "$out" ]] && { echo "$out"; return; }
+  fi
+  echo "${SUPPORTED_TERMINALS_FALLBACK[*]}"
+}
 
 # ── Version helpers ────────────────────────────────────────────────
 # version_ge "A.B.C" "X.Y.Z" → exit 0 when A.B.C >= X.Y.Z (semantic, dot-segment).
@@ -172,7 +204,7 @@ check_writable() {
 is_supported_terminal() {
   local needle="$1"
   local t
-  for t in "${SUPPORTED_TERMINALS[@]}"; do
+  for t in $(get_supported_terminals); do
     [[ "$needle" == "$t" ]] && return 0
   done
   return 1
@@ -181,13 +213,15 @@ is_supported_terminal() {
 check_terminal() {
   local cast="${CAST_TERMINAL:-}"
   local sysnal="${TERMINAL:-}"
+  local supported_str
+  supported_str=$(get_supported_terminals)
 
   if [[ -n "$cast" ]]; then
     if is_supported_terminal "$cast"; then
       note_green "\$CAST_TERMINAL=${cast} (supported)"
       return
     fi
-    note_yellow "\$CAST_TERMINAL=${cast} is not a supported terminal. Diecast will soft-fall-back to the first supported terminal in PATH. See docs/terminals.md."
+    note_yellow "\$CAST_TERMINAL=${cast} is not a supported terminal. Run \`bin/cast-doctor --fix-terminal\` to probe and configure interactively, or set \$CAST_TERMINAL to one of: ${supported_str}. See docs/reference/supported-terminals.md."
     return
   fi
 
@@ -197,15 +231,135 @@ check_terminal() {
   fi
 
   local t
-  for t in "${SUPPORTED_TERMINALS[@]}"; do
+  for t in $supported_str; do
     if command -v "$t" >/dev/null 2>&1; then
       note_green "supported terminal on PATH: ${t}"
       return
     fi
   done
 
-  note_yellow "No supported terminal found. Set \$CAST_TERMINAL or run ./setup to configure interactively. (Supported: ${SUPPORTED_TERMINALS[*]})"
+  note_yellow "No supported terminal found. Run \`bin/cast-doctor --fix-terminal\` to probe and configure interactively, or set \$CAST_TERMINAL manually. (Supported: ${supported_str})"
 }
+
+# fix_terminal — interactive first-run setup.
+#   Probes installed terminals on PATH (or /Applications on macOS), prompts the
+#   user when there are multiple candidates, asks for confirmation when there's
+#   exactly one, and writes terminal_default to ~/.cast/config.yaml.
+#   Idempotent: re-running replaces the value cleanly and preserves other keys.
+fix_terminal() {
+  local sys_name
+  sys_name=$(uname -s)
+  printf '[cast-doctor] Probing supported terminals on PATH...\n'
+
+  local -a candidates=()
+  local supported_str
+  supported_str=$(get_supported_terminals)
+
+  if [[ "$sys_name" == "Darwin" ]]; then
+    if [[ -d "/Applications/iTerm.app" ]]; then
+      candidates+=(iterm)
+      printf '  found: iterm (/Applications/iTerm.app)\n'
+    fi
+    candidates+=(terminal)  # always present on macOS
+    printf '  found: terminal (built-in)\n'
+  else
+    # Linux / BSD / WSL — probe via `command -v` in _SUPPORTED-table order.
+    # Bump konsole to the front when KDE is detected (only meaningful when
+    # konsole is in _SUPPORTED — currently dormant).
+    local desktop="${XDG_CURRENT_DESKTOP^^}"
+    local order_str="$supported_str"
+    if [[ "$desktop" == *KDE* && " $supported_str " == *" konsole "* ]]; then
+      order_str="konsole $(echo "$supported_str" | tr ' ' '\n' | grep -v '^konsole$' | tr '\n' ' ')"
+    fi
+    local t path
+    for t in $order_str; do
+      # Skip macOS-only keys.
+      [[ "$t" == "iterm" || "$t" == "terminal" ]] && continue
+      if path=$(command -v "$t" 2>/dev/null) && [[ -n "$path" ]]; then
+        candidates+=("$t")
+        printf '  found: %s (%s)\n' "$t" "$path"
+      fi
+    done
+  fi
+
+  if [[ ${#candidates[@]} -eq 0 ]]; then
+    printf '\n[cast-doctor] No supported terminal found on PATH.\n'
+    if [[ "$sys_name" == "Darwin" ]]; then
+      printf '  install iTerm2: brew install --cask iterm2\n'
+    else
+      printf '  install one of: %s\n' "$supported_str"
+      printf '  e.g. on Debian/Ubuntu: sudo apt install gnome-terminal\n'
+    fi
+    return 1
+  fi
+
+  local choice
+  if [[ ${#candidates[@]} -eq 1 ]]; then
+    printf '\n[cast-doctor] One candidate found: %s\n' "${candidates[0]}"
+    printf 'Write ~/.cast/config.yaml with terminal_default: %s? [Y/n] ' "${candidates[0]}"
+    read -r choice
+    case "${choice:-y}" in
+      [yY]|[yY][eE][sS]) choice="${candidates[0]}" ;;
+      *) printf '[cast-doctor] Aborted, no changes written.\n'; return 1 ;;
+    esac
+  else
+    printf '\nMultiple candidates. Pick one:\n'
+    local i=1
+    for c in "${candidates[@]}"; do
+      printf '  %d) %s\n' "$i" "$c"
+      i=$((i + 1))
+    done
+    printf '\nChoice [1]: '
+    read -r choice
+    choice="${choice:-1}"
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#candidates[@]} )); then
+      printf '[cast-doctor] Invalid choice: %s\n' "$choice"
+      return 1
+    fi
+    choice="${candidates[$((choice - 1))]}"
+  fi
+
+  local cfg_dir="${HOME}/.cast"
+  local cfg_file="${cfg_dir}/config.yaml"
+  mkdir -p "$cfg_dir"
+
+  # Idempotent write: replace just the terminal_default key, preserving other
+  # keys. We rewrite the file via python3 to avoid hand-rolling YAML in bash.
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$cfg_file" "$choice" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+
+path, choice = Path(sys.argv[1]), sys.argv[2]
+data = {}
+if path.exists():
+    try:
+        loaded = yaml.safe_load(path.read_text()) or {}
+        if isinstance(loaded, dict):
+            data = loaded
+    except yaml.YAMLError:
+        pass
+data["terminal_default"] = choice
+path.write_text(yaml.safe_dump(data, default_flow_style=False, sort_keys=True))
+PY
+  else
+    # python3 missing — write a minimal one-key file. Existing keys would be
+    # lost, but this branch only fires before the user's first dep install.
+    printf 'terminal_default: %s\n' "$choice" > "$cfg_file"
+  fi
+
+  printf '\n[cast-doctor] Wrote %s: terminal_default: %s\n' "$cfg_file" "$choice"
+  printf '[cast-doctor] Done. Verify with: cast-doctor\n'
+}
+
+# ── --fix-terminal short-circuit ───────────────────────────────────
+# When the user asked for first-run setup, run only that flow and exit.
+# Skips the prerequisite checks below — those are the diagnostic path.
+if [[ "${FIX_TERMINAL}" -eq 1 ]]; then
+  fix_terminal
+  exit $?
+fi
 
 # ── Run all checks ─────────────────────────────────────────────────
 check_bash

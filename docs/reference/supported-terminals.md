@@ -8,8 +8,8 @@ Diecast spawns child agent sessions in a new terminal tab. The terminal binary i
 
 1. **`$CAST_TERMINAL`** — preferred. Project-scoped; setting this in the shell that runs Diecast (or in a `.envrc`) keeps a per-project terminal choice independent of the user's POSIX default.
 2. **`$TERMINAL`** — POSIX convention. Many users already export this for non-Diecast tools; respecting it avoids forcing a second variable.
-3. **`~/.cast/config.yaml:terminal_default`** — written by `/cast-setup` (Phase 4) on first run. Survives shell restarts and removes the need for env-var plumbing in graphical launchers.
-4. **`ResolutionError`** — raised when all three sources are empty. The error message names all three sources and links here. There is **no silent fallback** to `xterm` or any "safe default": a wrong terminal is worse than a clear error pointing at the fix.
+3. **`~/.cast/config.yaml:terminal_default`** — written by `bin/cast-doctor --fix-terminal` on first run. The legacy key `terminal:` is also accepted as an alias for back-compat with configs written by older versions of `cast init` (`terminal_default:` wins when both are present). Survives shell restarts and removes the need for env-var plumbing in graphical launchers.
+4. **`ResolutionError`** — raised when all three sources are empty. The error message names all three sources and points at `bin/cast-doctor --fix-terminal`. There is **no silent fallback** to `xterm` or any "safe default": a wrong terminal is worse than a clear error pointing at the fix.
 
 `resolve_terminal()` returns a `ResolvedTerminal(command, args, flags)`. `command` is the executable; `args` carries any additional tokens parsed from the env-var/config string via `shlex.split` (e.g., `CAST_TERMINAL="kitty --single-instance"` → `command="kitty"`, `args=["--single-instance"]`). `flags` is a per-terminal preset pulled from the `_SUPPORTED` table inside `terminal.py`.
 
@@ -31,9 +31,10 @@ The `_SUPPORTED` table in `agents/_shared/terminal.py` mirrors this list and is 
 ## Adding a new terminal
 
 1. Add an entry to `_SUPPORTED` in `agents/_shared/terminal.py`. Use the binary's basename as the key. Required keys: `new_tab_flag` (string, may be empty if no tabbed mode), `cwd_flag` (string, including the trailing `=` if applicable).
-2. Document the terminal in the table above. Include the install command and any quirks.
-3. Add a row to the parametrized `test_supported_table_drives_resolution` in `tests/test_b6_terminal_resolution.py` so the resolver is exercised against the new entry.
-4. Run `bin/lint-anonymization` before committing — it runs in CI and will block any non-public reference.
+2. Update `bin/cast-doctor`'s `SUPPORTED_TERMINALS_FALLBACK` array (look for the `# KEEP IN SYNC WITH _SUPPORTED` comment) so the install-time fallback list — used before deps are installed — stays in lockstep with `_SUPPORTED.keys()`.
+3. Document the terminal in the table above. Include the install command and any quirks.
+4. Add a row to the parametrized `test_supported_table_drives_resolution` in `tests/test_b6_terminal_resolution.py` so the resolver is exercised against the new entry. The parity test in `tests/test_cast_doctor.py::test_fallback_list_matches_supported` will catch any drift between the bash fallback list and `_SUPPORTED.keys()` automatically.
+5. Run `bin/lint-anonymization` before committing — it runs in CI and will block any non-public reference.
 
 ## Quirks
 
@@ -49,11 +50,17 @@ The `_SUPPORTED` table in `agents/_shared/terminal.py` mirrors this list and is 
 
 - `$CAST_TERMINAL` is unset.
 - `$TERMINAL` is unset.
-- `~/.cast/config.yaml` lacks a non-empty `terminal_default` value (file may be absent entirely).
+- `~/.cast/config.yaml` lacks a non-empty `terminal_default` (or alias `terminal`) value.
 
-The `/cast-setup` slash command (shipping in Phase 4) calls this helper at the start of every run. When it returns `True`, `/cast-setup` prompts the user to pick a terminal from the supported list above and writes `terminal_default` into `~/.cast/config.yaml`. Subsequent runs see the config value and skip the prompt.
+When that's the case, run `bin/cast-doctor --fix-terminal`. The script:
 
-**This sub-phase ships only the prompt-trigger helper.** The interactive prompt itself, the config-write logic, and the shell snippet that exports `$CAST_TERMINAL` for the rest of the session all land in Phase 4's `/cast-setup` script.
+1. Probes installed terminals on `PATH` from the canonical `_SUPPORTED` list (read live via `python3 -c '...'`; falls back to the in-script `SUPPORTED_TERMINALS_FALLBACK` array when Python or the `agents._shared.terminal` import is unavailable, e.g., during install-time gating).
+2. With one candidate, asks the user to confirm `[Y/n]` before writing.
+3. With multiple, presents a numbered prompt (default: first).
+4. With none, prints platform-appropriate install instructions and exits 1.
+5. Writes the chosen terminal as `terminal_default` to `~/.cast/config.yaml`. Idempotent — re-running `--fix-terminal` replaces the value cleanly and preserves any other keys already in the file.
+
+Auto-detect runs **only** at first-run setup. During dispatch, `resolve_terminal()` keeps its loud-failure semantics: a misconfigured or unset terminal raises `ResolutionError` with a structured message pointing back at `bin/cast-doctor --fix-terminal` — there is no silent fallback.
 
 ## Why no `xterm` fallback?
 
