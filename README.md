@@ -1,8 +1,12 @@
 <div align="center">
 
+<img src="docs/assets/cast-shelf.png" alt="A workshop bookcase lined with hand-painted cast-* module blocks" width="720" />
+
+<br/>
+
 <img src="docs/assets/diecast-wordmark.png" alt="Diecast" width="380" />
 
-### Cast to spec. No drift.
+### Cast from the same die. Every run.
 
 **Opinionated agents, cast to spec from a die you control.**
 
@@ -232,6 +236,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR. Discussion happens 
 
 <div align="center">
 
-<sub>Diecast harvested patterns from <a href="https://github.com/github/spec-kit">spec-kit</a> (templates), gstack (upgrade flow), and a private workflow runtime called TaskOS. The maker-checker discipline came from shipping ~2K lines of compliant code with a paired checker on a real codebase.</sub>
+<sub>Diecast harvested patterns from <a href="https://github.com/github/spec-kit">spec-kit</a> (templates), gstack (upgrade flow), and a private workflow runtime called TaskOS.</sub>
 
 </div>
