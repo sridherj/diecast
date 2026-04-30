@@ -17,11 +17,11 @@ Each sub-phase corresponds to a section of the source plan (§A–§H). One comm
 | 1  | Port seam (`CAST_HOST` / `CAST_PORT` / `CAST_BIND_HOST`, default → 8005) | `sp1_port_seam/plan.md`           | —               | Done | §A. Foundation; markdown-aware sweep across ~30 sites; new `bin/sweep-port-refs.py`. |
 | 2  | `bin/cast-doctor` extended preflight (python3 ≥3.11, tmux) | `sp2_doctor_preflight/plan.md`    | —               | Done | §D. Adds two RED-list checks with OS-aware install hints. |
 | 3  | Alembic migrations + boot-time `_ensure_db_at_head()`   | `sp3_alembic_migrations/plan.md`  | —               | Done | §E. Hand-authored baseline (Decision #14); `tests/test_migrations.py`. |
-| 4  | Server-log `RotatingFileHandler` (`server.log` 10MB×5)  | `sp4_log_rotation/plan.md`        | 1               | Not Started | §F. Edits `config.py` after sp1's constants land. `bootstrap.log` is owned by sp8. |
+| 4  | Server-log `RotatingFileHandler` (`server.log` 10MB×5)  | `sp4_log_rotation/plan.md`        | 1               | Done | §F. Edits `config.py` after sp1's constants land. `bootstrap.log` is owned by sp8. |
 | 5  | Shellcheck CI (shebang-aware sweep over `setup` + `bin/*`) | `sp5_shellcheck_ci/plan.md`       | —               | Done | §G. New workflow + initial violation cleanup. Independent of all other sub-phases. |
-| 6  | `/cast-doctor` skill + `/api/health` + bin docstring sweep | `sp6_cast_doctor_skill/plan.md`   | 1, 2            | Not Started | §H + Decision #19. Overrides terminal-defaults' user-discovery wording in 4 sites + `ResolutionError`. |
-| 7  | README "Run the server" subsection + mental-model postscript | `sp7_readme_run_server/plan.md`   | 1               | Not Started | §C + §H step 6. Single owner of `README.md` edits. |
-| 8  | `setup` step 8: launch + browser + alembic + PATH check | `sp8_setup_launch_step/plan.md`   | 1, 2, 3, 4, 6   | Not Started | §B. Renumber Step X/7 → X/8; calls `bin/cast-doctor --fix-terminal`; `alembic upgrade head` between step 5 and step 8. |
+| 6  | `/cast-doctor` skill + `/api/health` + bin docstring sweep | `sp6_cast_doctor_skill/plan.md`   | 1, 2            | Done | §H + Decision #19. Overrides terminal-defaults' user-discovery wording in 4 sites + `ResolutionError`. |
+| 7  | README "Run the server" subsection + mental-model postscript | `sp7_readme_run_server/plan.md`   | 1               | Done | §C + §H step 6. Single owner of `README.md` edits. |
+| 8  | `setup` step 8: launch + browser + alembic + PATH check | `sp8_setup_launch_step/plan.md`   | 1, 2, 3, 4, 6   | Done | §B. Renumber Step X/7 → X/8; calls `bin/cast-doctor --fix-terminal`; `alembic upgrade head` between step 5 and step 8. |
 
 Status: Not Started → In Progress → Done → Verified → Skipped
 

@@ -82,7 +82,7 @@ run_or_dry() {
 
 # ── Step 1: prereqs via cast-doctor ────────────────────────────────
 step1_doctor() {
-  log "Step 1/7: prerequisite check (bin/cast-doctor)"
+  log "Step 1/8: prerequisite check (bin/cast-doctor)"
   if ! "${REPO_DIR}/bin/cast-doctor"; then
     fail "Prerequisites missing. Resolve the [RED] items above and re-run ./setup."
   fi
@@ -90,7 +90,7 @@ step1_doctor() {
 
 # ── Step 2: generate-skills + anti-leak grep ───────────────────────
 step2_generate_skills() {
-  log "Step 2/7: generate Claude Code skill files (bin/generate-skills)"
+  log "Step 2/8: generate Claude Code skill files (bin/generate-skills)"
   local skills_target="${HOME}/.claude/skills"
   if [[ "${DRY_RUN}" == "1" ]]; then
     "${REPO_DIR}/bin/generate-skills" --dry-run --target-dir "${skills_target}"
@@ -117,7 +117,7 @@ step2_5_migrations() {
   if [[ "${UPGRADE_MODE}" != "1" ]]; then
     return 0
   fi
-  log "Step 2.5/7: run schema migrations (bin/run-migrations.py)"
+  log "Step 2.5/8: run schema migrations (bin/run-migrations.py)"
   if [[ "${DRY_RUN}" == "1" ]]; then
     "${REPO_DIR}/bin/run-migrations.py" --dry-run
   else
@@ -127,7 +127,7 @@ step2_5_migrations() {
 
 # ── Step 3: install agents under ~/.claude/agents/cast-* ───────────
 step3_install_agents() {
-  log "Step 3/7: install agents -> ~/.claude/agents/"
+  log "Step 3/8: install agents -> ~/.claude/agents/"
   local target_root="${HOME}/.claude/agents"
   run_or_dry mkdir -p "${target_root}"
 
@@ -146,7 +146,7 @@ step3_install_agents() {
 
 # ── Step 4: install authored skills under ~/.claude/skills/cast-* ──
 step4_install_skills() {
-  log "Step 4/7: install hand-authored skills -> ~/.claude/skills/"
+  log "Step 4/8: install hand-authored skills -> ~/.claude/skills/"
   local source_root="${REPO_DIR}/skills/claude-code"
   local target_root="${HOME}/.claude/skills"
   [[ -d "${source_root}" ]] || { log "  (no skills/claude-code/ in repo, skipping)"; return 0; }
@@ -167,7 +167,7 @@ step4_install_skills() {
 
 # ── Step 5: ~/.local/bin/cast-server wrapper ───────────────────────
 step5_install_cast_server() {
-  log "Step 5/7: install ~/.local/bin/cast-server wrapper"
+  log "Step 5/8: install ~/.local/bin/cast-server wrapper"
   local bin_dir="${HOME}/.local/bin"
   local wrapper="${bin_dir}/cast-server"
   run_or_dry mkdir -p "${bin_dir}"
@@ -193,11 +193,26 @@ EOF
   fi
 }
 
+# ── Step 5b: alembic upgrade head ──────────────────────────────────
+# Runs migrations against ~/.cast/diecast.db before the server is allowed to launch.
+# Boot-time `_ensure_db_at_head()` (sp3, Decision #15) is the second line of defense;
+# this is the first. A failed migration aborts setup verbatim — refuse to launch a
+# possibly-broken DB.
+step5b_run_migrations() {
+  log "Step 5b/8: run database migrations (alembic upgrade head)"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY: (cd ${REPO_DIR}/cast-server && uv run alembic upgrade head)"
+    return 0
+  fi
+  ( cd "${REPO_DIR}/cast-server" && uv run alembic upgrade head ) \
+    || fail "alembic upgrade head failed; refusing to launch with possibly-broken DB"
+}
+
 # ── Step 6: write ~/.cast/config.yaml on first run ─────────────────
 # Canonical schema lives in docs/config.md and _shared_context.md.
 # If the file exists, fill in any missing keys with defaults but preserve user values.
 step6_write_config() {
-  log "Step 6/7: ~/.cast/config.yaml"
+  log "Step 6/8: ~/.cast/config.yaml"
   local cfg_dir="${HOME}/.cast"
   local cfg_file="${cfg_dir}/config.yaml"
   run_or_dry mkdir -p "${cfg_dir}"
@@ -299,7 +314,7 @@ PY
 }
 
 step7_terminal_prompt() {
-  log "Step 7/7: \$CAST_TERMINAL preference"
+  log "Step 7/8: \$CAST_TERMINAL preference"
   if [[ -n "${CAST_TERMINAL:-}" ]]; then
     log "  \$CAST_TERMINAL already set to '${CAST_TERMINAL}' — skipping prompt."
     return 0
@@ -327,26 +342,159 @@ step7_terminal_prompt() {
   persist_terminal_choice "${choice}"
 }
 
-# ── Typed next_steps printout (US14 / sp4d) ────────────────────────
-print_next_steps() {
-  cat <<'EOF'
+# ── Step 8: launch cast-server + open dashboard ───────────────────
+# The user-visible payoff. Skip on UPGRADE_MODE / DRY_RUN / NO_PROMPT / CI / already-running.
+# Decision #4 (drop disown), #10 (30×0.5s readiness), #11 (cache dir on happy path),
+# #13 (bootstrap.log vs server.log split). Never fails setup over the launch step.
+_open_browser() {
+  local url="$1"
+  case "$(uname -s)" in
+    Darwin) open "${url}" 2>/dev/null || true ;;
+    Linux)
+      if [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]] && command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "${url}" >/dev/null 2>&1 &
+      else
+        log "  no display detected — visit ${url} manually"
+      fi
+      ;;
+    *) log "  unsupported OS for browser open — visit ${url} manually" ;;
+  esac
+}
 
-[cast] Install complete. Suggested next steps:
+step8_launch_and_open_browser() {
+  log "Step 8/8: launch cast-server + open dashboard"
+
+  local host="${CAST_HOST:-localhost}"
+  local port="${CAST_PORT:-8005}"
+  local url="http://${host}:${port}/"
+
+  # Skip conditions (any one short-circuits this step).
+  if [[ "${UPGRADE_MODE}" == "1" ]]; then
+    log "  skipping launch: --upgrade mode"
+    LAUNCHED=0; return 0
+  fi
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "  skipping launch: --dry-run"
+    LAUNCHED=0; return 0
+  fi
+  if [[ "${NO_PROMPT}" == "1" ]] || [[ -n "${CI:-}" ]]; then
+    log "  skipping launch: non-interactive (--no-prompt or CI)"
+    LAUNCHED=0; return 0
+  fi
+
+  # Port pre-flight probe.
+  if exec 3<>"/dev/tcp/${host}/${port}" 2>/dev/null; then
+    exec 3<&-; exec 3>&-
+    # Something is bound. Determine whether it is our cast-server.
+    if curl -s --max-time 1 "${url}api/agents/runs?status=running" >/dev/null 2>&1; then
+      log "  cast-server already running on ${host}:${port}; opening browser only"
+      LAUNCHED=1
+      _open_browser "${url}"
+      return 0
+    fi
+    # Bound by something else.
+    local pid cmd
+    pid="$(lsof -ti ":${port}" 2>/dev/null | head -1 || true)"
+    cmd="$(ps -p "${pid:-0}" -o comm= 2>/dev/null || echo "?")"
+    warn "port ${port} in use by PID ${pid:-?} (${cmd})."
+    warn "       set CAST_PORT=<n> ./setup, or stop the process and re-run."
+    warn "       (skipping launch — install otherwise complete)"
+    LAUNCHED=0
+    return 0
+  fi
+
+  # Happy path: nothing on the port. Touch the cache dir only here (Decision #11).
+  mkdir -p "${HOME}/.cache/diecast"
+
+  # Detached background launch (Decision #4 — drop disown; Decision #13 — bootstrap.log).
+  ( nohup "${HOME}/.local/bin/cast-server" \
+        >"${HOME}/.cache/diecast/bootstrap.log" 2>&1 & ) >/dev/null 2>&1
+
+  # Readiness poll: 30 × 0.5s = 15s (Decision #10).
+  local i
+  for i in $(seq 1 30); do
+    if exec 3<>"/dev/tcp/${host}/${port}" 2>/dev/null; then
+      exec 3<&-; exec 3>&-
+      LAUNCHED=1
+      break
+    fi
+    sleep 0.5
+  done
+
+  if [[ "${LAUNCHED}" != "1" ]]; then
+    warn "cast-server did not become ready within 15s."
+    warn "       check ${HOME}/.cache/diecast/bootstrap.log for startup errors."
+    LAUNCHED=0
+    return 0   # never fail setup over the launch step
+  fi
+
+  # Terminal wire-up (skipped on --no-prompt / CI — already filtered above).
+  if [[ -x "${REPO_DIR}/bin/cast-doctor" ]]; then
+    "${REPO_DIR}/bin/cast-doctor" --fix-terminal \
+      || warn "  bin/cast-doctor --fix-terminal returned non-zero (continuing)"
+  fi
+
+  _open_browser "${url}"
+
+  # Post-install PATH check.
+  case ":${PATH}:" in
+    *":${HOME}/.local/bin:"*) : ;;
+    *) warn "cast-server installed to ~/.local/bin, which is not on your \$PATH.
+       Add this to your shell rc (e.g. ~/.zshrc, ~/.bashrc):
+         export PATH=\"\$HOME/.local/bin:\$PATH\"
+       Then restart your shell or: source ~/.zshrc" ;;
+  esac
+}
+
+# ── Typed next_steps printout (two-branch: running vs deferred) ───
+print_next_steps() {
+  local host="${CAST_HOST:-localhost}"
+  local port="${CAST_PORT:-8005}"
+  local url="http://${host}:${port}"
+
+  if [[ "${LAUNCHED}" == "1" ]]; then
+    cat <<EOF
+
+[cast] Install complete. cast-server is running at ${url}
+       (logs: ~/.cache/diecast/server.log; bootstrap: ~/.cache/diecast/bootstrap.log)
+
+To restart it later (e.g. after reboot):
+  cast-server                            # background-friendly defaults
+  CAST_PORT=8080 cast-server             # custom port
+  CAST_BIND_HOST=0.0.0.0 cast-server     # bind for LAN access (server side)
+  CAST_HOST=cast.example.com cast-server # connect target (client side; future cloud)
+
+Next steps:
   1. /cast-init   — scaffold a new project (writes CLAUDE.md + cast-* dirs)
-  2. /cast-runs   — open the cast-server runs dashboard
+  2. /cast-runs   — open the dashboard you just launched
 
 Docs: docs/config.md (config keys) · docs/troubleshooting.md (recovery & FAQ)
 EOF
+  else
+    cat <<EOF
+
+[cast] Install complete. To start the server: cast-server
+
+Next steps:
+  1. /cast-init   — scaffold a new project (writes CLAUDE.md + cast-* dirs)
+  2. /cast-runs   — open the dashboard once cast-server is up
+
+Docs: docs/config.md (config keys) · docs/troubleshooting.md (recovery & FAQ)
+EOF
+  fi
 }
 
 # ── Run ────────────────────────────────────────────────────────────
+LAUNCHED=0
 step1_doctor
 step2_generate_skills
 step2_5_migrations
 step3_install_agents
 step4_install_skills
 step5_install_cast_server
+step5b_run_migrations
 step6_write_config
 step7_terminal_prompt
 prune_old_backups
+step8_launch_and_open_browser
 print_next_steps

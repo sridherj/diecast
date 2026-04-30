@@ -52,7 +52,7 @@ Diecast doesn't fix the model. It fixes the workflow around the model.
 git clone https://github.com/sridherj/diecast.git ~/workspace/diecast
 cd ~/workspace/diecast
 
-# 2. Install (drops cast-* skills + agents into ~/.claude/, puts cast-server on your PATH)
+# 2. Install (drops cast-* skills + agents into ~/.claude/, puts cast-server on your PATH, and starts it on first install)
 ./setup
 
 # 3. In any project, scaffold the docs/ structure Diecast writes into
@@ -66,6 +66,30 @@ cd ~/your-project
 ```
 
 That's the chain. Every step writes its artifact into `docs/` using a stable file convention; every step suggests the next command.
+
+### Run the server
+
+`./setup` starts cast-server in the background and opens the dashboard on first
+install. To start it again after a reboot or shell restart:
+
+```bash
+cast-server                            # http://localhost:8005, on $PATH after ./setup
+./bin/cast-server                      # equivalent, from a fresh clone
+CAST_PORT=8080 cast-server             # custom port (8005 is the default)
+CAST_BIND_HOST=0.0.0.0 cast-server     # server-side bind for LAN access
+CAST_HOST=cast.example.com cast-server # client-side connect target (future cloud)
+```
+
+cast-server is a single user-level daemon — one instance per machine, shared
+across every project you cd into. State lives in `~/.cast/diecast.db`; logs at
+`~/.cache/diecast/server.log` (bootstrap output at `bootstrap.log`).
+`CAST_HOST` / `CAST_PORT` are the *client-side* connect target (used by skills
+calling the server); `CAST_BIND_HOST` controls the *server-side* bind. Each
+goal binds to one repo via its `external_project_dir` column.
+
+Only `cast-server` is on your `$PATH`. Every other Diecast operation is a
+`/cast-*` slash command inside Claude Code (run `/cast-doctor` to diagnose,
+`/cast-init` to scaffold, `/cast-runs` for the dashboard, etc.).
 
 ---
 
