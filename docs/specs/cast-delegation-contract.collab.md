@@ -14,8 +14,8 @@ last_verified: "2026-04-30"
 
 > One-line: file-based parent-child agent delegation contract — what every cast-* agent must obey when dispatching, polling, and consuming a child's output.
 
-**Scope:** output file naming, contract-v2 schema reference, terminal status set, polling backoff, idle timeout, heartbeat-by-mtime, atomic write, RUN_ID-scoped path validation, test hooks, edge cases, per-agent extension placeholder, cross-phase authorship, worked example.
-**Version:** 1 | **Updated:** 2026-04-30 — Initial spec authored as part of Phase 3a sub-phase 1 (B5 file-based polling foundation); Open-Question Tags (US13) appended in sp4c; Typed `next_steps` Array (US14) appended in sp4d.
+**Scope:** dispatch precondition (external_project_dir), output file naming, contract-v2 schema reference, terminal status set, polling backoff, idle timeout, heartbeat-by-mtime, atomic write, RUN_ID-scoped path validation, test hooks, edge cases, per-agent extension placeholder, cross-phase authorship, worked example.
+**Version:** 2 | **Updated:** 2026-05-01 — Dispatch Precondition section added (server-side enforcement of usable `external_project_dir` at trigger time, structured 422 error contract). v1 (2026-04-30): Initial spec authored as part of Phase 3a sub-phase 1 (B5 file-based polling foundation); Open-Question Tags (US13) appended in sp4c; Typed `next_steps` Array (US14) appended in sp4d.
 **Status:** Draft
 
 ---
@@ -27,6 +27,29 @@ The Diecast runtime is a parent-child agent system. Every cast-* parent agent di
 This spec is the single source of truth for the file-based delegation contract. Anything that diverges from this spec is a bug. The runtime encoding lives at `skills/claude-code/cast-child-delegation/SKILL.md`; if the skill and this spec ever diverge, the spec is canonical.
 
 ## Behaviors
+
+### Dispatch Precondition: external_project_dir
+
+This is a first-class subsection because it gates every dispatch path. Without it, runs were enqueued against goals with no usable working directory and failed at launch with confusing terminal-readiness timeouts. The precondition surfaces the real problem ("this goal has no project directory") at the API boundary, not as a launcher symptom.
+
+- **Server enforces at trigger time**: `POST /api/agents/{name}/trigger` calls `_validate_dispatch_preconditions(goal_slug)` before enqueueing. The goal MUST have a non-empty `external_project_dir` whose configured path resolves to a directory on disk. Same rule applies to scheduled runs (validated at enqueue, not at dispatch).
+- **Both failure modes share one error code**: unset `external_project_dir` and set-but-path-missing both raise `MissingExternalProjectDirError` and map to `error_code: "missing_external_project_dir"`. The `configured_path` field on the response disambiguates ("never set" vs. "set to <path>").
+- **Structured 422 response**: parents reading the route response can branch on `error_code` without parsing prose. Body shape:
+
+  ```json
+  {
+    "error_code": "missing_external_project_dir",
+    "goal_slug": "<slug>",
+    "configured_path": null | "<path that doesn't exist>",
+    "detail": "<human-readable message>",
+    "hint": "Set external_project_dir on the goal before dispatching. PATCH /api/goals/{slug}/config (form field external_project_dir=<absolute path>)."
+  }
+  ```
+
+- **Defense-in-depth at launch**: `_launch_agent` re-validates the same precondition. A run that bypasses the trigger contract (direct DB insert, scheduled enqueue under a stale config) raises `MissingExternalProjectDirError` and is marked `failed` with the error in `error_message`. The launcher MUST NOT silently fall back to a "default" working directory.
+- **Client-side preflight (canonical)**: `cast-child-delegation` Section 0 GETs the goal config before dispatch and prompts the user via `AskUserQuestion` (cwd / type path / cancel) when `external_project_dir` is missing or stale. On user choice it `PATCH /api/goals/{slug}/config` and proceeds. The 422 path is the fallback; the preflight prompt is the happy path.
+
+> Edge: `invoke_agent` (CLI `/invoke` route) is intentionally NOT subject to this precondition today — it serves ad-hoc, often goal-less, diagnostic invocations. Promoting `/invoke` to the same precondition is a separate concern.
 
 ### Overview & Boundary
 

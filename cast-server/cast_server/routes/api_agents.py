@@ -4,14 +4,18 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response, JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from cast_server import config as _config
 from cast_server.deps import templates
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
 from cast_server.services import agent_service
-from cast_server.services.agent_service import MalformedOutputError, load_canonical_file
+from cast_server.services.agent_service import (
+    MalformedOutputError,
+    MissingExternalProjectDirError,
+    load_canonical_file,
+)
 from cast_server.services.error_memory_service import resolve_memory
 
 
@@ -62,7 +66,28 @@ async def trigger_agent(request: Request, name: str):
     if delegation_context_raw:
         delegation_context_raw.setdefault("goal_slug", goal_slug)
         delegation_context_raw.setdefault("parent_run_id", parent_run_id or "")
-        delegation_context = DelegationContext(**delegation_context_raw)
+        # Default output_dir to <GOALS_DIR>/<slug> when caller omits it.
+        # Mirrors the goal_slug / parent_run_id setdefault pattern above; keeps
+        # all defaulting in one place and avoids post-construction mutation.
+        output_block = delegation_context_raw.setdefault("output", {})
+        output_block.setdefault("output_dir", str(_config.GOALS_DIR / goal_slug))
+
+        try:
+            delegation_context = DelegationContext(**delegation_context_raw)
+        except ValidationError as e:
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "error_code": "invalid_delegation_context",
+                    "detail": "delegation_context failed validation",
+                    "errors": e.errors(include_url=False),
+                    "hint": (
+                        "See docs/specs/cast-delegation-contract.collab.md and "
+                        "skills/claude-code/cast-child-delegation/SKILL.md for the "
+                        "expected shape."
+                    ),
+                },
+            )
     else:
         delegation_context = None
 
@@ -80,6 +105,20 @@ async def trigger_agent(request: Request, name: str):
             scheduled_at=scheduled_at,
             parent_run_id=parent_run_id,
             delegation_context=delegation_context,
+        )
+    except MissingExternalProjectDirError as e:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error_code": "missing_external_project_dir",
+                "goal_slug": e.goal_slug,
+                "configured_path": e.configured_path,
+                "detail": str(e),
+                "hint": (
+                    "Set external_project_dir on the goal before dispatching. "
+                    "PATCH /api/goals/{slug}/config (form field external_project_dir=<absolute path>)."
+                ),
+            },
         )
     except ValueError as e:
         return JSONResponse(status_code=422, content={"detail": str(e)})

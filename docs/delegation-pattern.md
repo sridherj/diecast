@@ -27,7 +27,7 @@ Diecast. Three concrete payoffs:
   in-memory tracing.
 
 The cast-server gives a richer experience — a web UI at
-`http://localhost:8000`, the HTTP API for dispatch state, the
+`http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}`, the HTTP API for dispatch state, the
 rate-limit auto-restart loop. But it is a read-through over the
 file-based truth. Removing the server does not remove the
 delegation.
@@ -183,7 +183,7 @@ The flow the GIF will show:
    the prompt file.
 3. The parent polls the output JSON path on the 1s/2s/5s/10s/30s
    cadence. cast-server is not running — `curl
-   http://localhost:8000` would return connection refused.
+   http://localhost:8005` would return connection refused.
 4. The child runs to completion in its own terminal, writes
    markdown artifacts, and finally writes
    `.agent-run_<RUN_ID>.output.json` atomically.

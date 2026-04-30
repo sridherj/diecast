@@ -20,6 +20,70 @@ Complete reference for Diecast agent delegation: parent mechanics (dispatch, pol
 
 Invoke this skill BEFORE dispatching any child agent. Follow the patterns for your specific use case.
 
+### Section 0: Preflight (external_project_dir)
+
+Every dispatch path on cast-server requires the goal to have a usable `external_project_dir`. The server enforces this at `POST /api/agents/{name}/trigger` and returns **HTTP 422** with `error_code: "missing_external_project_dir"` when it isn't set or the configured path doesn't exist on disk. Resolve it **before** dispatching so the user sees one clean prompt instead of a failed run.
+
+**Check, prompt, set, then dispatch:**
+
+```bash
+# Step 1: GET the goal config
+GOAL_JSON=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/$GOAL_SLUG")
+EXT_DIR=$(echo "$GOAL_JSON" | jq -r '.external_project_dir // empty')
+
+# Step 2: If unset or missing on disk, ask the user
+NEEDS_PROMPT=false
+if [ -z "$EXT_DIR" ]; then
+  NEEDS_PROMPT=true
+  REASON="not set"
+elif [ ! -d "$EXT_DIR" ]; then
+  NEEDS_PROMPT=true
+  REASON="set to '$EXT_DIR' but that path does not exist"
+fi
+
+# Step 3: Resolve via AskUserQuestion (cast-interactive-questions protocol)
+#   - Use Option A: current working directory ($PWD)
+#   - Option B: user types another absolute path
+#   - Option C: cancel
+# (These options live in the AskUserQuestion call, not in bash. Bash code below
+# runs after the user has chosen and `$NEW_EXT_DIR` is populated.)
+
+# Step 4: Persist the choice
+if [ -n "$NEW_EXT_DIR" ]; then
+  curl -s -X PATCH "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/$GOAL_SLUG/config" \
+    -F "external_project_dir=$NEW_EXT_DIR" | jq '.status'
+fi
+
+# Step 5: Proceed with dispatch (Section 1).
+```
+
+**AskUserQuestion shape (canonical):**
+
+> **Question #N: Set the goal's external project directory**
+>
+> The goal `<slug>` has no external_project_dir configured. Cast-server needs one before dispatching agents.
+> *(or: configured to `<path>` but that path no longer exists on disk.)*
+>
+> - **Option A — Use current directory `<cwd>` (Recommended if cwd is the project root):** keeps the dispatch in the directory the user is operating from.
+> - **Option B — Enter a different absolute path:** for goals tied to a project elsewhere on disk.
+> - **Option C — Cancel dispatch:** stop and let the user fix it manually.
+
+**Defense in depth — handle the 422 anyway:**
+
+If a dispatch still returns `error_code: missing_external_project_dir` (race, server restart, scheduled run), fall back to the same prompt-and-PATCH flow, then retry the trigger **once**. Never silently retry without the prompt.
+
+```bash
+RESP=$(curl -s -w "\n%{http_code}" -X POST "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/$AGENT/trigger" -H "Content-Type: application/json" -d "$BODY")
+CODE=$(echo "$RESP" | tail -1)
+BODY_JSON=$(echo "$RESP" | sed '$d')
+if [ "$CODE" = "422" ] && [ "$(echo "$BODY_JSON" | jq -r '.error_code // empty')" = "missing_external_project_dir" ]; then
+  # → run the Section 0 prompt-and-PATCH flow above, then retry once
+  :
+fi
+```
+
+---
+
 ### Section 1: Dispatch
 
 Dispatch a child agent via HTTP. Replace placeholders with actual values.
@@ -27,7 +91,7 @@ Dispatch a child agent via HTTP. Replace placeholders with actual values.
 **Basic trigger:**
 
 ```bash
-CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{agent-name}/trigger \
+CHILD_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/{agent-name}/trigger \
   -H "Content-Type: application/json" \
   -d '{
     "goal_slug": "'"$GOAL_SLUG"'",
@@ -59,7 +123,7 @@ CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{agent-name}/tri
 - `delegation_context.context.prior_output` (string): Summarize what you've done so far, so child understands context.
 - `delegation_context.context.constraints` (array of strings): Any constraints on the work (e.g., ["do not modify existing configs"]).
 - `delegation_context.context` also accepts **custom fields** (e.g., `phase_section`, `decisions_so_far`) — any extra keys are preserved and written to the delegation JSON file.
-- `delegation_context.output.output_dir` (string): Directory where child should write artifacts (typically `{output_dir}` from your preamble).
+- `delegation_context.output.output_dir` (string, **optional**): Directory where child should write artifacts. Defaults to the goal directory (`<goals>/<goal_slug>`) when omitted — see `docs/specs/cast-delegation-contract.collab.md:66`. Pass `{output_dir}` from your preamble explicitly when you need a non-default location (e.g., a sub-phase under `docs/execution/<project>`).
 - `delegation_context.output.expected_artifacts` (array): What you expect the child to produce (e.g., `["enrichment_result.json"]`).
 
 **Tip:** Use `{output_dir}` and `{goal_dir}` from your prompt preamble — these are injected at runtime.
@@ -108,7 +172,7 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
 
   # Layer-2: Deep polling (every 60s) — HTTP status + progress detection
   if [ $((ELAPSED % DEEP_POLL_INTERVAL)) -eq 0 ] && [ $ELAPSED -gt 0 ]; then
-    STATUS=$(curl -s "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status // empty')
+    STATUS=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status // empty')
 
     # If terminal state but file missing, break out
     if [ "$STATUS" = "completed" ] || [ "$STATUS" = "failed" ]; then
@@ -238,7 +302,7 @@ while True:
 When the output file doesn't appear, check the child's status to understand what happened.
 
 ```bash
-STATUS=$(curl -s "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID" \
+STATUS=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID" \
   | jq -r '.status // empty')
 
 echo "Status: $STATUS"
@@ -305,7 +369,7 @@ When dispatching multiple children that can run in parallel, collect run_ids and
 # Dispatch multiple children, store run_ids
 CHILD_RUN_IDS=()
 for agent in cast-web-researcher cast-playbook-synthesizer; do
-  RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/$agent/trigger \
+  RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/$agent/trigger \
     -H "Content-Type: application/json" \
     -d '{"goal_slug":"...","parent_run_id":"...","delegation_context":{...}}' \
     | jq -r '.run_id')
@@ -364,7 +428,7 @@ Dispatch a child early, do independent work while it runs, then read the result 
 
 ```bash
 # Step 1: Dispatch child at START of phase
-CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/cast-web-researcher/trigger ...)
+CHILD_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/cast-web-researcher/trigger ...)
 
 # Step 2: Do independent work (phases N.1, N.2, N.3)
 #         These steps don't depend on the child's output
@@ -403,11 +467,11 @@ When a child is in `idle` state (waiting for input), decide whether to send inpu
 **Continue (send input to idle child):**
 
 ```bash
-STATUS=$(curl -s "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status')
+STATUS=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status')
 
 if [ "$STATUS" = "idle" ]; then
   # Child is waiting for input
-  curl -s -X POST "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID/continue" \
+  curl -s -X POST "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID/continue" \
     -H "Content-Type: application/json" \
     -d '{
       "message": "User has decided to proceed with option A. Continue with sub-phases X, Y, Z."
@@ -421,7 +485,7 @@ fi
 **New trigger (start fresh):**
 
 ```bash
-NEW_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/cast-subphase-runner/trigger \
+NEW_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/cast-subphase-runner/trigger \
   -H "Content-Type: application/json" \
   -d '{"goal_slug":"...","parent_run_id":"...","delegation_context":{...}}' \
   | jq -r '.run_id')
@@ -611,7 +675,7 @@ PANE_CONTENT=$(tmux capture-pane -p -t "agent-$CHILD_RUN_ID" 2>/dev/null | tail 
 echo "$PANE_CONTENT"
 
 # Also check HTTP status
-STATUS=$(curl -s "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status // empty')
+STATUS=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID" | jq -r '.status // empty')
 echo "HTTP status: $STATUS"
 ```
 
@@ -626,7 +690,7 @@ Interpret what you see:
 ```bash
 # Option A: Send continuation via HTTP (preferred — uses Diecast continue endpoint)
 if [ "$STATUS" = "idle" ]; then
-  curl -s -X POST "http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID/continue" \
+  curl -s -X POST "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/jobs/$CHILD_RUN_ID/continue" \
     -H "Content-Type: application/json" \
     -d '{"message": "Continue with the task. Do not wait for user input unless absolutely necessary."}'
 fi
@@ -652,10 +716,10 @@ fi
 
 ```bash
 # Cancel the stuck run
-curl -s -X POST "http://localhost:8000/api/agents/runs/$CHILD_RUN_ID/cancel"
+curl -s -X POST "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/runs/$CHILD_RUN_ID/cancel"
 
 # Re-dispatch with refined instructions that address the stuck reason
-NEW_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{agent-name}/trigger \
+NEW_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/{agent-name}/trigger \
   -H "Content-Type: application/json" \
   -d '{
     "goal_slug": "'"$GOAL_SLUG"'",
@@ -686,7 +750,7 @@ CHILD_RUN_ID="$NEW_RUN_ID"
 
 ### Before Dispatching a Child
 
-- [ ] Diecast cast-server is running (`curl -s http://localhost:8000/api/agents/runs?status=running | head -1`)
+- [ ] Diecast cast-server is running (`curl -s http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/agents/runs?status=running | head -1`)
 - [ ] Child agent exists in registry (check `/agents/*/config.yaml`)
 - [ ] Instructions are specific and include success criteria
 - [ ] Context artifacts are relevant and paths are correct (relative to goal_dir)

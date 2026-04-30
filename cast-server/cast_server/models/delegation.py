@@ -14,7 +14,8 @@ class DelegationContextData(BaseModel):
 
 
 class DelegationOutputConfig(BaseModel):
-    output_dir: str
+    # Empty = "use goal_dir" (route layer backfills via setdefault before construction).
+    output_dir: str = ""
     expected_artifacts: list[str] = []
     contract_version: str = "1.0"
 
