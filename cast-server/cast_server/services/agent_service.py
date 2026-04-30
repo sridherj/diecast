@@ -390,6 +390,28 @@ def get_agent_run(run_id: str, db_path=None) -> dict | None:
     return _row_to_dict(row)
 
 
+class MalformedOutputError(ValueError):
+    """Raised when a canonical .agent-run_<id>.output.json file exists but cannot be parsed."""
+
+
+def load_canonical_file(goal_dir: Path, run_id: str) -> dict | None:
+    """Read the canonical agent-run output JSON from disk.
+
+    Returns the parsed dict if the file exists and is valid JSON, ``None`` if
+    the file does not exist, and raises :class:`MalformedOutputError` if it
+    exists but cannot be parsed. The contract spec is at
+    ``docs/specs/cast-delegation-contract.collab.md``; this helper only loads
+    raw JSON and does not validate the schema.
+    """
+    path = Path(goal_dir) / f".agent-run_{run_id}.output.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise MalformedOutputError(f"Malformed output file at {path}: {e}") from e
+
+
 def get_runs_for_goal(goal_slug: str, db_path=None) -> list[dict]:
     """Get all runs for a goal, ordered by created_at desc."""
     conn = get_connection(db_path)
@@ -463,12 +485,12 @@ def get_all_runs(
 
     Args:
         exclude_test: If True, exclude runs where agent_name starts with 'test'.
-            Defaults to True when TASKOS_ENV != 'test'.
+            Defaults to True when CAST_ENV != 'test'.
         page: 1-based page number.
         per_page: Items per page. If None, uses `limit` for backward compat.
     """
     if exclude_test is None:
-        exclude_test = os.environ.get("TASKOS_ENV") != "test"
+        exclude_test = os.environ.get("CAST_ENV") != "test"
     effective_per_page = per_page if per_page is not None else limit
 
     conn = get_connection(db_path)
@@ -733,10 +755,10 @@ def _inject_context(agent_name: str, goal_slug: str,
             context_parts.append(
                 f"\n## GStack Artifacts (reference-only context)\n"
                 f"Directory: {expanded}\n"
-                f"These are early-stage exploration/spec artifacts created outside TaskOS.\n"
+                f"These are early-stage exploration/spec artifacts created outside Diecast.\n"
                 f"See docs/reference/gstack-artifacts.md for what each file type means.\n"
                 f"IMPORTANT: GStack artifacts are reference material, NOT the source of truth. "
-                f"If a TaskOS goal artifact or external project doc covers the same topic, "
+                f"If a Diecast goal artifact or external project doc covers the same topic, "
                 f"that version is authoritative. If you see conflicts, flag them for human "
                 f"confirmation rather than assuming either is correct.\n"
                 f"DO NOT write to this directory."
@@ -755,7 +777,7 @@ def _inject_context(agent_name: str, goal_slug: str,
             context_parts.append(
                 f"\n## External Project Directory\n"
                 f"You are running inside the project directory ({expanded}).\n"
-                f"Goal artifacts (plans, research, playbooks) are in `.taskos/`.\n"
+                f"Goal artifacts (plans, research, playbooks) are in `.cast/`.\n"
                 f"Code and execution artifacts go in the current working directory."
             )
         else:
@@ -798,7 +820,7 @@ def _universal_anti_inline(allowed_delegations: list[str]) -> str:
     """Always-on rule: never inline an agent's work yourself.
 
     Emitted when allowed_delegations is non-empty, regardless of per-target
-    dispatch mix. Preserves SJ's intentional anti-inlining invariant: the
+    dispatch mix. Preserves the project's intentional anti-inlining invariant: the
     parent must dispatch, not paraphrase. Returns empty string when the
     parent has no delegations (nothing to inline).
     """
@@ -836,7 +858,7 @@ def _subagent_dispatch_rules(subagent_targets: list[str]) -> str:
     """Rules for subagent-dispatched delegation targets.
 
     Returns the subagent dispatch block covering Agent-tool dispatch, SendMessage
-    continuation, pass-through verdict, and the lack of TaskOS run tracking.
+    continuation, pass-through verdict, and the lack of Diecast run tracking.
     Returns empty string when subagent_targets is empty.
     """
     if not subagent_targets:
@@ -845,12 +867,12 @@ def _subagent_dispatch_rules(subagent_targets: list[str]) -> str:
     return (
         f"\nSubagent-dispatched delegations: [{targets}]\n"
         "- Dispatch via the Agent tool with subagent_type=\"<name>\" for the "
-        "targets above (Claude Code platform idiom; not TaskOS HTTP).\n"
+        "targets above (Claude Code platform idiom; not Diecast HTTP).\n"
         "- To continue a running subagent, use SendMessage targeting its agentId — "
         "do NOT call Agent again for the same subagent.\n"
         "- Never summarize the subagent's output. Return its verdict/report "
         "structurally (pass-through).\n"
-        "- These runs do NOT appear in TaskOS /api/agents/runs — the parent "
+        "- These runs do NOT appear in Diecast /api/agents/runs — the parent "
         "Claude Code conversation log is authoritative.\n"
     )
 
@@ -953,21 +975,21 @@ Context instructions for this goal directory ({goal_dir}):
     interactive_block = ""
     if interactive:
         interactive_block = """
-INTERACTIVE SESSION: A human (SJ) is watching this terminal and will respond to your questions.
+INTERACTIVE SESSION: A human is watching this terminal and will respond to your questions.
 You MUST ask clarifying questions before proceeding when the agent calls for it (e.g., scope
 clarification, approval gates, ambiguous requirements). Do NOT auto-resolve or guess — pause
-and wait for SJ's response. Type your question, then STOP and wait for input.
+and wait for the user's response. Type your question, then STOP and wait for input.
 
 When you delegate to child agents: after reviewing their output (see delegation instructions
-below), present your findings to SJ — gaps found, issues spotted, open questions — and ask
+below), present your findings to the user — gaps found, issues spotted, open questions — and ask
 whether to fix, re-delegate, or accept as-is. Do NOT silently absorb child output without
-giving SJ a chance to weigh in.
+giving the user a chance to weigh in.
 """
 
     preamble = f"""Your run ID: {run_id}
 Goal slug: {goal_slug}
 
-TaskOS API routes (http://localhost:8000):
+Diecast API routes (http://localhost:8000):
   POST /api/agents/{{name}}/trigger        — dispatch a child agent
   GET  /api/agents/jobs/{{run_id}}          — get run details/status
   POST /api/agents/jobs/{{run_id}}/recheck  — recheck a completed/failed run
@@ -1003,7 +1025,7 @@ Output directory: {artifact_dir}
 Work in {artifact_dir}. Write all artifacts there.
 {delegation_policy_block}
 Agent composition: If your task would benefit from another agent's capabilities,
-invoke the `/taskos-child-delegation` skill BEFORE dispatching any child. It covers
+invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
 dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
 {quick_reference_block}
 IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to {goal_dir}/.agent-{run_id}.output.json:
@@ -1018,7 +1040,7 @@ IMPORTANT — when you are completely finished (as your very last action), write
         {{"path": "relative/to/goal/dir/file.md", "type": "research|playbook|plan|code|data", "description": "What this file contains"}}
     ],
     "errors": [],
-    "next_steps": ["Suggested follow-up actions for SJ"],
+    "next_steps": ["Suggested follow-up actions for the user"],
     "human_action_needed": false,
     "human_action_items": [],
     "started_at": "{start_time_iso}",
@@ -1188,7 +1210,7 @@ def _finalize_run(run_id: str, goal_dir: Path, session_id: str | None = None,
         session_jsonl_dir = _resolve_jsonl_dir(working_dir)
         input_tokens, cache_write_tokens, cache_read_tokens, output_tokens = _read_session_tokens(
             session_id, session_jsonl_dir=session_jsonl_dir)
-        # Peak context usage (fallback — SessionEnd hook may overwrite with breakdown)
+        # Peak context usage (fallback — SessionEnd handler may overwrite with breakdown)
         context_usage = _read_context_usage(session_id, session_jsonl_dir=session_jsonl_dir, working_dir=working_dir)
     else:
         input_tokens, cache_write_tokens, cache_read_tokens, output_tokens = None, None, None, None
@@ -1415,7 +1437,7 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
         _ext_path = Path(_invoke_ext_proj).expanduser()
         if _ext_path.exists():
             _invoke_working_dir = str(_ext_path)
-            _invoke_tracking_dir = str(_ext_path / ".taskos")
+            _invoke_tracking_dir = str(_ext_path / ".cast")
     directories_json = json.dumps({
         "tracking_dir": _invoke_tracking_dir,
         "artifact_dir": _invoke_working_dir,
@@ -1515,25 +1537,25 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         gstack_dir = goal_data.get("gstack_dir") if goal_data else None
         external_project_dir = goal_data.get("external_project_dir") if goal_data else None
 
-        # Determine working directory and taskos_goal_dir
+        # Determine working directory and cast_goal_dir
         if external_project_dir:
             expanded_ext = Path(external_project_dir).expanduser()
             if expanded_ext.exists():
                 working_dir = str(expanded_ext)
-                goal_service.ensure_taskos_symlink(goal_slug, external_project_dir)
-                taskos_goal_dir = str(expanded_ext / ".taskos")
+                goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
+                cast_goal_dir = str(expanded_ext / ".cast")
             else:
                 working_dir = str(SECOND_BRAIN_ROOT)
-                taskos_goal_dir = str(goal_dir)
+                cast_goal_dir = str(goal_dir)
         else:
             working_dir = str(SECOND_BRAIN_ROOT)
-            taskos_goal_dir = str(goal_dir)
+            cast_goal_dir = str(goal_dir)
 
         # Determine phase-aware output directory
         task = task_service.get_task(task_id, db_path=db_path) if task_id else None
         is_exploration = bool(task and task.get("phase") == "exploration")
         if is_exploration:
-            output_dir = str(Path(taskos_goal_dir) / "exploration")
+            output_dir = str(Path(cast_goal_dir) / "exploration")
             Path(output_dir).mkdir(parents=True, exist_ok=True)
         else:
             output_dir = working_dir
@@ -1541,7 +1563,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         config = load_agent_config(agent_name)
 
         # Agent-config artifact_directory override (Req 4.3)
-        # Exploration phase is exempt -- always routes to taskos_goal_dir/exploration/
+        # Exploration phase is exempt -- always routes to cast_goal_dir/exploration/
         if not is_exploration and config.artifact_directory == "external_project_dir":
             if external_project_dir:
                 _ext_artifact_path = Path(external_project_dir).expanduser()
@@ -1583,7 +1605,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             goal_title=goal_title,
             task_title=task_title,
             task_outcome=task_outcome,
-            goal_dir=taskos_goal_dir,
+            goal_dir=cast_goal_dir,
             run_id=run_id,
             start_time_iso=started_at,
             context=input_params.get("context", ""),
@@ -1598,7 +1620,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
 
         # Build directory metadata JSON (Phase 3.1, Req 4.1)
         directories_json = json.dumps({
-            "tracking_dir": taskos_goal_dir,
+            "tracking_dir": cast_goal_dir,
             "artifact_dir": output_dir,
             "working_dir": working_dir,
             "goal_dir": str(goal_dir),
@@ -1638,18 +1660,18 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         escaped_display = session_name_display.replace('"', '\\"')
         cmd = f'claude --dangerously-skip-permissions --model {model} --name "{escaped_display}"'
 
-        # Child agent: own tmux session + Ptyxis tab
+        # Child agent: own tmux session + terminal tab
         parent_run_id = run.get("parent_run_id")
         if parent_run_id:
             tmux.create_session(session_name, cmd, working_dir)
 
-            # Open Ptyxis tab early (matches top-level flow) so the SIGWINCH
-            # from Ptyxis attachment fires during startup, not after prompt delivery.
+            # Open terminal window early (matches top-level flow) so the SIGWINCH
+            # from terminal attachment fires during startup, not after prompt delivery.
             child_title = f"[Child] {agent_name}"
             if task_title:
                 child_title += f" | {task_title[:40]}"
             child_title = child_title[:80]
-            tmux.open_terminal_tab(session_name, title=child_title)
+            tmux.open_terminal(session_name, title=child_title)
 
             if not tmux.wait_for_ready(session_name, timeout_seconds=AGENT_READY_TIMEOUT):
                 tmux.kill_session(session_name)
@@ -1689,7 +1711,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         tmux.create_session(session_name, cmd, working_dir)
 
         # Open visible terminal for all top-level agents (headless = non-interactive, not hidden)
-        top_title = f"[TaskOS] {agent_name} | goal: {goal_slug}"
+        top_title = f"[Diecast] {agent_name} | goal: {goal_slug}"
         top_title = top_title[:80]
         tmux.open_terminal(session_name, title=top_title)
 
@@ -1953,7 +1975,7 @@ async def _finalize_run_from_monitor(run: dict, db_path=None) -> None:
     if delegation_file.exists():
         delegation_file.unlink()
 
-    # Auto-close session 30s after completion (ptyxis tab/window closes when tmux session dies)
+    # Auto-close session 30s after completion (terminal tab/window closes when tmux session dies)
     session_name = f"agent-{run_id}"
     asyncio.create_task(_cleanup_parent_session(session_name))
 
@@ -1966,7 +1988,7 @@ async def _finalize_run_from_monitor(run: dict, db_path=None) -> None:
 
 
 async def _cleanup_parent_session(session_name: str) -> None:
-    """Auto-close parent tmux session after completion. Ptyxis window closes automatically."""
+    """Auto-close parent tmux session after completion. Terminal window closes automatically."""
     await asyncio.sleep(AGENT_SESSION_CLEANUP_DELAY)
     try:
         tmux = _get_tmux()

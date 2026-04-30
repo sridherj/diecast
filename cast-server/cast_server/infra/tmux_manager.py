@@ -1,9 +1,20 @@
 """Thin wrapper around tmux subprocess commands."""
 
+import os
 import shutil
 import subprocess
 import time
 import logging
+
+from cast_server.infra.terminal import (
+    ResolutionError,
+    ResolvedTerminal,
+    resolve_terminal,
+)
+
+
+def _basename(cmd: str) -> str:
+    return os.path.basename(cmd)
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +35,8 @@ class TmuxSessionManager:
             logger.info("tmux available: %s", result.stdout.strip())
         except FileNotFoundError:
             raise TmuxError("tmux binary not found")
-        self._ptyxis_available: bool | None = None  # Lazy-checked
+        # Lazy-resolved: None = not checked, False = unavailable, ResolvedTerminal = ready.
+        self._terminal: ResolvedTerminal | bool | None = None
 
     def _run(self, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
         try:
@@ -63,44 +75,58 @@ class TmuxSessionManager:
     def send_enter(self, target: str) -> None:
         self._run(["send-keys", "-t", target, "Enter"])
 
-    def _has_ptyxis(self) -> bool:
-        """Check if ptyxis binary is available (cached)."""
-        if self._ptyxis_available is None:
-            self._ptyxis_available = shutil.which("ptyxis") is not None
-            if not self._ptyxis_available:
-                logger.warning("ptyxis binary not found — visible terminals disabled")
-        return self._ptyxis_available
+    def _resolved_terminal(self) -> ResolvedTerminal | None:
+        """Resolve $CAST_TERMINAL once and cache. Returns None if unavailable."""
+        if self._terminal is None:
+            try:
+                resolved = resolve_terminal()
+            except ResolutionError as exc:
+                logger.warning("terminal resolution failed (%s) — visible terminals disabled", exc)
+                self._terminal = False
+                return None
+            if shutil.which(resolved.command) is None:
+                logger.warning("$CAST_TERMINAL=%s not on PATH — visible terminals disabled", resolved.command)
+                self._terminal = False
+                return None
+            self._terminal = resolved
+        return self._terminal if isinstance(self._terminal, ResolvedTerminal) else None
+
+    @staticmethod
+    def _split_flag(flag: str) -> list[str]:
+        return flag.split() if flag else []
 
     def open_terminal(self, session_name: str, title: str | None = None) -> None:
-        """Open a ptyxis terminal window attached to this tmux session.
+        """Open a new terminal window attached to this tmux session.
 
-        Args:
-            session_name: tmux session to attach to.
-            title: Optional window title (uses ptyxis --new-window -T flag).
+        Uses the configured $CAST_TERMINAL (or $TERMINAL / config default).
         """
-        if not self._has_ptyxis():
+        resolved = self._resolved_terminal()
+        if resolved is None:
             return
-        cmd = ["ptyxis", "--new-window"]
-        if title:
+        cmd = [resolved.command, *resolved.args]
+        cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
+        if title and _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
+            # Only ptyxis honors -T; other terminals ignore unknown flags or error.  # diecast-lint: ignore-line
             cmd.extend(["-T", title])
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
         subprocess.Popen(cmd, start_new_session=True)
 
     def open_terminal_tab(self, session_name: str, title: str | None = None) -> None:
-        """Open a ptyxis terminal tab attached to this tmux session.
+        """Open a new terminal tab attached to this tmux session.
 
-        Uses --tab to open in the active ptyxis window. If no ptyxis window
-        exists yet, ptyxis creates a new window with this tab.
-
-        Args:
-            session_name: tmux session to attach to.
-            title: Optional tab title (uses ptyxis --tab -T flag).
+        For ptyxis, opens via --tab in the active window. For other terminals,  # diecast-lint: ignore-line
+        falls back to the same new-window flag as ``open_terminal``.
         """
-        if not self._has_ptyxis():
+        resolved = self._resolved_terminal()
+        if resolved is None:
             return
-        cmd = ["ptyxis", "--tab"]
-        if title:
-            cmd.extend(["-T", title])
+        cmd = [resolved.command, *resolved.args]
+        if _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
+            cmd.append("--tab")
+            if title:
+                cmd.extend(["-T", title])
+        else:
+            cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
         subprocess.Popen(cmd, start_new_session=True)
 

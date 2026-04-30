@@ -25,7 +25,7 @@ class AgentOutput(BaseModel):
     artifacts: list[dict] = []  # [{path, type, description}]
     errors: list[str] = []
     next_steps: list[str] = []
-    started_at: str = ""  # ISO 8601, injected by TaskOS into the prompt
+    started_at: str = ""  # ISO 8601, injected by Diecast into the prompt
     completed_at: str = ""  # ISO 8601, written by agent at time of output
     human_action_needed: bool = False
     human_action_items: list[str] = []  # e.g., ["Approve spec update", "Fix Series A amount"]

@@ -34,7 +34,7 @@ def _enrich_task_for_render(task: dict) -> None:
 def _compute_next_off_peak() -> str:
     """Compute the next occurrence of OFF_PEAK_HOUR as an ISO UTC timestamp.
 
-    Uses local time for the hour comparison (it's about SJ's schedule),
+    Uses local time for the hour comparison (it's about the user's schedule),
     but returns UTC ISO for storage in scheduled_at.
     """
     now_local = datetime.now()

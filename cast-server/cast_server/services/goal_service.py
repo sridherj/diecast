@@ -178,9 +178,9 @@ def update_phase(slug: str, target_phase: str,
     return get_goal(slug, db_path)
 
 
-def ensure_taskos_symlink(goal_slug: str, external_project_dir: str,
-                          goals_dir: Path = None) -> Path | None:
-    """Create/update .taskos symlink in external project pointing to goal dir.
+def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
+                        goals_dir: Path = None) -> Path | None:
+    """Create/update .cast symlink in external project pointing to goal dir.
 
     Returns the symlink path, or None if external_project_dir is invalid.
     """
@@ -190,7 +190,7 @@ def ensure_taskos_symlink(goal_slug: str, external_project_dir: str,
         logger.warning("External project dir does not exist: %s", ext_path)
         return None
 
-    symlink_path = ext_path / ".taskos"
+    symlink_path = ext_path / ".cast"
     target = (goals_dir / goal_slug).resolve()
 
     if symlink_path.is_symlink():
@@ -198,32 +198,32 @@ def ensure_taskos_symlink(goal_slug: str, external_project_dir: str,
             return symlink_path  # already correct
         symlink_path.unlink()  # points elsewhere, recreate
     elif symlink_path.exists():
-        logger.warning(".taskos exists as a real file/dir in %s, skipping", ext_path)
+        logger.warning(".cast exists as a real file/dir in %s, skipping", ext_path)
         return None
 
     symlink_path.symlink_to(target)
-    logger.info("Created .taskos symlink: %s -> %s", symlink_path, target)
+    logger.info("Created .cast symlink: %s -> %s", symlink_path, target)
 
-    # Add .taskos to .gitignore if not already there
+    # Add .cast to .gitignore if not already there
     gitignore = ext_path / ".gitignore"
     if gitignore.exists():
         content = gitignore.read_text()
-        if ".taskos" not in content:
+        if ".cast" not in content:
             with gitignore.open("a") as f:
-                f.write("\n.taskos\n")
+                f.write("\n.cast\n")
     else:
-        gitignore.write_text(".taskos\n")
+        gitignore.write_text(".cast\n")
 
     return symlink_path
 
 
-def remove_taskos_symlink(external_project_dir: str) -> None:
-    """Remove .taskos symlink from external project dir (only if it's a symlink)."""
+def remove_cast_symlink(external_project_dir: str) -> None:
+    """Remove .cast symlink from external project dir (only if it's a symlink)."""
     ext_path = Path(external_project_dir).expanduser()
-    symlink_path = ext_path / ".taskos"
+    symlink_path = ext_path / ".cast"
     if symlink_path.is_symlink():
         symlink_path.unlink()
-        logger.info("Removed .taskos symlink from %s", ext_path)
+        logger.info("Removed .cast symlink from %s", ext_path)
 
 
 def update_config(slug: str, gstack_dir: str | None = None,
@@ -261,15 +261,15 @@ def update_config(slug: str, gstack_dir: str | None = None,
     if yaml_updates:
         _update_goal_yaml_fields(goal_dir, yaml_updates)
 
-    # Manage .taskos symlink
+    # Manage .cast symlink
     new_ext_dir = updates.get("external_project_dir", old_ext_dir)
     if external_project_dir is not None:
         if old_ext_dir and old_ext_dir != new_ext_dir:
-            remove_taskos_symlink(old_ext_dir)
+            remove_cast_symlink(old_ext_dir)
         if new_ext_dir:
-            ensure_taskos_symlink(slug, new_ext_dir, goals_dir)
+            ensure_cast_symlink(slug, new_ext_dir, goals_dir)
         elif old_ext_dir:
-            remove_taskos_symlink(old_ext_dir)
+            remove_cast_symlink(old_ext_dir)
 
     return get_goal(slug, db_path)
 
@@ -357,7 +357,7 @@ def _write_goal_yaml(goal_dir: Path, data: dict):
 
     with open(goal_dir / "goal.yaml", "w") as f:
         f.write("# AUTO-GENERATED: Read-only render of DB state. Do not edit directly.\n")
-        f.write("# Changes: use /taskos-goals agent or goal_service API.\n")
+        f.write("# Changes: use /cast-goals agent or goal_service API.\n")
         f.write("# Directory config: gstack_dir = reference-only external context (not authoritative),\n")
         f.write("#   external_project_dir = code/execution artifacts destination.\n")
         yaml.dump(yaml_data, f, default_flow_style=False, sort_keys=False)
@@ -378,7 +378,7 @@ def _update_goal_yaml_fields(goal_dir: Path, fields: dict):
 
         with open(yaml_path, "w") as f:
             f.write("# AUTO-GENERATED: Read-only render of DB state. Do not edit directly.\n")
-            f.write("# Changes: use /taskos-goals agent or goal_service API.\n")
+            f.write("# Changes: use /cast-goals agent or goal_service API.\n")
             f.write("# Directory config: gstack_dir = reference-only external context (not authoritative),\n")
             f.write("#   external_project_dir = code/execution artifacts destination.\n")
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)

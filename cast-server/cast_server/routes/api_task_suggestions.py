@@ -86,7 +86,7 @@ async def generate(request: Request, slug: str, phase: str = Query(default=None)
     form = await request.form()
     user_context = form.get("user_context", "").strip() or ""
     run_id = await trigger_agent(
-        agent_name="taskos-task-suggester",
+        agent_name="cast-task-suggester",
         goal_slug=slug,
         context=user_context,
     )
@@ -108,7 +108,7 @@ async def status(request: Request, slug: str, phase: str = Query(default=None)):
     Returns spinner while running, suggestion cards when done, error on failure.
     Polling stops automatically when status is completed or error (no hx-trigger).
     """
-    run = get_latest_agent_run(slug, agent_name="taskos-task-suggester", db_path=DB_PATH)
+    run = get_latest_agent_run(slug, agent_name="cast-task-suggester", db_path=DB_PATH)
     suggestions = []
 
     if not run:

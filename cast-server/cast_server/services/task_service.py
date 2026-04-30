@@ -425,7 +425,7 @@ def _rerender_tasks_md(goal_slug: str, goals_dir: Path = None, db_path=None):
         # Render
         lines = [
             "<!-- AUTO-GENERATED: Read-only render of DB state. Do not edit directly. -->",
-            "<!-- Changes: use /taskos-tasks agent or task_service API. -->",
+            "<!-- Changes: use /cast-tasks agent or task_service API. -->",
             f"# Tasks — {goal['title']}",
             "",
         ]
