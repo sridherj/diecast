@@ -40,24 +40,8 @@
         </div>
         {% endif %}
 
-        {# Directory config #}
-        {% if goal.gstack_dir or goal.external_project_dir %}
-        <div class="goal-dir-config">
-            {% if goal.external_project_dir %}
-            <span class="dir-config-item" title="Execution artifacts (code, specs, detailed plans)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                <code>{{ goal.external_project_dir }}</code>
-            </span>
-            {% endif %}
-            {% if goal.gstack_dir %}
-            <span class="dir-config-item dir-config-ref" title="GStack reference (not authoritative)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <code>{{ goal.gstack_dir }}</code>
-                <span class="dir-config-label">ref</span>
-            </span>
-            {% endif %}
-        </div>
-        {% endif %}
+        {# Directory config — inline paste form when unset #}
+        {% include "fragments/goal_dir_config.html" %}
 
         {# Status transition buttons #}
         <div class="status-actions" id="goal-detail-actions-{{ goal.slug }}">

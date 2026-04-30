@@ -13,6 +13,7 @@ from cast_server.services.task_service import (
     update_task_status, complete_task,
 )
 from cast_server.services import agent_service, goal_service
+from cast_server.services.agent_service import MissingExternalProjectDirError
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.task import TaskCreate
 from cast_server.config import GOALS_DIR, OFF_PEAK_HOUR
@@ -410,13 +411,29 @@ async def run_agent_for_task(request: Request, task_id: int, schedule: str = "")
         scheduled_at = _compute_next_off_peak()
 
     # 7. Enqueue agent run
-    run_id = await agent_service.trigger_agent(
-        agent_name=task["recommended_agent"],
-        goal_slug=task["goal_slug"],
-        task_id=task_id,
-        input_params=input_params,
-        scheduled_at=scheduled_at,
-    )
+    try:
+        run_id = await agent_service.trigger_agent(
+            agent_name=task["recommended_agent"],
+            goal_slug=task["goal_slug"],
+            task_id=task_id,
+            input_params=input_params,
+            scheduled_at=scheduled_at,
+        )
+    except MissingExternalProjectDirError as e:
+        hint = (
+            "Paste the project directory into the field at the top of this page, "
+            "then try again."
+        )
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error_code": "missing_external_project_dir",
+                "goal_slug": e.goal_slug,
+                "configured_path": e.configured_path,
+                "detail": f"{e}. {hint}",
+                "hint": hint,
+            },
+        )
 
     # 8. Set task status to in_progress (after successful enqueue)
     update_task_status(task_id, "in_progress")

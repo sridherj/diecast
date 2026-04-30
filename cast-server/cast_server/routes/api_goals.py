@@ -200,21 +200,64 @@ async def update_focus(
 
 @router.patch("/{slug}/config")
 async def update_goal_config(
+    request: Request,
     slug: str,
     gstack_dir: str = Form(None),
     external_project_dir: str = Form(None),
 ):
-    """Update goal directory config fields."""
+    """Update goal directory config fields.
+
+    HTMX callers get the re-rendered dir-config fragment + a success toast.
+    Non-HTMX callers get JSON.
+    """
     goal = goal_service.get_goal(slug)
     if not goal:
         raise HTTPException(status_code=404, detail="Goal not found")
+
+    if external_project_dir is not None:
+        external_project_dir = external_project_dir.strip() or None
 
     updated = goal_service.update_config(
         slug,
         gstack_dir=gstack_dir,
         external_project_dir=external_project_dir,
     )
+
+    if request.headers.get("HX-Request"):
+        response = templates.TemplateResponse(
+            request,
+            "fragments/goal_dir_config.html",
+            {"goal": updated, "editing": False},
+        )
+        response.headers["HX-Trigger"] = toast_header("Project directory saved")
+        return response
     return {"status": "ok", "goal": updated}
+
+
+@router.get("/{slug}/config/edit")
+async def get_goal_config_edit(request: Request, slug: str):
+    """Return the dir-config fragment in edit (form) mode."""
+    goal = goal_service.get_goal(slug)
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return templates.TemplateResponse(
+        request,
+        "fragments/goal_dir_config.html",
+        {"goal": goal, "editing": True},
+    )
+
+
+@router.get("/{slug}/config/view")
+async def get_goal_config_view(request: Request, slug: str):
+    """Return the dir-config fragment in view mode (cancel-edit)."""
+    goal = goal_service.get_goal(slug)
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return templates.TemplateResponse(
+        request,
+        "fragments/goal_dir_config.html",
+        {"goal": goal, "editing": False},
+    )
 
 
 @router.get("/{slug}/tab/{phase}")

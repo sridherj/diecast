@@ -1,0 +1,55 @@
+{# Goal directory config row.
+   States:
+     - external_project_dir set + not editing → display + edit button
+     - external_project_dir unset, or editing=True → inline paste form
+   Pass `editing=True` to force the form when the dir is already set. #}
+<div id="goal-dir-config" class="goal-dir-config">
+    {% if goal.external_project_dir and not editing %}
+    <span class="dir-config-item" title="Execution artifacts (code, specs, detailed plans)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <code>{{ goal.external_project_dir }}</code>
+        <button type="button"
+                class="dir-config-edit-btn"
+                title="Change project directory"
+                hx-get="/api/goals/{{ goal.slug }}/config/edit"
+                hx-target="#goal-dir-config"
+                hx-swap="outerHTML">
+            edit
+        </button>
+    </span>
+    {% else %}
+    <form class="dir-config-form"
+          hx-patch="/api/goals/{{ goal.slug }}/config"
+          hx-target="#goal-dir-config"
+          hx-swap="outerHTML">
+        <label for="external-project-dir-{{ goal.slug }}" class="dir-config-form-label">
+            Project directory:
+        </label>
+        <input type="text"
+               id="external-project-dir-{{ goal.slug }}"
+               name="external_project_dir"
+               class="dir-config-input"
+               placeholder="/absolute/path/to/project (required to dispatch agents)"
+               value="{{ goal.external_project_dir or '' }}"
+               autocomplete="off"
+               required>
+        <button type="submit" class="btn btn-sm">Save</button>
+        {% if goal.external_project_dir %}
+        <button type="button"
+                class="btn btn-sm btn-ghost"
+                hx-get="/api/goals/{{ goal.slug }}/config/view"
+                hx-target="#goal-dir-config"
+                hx-swap="outerHTML">
+            Cancel
+        </button>
+        {% endif %}
+    </form>
+    {% endif %}
+    {% if goal.gstack_dir %}
+    <span class="dir-config-item dir-config-ref" title="GStack reference (not authoritative)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <code>{{ goal.gstack_dir }}</code>
+        <span class="dir-config-label">ref</span>
+    </span>
+    {% endif %}
+</div>
