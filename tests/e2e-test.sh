@@ -74,7 +74,7 @@ SENTINEL_TARGET="${HOME}/.claude/agents/cast-refine-requirements/sentinel.txt"
 if [[ -d "$(dirname "${SENTINEL_TARGET}")" ]]; then
   printf 'sentinel-%s\n' "${START_TS}" > "${SENTINEL_TARGET}"
   if ( cd "${REPO_DIR}" && ./setup --no-prompt ) >/dev/null; then
-    if compgen -G "${HOME}/.claude/.cast-bak-*/agents/cast-refine-requirements/sentinel.txt" >/dev/null; then
+    if compgen -G "${HOME}/.claude/.cast-bak-*/.claude/agents/cast-refine-requirements/sentinel.txt" >/dev/null; then
       ok "sentinel preserved under .cast-bak-*"
     else
       bad "sentinel not found under .cast-bak-*"
