@@ -137,3 +137,5 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     CREATE INDEX IF NOT EXISTS idx_error_memories_agent
     ON agent_error_memories(agent_name, resolution_status)
     """)
+    # Stop's close-by-session query needs this for sub-millisecond filtering as agent_runs grows.
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_agent_runs_session_status ON agent_runs(session_id, status)")

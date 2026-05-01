@@ -29,6 +29,7 @@ dev = [
 
 [project.scripts]
 precommit-tests = "cast_server.dev_tools.precommit_tests:precommit_tests"
+cast-hook       = "cast_server.cli.hook:main"
 
 # NOTE: After `pip install -e ".[test]"`, run `playwright install chromium` once
 # to fetch the browser binary. Auto-install is intentionally avoided.
