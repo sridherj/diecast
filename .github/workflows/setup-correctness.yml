@@ -28,11 +28,22 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Install tmux
+        run: sudo apt-get update && sudo apt-get install -y tmux
+
+      - name: Install fake claude (CI-only shim)
+        run: |
+          mkdir -p .ci-bin
+          ln -sf "$PWD/tests/fixtures/fake-claude" .ci-bin/claude
+          echo "$PWD/.ci-bin" >> "$GITHUB_PATH"
+
       - name: Show prereq versions
         run: |
           bash --version | head -n 1
           uv --version
           git --version
+          tmux -V
+          claude --version
 
       - name: Run setup correctness scenarios
         run: bash tests/setup-correctness-test.sh
