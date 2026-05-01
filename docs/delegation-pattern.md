@@ -44,7 +44,7 @@ The parent writes this file to dispatch a child. Path convention:
 
 The file is plain markdown. The parent encodes:
 
-- Which agent the child should be (`taskos-subphase-runner`,
+- Which agent the child should be (`cast-subphase-runner`,
   `cast-detailed-plan`, etc.).
 - Where to find the delegation context (typically a sibling
   `.delegation-run_<RUN_ID>.json` with structured fields).
@@ -62,7 +62,7 @@ The child writes this file as its **last action**. Schema sketch:
 ```json
 {
   "contract_version": "2",
-  "agent_name": "taskos-subphase-runner",
+  "agent_name": "cast-subphase-runner",
   "task_title": "Phase 6.2: docs/ set authorship",
   "status": "completed | partial | failed",
   "summary": "One paragraph describing what was accomplished",
@@ -169,7 +169,7 @@ should have asked. With it, the chain has a clean third option.
 ## Worked example
 
 The walkthrough below traces what happens when a parent dispatches
-`taskos-subphase-runner` to execute Phase 6 sp2 of the Diecast OSS
+`cast-subphase-runner` to execute Phase 6 sp2 of the Diecast OSS
 plan. The cast-server is **stopped** — the example is the file
 contract proving itself.
 

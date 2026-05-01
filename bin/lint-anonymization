@@ -65,7 +65,6 @@ FORBIDDEN_PATTERNS: List[Tuple[str, int]] = [
     (r"~/workspace/linkedout-oss", 0),                             # diecast-lint: ignore-line
     (r"~/workspace/second-brain", 0),                              # diecast-lint: ignore-line
     (r"\babout_me/", 0),                                           # diecast-lint: ignore-line
-    (r"\bptyxis\b", re.IGNORECASE),                                # diecast-lint: ignore-line
     # Personal-agent names from refined-req US3 exclusion set. Match both bare
     # and `taskos-` prefixed forms.
     (r"\b(?:taskos-)?linkedin-ai\b", 0),                           # diecast-lint: ignore-line

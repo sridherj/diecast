@@ -302,9 +302,8 @@ agent that produced bad output.
   number on the first run for your project's baseline.
 - **Wall-clock:** ~5 minutes end-to-end (Widget shape, 5 fields).
 - **Total estimated_sessions for the Phase 5 fleet rewrite:** 5.75
-  sessions (per `docs/audit/cast-crud-rewrite-budget.ai.md`). One agent
-  scored red (`cast-integration-test-orchestrator` at 1.5 sessions);
-  the other 14 are green or yellow.
+  sessions. One agent scored red (`cast-integration-test-orchestrator`
+  at 1.5 sessions); the other 14 are green or yellow.
 - **Regeneration policy:** this document is regenerated against the
   cast-crud agent fleet on **every tagged release**. Maintainers: run
   the regeneration on the release branch before tagging. See

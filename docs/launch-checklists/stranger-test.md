@@ -20,7 +20,7 @@ environment?", and "do the first three skills feel useful?".
   contributor.
 - Has Claude Code installed and at least one project they want to use
   it on.
-- Comfortable on a terminal but not necessarily a Diecast/TaskOS power
+- Comfortable on a terminal but not necessarily a Diecast power
   user.
 
 ## Pre-flight (run by the inviter, not the stranger)
@@ -113,5 +113,4 @@ Phase 6 detailed plan for SLA + fix routing.
 
 - Automated e2e: [`tests/e2e-test.sh`](../../tests/e2e-test.sh)
 - Setup correctness scenarios: [`tests/setup-correctness-test.sh`](../../tests/setup-correctness-test.sh)
-- Phase 4 plan: `taskos/goals/diecast-open-source/phase-4-detailed-plan.collab.md`
-- Phase 6 plan: `taskos/goals/diecast-open-source/phase-6-detailed-plan.collab.md`
+- Phase 4 and Phase 6 detailed plans (upstream-private — not shipped in this repo).

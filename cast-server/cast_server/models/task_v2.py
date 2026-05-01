@@ -1,14 +1,13 @@
-"""Task models (Diecast).
+"""Task models (US10 — `estimate_size` schema).
 
-US10: the legacy `estimated_time: str | None` field is replaced with
+The legacy `estimated_time: str | None` field is replaced with
 `estimate_size: EstimateSize` end-to-end. See:
 - `db/schema.sql` (canonical column definition + CHECK constraint)
 - `bin/migrate-legacy-estimates.py` (legacy → T-shirt mapping, importable)
 - `agents/cast-task-suggester/cast-task-suggester.md` (calibration table)
 
-Path note: this file lives at `taskos/src/taskos/models/task.py` for now —
-inherited from the pre-rebrand TaskOS layout. Phase 3b's rebrand sub-phase
-will move it under `cast-server/`. Do NOT rename here.
+This module sits alongside the legacy `task.py` until the full rebrand
+sub-phase migrates remaining cast-server consumers off `estimated_time`.
 """
 
 from __future__ import annotations

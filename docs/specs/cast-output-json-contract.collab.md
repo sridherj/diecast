@@ -34,7 +34,7 @@ The runtime delegation/poll/atomic-write semantics live in `docs/specs/cast-dele
 
 - **Canonical path**: `<goal_dir>/.agent-run_<RUN_ID>.output.json`. See `cast-delegation-contract.collab.md` for path resolution and atomic-write rules.
 - **One file per child run**: each dispatched child writes exactly one terminal output file. No append, no rotation.
-- **Contract version**: this spec defines `contract_version: "2"`. v1 is legacy (pre-rebrand TaskOS); cast-* agents emit v2 only.
+- **Contract version**: this spec defines `contract_version: "2"`. v1 is legacy; cast-* agents emit v2 only.
 
 ### Field-by-Field Schema
 
@@ -203,7 +203,7 @@ A `failed` example with `human_action_needed`, emitted via parent's idle-timeout
 ### artifacts[].type closed enum — 2026-04-30
 **Chose:** `research | playbook | plan | code | data` as the closed type set.
 **Over:** free-form type strings.
-**Because:** parents and viewers (e.g., a future TaskOS UI) want to render artifacts by type; an open enum makes that brittle. Additive new types require a spec bump.
+**Because:** parents and viewers (e.g., a future cast-server UI) want to render artifacts by type; an open enum makes that brittle. Additive new types require a spec bump.
 
 ### cast-review-code per-issue confidence is additive — 2026-04-30 (Q#20, sp3d)
 **Chose:** add a `confidence: high|medium|low` field to each review-issue object.
@@ -212,7 +212,7 @@ A `failed` example with `human_action_needed`, emitted via parent's idle-timeout
 
 ## Not Included
 
-- v1 (pre-rebrand TaskOS) schema — deprecated. v1 fixtures may exist in TaskOS-era goal dirs but cast-* agents emit only v2.
+- v1 schema — deprecated. v1 fixtures may exist in legacy goal dirs but cast-* agents emit only v2.
 - Open-question tagging on `human_action_items[]` — deferred to sp4c.
 - Typed `next_steps` shape — deferred to sp4d.
 - A JSON Schema document validating this contract — deferred (current verification is by spec text + per-agent fixture parsing).

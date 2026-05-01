@@ -4,7 +4,7 @@
 Internal use; not on user PATH. One-shot data migration; obsolete after the
 matching deploy. Kept for users on stale databases.
 
-Pre-rebrand TaskOS used either:
+Legacy schemas used either:
 - `estimated_time TEXT` carrying values like ``"30m"``, ``"45m"``, ``"60m"`` in
   the DB column and YAML task files, OR
 - `estimate_minutes INTEGER` (older variants in some fixtures).
@@ -14,8 +14,8 @@ canonical T-shirt set ``{XS, S, M, L, XL}``.
 
 This module is BOTH a CLI script and an importable module. cast-server's
 ``task_service`` imports ``minutes_to_size`` / ``time_str_to_size`` to coerce
-inbound legacy data on the fly (so the OSS launch can absorb a TaskOS export
-without a separate migration step).
+inbound legacy data on the fly so a legacy export can be absorbed without a
+separate migration step.
 
 Idempotent: running twice is a no-op. Detects column / field presence.
 """

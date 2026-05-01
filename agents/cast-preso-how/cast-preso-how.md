@@ -118,13 +118,13 @@ Steve Jobs test: Would this slide make the cut in an Apple keynote? Why/why not?
 > Approach 1: Single-Stat Hero. Pros: visually striking, easy to remember. Cons: needs a strong stat. Steve Jobs test: passes — Apple uses big numbers.
 
 ✅ **GOOD (slide-specific):**
-> Approach 1: Single-Stat Hero displaying "73%" — the share of LinkedIn connections that go stale within 2 years. Pros: the number lands the pain instantly; ties directly to the WHAT doc's L1 outcome about staleness; sets up the next slide's reveal of how Linked-Out fixes it. Cons: 73% is a stale-data stat, not a *lived* pain — risks feeling abstract; loses the self-identification element. Steve Jobs test: ALMOST. Apple would use this stat but pair it with one human image (a phone screen full of forgotten contacts). Without that image, it's a data slide, not a hook.
+> Approach 1: Single-Stat Hero displaying "73%" — the share of professional contacts that go stale within 2 years. Pros: the number lands the pain instantly; ties directly to the WHAT doc's L1 outcome about staleness; sets up the next slide's reveal of how the product fixes it. Cons: 73% is a stale-data stat, not a *lived* pain — risks feeling abstract; loses the self-identification element. Steve Jobs test: ALMOST. Apple would use this stat but pair it with one human image (a phone screen full of forgotten contacts). Without that image, it's a data slide, not a hook.
 
 ❌ **BAD (rubber stamp):**
 > Approach 2: Compare/Contrast (old way / new way). Pros: classic before/after. Cons: none significant. Steve Jobs test: passes.
 
 ✅ **GOOD (honest, opinionated):**
-> Approach 2: Compare/Contrast — left column "15 minutes scrolling LinkedIn," right column "1 query, 3 seconds." Pros: directly visualizes the productivity gap from the WHAT doc; works whether projected or printed. Cons: the right column needs a real query example or it feels hand-wavy; the audience knows manual search is slow — this might restate what they already feel. Steve Jobs test: FAILS. The pain on the left is correct, but the right side is the *solution* — that should be its own reveal slide, not crammed into the hook. Splitting wins.
+> Approach 2: Compare/Contrast — left column "15 minutes scrolling a contact list," right column "1 query, 3 seconds." Pros: directly visualizes the productivity gap from the WHAT doc; works whether projected or printed. Cons: the right column needs a real query example or it feels hand-wavy; the audience knows manual search is slow — this might restate what they already feel. Steve Jobs test: FAILS. The pain on the left is correct, but the right side is the *solution* — that should be its own reveal slide, not crammed into the hook. Splitting wins.
 
 **Selection criteria (in priority order):**
 

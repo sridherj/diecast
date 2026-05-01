@@ -64,14 +64,14 @@ CODING_OUTPUT_SKILLS = {
 
 # Flagged personal placeholders that must NOT survive into diecast.
 EXCLUDED_PERSONAL = {
-    "cast-startup-discover",
-    "cast-startup-enrich",
-    "cast-linkedin-ai",
-    "cast-reachout-packet",
-    "cast-opportunity-finder",
-    "cast-generate-news-digest",
-    "cast-google-alert-setup",
-    "cast-startup-pipeline",
+    "cast-startup-discover",       # diecast-lint: ignore-line
+    "cast-startup-enrich",         # diecast-lint: ignore-line
+    "cast-linkedin-ai",            # diecast-lint: ignore-line
+    "cast-reachout-packet",        # diecast-lint: ignore-line
+    "cast-opportunity-finder",     # diecast-lint: ignore-line
+    "cast-generate-news-digest",   # diecast-lint: ignore-line
+    "cast-google-alert-setup",     # diecast-lint: ignore-line
+    "cast-startup-pipeline",       # diecast-lint: ignore-line
 }
 
 # Tokens that share the `cast-` prefix but are not agents and so are not
@@ -122,8 +122,8 @@ GREEN_PATH_PREFIXES = (
     "decisions/",
 )
 
-# Disallowed prefixes — TaskOS-style, SJ-personal, /tmp, user home,
-# privileged paths.
+# Disallowed prefixes — upstream-private, personal, /tmp, user home,
+# privileged paths.  # diecast-lint: ignore-line
 RED_PATH_PREFIXES = (
     "taskos/goals/",
     "taskos/",
@@ -244,9 +244,9 @@ def _classify_folder_path(path: str) -> tuple[str, str]:
     for red in RED_PATH_PREFIXES:
         if pl.startswith(red):
             label = {
-                "taskos/goals/": "TaskOS-style goal path; should be project-local",
-                "taskos/": "Legacy TaskOS root path; not portable",
-                "/data/workspace/": "SJ-personal absolute path",
+                "taskos/goals/": "upstream-private goal path; should be project-local",
+                "taskos/": "upstream-private root path; not portable",
+                "/data/workspace/": "personal absolute path",  # diecast-lint: ignore-line
                 "/home/": "Hard-coded user home",
                 "~/.claude/": "User-home Claude config; violates US2",
                 "~/.config/": "User-home config dir; violates US2",
@@ -515,7 +515,7 @@ def _classify_naming(
 ) -> tuple[str, str]:
     """Return (status, reason) for a naming reference."""
     if target in EXCLUDED_PERSONAL:
-        return ("red", "references excluded SJ-personal agent")
+        return ("red", "references excluded personal agent")  # diecast-lint: ignore-line
     if target.startswith("taskos-"):
         return ("red", "legacy taskos-* prefix survived into diecast")
     if target in nodes:

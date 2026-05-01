@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import importlib.util
 import sqlite3
-import sys
 from pathlib import Path
 
 import pytest
@@ -27,10 +26,7 @@ mle = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(mle)
 
 
-# Make the in-repo Pydantic model importable for the test process.
-TASK_MODULE_DIR = REPO_ROOT / "taskos" / "src"
-if str(TASK_MODULE_DIR) not in sys.path:
-    sys.path.insert(0, str(TASK_MODULE_DIR))
+# Pydantic model lives in cast_server (installed via `pip install -e .`).
 
 
 # ---------------------------------------------------------------------------
@@ -63,7 +59,7 @@ def test_us10_task_suggester_emits_estimate_size():
 
 def test_us10_task_model_validates_enum():
     """Task model accepts canonical values; rejects junk like 'HUGE'."""
-    from taskos.models.task import Task  # noqa: WPS433 — local import after sys.path tweak
+    from cast_server.models.task_v2 import Task
 
     t = Task(goal_slug="g", title="x", estimate_size="S")
     assert t.estimate_size == "S"
@@ -86,7 +82,7 @@ def test_us10_minutes_to_size_mapping():
     assert mle.minutes_to_size(240) == "XL"
     assert mle.minutes_to_size(None) == "M"   # default
 
-    # String-form ("30m"/"1h") used by the actual TaskOS source data.
+    # String-form ("30m"/"1h") used by the legacy source data.
     assert mle.time_str_to_size("30m") == "M"   # 30 → M (lower bound of M bucket)
     assert mle.time_str_to_size("60m") == "M"
     assert mle.time_str_to_size("1h") == "M"

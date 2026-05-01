@@ -260,6 +260,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR. Discussion happens 
 
 <div align="center">
 
-<sub>Diecast harvested patterns from <a href="https://github.com/github/spec-kit">spec-kit</a> (templates), gstack (upgrade flow), and a private workflow runtime called TaskOS.</sub>
+<sub>Diecast harvested patterns from <a href="https://github.com/github/spec-kit">spec-kit</a> (templates) and gstack (upgrade flow).</sub>
 
 </div>

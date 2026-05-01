@@ -203,7 +203,7 @@ The cast-server UI MUST NOT auto-execute them — render only, user clicks-to-co
 
 ### Cross-Phase Authorship
 
-- **Phase 3a authorship**: this spec, `cast-output-json-contract.collab.md`, `db/schema.sql` schema flips, and `taskos/src/taskos/models/task.py` enum changes.
+- **Phase 3a authorship**: this spec, `cast-output-json-contract.collab.md`, `db/schema.sql` schema flips, and the task model enum changes.
 - **Phase 3b consumption**: `cast-server` HTTP layer consumes the file via `task_service` only; never reads the JSON directly bypassing the service.
 - **Cast-* agent reads**: cast-* agents reference this spec by path (and the output-json spec) instead of reverse-engineering schema details from prompt fragments.
 

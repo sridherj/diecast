@@ -100,7 +100,7 @@ sp13 removes these exception entries explicitly when the corresponding files are
 
 ## 6. References
 
-- Phase 3b detailed plan: `taskos/goals/diecast-open-source/phase-3b-detailed-plan.collab.md`
+- Phase 3b detailed plan (upstream-private — not shipped in this repo).
 - Phase 3b shared context: `docs/execution/diecast-open-source/phase-3b/_shared_context.md`
 - Sub-phase 2 plan: `docs/execution/diecast-open-source/phase-3b/sp2_stub_prune/plan.md`
 - Sub-phase 13 plan: `docs/execution/diecast-open-source/phase-3b/sp13_second_prune/plan.md`

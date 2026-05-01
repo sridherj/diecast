@@ -40,7 +40,7 @@ inside Claude Code.
 These are obsolete after their matching deploy but kept for users on stale
 databases:
 
-- `migrate-legacy-estimates.py` — pre-rebrand TaskOS estimates → Diecast US10
+- `migrate-legacy-estimates.py` — legacy estimate columns → Diecast US10
   T-shirt sizes.
 - `migrate-next-steps-shape.py` — bulk-rewrite legacy `next_steps` lists to
   the typed shape (US14).

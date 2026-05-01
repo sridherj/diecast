@@ -8,7 +8,7 @@ contract-version-2. The fixture is intentionally small so a full-fleet
 dry-run finishes in a single session.
 
 ## Constraints
-- No real LinkedOut data; no SJ-personal artifacts.
+- No real upstream data; no user-personal artifacts.
 - All paths resolve under this fixture root.
 - Keep the skeleton to the canonical seven docs subtrees.
 

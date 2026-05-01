@@ -72,8 +72,7 @@ opens a controlled bridge to where work actually gets tracked.
 >   run logged per week in their environment),
 > - No third-party agent or skill submissions,
 >
-> then Diecast remains a TaskOS-internal name and the public
-> artifact is archived.
+> then the public artifact is archived.
 
 This is a forcing function — public failure-condition disclosed up
 front so v1.1 isn't a sunk-cost continuation. The maintainer ships

@@ -31,11 +31,8 @@ Q#25 + Q#28). If this section is incomplete, do not tag.
       clean across `agents/cast-{crud,schema,entity,repository,service,controller,seed}-*/`,
       `tests/cast-crud-worked-example/`, `tests/cast-crud-note-fixture/`,
       `tests/cast-crud/`, `docs/maker-checker.md`, and
-      `docs/release-checklist.md`. Pre-existing repo-wide hits in
-      `docs/audit/linkedout-coupling-spike.ai.*` and
-      `tests/dry-runs/_real_world_sanity.log` belong to upstream
-      sub-phases — they must already be clean by Phase 6.1; if not,
-      escalate before tagging.
+      `docs/release-checklist.md`. Any remaining repo-wide hits must
+      be cleared by Phase 6.1; if not, escalate before tagging.
 - [ ] Run the manual end-to-end test (steps below) and record the
       result in the log section.
 - [ ] Mark US15 coherent-unit acceptance: PASS / FAIL on this release
@@ -115,12 +112,8 @@ Run logs: <path or PR link>
       tmp goal dir; cannot be run from sp4 in unattended mode).
 - [ ] `/cast-agent-compliance` clean on walkthrough invocations —
       DEFERRED to v1 release tag (requires live agent dispatch).
-- [ ] `bin/lint-anonymization` clean repo-wide — pre-existing hits
-      remain in `docs/audit/linkedout-coupling-spike.ai.*`,
-      `tests/dry-runs/_real_world_sanity.log`, `setup`, and
-      `tests/fixtures/minimal-goal/requirements.human.md`. These
-      belong to upstream sub-phases (Phase 1 / Phase 2). Phase 6.1
-      launch-readiness sweep must clear them before tag.
+- [ ] `bin/lint-anonymization` clean repo-wide. Phase 6.1
+      launch-readiness sweep must clear any remaining hits before tag.
 - [ ] US15 coherent-unit acceptance: PENDING (gated on the four
       DEFERRED items above).
 
