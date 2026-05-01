@@ -37,6 +37,14 @@ The skill is **idempotent and non-destructive** on re-run: detection logic surfa
   delegation contract).
 - **`{{PROJECT_NAME}}`:** derived from `basename "$(pwd)"`. Sanitize for markdown safety
   (escape backticks, square brackets, asterisks, underscores, pipes if present).
+- **`--no-hooks`** *(optional, default off):* opt out of the Step 4 hook install. By
+  default `/cast-init` installs the `cast-hook` entries that capture every user-typed
+  `/cast-*` slash command as a top-level run. Pass `--no-hooks` to skip that step (the
+  scaffold still happens). The hooks can be installed later via standalone
+  `cast-hook install`.
+- **`--user`** *(optional, default off):* when installing hooks, write to user-scope
+  `~/.claude/settings.json` instead of project-scope `<cwd>/.claude/settings.json`.
+  Has no effect if combined with `--no-hooks`.
 
 ## Pre-flight
 
@@ -96,13 +104,15 @@ Behavior per option:
      replicate the backup primitive in Python — single source of truth.
   2. Render the template (Step 3.2) and write `<cwd>/CLAUDE.md`.
   3. Skip directory creation.
-  4. Emit `next_steps` per Step 4.
+  4. Run Step 4 (install cast-hook entries) unless `--no-hooks`.
+  5. Emit `next_steps` per Step 5.
 - **C (Add missing dirs only):**
   1. For each canonical dir that does not exist: `mkdir -p` + `touch .gitkeep`.
   2. Append exactly one HTML comment to the bottom of the existing `CLAUDE.md`:
      `<!-- cast-init suggests adopting the conventions in docs/specs/cast-init-conventions.collab.md from github.com/sridherj/diecast -->`.
      If the comment is already present (idempotence check), skip the append.
-  3. Emit `next_steps` per Step 4.
+  3. Run Step 4 (install cast-hook entries) unless `--no-hooks`.
+  4. Emit `next_steps` per Step 5.
 - **D (Cancel):** exit 0; print `Cancelled. No changes made.`; emit `next_steps: []`.
 
 ## Step 3: Scaffold (clean-project path)
@@ -134,6 +144,8 @@ mtime but is otherwise a no-op. The seven canonical areas are exactly: `explorat
    clean-project branch, it appeared mid-run — bail with an error and instruct the user
    to re-run.
 
+After 3.3 finishes, fall through to Step 4 (hook install) unless `--no-hooks` was passed.
+
 ### 3.3 Generate the skills-available list
 
 Enumerate `~/.claude/skills/cast-*/SKILL.md`. For each, parse the YAML front matter,
@@ -156,7 +168,58 @@ themselves in the list — small UX win that reinforces that the file is project
 > Workaround documented in `docs/troubleshooting.md`: re-run `/cast-init` and pick
 > "Overwrite CLAUDE.md only".
 
-## Step 4: Emit typed `next_steps` (US14)
+## Step 4: Install cast-hook entries (default ON)
+
+> Skip with `--no-hooks`.
+
+Install the Claude Code hooks that capture every user-typed `/cast-*` slash command as a
+top-level `agent_run` row. This is the wiring that makes the runs tree show the human
+action that initiated downstream work — without it, only agent-dispatched children appear.
+
+By default this step runs at **project scope**, writing to `<cwd>/.claude/settings.json`.
+Pass `--user` to install at user scope (`~/.claude/settings.json`) instead.
+
+Behavior:
+
+```bash
+cast-hook install            # project scope, the default
+cast-hook install --user     # user (global) scope
+```
+
+`cast-hook install` is **idempotent**: re-running is safe and never duplicates entries. It
+**never replaces** existing third-party hooks — it appends our `UserPromptSubmit` and
+`Stop` entries alongside whatever else lives in `settings.json`. Missing `settings.json`
+is created. Malformed `settings.json` aborts with a readable message rather than
+overwriting the user's file.
+
+To remove later: `cast-hook uninstall` (or `cast-hook uninstall --user`).
+
+If `--no-hooks` was passed to `/cast-init`, skip this step entirely and do not print the
+restart line below.
+
+After install (and on every successful `/cast-init` run that did not pass `--no-hooks`),
+print this final line so it is the last thing the user sees:
+
+```text
+Restart Claude Code to activate the hooks.
+```
+
+This matters because Claude Code reads `settings.json` at startup; new hook entries do not
+take effect in the current session.
+
+### Standalone surface
+
+The same install path is available outside `/cast-init` for users who skipped it or who
+want to (re-)install later from a project root:
+
+```bash
+cast-hook install              # project scope (default)
+cast-hook install --user       # user (global) scope
+cast-hook uninstall            # remove our entries; preserve everything else
+cast-hook uninstall --user
+```
+
+## Step 5: Emit typed `next_steps` (US14)
 
 Always emit (except on options A and D, which emit `[]`):
 
@@ -213,10 +276,11 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
     {"path": "docs/design/.gitkeep", "type": "data", "description": "Canonical design directory keeper."},
     {"path": "docs/execution/.gitkeep", "type": "data", "description": "Canonical execution directory keeper."},
     {"path": "docs/ui-design/.gitkeep", "type": "data", "description": "Canonical ui-design directory keeper."},
-    {"path": "CLAUDE.md", "type": "data", "description": "Project-local Claude Code conventions; references cast-init-conventions spec."}
+    {"path": "CLAUDE.md", "type": "data", "description": "Project-local Claude Code conventions; references cast-init-conventions spec."},
+    {"path": ".claude/settings.json", "type": "data", "description": "Claude Code settings with appended cast-hook UserPromptSubmit + Stop entries (omitted from artifacts when --no-hooks was passed)."}
   ],
   "errors": [],
-  "next_steps": [/* see Step 4 */],
+  "next_steps": [/* see Step 5 */],
   "human_action_needed": false,
   "human_action_items": []
 }
@@ -233,3 +297,10 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
   canonical subdirectories. Anything else is the user's.
 - **Accepting a user-supplied target directory.** `<cwd>` is always `pwd`. No flag
   surface to override — eliminates path-traversal and "wrong project" footguns.
+- **Inverting the `--no-hooks` polarity.** Hooks are installed by default
+  (Decision #8). `--no-hooks` is the opt-out; there is no `--hooks` flag. Skipping the
+  install also means skipping the "Restart Claude Code…" final line.
+- **Calling the installer in a way that overrides existing hooks.** The installer is a
+  polite citizen — it appends to whatever already lives in `settings.json` and never
+  deletes a third-party hook. `/cast-init` MUST go through `cast-hook install` (or
+  `install_hooks.install(...)`); never hand-edit `settings.json` from this skill.

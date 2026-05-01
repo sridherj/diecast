@@ -249,3 +249,16 @@ This is the chain `sp3c` automates. It is the canonical reference for parents th
 - cast-server-side code (Phase 3b).
 - Cleanup of orphan `.tmp` files (separate sub-phase, not yet planned).
 - Migrating all ~30 cast-* agents to reference the output-JSON spec — sp1 covers 3 agents; the rest follow incrementally as agents are next touched.
+
+## Cross-references
+
+> **Note:** User-invocation rows (created by user-typed `/cast-*` slash
+> commands captured by Claude Code's `UserPromptSubmit` / `Stop` hooks) are
+> now a recognized top-level kind of `agent_run`. They are distinguished by
+> `input_params.source == "user-prompt"` and always have
+> `parent_run_id = NULL`. See
+> [`cast-user-invocation-tracking.collab.md`](./cast-user-invocation-tracking.collab.md)
+> for the lifecycle contract and
+> [`cast-hooks.collab.md`](./cast-hooks.collab.md) for the polite-citizen
+> install/uninstall contract that wires the listener into the user's
+> `.claude/settings.json`.

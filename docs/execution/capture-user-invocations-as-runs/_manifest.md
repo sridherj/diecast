@@ -19,9 +19,9 @@ Each sub-phase runs in a **separate Claude context**. For each sub-phase:
 | 3 | DB Index for Close-By-Session | `sp3_db_index/` | 1 | Done | One-line index addition; can parallel with 2, 4. |
 | 4 | Hook Events, Handlers, `cast-hook` Console Script | `sp4_hooks_cli/` | 1 | Done | New `cli/` package + `pyproject.toml`. Can parallel with 2, 3. |
 | 5 | settings.json Installer + Tests | `sp5_installer/` | 4 | In Progress | **User-safety critical.** Module-level autouse isolation fixture is non-negotiable. Delegate `/cast-pytest-best-practices`. |
-| 6 | Wire Installer into `/cast-init` | `sp6_wire_cast_init/` | 5 | Not Started | Default ON; `--no-hooks` opt-out. |
-| 7 | Spec Capture (Two Specs) | `sp7_specs/` | 6 | Not Started | `cast-user-invocation-tracking` + `cast-hooks`. Delegate `/cast-update-spec` and `/cast-spec-checker`. |
-| 8 | End-to-End Smoke | `sp8_e2e_smoke/` | 7 | Not Started | Real Claude Code session; failure-mode probes. |
+| 6 | Wire Installer into `/cast-init` | `sp6_wire_cast_init/` | 5 | Done | Default ON; `--no-hooks` opt-out. |
+| 7 | Spec Capture (Two Specs) | `sp7_specs/` | 6 | Done | `cast-user-invocation-tracking` + `cast-hooks`. Delegate `/cast-update-spec` and `/cast-spec-checker`. |
+| 8 | End-to-End Smoke | `sp8_e2e_smoke/` | 7 | Done | Real Claude Code session; failure-mode probes. |
 
 Status: Not Started → In Progress → Done → Verified → Skipped
 
