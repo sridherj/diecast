@@ -1,0 +1,16 @@
+name: cast-ui-test-about
+description: |
+  Diecast UI e2e: about screen. Smoke + functional asserts via Playwright.
+entrypoint: cast-ui-test-about.md
+inputs:
+  goal_slug:
+    type: string
+    required: true
+  base_url:
+    type: string
+    required: false
+    default: http://127.0.0.1:8006
+tags:
+  - test
+  - ui
+visible: true

@@ -1,0 +1,16 @@
+name: cast-ui-test-agents
+description: |
+  Diecast UI e2e: agents screen. Smoke + functional asserts via Playwright.
+entrypoint: cast-ui-test-agents.md
+inputs:
+  goal_slug:
+    type: string
+    required: true
+  base_url:
+    type: string
+    required: false
+    default: http://127.0.0.1:8006
+tags:
+  - test
+  - ui
+visible: true

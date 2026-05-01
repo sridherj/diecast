@@ -1,0 +1,14 @@
+name: cast-ui-test-noop
+description: |
+  No-op support agent for the UI test suite. Sleeps for the requested
+  number of seconds, then writes a completed output.json.
+entrypoint: cast-ui-test-noop.md
+inputs:
+  sleep:
+    type: integer
+    required: false
+    default: 0
+tags:
+  - test
+  - ui
+visible: true

@@ -1,0 +1,25 @@
+name: cast-ui-test-orchestrator
+description: |
+  Diecast UI e2e test orchestrator. Fans out to 7 per-screen children
+  (dashboard first, then 6 in parallel) and aggregates results.
+entrypoint: cast-ui-test-orchestrator.md
+inputs:
+  goal_slug:
+    type: string
+    required: true
+  base_url:
+    type: string
+    required: false
+    default: http://127.0.0.1:8006
+tags:
+  - test
+  - ui
+visible: true
+allowed_delegations:
+  - cast-ui-test-dashboard
+  - cast-ui-test-agents
+  - cast-ui-test-runs
+  - cast-ui-test-scratchpad
+  - cast-ui-test-goal-detail
+  - cast-ui-test-focus
+  - cast-ui-test-about
