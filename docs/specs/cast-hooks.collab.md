@@ -372,6 +372,14 @@ deferred to future sub-phases.
 
 - User-invocation lifecycle that uses these hooks: see
   [`cast-user-invocation-tracking.collab.md`](./cast-user-invocation-tracking.collab.md).
+- Task()-dispatched subagent + Skill-event capture path. Extends the
+  install contract with a per-event `matcher` slot in `HOOK_EVENTS`
+  (4-tuple shape) — `cli/install_hooks.py` emits
+  `{"matcher": ..., "hooks": [...]}` when the matcher is non-`None`,
+  matcher-aware idempotency keeps third-party `PreToolUse(matcher="Bash")`
+  entries safe under our `PreToolUse(matcher="Skill")` install/uninstall.
+  See
+  [`cast-subagent-and-skill-capture.collab.md`](./cast-subagent-and-skill-capture.collab.md).
 - Install entry point in a fresh project (default ON; opt out with
   `--no-hooks`): `/cast-init` Step 4 in
   [`skills/claude-code/cast-init/SKILL.md`](../../skills/claude-code/cast-init/SKILL.md).

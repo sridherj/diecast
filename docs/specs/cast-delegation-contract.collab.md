@@ -262,3 +262,11 @@ This is the chain `sp3c` automates. It is the canonical reference for parents th
 > [`cast-hooks.collab.md`](./cast-hooks.collab.md) for the polite-citizen
 > install/uninstall contract that wires the listener into the user's
 > `.claude/settings.json`.
+
+> **Note:** Task()-dispatched `cast-*` subagent rows ride a parallel
+> session_id-based capture path with exact `claude_agent_id` closure (no
+> staleness window). These rows do NOT write delegation `output.json`
+> files — they are tracking artifacts created by Claude Code hooks rather
+> than HTTP-dispatched delegations. The two contracts coexist without
+> conflict. See
+> [`cast-subagent-and-skill-capture.collab.md`](./cast-subagent-and-skill-capture.collab.md).
