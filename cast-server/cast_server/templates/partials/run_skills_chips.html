@@ -1,0 +1,15 @@
+{# L2 skill chip row. Empty `skills_used` hides the row entirely.
+   First 2 chip names are rendered inline; remaining count collapses into
+   a "+N" overflow badge. Skill names are agent-controlled (never user
+   input) and ride Jinja's default autoescape — do NOT add `|safe`. #}
+{% if skills_used %}
+<div class="skills-chips">
+  <span class="skills-count">{{ skills_used | length }} skill{{ 's' if skills_used | length != 1 else '' }}:</span>
+  {% for skill in skills_used[:2] %}
+    <span class="skill-chip">{{ skill.name }}</span>
+  {% endfor %}
+  {% if skills_used | length > 2 %}
+    <span class="skill-overflow">+{{ skills_used | length - 2 }}</span>
+  {% endif %}
+</div>
+{% endif %}

@@ -23,6 +23,8 @@
     </div>
 
     {% include "fragments/run_status_cells.html" %}
+
+    {% with skills_used=run.skills_used %}{% include "partials/run_skills_chips.html" %}{% endwith %}
   </div>
 
   {% if run.children %}
@@ -38,6 +40,7 @@
     <h4>Summary</h4>
     <p class="summary">{{ run.output.summary }}</p>
     {% endif %}
+    {% with skills_aggregated=run.skills_aggregated %}{% include "partials/run_skills_detail.html" %}{% endwith %}
     {% if run.error_message %}
     <h4>Error</h4>
     <div class="err">{{ run.error_message }}</div>

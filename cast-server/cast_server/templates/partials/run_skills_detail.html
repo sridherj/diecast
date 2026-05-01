@@ -1,0 +1,18 @@
+{# L3 skills detail table — full list with first invocation timestamp
+   and total count per skill. Server-side aggregation lives in pages.py;
+   this partial just iterates the precomputed `skills_aggregated` list. #}
+{% if skills_aggregated %}
+<h4>Skills</h4>
+<table class="skills-detail">
+  <thead><tr><th>Skill</th><th>First invoked</th><th>Count</th></tr></thead>
+  <tbody>
+  {% for row in skills_aggregated %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td>{{ row.first_invoked }}</td>
+      <td>{{ row.count }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}

@@ -1,5 +1,6 @@
 """Page routes — full HTML page renders."""
 
+import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -172,12 +173,59 @@ async def scratchpad(request: Request):
     })
 
 
+def _decorate_skills(run: dict) -> None:
+    """Parse `skills_used` JSON in-place and compute `skills_aggregated`.
+
+    Defensive on malformed JSON (`json.JSONDecodeError`) and non-string
+    inputs (`TypeError`) — both fall back to an empty list so a single
+    bad row never crashes the page. Aggregation groups by `name`,
+    counting occurrences and tracking the earliest `invoked_at` as
+    `first_invoked`. Recurses through the run's `children` so every
+    node in the tree is decorated.
+    """
+    raw = run.get("skills_used")
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw or "[]")
+        except (json.JSONDecodeError, TypeError):
+            parsed = []
+    elif isinstance(raw, list):
+        parsed = raw
+    else:
+        parsed = []
+    if not isinstance(parsed, list):
+        parsed = []
+    run["skills_used"] = parsed
+
+    aggregated: dict[str, dict] = {}
+    for entry in parsed:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        if not name:
+            continue
+        invoked_at = entry.get("invoked_at") or ""
+        bucket = aggregated.get(name)
+        if bucket is None:
+            aggregated[name] = {"name": name, "first_invoked": invoked_at, "count": 1}
+        else:
+            bucket["count"] += 1
+            if invoked_at and (not bucket["first_invoked"] or invoked_at < bucket["first_invoked"]):
+                bucket["first_invoked"] = invoked_at
+    run["skills_aggregated"] = list(aggregated.values())
+
+    for child in run.get("children", []):
+        _decorate_skills(child)
+
+
 @router.get("/runs")
 async def runs_page(request: Request):
     page = int(request.query_params.get("page", 1))
     status_filter = request.query_params.get("status")
     result = get_runs_tree(status_filter=status_filter, page=page, per_page=25)
     runs = result["runs"]
+    for run in runs:
+        _decorate_skills(run)
     active_count = sum(1 for r in runs if r["status"] in ("running", "pending"))
     summary = get_dashboard_summary()
     escalated = get_escalated_agents()
