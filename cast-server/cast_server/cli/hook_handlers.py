@@ -5,12 +5,11 @@ network/HTTP failure exits silently — never block the user's prompt.
 """
 import json
 import os
-import re
 import sys
 import urllib.error
 import urllib.request
 
-PROMPT_PATTERN = re.compile(r"^\s*/(cast-[a-z0-9-]+)")
+from cast_server.cli._cast_name import PROMPT_PATTERN
 
 
 def _base_url() -> str:
