@@ -44,10 +44,24 @@ fields via a `source` discriminator.
 | `POST` | `/api/agents/runs/{run_id}/fail` | Manually mark a run as failed. |
 | `DELETE` | `/api/agents/runs/{run_id}` | Delete a terminal run. |
 | `GET`  | `/api/agents/runs` | List runs (filter via `?status=`, paginated). |
-| `GET`  | `/api/agents/runs/{run_id}/children` | HTMX fragment: child runs for a parent run. |
-| `GET`  | `/api/agents/runs/{run_id}/row` | HTMX fragment: single run row for polling updates. |
+| `GET`  | `/api/agents/jobs/{run_id}?include=children` | JSON: run state + descendant tree (rollups attached). Replaces the removed `GET /api/agents/runs/{run_id}/children` fragment endpoint. |
 | `POST` | `/api/agents/{name}/invoke` | CLI invoke — creates run, returns prompt for tmux launch. |
 | `POST` | `/api/agents/error-memories/{memory_id}/resolve` | Mark an error memory resolved. |
+
+### `?include=children` on `GET /api/agents/jobs/{run_id}`
+
+Optional query parameter that augments the merged run JSON with a `children`
+array. Each entry is a descendant run shaped by `get_run_with_rollups` —
+depth-capped, with rollup fields (`descendant_count`, `failed_descendant_count`,
+`rework_count`, `status_rollup`, `total_cost_usd`, `ctx_class`,
+`wall_duration_seconds`) computed; nested children appear under their
+respective entries' `children` arrays.
+
+**Removed in this release:** `GET /api/agents/runs/{run_id}/children` (HTML
+fragment) and `GET /api/agents/runs/{run_id}/row` (HTML fragment). The threaded
+`/runs` page no longer renders per-row HTML for those callers; live updates
+flow through `GET /api/agents/runs/{run_id}/status_cells` and the descendant
+tree is exposed as JSON via `?include=children`.
 
 ## Precedence rule for `GET /api/agents/jobs/{run_id}`
 

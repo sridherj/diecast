@@ -12,7 +12,7 @@ from cast_server.deps import templates
 from cast_server.db.connection import get_connection
 from cast_server.config import STATUS_TRANSITIONS, PHASES, PHASE_ARTIFACTS, SCRATCHPAD_PATH
 from cast_server.services import goal_service, task_service
-from cast_server.services.agent_service import get_all_agents, get_all_runs, get_dashboard_summary, get_escalated_agents
+from cast_server.services.agent_service import get_all_agents, get_dashboard_summary, get_escalated_agents, get_runs_tree
 from cast_server.services.task_suggestion_service import get_pending_suggestions
 
 logger = logging.getLogger(__name__)
@@ -175,7 +175,8 @@ async def scratchpad(request: Request):
 @router.get("/runs")
 async def runs_page(request: Request):
     page = int(request.query_params.get("page", 1))
-    result = get_all_runs(top_level_only=True, page=page, per_page=25)
+    status_filter = request.query_params.get("status")
+    result = get_runs_tree(status_filter=status_filter, page=page, per_page=25)
     runs = result["runs"]
     active_count = sum(1 for r in runs if r["status"] in ("running", "pending"))
     summary = get_dashboard_summary()
@@ -183,7 +184,7 @@ async def runs_page(request: Request):
     return templates.TemplateResponse(request, "pages/runs.html", {
         "runs": runs,
         "active_count": active_count,
-        "active_filter": "all",
+        "active_filter": status_filter or "all",
         "active_page": "runs",
         "summary": summary,
         "escalated_agents": escalated,

@@ -162,7 +162,7 @@ async def complete_user_invocation(req: UserInvocationCompleteRequest):
 
 
 @router.get("/jobs/{run_id}")
-async def get_run_status(run_id: str):
+async def get_run_status(run_id: str, include: str | None = None):
     """Get agent run status by ID — file-canonical read-through.
 
     Precedence (Phase 3b sp5; references docs/specs/cast-delegation-contract.collab.md):
@@ -174,6 +174,10 @@ async def get_run_status(run_id: str):
 
     File is read on every request; no caching. The canonical-file rule
     supersedes any future caching layer.
+
+    ``?include=children`` augments the response with a ``children`` array
+    holding the descendant tree (depth-capped, rollups attached) shaped by
+    ``get_run_with_rollups``.
     """
     db_row = agent_service.get_agent_run(run_id)
     if db_row is None:
@@ -196,11 +200,16 @@ async def get_run_status(run_id: str):
         )
 
     if file_data is None:
-        return {**db_row, "source": "db"}
+        merged = {**db_row, "source": "db"}
+    else:
+        # Field-by-field merge: file wins where present; DB fills gaps
+        # (created_at, parent_run_id, worktree_path, etc.).
+        merged = {**db_row, **file_data, "source": "file"}
 
-    # Field-by-field merge: file wins where present; DB fills gaps
-    # (created_at, parent_run_id, worktree_path, etc.).
-    merged = {**db_row, **file_data, "source": "file"}
+    if include == "children":
+        tree = agent_service.get_run_with_rollups(run_id)
+        merged["children"] = (tree or {}).get("children", []) or []
+
     return merged
 
 
@@ -208,7 +217,9 @@ async def get_run_status(run_id: str):
 async def recheck_run(request: Request, run_id: str):
     """Recheck a failed agent run — recover if agent finished after timeout.
 
-    Returns the re-rendered task_item fragment so HTMX can swap it in-place.
+    Returns the re-rendered task_item fragment for goal-page callers, or the
+    threaded `.run-group` fragment (run_node macro) for /runs-page callers,
+    matching the macro's `hx-target="closest .run-group"`.
     """
     from cast_server.services.task_service import get_task
 
@@ -216,7 +227,6 @@ async def recheck_run(request: Request, run_id: str):
     if not updated:
         return Response(status_code=422, content="Agent has not finished yet")
 
-    # Re-render the task item with updated run state
     task_id = updated.get("task_id")
     if task_id:
         task = get_task(task_id)
@@ -230,10 +240,10 @@ async def recheck_run(request: Request, run_id: str):
                 "task": task,
             })
 
-    # Fallback: render as run_row if accessed from runs page
-    _enrich_interactive(updated)
-    return templates.TemplateResponse(request, "fragments/run_row.html", {
-        "run": updated,
+    run = agent_service.get_run_with_rollups(run_id) or updated
+    _enrich_interactive(run)
+    return templates.TemplateResponse(request, "fragments/run_group.html", {
+        "run": run,
     })
 
 
@@ -244,49 +254,42 @@ async def backfill_context_usage():
     return {"updated": updated}
 
 
-@router.get("/runs/{run_id}/children")
-async def get_run_children(request: Request, run_id: str):
-    """HTMX fragment: child runs for a parent run."""
-    children = agent_service.get_children_runs(run_id)
-    for child in children:
-        _enrich_interactive(child)
-    return templates.TemplateResponse(request, "fragments/run_children.html", {
-        "children": children,
-    })
-
-
 @router.get("/runs")
 async def list_runs(request: Request, status: str = "all", page: int = 1):
-    """HTMX fragment: filtered list of all agent runs."""
-    escalated = agent_service.get_escalated_agents()
-    result = agent_service.get_all_runs(status_filter=status, top_level_only=True, page=page, per_page=25)
+    """List runs as a tree: top-level entries with full descendant trees attached.
+
+    Content negotiation: HTMX requests (carry the ``HX-Request`` header) get the
+    threaded HTML fragment for partial swaps; plain API consumers get the
+    raw JSON tree dict so they can introspect descendant counts, rollups, etc.
+    """
+    status_filter = None if status in ("all", "") else status
+    result = agent_service.get_runs_tree(status_filter=status_filter, page=page, per_page=25)
     for run in result["runs"]:
         _enrich_interactive(run)
+    if request.headers.get("hx-request", "").lower() != "true":
+        return JSONResponse(result)
+    escalated = agent_service.get_escalated_agents()
     return templates.TemplateResponse(request, "fragments/runs_list.html", {
-        "runs": result["runs"], "escalated_agents": escalated, "pagination": result,
+        "runs": result["runs"],
+        "escalated_agents": escalated,
+        "pagination": result,
+        "active_filter": status_filter or "all",
     })
 
 
-@router.get("/runs/{run_id}/row")
-async def get_run_row(request: Request, run_id: str):
-    """HTMX fragment: single run row for polling updates."""
-    run = agent_service.get_agent_run(run_id)
-    if not run:
-        return Response(status_code=404, content="Run not found")
-    # Inline enrichment: fetch goal_title and task_title
-    from cast_server.db.connection import get_connection
-    conn = get_connection()
-    try:
-        if run.get("goal_slug"):
-            row = conn.execute("SELECT title FROM goals WHERE slug = ?", (run["goal_slug"],)).fetchone()
-            run["goal_title"] = row["title"] if row else None
-        if run.get("task_id"):
-            row = conn.execute("SELECT title FROM tasks WHERE id = ?", (run["task_id"],)).fetchone()
-            run["task_title"] = row["title"] if row else None
-    finally:
-        conn.close()
-    _enrich_interactive(run)
-    return templates.TemplateResponse(request, "fragments/run_row.html", {
+@router.get("/runs/{run_id}/status_cells")
+async def get_run_status_cells(request: Request, run_id: str):
+    """HTMX fragment: line-2 status cells for a single run.
+
+    Polled every 3s by running rows on the threaded /runs page. Renders the
+    inner `.run-status-cells` span so expand state on the outer `.run-node`
+    survives the swap. Recomputes rollups (descendant counts, status_rollup,
+    total_cost_usd, ctx_class) since they can change between polls.
+    """
+    run = agent_service.get_run_with_rollups(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    return templates.TemplateResponse(request, "fragments/run_status_cells.html", {
         "run": run,
     })
 
@@ -343,16 +346,19 @@ async def complete_run(run_id: str):
 
 @router.post("/runs/{run_id}/cancel")
 async def cancel_run_endpoint(request: Request, run_id: str):
-    """Cancel an active agent run. Returns updated row HTML for HTMX."""
+    """Cancel an active agent run. Returns the threaded `.run-group` fragment
+    (run_node macro) for HTMX callers — matches the macro's
+    `hx-target="closest .run-group"` swap target.
+    """
     try:
         result = agent_service.cancel_run(run_id)
     except ValueError as e:
         return JSONResponse(status_code=422, content={"detail": str(e)})
     if request.headers.get("HX-Request"):
-        run = agent_service.get_agent_run(run_id)
+        run = agent_service.get_run_with_rollups(run_id)
         if run:
             _enrich_interactive(run)
-            return templates.TemplateResponse(request, "fragments/run_row.html", {"run": run})
+            return templates.TemplateResponse(request, "fragments/run_group.html", {"run": run})
     return result
 
 

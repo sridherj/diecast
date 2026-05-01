@@ -1,0 +1,101 @@
+{# Recursive render macro for the threaded /runs page (sp2).
+   Direct self-recursion (the macro calls itself by name); the imported-self
+   pattern is intentionally avoided.
+   The outer `.run-group` carries failure/warning border state. The inner
+   `.run-node` carries `is-child` and `ctx-{class}` tints. The `.thread`
+   element mirrors group state so the rail itself colors correctly. #}
+{% macro render_run(run, depth=0) %}
+<div class="run-group{% if run.failed_descendant_count and not run.rework_count %} has-failure{% elif run.rework_count and not run.failed_descendant_count %} has-warning{% elif run.failed_descendant_count and run.rework_count %} has-failure{% endif %}">
+  <div class="run-node{% if depth > 0 %} is-child{% endif %}{% if run.ctx_class %} ctx-{{ run.ctx_class }}{% endif %}{% if run.status in ('failed', 'stuck') %} failed-self{% endif %}"
+       data-run-id="{{ run.id }}"
+       data-resume-cmd="{{ (run.resume_command or (run.session_id and ('claude --resume ' ~ run.session_id)) or '')|e }}">
+
+    <div class="row-1">
+      <span class="status-dot {{ run.status }}"></span>
+      <span class="agent-name">{{ run.agent_name }}</span>
+      <span class="crumbs">
+        {% if depth == 0 and run.goal_slug %}<a class="goal" href="/goals/{{ run.goal_slug }}">{{ run.goal_title or run.goal_slug }}</a>{% endif %}
+        {% if depth == 0 and run.goal_slug and run.task_title %}<span class="sep">·</span>{% endif %}
+        {% if run.task_title %}<span class="task">{{ run.task_title }}</span>{% endif %}
+      </span>
+      {% if run.is_rework %}<span class="rework-tag">↻ rework #{{ run.rework_index }}</span>{% endif %}
+      <span class="caret" aria-hidden="true">▸</span>
+    </div>
+
+    {% include "fragments/run_status_cells.html" %}
+  </div>
+
+  {% if run.children %}
+    <div class="thread{% if run.failed_descendant_count and not run.rework_count %} has-failure{% elif run.rework_count and not run.failed_descendant_count %} has-warning{% elif run.failed_descendant_count and run.rework_count %} has-failure{% endif %}">
+      {% for child in run.children %}
+        {{ render_run(child, depth + 1) }}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="detail" id="run-detail-{{ run.id }}" hidden>
+    {% if run.output and run.output.summary %}
+    <h4>Summary</h4>
+    <p class="summary">{{ run.output.summary }}</p>
+    {% endif %}
+    {% if run.error_message %}
+    <h4>Error</h4>
+    <div class="err">{{ run.error_message }}</div>
+    {% endif %}
+    {% if run.artifacts %}
+    <h4>Artifacts</h4>
+    <ul>
+      {% for artifact in run.artifacts %}
+      <li>
+        {% if artifact is mapping %}
+        <span class="artifact">{{ artifact.path }}</span>{% if artifact.description %} — {{ artifact.description }}{% endif %}
+        {% else %}
+        <span class="artifact">{{ artifact }}</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if run.context_usage and run.context_usage.total %}
+    {% set cu = run.context_usage %}
+    {% set limit = cu.limit|default(200000) %}
+    {% set total = cu.total %}
+    {% set has_breakdown = cu.system or cu.memory or cu.agents %}
+    <h4>Context usage</h4>
+    <div class="ctx-bar">
+      {% if has_breakdown %}
+      <div class="ctx-seg system"   style="width: {{ (cu.system|default(0) / limit * 100)|round(1) }}%"></div>
+      <div class="ctx-seg memory"   style="width: {{ (cu.memory|default(0) / limit * 100)|round(1) }}%"></div>
+      <div class="ctx-seg agents"   style="width: {{ (cu.agents|default(0) / limit * 100)|round(1) }}%"></div>
+      <div class="ctx-seg messages" style="width: {{ (cu.messages|default(0) / limit * 100)|round(1) }}%"></div>
+      {% else %}
+      <div class="ctx-seg messages" style="width: {{ (total / limit * 100)|round(1) }}%"></div>
+      {% endif %}
+    </div>
+    <div class="ctx-legend">
+      {% if cu.system %}<span><span class="swatch" style="background:#5A8DCB"></span>system {{ format_tokens(cu.system) }}</span>{% endif %}
+      {% if cu.memory %}<span><span class="swatch" style="background:#9B7AC9"></span>memory {{ format_tokens(cu.memory) }}</span>{% endif %}
+      {% if cu.agents %}<span><span class="swatch" style="background:#E0A75B"></span>agents {{ format_tokens(cu.agents) }}</span>{% endif %}
+      {% if cu.messages %}<span><span class="swatch" style="background:#6FAE7E"></span>messages {{ format_tokens(cu.messages) }}</span>{% endif %}
+      <span>{{ format_tokens(total) }} / {{ format_tokens(limit) }}</span>
+    </div>
+    {% endif %}
+    <div class="actions">
+      <a class="btn" href="/runs/{{ run.id }}">Open run</a>
+      {% if run.status == 'failed' %}
+      <button class="btn"
+              hx-post="/api/agents/jobs/{{ run.id }}/recheck"
+              hx-target="closest .run-group"
+              hx-swap="outerHTML">Recheck</button>
+      {% endif %}
+      {% if run.status in ('running', 'pending', 'scheduled') %}
+      <button class="btn"
+              hx-post="/api/agents/runs/{{ run.id }}/cancel"
+              hx-target="closest .run-group"
+              hx-swap="outerHTML"
+              hx-confirm="Cancel this run?">Cancel</button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endmacro %}

@@ -589,20 +589,377 @@ def get_all_runs(
     return {"runs": result, "total": total, "page": page, "per_page": effective_per_page, "pages": pages}
 
 
-def get_children_runs(parent_run_id: str, db_path=None) -> list[dict]:
-    """Get child runs for a given parent run."""
+# ---------------------------------------------------------------------------
+# Threaded /runs page: get_runs_tree + helpers
+# ---------------------------------------------------------------------------
+
+# Severity ordering for status_rollup (Decision #4 in plan; locked).
+# Higher = more severe. Unknown statuses default to lowest severity.
+_STATUS_SEVERITY = {
+    "completed": 0,
+    "scheduled": 1,
+    "pending": 2,
+    "running": 3,
+    "rate_limited": 4,
+    "stuck": 5,
+    "failed": 6,
+}
+
+# Depth cap for recursive CTE (Decision in plan; locked).
+_TREE_DEPTH_CAP = 10
+
+
+def _row_to_tree_dict(row) -> dict:
+    """Tree-path row hydration: parses ONLY context_usage.
+
+    Other JSON columns (input_params, output, artifacts, directories) are
+    deferred to the detail-render path — the threaded /runs page does not
+    need them. Trimming the per-row JSON parse keeps tree assembly cheap.
+    """
+    d = dict(row)
+    cu = d.get("context_usage")
+    if cu and isinstance(cu, str):
+        try:
+            d["context_usage"] = json.loads(cu)
+        except json.JSONDecodeError:
+            pass
+    return d
+
+
+def _ctx_class(context_usage) -> str | None:
+    """Bucket context usage into 'low' / 'mid' / 'high', or None when unknown."""
+    if not isinstance(context_usage, dict):
+        return None
+    total = context_usage.get("total")
+    limit = context_usage.get("limit")
+    if total is None or limit is None or not limit:
+        return None
+    pct = (total / limit) * 100
+    if pct < 40:
+        return "low"
+    if pct < 70:
+        return "mid"
+    return "high"
+
+
+def _parse_iso(ts):
+    """Parse an ISO timestamp string from SQLite, returning None on failure."""
+    if not ts:
+        return None
+    try:
+        # SQLite stores timestamps as text; some are naive, some have offsets.
+        return datetime.fromisoformat(ts)
+    except (ValueError, TypeError):
+        return None
+
+
+def _assemble_tree(rows: list[dict], l1_ids: list[str]) -> list[dict]:
+    """Build parent→children tree from a flat row list.
+
+    Returns the L1 roots (in the order of `l1_ids`) with `children` lists
+    attached recursively. Each level is sorted by `created_at ASC`.
+    """
+    by_id: dict[str, dict] = {}
+    for r in rows:
+        r["children"] = []
+        by_id[r["id"]] = r
+
+    for r in rows:
+        parent_id = r.get("parent_run_id")
+        if parent_id and parent_id in by_id:
+            by_id[parent_id]["children"].append(r)
+
+    # Sort children at every level by created_at ASC for determinism.
+    for r in rows:
+        r["children"].sort(key=lambda c: c.get("created_at") or "")
+
+    return [by_id[lid] for lid in l1_ids if lid in by_id]
+
+
+def _detect_rework(parent: dict) -> int:
+    """Mark consecutive same-(agent_name, task_id) sibling reworks.
+
+    Walks `parent["children"]` (already sorted ASC) and tracks how many
+    times each (agent_name, task_id) key has been seen. The first sighting
+    is the original; each subsequent sighting gets `is_rework=True` and
+    `rework_index = N` (starts at 2 for the second instance).
+
+    Returns the number of rework events at this level (= number of children
+    flagged). Does NOT recurse — the caller drives recursion.
+    """
+    seen: dict[tuple, int] = {}
+    rework_events = 0
+    for child in parent["children"]:
+        key = (child.get("agent_name"), child.get("task_id"))
+        count = seen.get(key, 0) + 1
+        seen[key] = count
+        if count >= 2:
+            child["is_rework"] = True
+            child["rework_index"] = count
+            rework_events += 1
+        else:
+            # First sighting: explicit defaults so downstream can trust shape.
+            child.setdefault("is_rework", False)
+            child.setdefault("rework_index", None)
+    return rework_events
+
+
+def _propagate_rework(roots: list[dict]) -> None:
+    """Post-order DFS: rework_count = own rework events + sum of descendants'.
+
+    An L1's `rework_count` reflects rework loops anywhere in its tree, so
+    the rollup pill on the L1 row is meaningful without expansion.
+    """
+    def walk(node: dict) -> int:
+        own = _detect_rework(node) if node["children"] else 0
+        for child in node["children"]:
+            child.setdefault("is_rework", False)
+            child.setdefault("rework_index", None)
+        sub = sum(walk(c) for c in node["children"])
+        node["rework_count"] = own + sub
+        return node["rework_count"]
+
+    for root in roots:
+        walk(root)
+
+
+def _compute_rollups(roots: list[dict]) -> None:
+    """Post-order DFS computing all per-node rollup fields in one walk.
+
+    Sets on every node:
+        descendant_count        (excludes self)
+        failed_descendant_count (status in {failed, stuck})
+        total_cost_usd          (self + descendants; None treated as 0.0)
+        status_rollup           (max severity over self + descendants)
+        ctx_class               (from own context_usage)
+    Sets on L1 roots only:
+        wall_duration_seconds   (completed_at - started_at; None otherwise)
+    """
+    def walk(node: dict, depth: int) -> tuple[int, int, float, int]:
+        # Defaults so children of nodes with no kids still have the shape.
+        node.setdefault("children", [])
+
+        own_cost = node.get("cost_usd") or 0.0
+        own_severity = _STATUS_SEVERITY.get(node.get("status"), 0)
+        own_failed = 1 if node.get("status") in ("failed", "stuck") else 0
+
+        sub_count = 0
+        sub_failed = 0
+        sub_cost = 0.0
+        sub_max_sev = 0
+        for child in node["children"]:
+            c_count, c_failed, c_cost, c_sev = walk(child, depth + 1)
+            sub_count += 1 + c_count
+            sub_failed += c_failed
+            sub_cost += c_cost
+            if c_sev > sub_max_sev:
+                sub_max_sev = c_sev
+
+        node["descendant_count"] = sub_count
+        node["failed_descendant_count"] = sub_failed
+        node["total_cost_usd"] = round(own_cost + sub_cost, 6)
+
+        max_sev = max(own_severity, sub_max_sev)
+        # Reverse-lookup severity → status name. Stable: pick the canonical
+        # name with the highest severity (only one per level in our table).
+        node["status_rollup"] = _SEVERITY_TO_STATUS.get(max_sev, node.get("status") or "completed")
+
+        node["ctx_class"] = _ctx_class(node.get("context_usage"))
+
+        if depth == 0:
+            started = _parse_iso(node.get("started_at"))
+            completed = _parse_iso(node.get("completed_at"))
+            if started and completed:
+                node["wall_duration_seconds"] = int((completed - started).total_seconds())
+            else:
+                node["wall_duration_seconds"] = None
+
+        # Return descendant accumulators for the parent's roll-up.
+        return sub_count, sub_failed + own_failed, own_cost + sub_cost, max_sev
+
+    for root in roots:
+        walk(root, 0)
+
+
+# Reverse map for status_rollup: severity -> status name.
+_SEVERITY_TO_STATUS = {v: k for k, v in _STATUS_SEVERITY.items()}
+
+
+def get_runs_tree(
+    status_filter: str | None = None,
+    page: int = 1,
+    per_page: int = 25,
+    exclude_test: bool | None = None,
+    db_path=None,
+) -> dict:
+    """Return paginated L1 runs with full descendant trees attached.
+
+    Pagination is bounded by L1 count (children never count toward the page
+    limit). Trees are fetched via a depth-capped recursive CTE; trees deeper
+    than 10 are silently truncated and a server-side warning is logged so
+    runaway agent loops are visible in production.
+
+    Each run dict includes:
+        children: list[run]                # ordered by created_at ASC
+        descendant_count: int              # total subtree size (excludes self)
+        failed_descendant_count: int       # count where status in (failed, stuck)
+        rework_count: int                  # propagated up to all ancestors
+        status_rollup: str                 # max-severity status across self+descendants
+        total_cost_usd: float              # sum of self + descendants
+        wall_duration_seconds: int | None  # L1 only: completed_at - started_at
+        ctx_class: str | None              # 'low' | 'mid' | 'high'
+        is_rework: bool                    # set on children only
+        rework_index: int | None           # 2,3,... for 2nd+ attempt
+
+    Returns: {"runs": [...], "total": int, "page": int, "per_page": int, "pages": int}.
+
+    The `status_filter` is rollup-aware (Decision #13): an L1 whose own
+    status is `completed` but with a `failed` descendant matches
+    `status_filter='failed'`. Filtering is post-rollup (in Python) for
+    simplicity; per-page L1 cap bounds the cost.
+    """
+    if exclude_test is None:
+        exclude_test = os.environ.get("CAST_ENV") != "test"
+
     conn = get_connection(db_path)
-    rows = conn.execute(
-        """SELECT ar.*, g.title AS goal_title, t.title AS task_title
-           FROM agent_runs ar
-           LEFT JOIN goals g ON ar.goal_slug = g.slug
-           LEFT JOIN tasks t ON ar.task_id = t.id
-           WHERE ar.parent_run_id = ?
-           ORDER BY ar.created_at ASC""",
-        (parent_run_id,),
-    ).fetchall()
-    conn.close()
-    return [_row_to_dict(r) for r in rows]
+    try:
+        # Step 1: Page L1 ids (no raw status pre-filter — rollup is the only
+        # filter applied, post-assembly).
+        l1_conditions = ["ar.parent_run_id IS NULL"]
+        l1_params: list = []
+        if exclude_test:
+            l1_conditions.append("ar.agent_name NOT LIKE 'test%'")
+        l1_where = " WHERE " + " AND ".join(l1_conditions)
+
+        total_l1 = conn.execute(
+            f"SELECT COUNT(*) AS cnt FROM agent_runs ar{l1_where}", l1_params
+        ).fetchone()["cnt"]
+
+        offset = (page - 1) * per_page
+        l1_rows = conn.execute(
+            f"SELECT ar.id FROM agent_runs ar{l1_where} "
+            f"ORDER BY ar.created_at DESC LIMIT ? OFFSET ?",
+            [*l1_params, per_page, offset],
+        ).fetchall()
+        l1_ids = [r["id"] for r in l1_rows]
+
+        if not l1_ids:
+            pages = max(1, (total_l1 + per_page - 1) // per_page) if total_l1 else 1
+            return {"runs": [], "total": total_l1, "page": page,
+                    "per_page": per_page, "pages": pages}
+
+        # Step 2: Tree fetch via recursive CTE, depth-capped at 10.
+        placeholders = ",".join("?" * len(l1_ids))
+        tree_sql = f"""
+            WITH RECURSIVE tree AS (
+                SELECT ar.*, 0 AS depth
+                FROM agent_runs ar
+                WHERE ar.id IN ({placeholders})
+                UNION ALL
+                SELECT ar.*, tree.depth + 1
+                FROM agent_runs ar
+                JOIN tree ON ar.parent_run_id = tree.id
+                WHERE tree.depth < ?
+            )
+            SELECT tree.*, g.title AS goal_title, t.title AS task_title
+            FROM tree
+            LEFT JOIN goals g ON tree.goal_slug = g.slug
+            LEFT JOIN tasks t ON tree.task_id = t.id
+        """
+        rows = conn.execute(tree_sql, [*l1_ids, _TREE_DEPTH_CAP]).fetchall()
+
+        # Detect truncation: any node at depth == cap whose row has children
+        # in the DB indicates the tree was cut off.
+        depth_cap_ids = [r["id"] for r in rows if r["depth"] >= _TREE_DEPTH_CAP]
+        if depth_cap_ids:
+            probe = conn.execute(
+                f"SELECT DISTINCT parent_run_id FROM agent_runs "
+                f"WHERE parent_run_id IN ({','.join('?' * len(depth_cap_ids))})",
+                depth_cap_ids,
+            ).fetchall()
+            if probe:
+                # Walk back up to find which L1 owns each truncated branch.
+                truncated_l1s = set()
+                # Build parent map for the fetched rows so we can walk up.
+                parent_of = {r["id"]: r["parent_run_id"] for r in rows}
+                for tid in (p["parent_run_id"] for p in probe):
+                    cur = tid
+                    while cur and parent_of.get(cur):
+                        cur = parent_of[cur]
+                    if cur:
+                        truncated_l1s.add(cur)
+                for l1 in truncated_l1s or {depth_cap_ids[0]}:
+                    logger.warning(
+                        "tree truncated at depth %d for L1 run_id=%s",
+                        _TREE_DEPTH_CAP, l1,
+                    )
+    finally:
+        conn.close()
+
+    # Step 3: Trim per-row JSON parsing — only context_usage on the tree path.
+    hydrated = [_row_to_tree_dict(r) for r in rows]
+
+    # Step 4: Assemble tree.
+    roots = _assemble_tree(hydrated, l1_ids)
+
+    # Step 5: Compute rollups (single post-order walk).
+    _compute_rollups(roots)
+
+    # Step 6: Detect + propagate rework.
+    _propagate_rework(roots)
+
+    # Step 7: Rollup-aware status filter (Decision #13).
+    if status_filter and status_filter != "all":
+        roots = [r for r in roots if r.get("status_rollup") == status_filter]
+
+    total = len(roots) if (status_filter and status_filter != "all") else total_l1
+    pages = max(1, (total + per_page - 1) // per_page) if total else 1
+    return {"runs": roots, "total": total, "page": page,
+            "per_page": per_page, "pages": pages}
+
+
+def get_run_with_rollups(run_id: str, db_path=None) -> dict | None:
+    """Return a single run as an L1 root with descendants + rollups attached.
+
+    Powers the `/api/agents/runs/{id}/status_cells` poll endpoint: rollup
+    fields (descendant_count, failed_descendant_count, rework_count,
+    status_rollup, total_cost_usd, ctx_class, wall_duration_seconds) can
+    change between 3s polls, so the partial render must recompute them.
+    Reuses the same recursive CTE + helpers as `get_runs_tree`, scoped to
+    one root.
+    """
+    conn = get_connection(db_path)
+    try:
+        tree_sql = """
+            WITH RECURSIVE tree AS (
+                SELECT ar.*, 0 AS depth
+                FROM agent_runs ar
+                WHERE ar.id = ?
+                UNION ALL
+                SELECT ar.*, tree.depth + 1
+                FROM agent_runs ar
+                JOIN tree ON ar.parent_run_id = tree.id
+                WHERE tree.depth < ?
+            )
+            SELECT tree.*, g.title AS goal_title, t.title AS task_title
+            FROM tree
+            LEFT JOIN goals g ON tree.goal_slug = g.slug
+            LEFT JOIN tasks t ON tree.task_id = t.id
+        """
+        rows = conn.execute(tree_sql, (run_id, _TREE_DEPTH_CAP)).fetchall()
+    finally:
+        conn.close()
+
+    if not rows:
+        return None
+
+    hydrated = [_row_to_tree_dict(r) for r in rows]
+    roots = _assemble_tree(hydrated, [run_id])
+    if not roots:
+        return None
+    _compute_rollups(roots)
+    _propagate_rework(roots)
+    return roots[0]
 
 
 def get_dashboard_summary(db_path=None) -> dict:
@@ -1047,7 +1404,7 @@ Diecast API routes ({SERVER_URL}):
   DELETE /api/agents/runs/{{run_id}}        — delete a terminal run
   GET  /api/agents/runs                     — list all runs
   GET  /api/agents/runs?status=running      — filter runs by status
-  GET  /api/agents/runs/{{run_id}}/children — list child runs
+  GET  /api/agents/jobs/{{run_id}}?include=children — descendant tree (rollups attached)
   POST /api/tasks/{{task_id}}/run-agent     — trigger agent for a task
   Health check: curl -s {SERVER_URL}/api/agents/runs?status=running | head -1
 """
@@ -1123,7 +1480,7 @@ Artifact paths must be relative to {goal_dir}.""" + _inject_error_memories(agent
 # pinned in agents/README.md.
 # ---------------------------------------------------------------------------
 
-_AGENT_REGISTRY_CACHE: tuple[float, dict] | None = None
+_AGENT_REGISTRY_CACHE: dict[Path, tuple[float, dict]] = {}
 
 
 def _parse_frontmatter(md_path: Path) -> dict | None:
@@ -1147,18 +1504,14 @@ def _parse_frontmatter(md_path: Path) -> dict | None:
 
 def _load_agent_registry(agents_dir: Path | None = None) -> dict[str, dict]:
     """Scan agents/<name>/<name>.md and return {name: agent_dict}."""
-    global _AGENT_REGISTRY_CACHE
-    root = agents_dir or (DIECAST_ROOT / "agents")
+    root = (agents_dir or (DIECAST_ROOT / "agents")).resolve()
     if not root.is_dir():
         return {}
 
     mtime = root.stat().st_mtime
-    if (
-        agents_dir is None
-        and _AGENT_REGISTRY_CACHE is not None
-        and _AGENT_REGISTRY_CACHE[0] == mtime
-    ):
-        return _AGENT_REGISTRY_CACHE[1]
+    cached = _AGENT_REGISTRY_CACHE.get(root)
+    if cached is not None and cached[0] == mtime:
+        return cached[1]
 
     registry: dict[str, dict] = {}
     for entry in sorted(root.iterdir()):
@@ -1181,16 +1534,29 @@ def _load_agent_registry(agents_dir: Path | None = None) -> dict[str, dict]:
             "input": fm.get("input", ""),
             "output": fm.get("output", ""),
             "last_tested": fm.get("last_tested", ""),
+            "source_root": str(root),
         }
 
-    if agents_dir is None:
-        _AGENT_REGISTRY_CACHE = (mtime, registry)
+    _AGENT_REGISTRY_CACHE[root] = (mtime, registry)
     return registry
 
 
 def get_all_agents(db_path=None, agents_dir: Path | None = None) -> list[dict]:
     """Get all agents from disk, sorted by name, augmented with run_count."""
     registry = _load_agent_registry(agents_dir)
+    test_dir = os.environ.get("CAST_TEST_AGENTS_DIR")
+    if test_dir:
+        test_registry = _load_agent_registry(Path(test_dir))
+        merged: dict[str, dict] = dict(test_registry)
+        for name, agent in registry.items():
+            if name in merged:
+                logger.warning(
+                    "Test agent %r collides with production agent of the same name; "
+                    "preferring production entry.",
+                    name,
+                )
+            merged[name] = agent
+        registry = merged
     conn = get_connection(db_path)
     try:
         counts = dict(

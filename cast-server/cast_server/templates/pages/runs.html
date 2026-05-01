@@ -71,12 +71,65 @@ document.querySelectorAll('.runs-filters .filter-btn').forEach(btn => {
         btn.classList.add('active');
     });
 });
+</script>
 
-document.addEventListener('click', function(e) {
-    var row = e.target.closest('.run-row-main');
-    if (row) {
-        row.closest('.run-row').classList.toggle('expanded');
+<script>
+(function () {
+  'use strict';
+
+  const STORAGE_PREFIX = 'runs:expanded:';
+
+  function applyExpandedFromStorage(root) {
+    const scope = root || document;
+    scope.querySelectorAll('.run-node[data-run-id]').forEach(node => {
+      const id = node.dataset.runId;
+      if (!id) return;
+      if (localStorage.getItem(STORAGE_PREFIX + id) === '1') {
+        node.classList.add('expanded');
+      }
+    });
+  }
+
+  function toggleExpanded(node) {
+    const id = node.dataset.runId;
+    if (!id) return;
+    const willExpand = !node.classList.contains('expanded');
+    node.classList.toggle('expanded', willExpand);
+    if (willExpand) {
+      localStorage.setItem(STORAGE_PREFIX + id, '1');
+    } else {
+      localStorage.removeItem(STORAGE_PREFIX + id);
     }
-});
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.copy-resume')) return;
+    if (e.target.closest('a, button, input, textarea')) return;
+    const node = e.target.closest('.run-node');
+    if (node) toggleExpanded(node);
+  });
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.copy-resume');
+    if (!btn) return;
+    e.stopPropagation();
+    const cmd = btn.dataset.cmd || '';
+    if (!cmd) return;
+    navigator.clipboard.writeText(cmd).then(() => {
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1100);
+    }).catch(() => {});
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { applyExpandedFromStorage(); });
+  } else {
+    applyExpandedFromStorage();
+  }
+
+  document.body.addEventListener('htmx:afterSwap', function () {
+    applyExpandedFromStorage();
+  });
+})();
 </script>
 {% endblock %}

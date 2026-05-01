@@ -1,0 +1,4 @@
+{# Single-node `.run-group` fragment — wraps the run_node macro for HTMX
+   responses (recheck / cancel) whose hx-target is `closest .run-group`. #}
+{% import "macros/run_node.html" as rn %}
+{{ rn.render_run(run) }}

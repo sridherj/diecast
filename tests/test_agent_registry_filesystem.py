@@ -91,7 +91,7 @@ def test_get_all_agents_augments_with_run_count(tmp_path: Path, monkeypatch) -> 
 
     # Reset module cache so the tmp agents_dir takes effect via the explicit param.
     import cast_server.services.agent_service as svc
-    svc._AGENT_REGISTRY_CACHE = None
+    svc._AGENT_REGISTRY_CACHE = {}
 
     agents = get_all_agents(db_path=db_path, agents_dir=agents_dir)
     by_name = {a["name"]: a for a in agents}

@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runs — threaded mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-bg: #F5F4F0;
+    --color-text: #1A1A28;
+    --color-muted: #4A4860;
+    --color-faint: #8E8AA3;
+    --color-surface: #FFFFFF;
+    --color-surface-2: #ECEAE4;
+    --color-border: #DDD8CD;
+    --color-accent: #D6235C;
+    --color-success: #2D7D4F;
+    --color-warning: #B5821A;
+    --color-danger: #B22439;
+    --color-info: #3B5BB0;
+    --color-focus: #6B47B0;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-body: 'DM Sans', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+  .page-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .page-header h1 {
+    font-family: var(--font-mono); font-weight: 600; font-size: 22px; margin: 0;
+  }
+  .page-header .meta { color: var(--color-muted); font-size: 13px; }
+  .mockup-label {
+    margin: 36px 0 12px; padding: 8px 12px;
+    background: var(--color-surface-2);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .mockup-label .desc {
+    display: block; margin-top: 4px;
+    text-transform: none; letter-spacing: 0; font-weight: 400;
+    color: var(--color-text); font-family: var(--font-body);
+  }
+
+  /* ───────── Run group ───────── */
+  .run-group {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .run-group.has-failure { border-left: 3px solid var(--color-danger); }
+  .run-group.has-warning { border-left: 3px solid var(--color-warning); }
+
+  /* ───────── Run node (the two-line row) ───────── */
+  .run-node {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.08s;
+  }
+  .run-node:hover { background: rgba(0,0,0,0.015); }
+
+  .row-1 {
+    display: flex; align-items: center; gap: 8px;
+    min-width: 0;
+  }
+  .row-2 {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 4px; padding-left: 16px; /* aligns under agent name (past dot) */
+    color: var(--color-muted); font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    display: inline-block;
+  }
+  .status-dot.completed { background: var(--color-success); }
+  .status-dot.running   { background: var(--color-info); animation: pulse 1.5s infinite; }
+  .status-dot.failed    { background: var(--color-danger); }
+  .status-dot.pending   { background: var(--color-faint); }
+  .status-dot.rate      { background: var(--color-warning); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+  .agent-name {
+    font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+  .run-node.is-child .agent-name { font-weight: 500; color: var(--color-muted); }
+
+  .crumbs {
+    color: var(--color-muted); font-size: 13px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    min-width: 0; flex: 1;
+  }
+  .crumbs .goal {
+    color: var(--color-muted);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.08s;
+  }
+  .crumbs .goal:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  .crumbs .sep { margin: 0 6px; color: var(--color-faint); }
+
+  /* L1 rollup pills (parent w/ children only) */
+  .rollup {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 1px 7px; border-radius: 10px;
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+  }
+  .rollup.bad { background: #FBE4E8; color: var(--color-danger); font-weight: 600; }
+  .rollup.warn { background: #FBEFD6; color: var(--color-warning); }
+
+  .pill {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    padding: 1px 7px; border-radius: 10px;
+  }
+  .pill.completed { background: rgba(45,125,79,0.12); color: var(--color-success); }
+  .pill.running   { background: rgba(59,91,176,0.12); color: var(--color-info); }
+  .pill.failed    { background: rgba(178,36,57,0.14); color: var(--color-danger); }
+  .pill.pending   { background: rgba(142,138,163,0.18); color: var(--color-muted); }
+  .pill.rate      { background: rgba(181,130,26,0.15); color: var(--color-warning); }
+
+  .telem { font-family: var(--font-mono); }
+  .telem.dim { color: var(--color-faint); }
+  .telem-sep { color: var(--color-faint); }
+  /* Context-usage thresholds: <40 green, 40–70 amber, 70+ red.
+     Promoted to pill-level prominence — sits next to the status pill,
+     because "is the agent in trouble" is as critical as "did it succeed". */
+  .ctx-pill {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    padding: 1px 7px; border-radius: 10px;
+    white-space: nowrap;
+  }
+  .ctx-pill.low  { background: rgba(45,125,79,0.12);  color: var(--color-success); }
+  .ctx-pill.mid  { background: rgba(181,130,26,0.15); color: var(--color-warning); }
+  .ctx-pill.high { background: rgba(178,36,57,0.14);  color: var(--color-danger); font-weight: 600; }
+
+  /* Children get the ctx tint applied to their agent name too —
+     ambient visual weight on the most-scannable element. */
+  .run-node.is-child.ctx-low  .agent-name { color: var(--color-success); }
+  .run-node.is-child.ctx-mid  .agent-name { color: var(--color-warning); }
+  .run-node.is-child.ctx-high .agent-name { color: var(--color-danger); font-weight: 600; }
+
+  /* Copy-resume button (line-2, every run with a session) */
+  .copy-resume {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: var(--radius-sm);
+    background: transparent; border: none; cursor: pointer;
+    color: var(--color-faint);
+    font-size: 12px; line-height: 1;
+    transition: background 0.08s, color 0.08s;
+  }
+  .copy-resume:hover { background: var(--color-surface-2); color: var(--color-text); }
+  .copy-resume.copied { color: var(--color-success); }
+  .copy-resume.copied::after {
+    content: "copied"; margin-left: 4px;
+    font-family: var(--font-mono); font-size: 10px;
+  }
+
+  .rework-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--color-focus);
+    background: rgba(107,71,176,0.10);
+    padding: 1px 6px; border-radius: 8px;
+    text-transform: lowercase; letter-spacing: 0.02em;
+  }
+
+  .caret {
+    margin-left: auto;
+    color: var(--color-faint); font-size: 14px;
+    transition: transform 0.12s;
+    flex-shrink: 0;
+  }
+  .run-node.expanded .caret { transform: rotate(90deg); }
+
+  /* ───────── Thread rail + nested children ───────── */
+  .thread {
+    margin: 0 14px 10px 22px;       /* clear left for rail anchor */
+    padding-left: 14px;
+    border-left: 2px solid var(--color-border);
+    position: relative;
+  }
+  .thread.has-failure { border-left-color: var(--color-danger); }
+
+  .thread .run-node {
+    padding: 6px 0 6px 8px;
+    border-radius: var(--radius-sm);
+    position: relative;
+  }
+  /* short horizontal connector from rail to child */
+  .thread > .run-node::before {
+    content: "";
+    position: absolute;
+    left: -14px; top: 18px;
+    width: 12px; height: 1px;
+    background: var(--color-border);
+  }
+  .thread .run-node.failed-self::before { background: var(--color-danger); }
+
+  /* ───────── Expansion (L3 detail) ───────── */
+  .detail {
+    display: none;
+    margin: 4px 14px 12px 36px;
+    padding: 12px 14px;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+  }
+  .run-node.expanded + .detail { display: block; }
+  .detail h4 {
+    font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--color-muted); margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .detail h4:not(:first-child) { margin-top: 14px; }
+  .detail p { margin: 0 0 6px; }
+  .detail .summary { color: var(--color-text); }
+  .detail .err {
+    background: rgba(178,36,57,0.06);
+    border-left: 2px solid var(--color-danger);
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    color: var(--color-danger); font-family: var(--font-mono); font-size: 12px;
+  }
+  .detail ul { margin: 0; padding-left: 18px; }
+  .detail .artifact {
+    font-family: var(--font-mono); font-size: 12px; color: var(--color-info);
+  }
+
+  /* Context bar (full breakdown — only in expansion) */
+  .ctx-bar {
+    display: flex; height: 8px; border-radius: 4px; overflow: hidden;
+    background: var(--color-border); margin: 6px 0 4px;
+  }
+  .ctx-seg.system   { background: #5A8DCB; }
+  .ctx-seg.memory   { background: #9B7AC9; }
+  .ctx-seg.agents   { background: #E0A75B; }
+  .ctx-seg.messages { background: #6FAE7E; }
+  .ctx-legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    font-size: 11px; color: var(--color-muted); font-family: var(--font-mono);
+  }
+  .ctx-legend .swatch {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 2px; margin-right: 4px; vertical-align: middle;
+  }
+
+  .actions {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  .btn {
+    font-family: var(--font-body); font-size: 12px;
+    padding: 4px 10px; border-radius: var(--radius-sm);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    color: var(--color-text); cursor: pointer;
+  }
+  .btn.primary { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .row-2 { gap: 6px; }
+    .telem.relative-time { display: none; }
+    .crumbs .task { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="page-header">
+    <h1>Runs</h1>
+    <div class="meta">23 runs · 3 active · $4.21 today</div>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       MOCKUP A — happy path, 3-child orchestration
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <div class="mockup-label">
+    Mockup A — happy path
+    <span class="desc">L1 with 3 successful children, all collapsed. The L1 rollup line shows total cost, child count, total time. Children show their own metrics, no rollup.</span>
+  </div>
+
+  <div class="run-group">
+    <div class="run-node" onclick="this.classList.toggle('expanded')">
+      <div class="row-1">
+        <span class="status-dot completed"></span>
+        <span class="agent-name">cast-explore</span>
+        <span class="crumbs">
+          <span class="goal">cast-ui-test-harness</span>
+          <span class="sep">·</span>
+          <span class="task">explore approaches</span>
+        </span>
+        <span class="caret">▸</span>
+      </div>
+      <div class="row-2">
+        <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 38%</span>
+        <span class="rollup">3 steps</span>
+        <span class="telem">8m active</span>
+        <span class="telem-sep">·</span>
+        <span class="telem">$0.41 total</span>
+        <button class="copy-resume" data-cmd="claude --resume sess-explore-abc" title="Copy resume command">⧉</button>
+        <span class="telem-sep">·</span>
+        <span class="telem dim relative-time">12m ago</span>
+      </div>
+    </div>
+
+    <div class="thread">
+      <div class="run-node is-child ctx-low" onclick="this.classList.toggle('expanded')">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-web-researcher</span>
+          <span class="crumbs"><span class="task">research browser-automation libs</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 22%</span>
+          <span class="telem">2m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.08</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-web-researcher-1" title="Copy resume command">⧉</button>
+          <span class="telem-sep">·</span>
+          <span class="telem dim relative-time">11m ago</span>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-low" onclick="this.classList.toggle('expanded')">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-code-explorer</span>
+          <span class="crumbs"><span class="task">scan existing test infra</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 15%</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.04</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-code-explorer-1" title="Copy resume command">⧉</button>
+          <span class="telem-sep">·</span>
+          <span class="telem dim relative-time">10m ago</span>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-low" onclick="this.classList.toggle('expanded')">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-playbook-synthesizer</span>
+          <span class="crumbs"><span class="task">synthesize findings</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 28%</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.06</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-playbook-synth-1" title="Copy resume command">⧉</button>
+          <span class="telem-sep">·</span>
+          <span class="telem dim relative-time">9m ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       MOCKUP B — failure with rework loop (preso-style)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <div class="mockup-label">
+    Mockup B — rework loop with failed-then-recovered child
+    <span class="desc">cast-preso-orchestrator runs a check-coordinator, it rejects on tone, the same agent is re-run (rework tag). Group border is amber because there was a recovered failure. Failed child has its detail panel pre-expanded.</span>
+  </div>
+
+  <div class="run-group has-warning">
+    <div class="run-node" onclick="this.classList.toggle('expanded')">
+      <div class="row-1">
+        <span class="status-dot completed"></span>
+        <span class="agent-name">cast-preso-orchestrator</span>
+        <span class="crumbs">
+          <span class="goal">preso-ai-roadmap</span>
+          <span class="sep">·</span>
+          <span class="task">run pipeline</span>
+        </span>
+        <span class="caret">▸</span>
+      </div>
+      <div class="row-2">
+        <span class="pill completed">completed</span>
+          <span class="ctx-pill high">ctx 71%</span>
+        <span class="rollup">9 steps</span>
+        <span class="rollup warn">⚠ 1 reworked</span>
+        <span class="telem">22m active</span>
+        <span class="telem-sep">·</span>
+        <span class="telem">$1.12 total</span>
+        <button class="copy-resume" data-cmd="claude --resume sess-preso-orch-xyz" title="Copy resume command">⧉</button>
+        <span class="telem-sep">·</span>
+        <span class="telem dim relative-time">2h ago</span>
+      </div>
+    </div>
+
+    <div class="thread">
+      <div class="run-node is-child ctx-low">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-narrative</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 33%</span>
+          <span class="telem">3m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.21</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-narr-1" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-what-planner</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.05</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-plan-1" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-mid">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-how</span>
+          <span class="crumbs"><span class="task">slide-1</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill mid">ctx 41%</span>
+          <span class="telem">4m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.18</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-how-1a" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-low failed-self expanded">
+        <div class="row-1">
+          <span class="status-dot failed"></span>
+          <span class="agent-name">cast-preso-check-coordinator</span>
+          <span class="crumbs"><span class="task">slide-1</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill failed">failed</span>
+          <span class="ctx-pill low">ctx 19%</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.04</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-check-1a" title="Copy resume command">⧉</button>
+          <span class="telem-sep">·</span>
+          <span class="telem dim">tone reject</span>
+        </div>
+      </div>
+      <div class="detail" style="display:block">
+        <h4>Error</h4>
+        <div class="err">tone-checker rejected slide-1: 3 GPT-isms detected ("delve", "leverage", "It's important to note that…")</div>
+        <h4>Verdict</h4>
+        <p class="summary">content: ✓ pass · visual: ✓ pass · tone: ✗ rework. Coordinator returned <code>rework</code>.</p>
+        <div class="actions">
+          <button class="btn">Open run</button>
+          <button class="btn">View transcript</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-high">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-how</span>
+          <span class="crumbs"><span class="task">slide-1</span></span>
+          <span class="rework-tag">↻ rework #2</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill high">ctx 76%</span>
+          <span class="telem">3m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.16</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-how-1b" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-check-coordinator</span>
+          <span class="crumbs"><span class="task">slide-1</span></span>
+          <span class="rework-tag">↻ rework #2</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.04</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-check-1b" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-preso-assembler</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="telem">1m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.05</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-preso-assembler-1" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       MOCKUP C — deep nesting (4 levels) with expansion showing L3 detail
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <div class="mockup-label">
+    Mockup C — 4-level nesting; one running L4 with full expansion
+    <span class="desc">L1 → L2 → L3 → L4. Demonstrates recursive thread rails (each nesting level gets its own short rail). The L4 cast-controller-test row is expanded to show the L3 detail panel including the segmented context bar that used to live on the row.</span>
+  </div>
+
+  <div class="run-group">
+    <div class="run-node" onclick="this.classList.toggle('expanded')">
+      <div class="row-1">
+        <span class="status-dot running"></span>
+        <span class="agent-name">cast-orchestrate</span>
+        <span class="crumbs">
+          <span class="goal">diecast-precommit</span>
+          <span class="sep">·</span>
+          <span class="task">execute plan</span>
+        </span>
+        <span class="caret">▸</span>
+      </div>
+      <div class="row-2">
+        <span class="pill running">running</span>
+          <span class="ctx-pill mid">ctx 64%</span>
+        <span class="rollup">12 steps</span>
+        <span class="telem">35m active</span>
+        <span class="telem-sep">·</span>
+        <span class="telem">$1.78 total</span>
+        <button class="copy-resume" data-cmd="claude --resume sess-orch-main" title="Copy resume command">⧉</button>
+        <span class="telem-sep">·</span>
+        <span class="telem dim relative-time">started 35m ago</span>
+      </div>
+    </div>
+
+    <div class="thread">
+      <div class="run-node is-child ctx-low" onclick="this.classList.toggle('expanded')">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-subphase-runner</span>
+          <span class="crumbs"><span class="task">sp1 · controller layer</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 31%</span>
+          <span class="rollup">4 steps</span>
+          <span class="telem">8m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.42</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-sp1" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="thread">
+        <div class="run-node is-child ctx-low">
+          <div class="row-1">
+            <span class="status-dot completed"></span>
+            <span class="agent-name">cast-detailed-plan</span>
+            <span class="caret">▸</span>
+          </div>
+          <div class="row-2">
+            <span class="pill completed">completed</span>
+          <span class="ctx-pill low">ctx 24%</span>
+            <span class="telem">3m</span><span class="telem-sep">·</span>
+            <span class="telem">$0.18</span>
+            <button class="copy-resume" data-cmd="claude --resume sess-detailed-plan" title="Copy resume command">⧉</button>
+          </div>
+        </div>
+
+        <div class="run-node is-child">
+          <div class="row-1">
+            <span class="status-dot completed"></span>
+            <span class="agent-name">cast-plan-review</span>
+            <span class="caret">▸</span>
+          </div>
+          <div class="row-2">
+            <span class="pill completed">completed</span>
+            <span class="telem">2m</span><span class="telem-sep">·</span>
+            <span class="telem">$0.12</span>
+            <button class="copy-resume" data-cmd="claude --resume sess-plan-review" title="Copy resume command">⧉</button>
+          </div>
+        </div>
+
+        <div class="run-node is-child" onclick="this.classList.toggle('expanded')">
+          <div class="row-1">
+            <span class="status-dot completed"></span>
+            <span class="agent-name">cast-controller</span>
+            <span class="caret">▸</span>
+          </div>
+          <div class="row-2">
+            <span class="pill completed">completed</span>
+            <span class="rollup">1 step</span>
+            <span class="telem">2m</span><span class="telem-sep">·</span>
+            <span class="telem">$0.08</span>
+            <button class="copy-resume" data-cmd="claude --resume sess-controller" title="Copy resume command">⧉</button>
+          </div>
+        </div>
+
+        <div class="thread">
+          <div class="run-node is-child ctx-low expanded">
+            <div class="row-1">
+              <span class="status-dot running"></span>
+              <span class="agent-name">cast-controller-test</span>
+              <span class="caret">▸</span>
+            </div>
+            <div class="row-2">
+              <span class="pill running">running</span>
+          <span class="ctx-pill low">ctx 18%</span>
+              <span class="telem">42s elapsed</span><span class="telem-sep">·</span>
+              <span class="telem">$0.02 so far</span>
+              <button class="copy-resume" data-cmd="claude --resume sess-ctrl-test-live" title="Copy resume command">⧉</button>
+            </div>
+          </div>
+          <div class="detail" style="display:block">
+            <h4>Live progress</h4>
+            <p class="summary">Generating wiring tests for <code>NoteController</code> · 4 / 7 endpoints covered</p>
+
+            <h4>Context usage</h4>
+            <div class="ctx-bar">
+              <div class="ctx-seg system"   style="width: 22%"></div>
+              <div class="ctx-seg memory"   style="width: 18%"></div>
+              <div class="ctx-seg agents"   style="width: 28%"></div>
+              <div class="ctx-seg messages" style="width: 32%"></div>
+            </div>
+            <div class="ctx-legend">
+              <span><span class="swatch" style="background:#5A8DCB"></span>system 8.0K</span>
+              <span><span class="swatch" style="background:#9B7AC9"></span>memory 6.5K</span>
+              <span><span class="swatch" style="background:#E0A75B"></span>agents 10.2K</span>
+              <span><span class="swatch" style="background:#6FAE7E"></span>messages 11.6K</span>
+              <span class="dim">36.3K / 200K (18%)</span>
+            </div>
+
+            <h4>Tokens · cost</h4>
+            <p class="summary">in 5.2K · cached 1.8K (35%) · out 980 · $0.02</p>
+
+            <div class="actions">
+              <button class="btn">Recheck</button>
+              <button class="btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="run-node is-child">
+          <div class="row-1">
+            <span class="status-dot completed"></span>
+            <span class="agent-name">cast-service</span>
+            <span class="caret">▸</span>
+          </div>
+          <div class="row-2">
+            <span class="pill completed">completed</span>
+            <span class="telem">1m</span><span class="telem-sep">·</span>
+            <span class="telem">$0.04</span>
+            <button class="copy-resume" data-cmd="claude --resume sess-service" title="Copy resume command">⧉</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-high">
+        <div class="row-1">
+          <span class="status-dot completed"></span>
+          <span class="agent-name">cast-subphase-runner</span>
+          <span class="crumbs"><span class="task">sp2 · service layer</span></span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill completed">completed</span>
+          <span class="ctx-pill high">ctx 73%</span>
+          <span class="rollup">5 steps</span>
+          <span class="telem">15m</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.78</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-sp2" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+
+      <div class="run-node is-child ctx-mid">
+        <div class="row-1">
+          <span class="status-dot running"></span>
+          <span class="agent-name">cast-integration-test-orchestrator</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="row-2">
+          <span class="pill running">running</span>
+          <span class="ctx-pill mid">ctx 52%</span>
+          <span class="rollup">3 steps</span>
+          <span class="telem">12m elapsed</span>
+          <span class="telem-sep">·</span>
+          <span class="telem">$0.58 so far</span>
+          <button class="copy-resume" data-cmd="claude --resume sess-int-test-orch" title="Copy resume command">⧉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Collapse-state demo only: real impl will persist to localStorage and
+  // survive HTMX polls by swapping only the .row-2 span, not the run-node.
+
+  // Copy-resume affordance — wired across every line-2 button.
+  document.querySelectorAll('.copy-resume').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // don't toggle the row's expansion
+      const cmd = btn.getAttribute('data-cmd');
+      try { await navigator.clipboard.writeText(cmd); } catch (_) { /* fallback noop in mockup */ }
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1100);
+    });
+  });
+</script>
+</body>
+</html>

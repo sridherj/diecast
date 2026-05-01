@@ -1,0 +1,30 @@
+{# Line-2 status/telemetry cells for a run node (sp2).
+   Wrapper id `run-cells-{{ run.id }}`. The hx-* attrs are conditional on
+   `run.status in ('running', 'pending', 'rate_limited')` — completed runs
+   do not poll. The endpoint that serves this fragment lands in sp3; until
+   then, polls 404 silently for live rows. The HTMX swap lives on this inner
+   span (NEVER the outer .run-node) so expand state on the outer node
+   survives the 3s poll. #}
+<span class="run-status-cells row-2"
+      id="run-cells-{{ run.id }}"
+      {% if run.status in ('running', 'pending', 'rate_limited') %}hx-get="/api/agents/runs/{{ run.id }}/status_cells"
+      hx-trigger="every 3s"
+      hx-swap="outerHTML"{% endif %}>
+  <span class="pill {{ run.status }}">{{ run.status }}</span>
+  {% if run.ctx_class %}<span class="ctx-pill {{ run.ctx_class }}">ctx {{ run.ctx_class }}</span>{% endif %}
+  {% if run.descendant_count %}<span class="rollup">{{ run.descendant_count }} steps</span>{% endif %}
+  {% if run.failed_descendant_count %}<span class="rollup bad">⚠ {{ run.failed_descendant_count }} failed</span>{% endif %}
+  {% if run.rework_count and not run.failed_descendant_count %}<span class="rollup warn">⚠ {{ run.rework_count }} reworked</span>{% endif %}
+  {% if run.wall_duration_seconds is not none and run.wall_duration_seconds is defined %}
+    <span class="duration">{{ duration(run.started_at, run.completed_at) }}</span>
+  {% elif run.active_execution_seconds %}
+    <span class="duration">{{ run.active_execution_seconds // 60 }}m active</span>
+  {% elif run.started_at %}
+    <span class="duration">started {{ relative_time(run.started_at) }}</span>
+  {% endif %}
+  {% if run.total_cost_usd %}<span class="cost">${{ '%.2f' | format(run.total_cost_usd) }}</span>{% elif run.cost_usd %}<span class="cost">{{ format_cost(run.cost_usd) }}</span>{% endif %}
+  <button class="copy-resume" type="button"
+          data-cmd="{{ (run.resume_command or (run.session_id and ('claude --resume ' ~ run.session_id)) or '')|e }}"
+          aria-label="Copy resume command">⧉</button>
+  <span class="relative-time" data-ts="{{ run.created_at }}">{{ relative_time(run.created_at) }}</span>
+</span>

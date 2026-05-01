@@ -2286,43 +2286,6 @@ select:focus-visible {
     background: rgba(59, 91, 176, 0.14);
     color: var(--color-info);
 }
-/* Parent-child tree connectors (4.1b) */
-.run-children-container {
-    border-left: 2px solid rgba(107, 114, 128, 0.25);
-    margin-left: 18px;
-    padding-left: 0;
-}
-.child-run {
-    position: relative;
-}
-.child-run::before {
-    content: '';
-    position: absolute;
-    left: -2px;
-    top: 50%;
-    width: 12px;
-    height: 0;
-    border-top: 2px solid rgba(107, 114, 128, 0.25);
-}
-.child-indent {
-    color: rgba(107, 114, 128, 0.4);
-    font-family: var(--font-mono);
-    font-size: 12px;
-}
-/* Second row: context bar always visible in run row */
-.run-row-context {
-    padding: 4px 12px 6px 28px;
-    border-top: 1px solid rgba(107, 114, 128, 0.08);
-}
-.run-row-context .context-bar {
-    max-width: none;
-    margin-top: 2px;
-}
-.run-row-context .context-bar-legend {
-    margin-top: 4px;
-    margin-bottom: 0;
-}
-
 /* Context usage bar (4.1c) */
 .context-bar {
     display: flex;
@@ -3048,41 +3011,6 @@ select:focus-visible {
     margin-bottom: 20px;
 }
 
-.run-row {
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--border);
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-    transition: border-color 150ms ease, box-shadow 150ms ease;
-}
-
-.run-row[data-status="running"],
-.run-row[data-status="pending"] {
-    border-left-color: var(--color-info);
-}
-
-.run-row[data-status="completed"] {
-    border-left-color: var(--color-success);
-}
-
-.run-row[data-status="failed"] {
-    border-left-color: var(--color-danger);
-}
-
-.run-row:hover {
-    border-color: var(--text-muted);
-}
-
-.run-row-main {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    min-height: 44px;
-}
-
 .run-status-dot {
     width: 8px;
     height: 8px;
@@ -3137,14 +3065,6 @@ select:focus-visible {
     min-width: 0;
 }
 
-.run-row-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
 .run-status-pill {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -3196,16 +3116,6 @@ select:focus-visible {
     white-space: nowrap;
     min-width: 60px;
     text-align: right;
-}
-
-.run-row-details {
-    display: none;
-    padding: 0 16px 16px 36px;
-    border-top: 1px solid var(--border);
-}
-
-.run-row.expanded .run-row-details {
-    display: block;
 }
 
 .run-detail-section {
@@ -3346,29 +3256,6 @@ select:focus-visible {
 
 .run-expand-toggle.expanded {
     transform: rotate(90deg);
-}
-
-.run-children-container {
-    display: none;
-    padding-left: 24px;
-    border-top: 1px solid var(--border);
-}
-
-.run-row.children-visible .run-children-container {
-    display: block;
-}
-
-.child-run {
-    border-left: 2px solid var(--text-muted);
-    margin-left: 12px;
-    margin-bottom: 4px;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.child-indent {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
 }
 
 /* ── Cache Hit Rate ──────────────────────── */
@@ -3978,4 +3865,243 @@ body.sidebar-active::after {
     color: var(--color-accent);
     font-style: italic;
     font-size: 0.85em;
+}
+
+/* === threaded /runs (sp2) =================================================
+   Ported from docs/plan/mockups/runs-threaded.html. Boundary marker so sp5's
+   cleanup of legacy `.run-row*` styles can grep for the start of this block
+   and avoid touching anything below. Variable references reuse the
+   --color-* / --radius-* / --font-* tokens already defined upstream. */
+
+.run-group {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.run-group.has-failure { border-left: 3px solid var(--color-danger); }
+.run-group.has-warning { border-left: 3px solid var(--color-warning); }
+
+.run-node {
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.08s;
+}
+.run-node:hover { background: rgba(0,0,0,0.015); }
+.run-node.expanded .caret { transform: rotate(90deg); }
+
+.run-node .row-1 {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0;
+}
+.run-node .row-2 {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 4px; padding-left: 16px;
+  color: var(--color-muted); font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.run-node .status-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  display: inline-block;
+  background: var(--color-faint);
+}
+.run-node .status-dot.completed   { background: var(--color-success); }
+.run-node .status-dot.running     { background: var(--color-info); animation: run-node-pulse 1.5s infinite; }
+.run-node .status-dot.failed,
+.run-node .status-dot.stuck       { background: var(--color-danger); }
+.run-node .status-dot.pending,
+.run-node .status-dot.scheduled   { background: var(--color-faint); }
+.run-node .status-dot.rate_limited,
+.run-node .status-dot.rate        { background: var(--color-warning); }
+@keyframes run-node-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+.run-node .agent-name {
+  font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.run-node.is-child .agent-name { font-weight: 500; color: var(--color-muted); }
+.run-node.is-child.ctx-low  .agent-name { color: var(--color-success); }
+.run-node.is-child.ctx-mid  .agent-name { color: var(--color-warning); }
+.run-node.is-child.ctx-high .agent-name { color: var(--color-danger); font-weight: 600; }
+
+.run-node .crumbs {
+  color: var(--color-muted); font-size: 13px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0; flex: 1;
+}
+.run-node .crumbs .goal {
+  color: var(--color-muted);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.08s;
+}
+.run-node .crumbs .goal:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.run-node .crumbs .sep { margin: 0 6px; color: var(--color-faint); }
+
+.run-node .pill {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  padding: 1px 7px; border-radius: 10px;
+}
+.run-node .pill.completed   { background: rgba(45,125,79,0.12); color: var(--color-success); }
+.run-node .pill.running     { background: rgba(59,91,176,0.12); color: var(--color-info); }
+.run-node .pill.failed,
+.run-node .pill.stuck       { background: rgba(178,36,57,0.14); color: var(--color-danger); }
+.run-node .pill.pending,
+.run-node .pill.scheduled   { background: rgba(142,138,163,0.18); color: var(--color-muted); }
+.run-node .pill.rate_limited,
+.run-node .pill.rate        { background: rgba(181,130,26,0.15); color: var(--color-warning); }
+
+/* ctx pill — sits next to status pill at equal prominence (Decision #4). */
+.run-node .ctx-pill {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  padding: 1px 7px; border-radius: 10px;
+  white-space: nowrap;
+}
+.run-node .ctx-pill.low  { background: rgba(45,125,79,0.12);  color: var(--color-success); }
+.run-node .ctx-pill.mid  { background: rgba(181,130,26,0.15); color: var(--color-warning); }
+.run-node .ctx-pill.high { background: rgba(178,36,57,0.14);  color: var(--color-danger); font-weight: 600; }
+
+.run-node .rollup {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  padding: 1px 7px; border-radius: 10px;
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+}
+.run-node .rollup.bad  { background: #FBE4E8; color: var(--color-danger); font-weight: 600; }
+.run-node .rollup.warn { background: #FBEFD6; color: var(--color-warning); }
+
+.run-node .rework-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-family: var(--font-mono);
+  color: var(--color-focus, #6B47B0);
+  background: rgba(107,71,176,0.10);
+  padding: 1px 6px; border-radius: 8px;
+  text-transform: lowercase; letter-spacing: 0.02em;
+}
+
+.run-node .duration,
+.run-node .cost {
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+}
+.run-node .relative-time {
+  font-family: var(--font-mono);
+  color: var(--color-faint);
+}
+
+.run-node .copy-resume {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: var(--radius-sm);
+  background: transparent; border: none; cursor: pointer;
+  color: var(--color-faint);
+  font-size: 12px; line-height: 1;
+  transition: background 0.08s, color 0.08s;
+}
+.run-node .copy-resume:hover { background: var(--color-surface-2); color: var(--color-text); }
+.run-node .copy-resume.copied { color: var(--color-success); }
+.run-node .copy-resume.copied::after {
+  content: "copied"; margin-left: 4px;
+  font-family: var(--font-mono); font-size: 10px;
+}
+
+.run-node .caret {
+  margin-left: auto;
+  color: var(--color-faint); font-size: 14px;
+  transition: transform 0.12s;
+  flex-shrink: 0;
+}
+
+/* Thread rail — one rail per group, child connector to row. */
+.thread {
+  margin: 0 14px 10px 22px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border);
+  position: relative;
+}
+.thread.has-failure { border-left-color: var(--color-danger); }
+.thread.has-warning { border-left-color: var(--color-warning); }
+.thread .run-node {
+  padding: 6px 0 6px 8px;
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+.thread > .run-node::before {
+  content: "";
+  position: absolute;
+  left: -14px; top: 18px;
+  width: 12px; height: 1px;
+  background: var(--color-border);
+}
+.thread.has-failure > .run-node.failed-self::before { background: var(--color-danger); }
+
+/* L3 detail (expansion target). Hidden by default; sp4's JS will toggle. */
+.run-node + .detail {
+  display: none;
+  margin: 4px 14px 12px 36px;
+  padding: 12px 14px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.run-node.expanded + .detail { display: block; }
+.detail h4 {
+  font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--color-muted); margin: 0 0 6px;
+  font-weight: 600;
+}
+.detail h4:not(:first-child) { margin-top: 14px; }
+.detail p { margin: 0 0 6px; }
+.detail .summary { color: var(--color-text); }
+.detail .err {
+  background: rgba(178,36,57,0.06);
+  border-left: 2px solid var(--color-danger);
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  color: var(--color-danger); font-family: var(--font-mono); font-size: 12px;
+}
+.detail ul { margin: 0; padding-left: 18px; }
+.detail .artifact {
+  font-family: var(--font-mono); font-size: 12px; color: var(--color-info);
+}
+.detail .actions { display: flex; gap: 8px; margin-top: 10px; }
+.detail .btn {
+  font-family: var(--font-body); font-size: 12px;
+  padding: 4px 10px; border-radius: var(--radius-sm);
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  color: var(--color-text); cursor: pointer;
+  text-decoration: none;
+}
+.detail .btn.primary {
+  background: var(--color-accent); color: white; border-color: var(--color-accent);
+}
+
+/* Full segmented context bar (only inside .detail expansion). */
+.detail .ctx-bar {
+  display: flex; height: 8px; border-radius: 4px; overflow: hidden;
+  background: var(--color-border); margin: 6px 0 4px;
+}
+.detail .ctx-seg.system   { background: #5A8DCB; }
+.detail .ctx-seg.memory   { background: #9B7AC9; }
+.detail .ctx-seg.agents   { background: #E0A75B; }
+.detail .ctx-seg.messages { background: #6FAE7E; }
+.detail .ctx-legend {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  font-size: 11px; color: var(--color-muted); font-family: var(--font-mono);
+}
+.detail .ctx-legend .swatch {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 2px; margin-right: 4px; vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .run-node .row-2 { gap: 6px; }
+  .run-node .relative-time { display: none; }
+  .run-node .crumbs .task { display: none; }
 }

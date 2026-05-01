@@ -16,7 +16,7 @@ These tests stub child checker outputs (or mock dispatch) and verify the coordin
 - Stubbed checker verdicts: content PASS (0.90), visual PASS (0.88), tone PASS (0.92)
 
 **Expected Behavior:**
-- Dispatches 3 children in parallel (check via `/api/agents/runs/{run_id}/children`)
+- Dispatches 3 children in parallel (check via `/api/agents/jobs/{run_id}?include=children` — assert `len(json.children) == 3`)
 - Waits for all 3 output.json files (barrier)
 - Runs adversarial pass (4 questions) → PASS
 - Decision: APPROVED
@@ -62,7 +62,7 @@ These tests stub child checker outputs (or mock dispatch) and verify the coordin
 - `check_mode: lightweight`
 
 **Expected Behavior:**
-- NO child dispatches (verify via `/api/agents/runs/{coordinator_run_id}/children` returns empty)
+- NO child dispatches (verify via `/api/agents/jobs/{coordinator_run_id}?include=children` — assert `json.children == []`)
 - Coordinator runs 6 condensed checks itself
 - Response time < 5 min (no child dispatch overhead)
 - Writes lightweight verdict to output.json
@@ -134,7 +134,7 @@ These tests exercise the full HOW → check → rework loop with real child agen
 3. Trigger check-coordinator with `check_mode: full`, `rework_iteration: 0`
 
 **Verify:**
-- [ ] Coordinator dispatched 3 child checkers (visible in `/api/agents/runs/{coord_run_id}/children`)
+- [ ] Coordinator dispatched 3 child checkers (visible in `/api/agents/jobs/{coord_run_id}?include=children` — assert `len(json.children) == 3`)
 - [ ] All 3 checkers produced verdicts in their respective `.agent-{run_id}.output.json`
 - [ ] Coordinator aggregated verdicts into `how/test-01/check-results.json`
 - [ ] Adversarial pass ran (4 questions visible in check-results.json)
@@ -172,7 +172,7 @@ These tests exercise the full HOW → check → rework loop with real child agen
 2. Trigger check-coordinator with `check_mode: lightweight`
 
 **Verify:**
-- [ ] No child agents dispatched (`/api/agents/runs/{coord_run_id}/children` returns empty list)
+- [ ] No child agents dispatched (`/api/agents/jobs/{coord_run_id}?include=children` — assert `json.children == []`)
 - [ ] Coordinator ran 6 condensed checks itself
 - [ ] Verdict returned in output.json with `mode: "lightweight"` and 6 checks_performed entries
 - [ ] No adversarial pass ran (skipped for lightweight)
