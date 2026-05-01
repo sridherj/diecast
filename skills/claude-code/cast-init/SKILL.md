@@ -135,9 +135,9 @@ mtime but is otherwise a no-op. The seven canonical areas are exactly: `explorat
 
 ### 3.2 Render `CLAUDE.md` template
 
-1. Read `templates/CLAUDE.md.template` from the installed Diecast repo (resolve via
-   `${CAST_REPO_DIR:-$(dirname $(realpath ~/.local/bin/cast-server))/../..}` or by reading
-   the install manifest written by `./setup`).
+1. Read `templates/CLAUDE.md.template` from the installed Diecast repo. Resolve the
+   repo via `${CAST_REPO_DIR:-$(readlink -f ~/.claude/skills/diecast)}` — `./setup`
+   creates `~/.claude/skills/diecast` as a symlink pointing at the repo root.
 2. Substitute `{{PROJECT_NAME}}` ← `basename "$(pwd)"` (markdown-sanitized).
 3. Substitute `{{SKILLS_LIST}}` ← Step 3.3 output.
 4. Write `<cwd>/CLAUDE.md`. If a CLAUDE.md already exists at this point on the
@@ -182,9 +182,13 @@ Pass `--user` to install at user scope (`~/.claude/settings.json`) instead.
 Behavior:
 
 ```bash
-cast-hook install            # project scope, the default
-cast-hook install --user     # user (global) scope
+~/.claude/skills/diecast/bin/cast-hook install            # project scope, the default
+~/.claude/skills/diecast/bin/cast-hook install --user     # user (global) scope
 ```
+
+The bare `cast-hook` command is **not** on PATH — it lives at the absolute path
+above. `./setup` creates the `~/.claude/skills/diecast` symlink to the repo root,
+which makes `bin/cast-hook` (a thin `uv run` wrapper) reachable.
 
 `cast-hook install` is **idempotent**: re-running is safe and never duplicates entries. It
 **never replaces** existing third-party hooks — it appends our `UserPromptSubmit` and
@@ -213,10 +217,10 @@ The same install path is available outside `/cast-init` for users who skipped it
 want to (re-)install later from a project root:
 
 ```bash
-cast-hook install              # project scope (default)
-cast-hook install --user       # user (global) scope
-cast-hook uninstall            # remove our entries; preserve everything else
-cast-hook uninstall --user
+~/.claude/skills/diecast/bin/cast-hook install              # project scope (default)
+~/.claude/skills/diecast/bin/cast-hook install --user       # user (global) scope
+~/.claude/skills/diecast/bin/cast-hook uninstall            # remove our entries; preserve everything else
+~/.claude/skills/diecast/bin/cast-hook uninstall --user
 ```
 
 ## Step 5: Emit typed `next_steps` (US14)

@@ -45,6 +45,36 @@ backup_if_exists() {
   log "Backed up ${src} -> ${dest}"
 }
 
+# install_diecast_skill_root <repo_dir>
+#   Mirror gstack's pattern (gstack/setup link_claude_skill_dirs root link):
+#   create ~/.claude/skills/diecast as a symlink to the repo root so that
+#   binaries under bin/ are reachable through ~/.claude/skills/diecast/bin/.
+#   The hooks installer writes that absolute path into settings.json, dodging
+#   PATH resolution entirely (Claude Code fires hooks with a restricted PATH
+#   that does not reliably include ~/.local/bin/ or .venv/bin/).
+#
+#   Idempotent: removes any existing symlink, backs up a real dir/file, then
+#   re-links. Honors DRY_RUN.
+install_diecast_skill_root() {
+  local repo_dir="$1"
+  local skills_dir="${HOME}/.claude/skills"
+  local target="${skills_dir}/diecast"
+
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY: ln -snf ${repo_dir} ${target}"
+    return 0
+  fi
+
+  mkdir -p "${skills_dir}"
+  if [[ -L "${target}" ]]; then
+    rm -f "${target}"
+  elif [[ -e "${target}" ]]; then
+    backup_if_exists "${target}"
+  fi
+  ln -snf "${repo_dir}" "${target}"
+  log "Linked ${target} -> ${repo_dir}"
+}
+
 # prune_old_backups
 #   Keep the 5 newest ~/.claude/.cast-bak-* directories (lex sort), rm -rf the rest.
 prune_old_backups() {

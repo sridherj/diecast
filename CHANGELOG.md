@@ -12,6 +12,30 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 > parent-child delegation primitive, cast-server with Diecast design tokens,
 > the cast-crud reference family (Layer-1), and one-command setup.
 
+### Install seam: gstack pattern, no PATH dependency (BREAKING)
+- `./setup` now creates `~/.claude/skills/diecast/` as a symlink to the repo
+  root. Binaries are reachable as `~/.claude/skills/diecast/bin/cast-server`
+  and `~/.claude/skills/diecast/bin/cast-hook` — no PATH manipulation.
+- `~/.local/bin/cast-server` shim is **removed** by `./setup --upgrade`
+  (backed up under `~/.claude/.cast-bak-<ts>/.local/bin/cast-server`).
+- `cast-hook install` writes the absolute path
+  `~/.claude/skills/diecast/bin/cast-hook <subcommand>` into
+  `.claude/settings.json` instead of bare `cast-hook <subcommand>`. PATH-based
+  resolution was unreliable: Claude Code fires hooks with a restricted shell
+  PATH that frequently excluded `~/.local/bin/` and `.venv/bin/`, so hooks
+  silently failed with "command not found".
+- **BREAKING:** if you aliased `cast-server` in your shell rc, update it to
+  point at `~/.claude/skills/diecast/bin/cast-server`. If you previously ran
+  `cast-hook install` in any project, the old bare-`cast-hook` entries in
+  that project's `.claude/settings.json` are now orphans — re-run
+  `~/.claude/skills/diecast/bin/cast-hook install` from each affected
+  project to refresh.
+- New cast-doctor checks: green "diecast skill root linked" + yellow when
+  the symlink is missing or the binary is unreachable.
+- Spec updated: `docs/specs/cast-hooks.collab.md` v2 inverts FR-002 (PATH
+  forbidden, absolute path required) and adds FR-014 (skill-root symlink)
+  and FR-015 (legacy shim removal on upgrade).
+
 ### Port + env-var seam (sp1, first-run launch)
 - Default cast-server port shifted from `8000` to `8005`.
 - New env-var `CAST_HOST` (client-side connect target, default `localhost`).

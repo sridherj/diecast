@@ -83,8 +83,16 @@ case_clean_install() {
     assert_file "${fake_home}/.cast/config.yaml" || return 1
     assert_grep "^terminal:" "${fake_home}/.cast/config.yaml" || return 1
     assert_grep "auto_upgrade:" "${fake_home}/.cast/config.yaml" || return 1
-    assert_file "${fake_home}/.local/bin/cast-server" || return 1
-    assert_grep "uv run --project" "${fake_home}/.local/bin/cast-server" || return 1
+
+    # gstack-pattern install seam: ~/.claude/skills/diecast symlink → repo,
+    # binaries reachable through bin/. No PATH shim at ~/.local/bin/cast-server.
+    assert_no_file "${fake_home}/.local/bin/cast-server" || return 1
+    if [[ ! -L "${fake_home}/.claude/skills/diecast" ]]; then
+      echo "    ~/.claude/skills/diecast is not a symlink" >&2
+      return 1
+    fi
+    assert_file "${fake_home}/.claude/skills/diecast/bin/cast-server" || return 1
+    assert_file "${fake_home}/.claude/skills/diecast/bin/cast-hook" || return 1
 
     # At least one cast-* agent landed.
     if ! ls "${fake_home}/.claude/agents/" 2>/dev/null | grep -q '^cast-'; then

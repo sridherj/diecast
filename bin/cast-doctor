@@ -25,6 +25,8 @@
 # Yellow (warn-only) checks:
 #   * $CAST_TERMINAL set to a value not in the supported list (soft-fallback per Decision #3)
 #   * $CAST_TERMINAL empty, $TERMINAL empty, no supported terminal on PATH
+#   * cast-hook not installed at project- or user-scope when cwd looks like a project
+#     (without it the /runs tree drops user-typed /cast-* commands as parent rows)
 #
 # Direct callability (Decision #2): this script is intentionally usable post-install.
 # The setup wrapper sources bin/_lib.sh and then invokes us; standalone callers do
@@ -279,6 +281,57 @@ check_writable() {
   fi
 }
 
+# Yellow-only — cast-hook is functional without per-project install (cast-server
+# still serves the API, agent dispatches still work) but the runs-tree won't
+# capture user-typed /cast-* commands as parent rows. The grep pattern matches
+# the absolute-path command shape that install_hooks.py writes (resolved
+# through ~/.claude/skills/diecast/bin/cast-hook).
+check_cast_hooks() {
+  local cwd
+  cwd="$(pwd)"
+  local proj_settings="${cwd}/.claude/settings.json"
+  local user_settings="${HOME}/.claude/settings.json"
+  local needle="${HOME}/.claude/skills/diecast/bin/cast-hook "
+
+  local proj_has=0
+  local user_has=0
+  [[ -f "${proj_settings}" ]] && grep -qF "${needle}" "${proj_settings}" 2>/dev/null && proj_has=1
+  [[ -f "${user_settings}" ]] && grep -qF "${needle}" "${user_settings}" 2>/dev/null && user_has=1
+
+  if [[ "${proj_has}" -eq 1 ]]; then
+    note_green "cast-hook installed at project scope (${proj_settings})"
+    return
+  fi
+  if [[ "${user_has}" -eq 1 ]]; then
+    note_green "cast-hook installed at user scope (${user_settings})"
+    return
+  fi
+
+  # Neither scope has it. Only flag YELLOW when cwd looks like a project
+  # (Diecast-managed or otherwise) — bare shells get nothing because there's
+  # nothing to install into.
+  if [[ -d "${cwd}/.claude" || -d "${cwd}/.git" || -f "${cwd}/pyproject.toml" || -f "${cwd}/package.json" ]]; then
+    note_yellow "cast-hook not installed for this project. Without it the /runs page won't show user-typed /cast-* commands as parent rows. Fix: run \`~/.claude/skills/diecast/bin/cast-hook install\` in this directory (add --user for global scope). Re-run /cast-init also wires this automatically."
+  fi
+}
+
+# Yellow-only — verify the diecast skill-root symlink that resolves cast-hook
+# (and cast-server) is in place. Missing it means hook entries written by the
+# installer point at a non-existent binary; rerun ./setup to repair.
+check_diecast_skill_root() {
+  local target="${HOME}/.claude/skills/diecast"
+  local hook_bin="${target}/bin/cast-hook"
+  if [[ ! -L "${target}" ]]; then
+    note_yellow "~/.claude/skills/diecast is not a symlink. Run ./setup --upgrade from the diecast repo to install it."
+    return
+  fi
+  if [[ ! -x "${hook_bin}" ]]; then
+    note_yellow "${hook_bin} is missing or not executable. The diecast skill-root symlink points at $(readlink "${target}"). Run ./setup --upgrade to repair."
+    return
+  fi
+  note_green "diecast skill root linked (${target} -> $(readlink "${target}"))"
+}
+
 is_supported_terminal() {
   local needle="$1"
   local t
@@ -449,6 +502,8 @@ check_claude
 check_writable "${HOME}/.claude"
 check_writable "${HOME}/.cast"
 check_terminal
+check_diecast_skill_root
+check_cast_hooks
 
 # ── Output ─────────────────────────────────────────────────────────
 emit_json() {

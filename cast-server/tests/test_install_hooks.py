@@ -296,6 +296,31 @@ def test_uninstall_noop_when_settings_file_missing(tmp_project_root, capsys):
     assert not path.exists()
 
 
+def test_install_writes_absolute_path_command(tmp_project_root):
+    """FR-002 (v2): the command string MUST be the absolute path through the
+    diecast skill-root umbrella, never bare `cast-hook <subcommand>`.
+    """
+    install_hooks.install(tmp_project_root)
+    data = _read(_settings(tmp_project_root))
+    cmd = data["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert cmd.startswith("/")
+    assert "/.claude/skills/diecast/bin/cast-hook " in cmd
+    assert cmd.endswith(" user-prompt-start")
+
+
+def test_install_refuses_when_cast_hook_bin_missing(tmp_project_root, monkeypatch):
+    """FR-002 (v2): pre-flight check refuses to write entries that point at a
+    non-existent binary. Tells the user to run ./setup --upgrade.
+    """
+    monkeypatch.setattr(install_hooks, "CAST_HOOK_BIN", "/nonexistent/path/cast-hook")
+    with pytest.raises(SystemExit) as exc_info:
+        install_hooks.install(tmp_project_root)
+    assert "/nonexistent/path/cast-hook" in str(exc_info.value)
+    assert "./setup --upgrade" in str(exc_info.value)
+    # Pre-flight failed → no settings.json was written.
+    assert not _settings(tmp_project_root).exists()
+
+
 def test_round_trip_install_then_uninstall_restores_original_shape(tmp_project_root):
     seed = {
         "hooks": {

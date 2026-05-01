@@ -40,10 +40,15 @@ fixes; older alpha and pre-release versions do not.
 ## Install-time trust model
 
 Diecast install grants the cloned repo execution under your user account.
-The `~/.local/bin/cast-server` wrapper that `./setup` writes invokes
+`./setup` symlinks the repo to `~/.claude/skills/diecast/`, so the wrappers
+at `~/.claude/skills/diecast/bin/cast-server` and
+`~/.claude/skills/diecast/bin/cast-hook` invoke
 `uv run --project <repo>` against the very directory you cloned — a
 malicious replacement of the repo (or any of its dependencies) could
-execute arbitrary code as your user the next time `cast-server` runs.
+execute arbitrary code as your user the next time either binary runs.
+Hooks fired by Claude Code do likewise: `.claude/settings.json` writes
+the absolute path `~/.claude/skills/diecast/bin/cast-hook ...`, so each
+prompt submit triggers code from the symlinked repo.
 
 For production environments, pin the install to a tagged release rather
 than tracking `main`:

@@ -14,9 +14,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from cast_server.cli.hook_events import HOOK_EVENTS, COMMAND_FOR_EVENT
+from cast_server.cli.hook_events import CAST_HOOK_BIN, COMMAND_FOR_EVENT, HOOK_EVENTS
 
-HOOK_MARKER = "cast-hook "
+HOOK_MARKER = f"{CAST_HOOK_BIN} "
 HOOK_TIMEOUT_SECONDS = 3
 PROJECT_MARKERS = (".git", ".cast", "pyproject.toml", "package.json")
 
@@ -81,6 +81,13 @@ def _entry_is_ours(entry: Any) -> bool:
 
 
 def install(project_root: Path, user_scope: bool = False) -> int:
+    if not Path(CAST_HOOK_BIN).exists():
+        raise SystemExit(
+            f"cast-hook: {CAST_HOOK_BIN} is missing. "
+            f"Run `./setup --upgrade` from the diecast repo first to create the "
+            f"~/.claude/skills/diecast symlink that resolves cast-hook."
+        )
+
     if not user_scope and not _looks_like_project_root(project_root):
         print(
             f"cast-hook: warning: {project_root} does not look like a project root "

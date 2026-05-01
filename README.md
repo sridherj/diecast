@@ -52,7 +52,7 @@ Diecast doesn't fix the model. It fixes the workflow around the model.
 git clone https://github.com/sridherj/diecast.git ~/workspace/diecast
 cd ~/workspace/diecast
 
-# 2. Install (drops cast-* skills + agents into ~/.claude/, puts cast-server on your PATH, and starts it on first install)
+# 2. Install (drops cast-* skills + agents into ~/.claude/, links the repo as ~/.claude/skills/diecast/, and starts cast-server on first install)
 ./setup
 
 # 3. In any project, scaffold the docs/ structure Diecast writes into
@@ -73,11 +73,11 @@ That's the chain. Every step writes its artifact into `docs/` using a stable fil
 install. To start it again after a reboot or shell restart:
 
 ```bash
-cast-server                            # http://localhost:8005, on $PATH after ./setup
-./bin/cast-server                      # equivalent, from a fresh clone
-CAST_PORT=8080 cast-server             # custom port (8005 is the default)
-CAST_BIND_HOST=0.0.0.0 cast-server     # server-side bind for LAN access
-CAST_HOST=cast.example.com cast-server # client-side connect target (future cloud)
+~/.claude/skills/diecast/bin/cast-server                            # http://localhost:8005
+./bin/cast-server                                                   # equivalent, from a fresh clone
+CAST_PORT=8080 ~/.claude/skills/diecast/bin/cast-server             # custom port (8005 is the default)
+CAST_BIND_HOST=0.0.0.0 ~/.claude/skills/diecast/bin/cast-server     # server-side bind for LAN access
+CAST_HOST=cast.example.com ~/.claude/skills/diecast/bin/cast-server # client-side connect target (future cloud)
 ```
 
 cast-server is a single user-level daemon — one instance per machine, shared
@@ -87,8 +87,11 @@ across every project you cd into. State lives in `~/.cast/diecast.db`; logs at
 calling the server); `CAST_BIND_HOST` controls the *server-side* bind. Each
 goal binds to one repo via its `external_project_dir` column.
 
-Only `cast-server` is on your `$PATH`. Every other Diecast operation is a
-`/cast-*` slash command inside Claude Code (run `/cast-doctor` to diagnose,
+Diecast does not put anything on your `$PATH`. `./setup` symlinks the repo to
+`~/.claude/skills/diecast/`, so `~/.claude/skills/diecast/bin/cast-server` and
+`~/.claude/skills/diecast/bin/cast-hook` are the canonical entry points (alias
+in your shell rc if you want a shorter name). Every other Diecast operation is
+a `/cast-*` slash command inside Claude Code (run `/cast-doctor` to diagnose,
 `/cast-init` to scaffold, `/cast-runs` for the dashboard, etc.).
 
 ---
@@ -156,7 +159,7 @@ cd ~/workspace/diecast
 
 - `~/.claude/agents/cast-*` — all agent definitions
 - `~/.claude/skills/cast-*` — all slash commands (skills are auto-generated; never hand-edit)
-- `cast-server` on your PATH
+- `~/.claude/skills/diecast/bin/cast-server` symlinked from the repo (no PATH pollution)
 - `~/.cast/config.yaml` — your local config
 
 Re-run `./setup` any time; existing files back up to `~/.claude/.cast-bak-<timestamp>/` first.

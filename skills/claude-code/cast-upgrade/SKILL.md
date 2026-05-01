@@ -286,7 +286,7 @@ yq -i '.upgrade_snooze_until = null | .upgrade_snooze_streak = 0' ~/.cast/config
 if [[ "$SERVER_WAS_RUNNING" == "1" ]]; then
   pkill -f cast-server || true
   sleep 1
-  nohup "$HOME/.local/bin/cast-server" >> "$HOME/.cast/cast-server.log" 2>&1 &
+  nohup "$HOME/.claude/skills/diecast/bin/cast-server" >> "$HOME/.cast/cast-server.log" 2>&1 &
   disown
 fi
 ```
@@ -294,6 +294,52 @@ fi
 `nohup` is critical — without it, killing the parent shell kills the
 restarted server. The `disown` keeps the background job out of the shell's
 job table so it does not get reaped on shell exit.
+
+### Step 10b: Backfill cast-hook entries when missing
+
+Users who ran `/cast-init` before commit `455a38c` (which wired the hook
+installer into init) have a project-local `.claude/settings.json` without
+the `cast-hook` `UserPromptSubmit` / `Stop` entries. Without those, the
+`/runs` page never shows a parent row for user-typed `/cast-*` commands —
+all child agent runs orphan. This step backfills them on upgrade so the
+runs tree heals automatically.
+
+```bash
+# Only act when there is a project-local .claude/ directory in cwd —
+# cast-upgrade is sometimes run from a non-project shell, in which case
+# we leave hooks alone (the user will install per-project later).
+if [[ -d "$(pwd)/.claude" ]]; then
+  SETTINGS="$(pwd)/.claude/settings.json"
+  NEEDLE="$HOME/.claude/skills/diecast/bin/cast-hook "
+  HAS_HOOKS=0
+  if [[ -f "$SETTINGS" ]] && grep -qF "$NEEDLE" "$SETTINGS" 2>/dev/null; then
+    HAS_HOOKS=1
+  fi
+
+  if [[ "$HAS_HOOKS" == "0" ]]; then
+    echo "[cast] Project .claude/settings.json has no cast-hook entries —"
+    echo "[cast] backfilling so the /runs tree captures user-typed slash commands."
+    if "$HOME/.claude/skills/diecast/bin/cast-hook" install; then
+      echo "[cast] cast-hook installed at project scope. Restart Claude Code for it to take effect."
+    else
+      echo "[cast] cast-hook install failed — check the message above and run manually."
+    fi
+  fi
+fi
+```
+
+**Idempotent.** `cast-hook install` is a no-op when entries are already
+present, so re-running cast-upgrade after a manual install never
+duplicates. **Surgical.** Existing third-party hooks are preserved
+byte-for-byte. **Project-scope only.** This step never touches
+`~/.claude/settings.json`; users who want user-scope hooks must run
+`cast-hook install --user` themselves.
+
+If the upgrade also adds new hook events (e.g., when sp3 of
+`cast-subagent-and-skill-capture` lands `SubagentStart`/`SubagentStop`/
+`PreToolUse(Skill)` entries), this same backfill step picks them up on
+the next `/cast-upgrade` because `cast-hook install` is additive — it
+appends any not-yet-installed events alongside the existing ones.
 
 ### Step 11: Success path
 
