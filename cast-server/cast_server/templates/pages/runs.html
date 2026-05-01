@@ -115,10 +115,21 @@ document.querySelectorAll('.runs-filters .filter-btn').forEach(btn => {
     e.stopPropagation();
     const cmd = btn.dataset.cmd || '';
     if (!cmd) return;
-    navigator.clipboard.writeText(cmd).then(() => {
+    const label = btn.querySelector('.label');
+    const ico = btn.querySelector('.ico');
+    const prevLabel = label ? label.textContent : null;
+    const prevIco = ico ? ico.textContent : null;
+    Promise.resolve(copyToClipboard(cmd, 'resume command')).then((ok) => {
+      if (!ok) return;
       btn.classList.add('copied');
-      setTimeout(() => btn.classList.remove('copied'), 1100);
-    }).catch(() => {});
+      if (label) label.textContent = 'Copied';
+      if (ico) ico.textContent = '✓';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        if (label && prevLabel !== null) label.textContent = prevLabel;
+        if (ico && prevIco !== null) ico.textContent = prevIco;
+      }, 1100);
+    });
   });
 
   if (document.readyState === 'loading') {

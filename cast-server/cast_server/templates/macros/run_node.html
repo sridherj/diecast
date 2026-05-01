@@ -81,7 +81,6 @@
     </div>
     {% endif %}
     <div class="actions">
-      <a class="btn" href="/runs/{{ run.id }}">Open run</a>
       {% if run.status == 'failed' %}
       <button class="btn"
               hx-post="/api/agents/jobs/{{ run.id }}/recheck"

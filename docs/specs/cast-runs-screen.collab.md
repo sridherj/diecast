@@ -133,10 +133,11 @@ the `⧉` button is present on every rendered row and clicking it calls
 **Acceptance scenarios:**
 
 - **Scenario 1:** WHEN any row renders, THE SYSTEM SHALL include the
-  `.copy-resume` `⧉` button in its line-2 cells regardless of `status`.
-- **Scenario 2:** WHEN the user clicks `⧉`, THE SYSTEM SHALL call
-  `navigator.clipboard.writeText(<resume command>)` and apply a brief
-  `.copied` flash class to the button.
+  `.copy-resume` button (labeled `Resume ⧉`) in its line-2 cells regardless
+  of `status`.
+- **Scenario 2:** WHEN the user clicks the `Resume` button, THE SYSTEM SHALL
+  call `navigator.clipboard.writeText(<resume command>)` and swap the button
+  contents to `Copied ✓` with the `.copied` class for ~1.1s, then revert.
 
 ### US6 — Polling preserves user state (Priority: P1)
 

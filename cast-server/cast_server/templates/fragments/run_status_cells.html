@@ -25,6 +25,6 @@
   {% if run.total_cost_usd %}<span class="cost">${{ '%.2f' | format(run.total_cost_usd) }}</span>{% elif run.cost_usd %}<span class="cost">{{ format_cost(run.cost_usd) }}</span>{% endif %}
   <button class="copy-resume" type="button"
           data-cmd="{{ (run.resume_command or (run.session_id and ('claude --resume ' ~ run.session_id)) or '')|e }}"
-          aria-label="Copy resume command">⧉</button>
+          aria-label="Copy resume command"><span class="label">Resume</span><span class="ico" aria-hidden="true">⧉</span></button>
   <span class="relative-time" data-ts="{{ run.created_at }}">{{ relative_time(run.created_at) }}</span>
 </span>

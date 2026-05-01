@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Diecast{% endblock %}</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/vendor/easymde/easymde.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,33 +54,49 @@
     {% include "fragments/footer.html" %}
 
     <script>
-    function copyPath(path) {
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(path).then(function() {
-                showToast("Copied: " + path, "success");
-            }).catch(function() {
-                copyPathFallback(path);
-            });
-        } else {
-            copyPathFallback(path);
+    /* Shared clipboard helper. All copy buttons in the app go through this so
+       the success toast looks identical everywhere. Returns a Promise<boolean>:
+       true on success, false on failure. */
+    function copyToClipboard(text, label) {
+        var displayLabel = label || text;
+        function done(ok) {
+            if (ok) {
+                showToast("Copied: " + displayLabel, "success");
+            } else {
+                showToast("Copy failed — select manually: " + displayLabel, "error");
+            }
+            return ok;
         }
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text)
+                .then(function() { return done(true); })
+                .catch(function() { return Promise.resolve(copyToClipboardFallback(text, displayLabel)); });
+        }
+        return Promise.resolve(copyToClipboardFallback(text, displayLabel));
     }
 
-    function copyPathFallback(path) {
+    function copyToClipboardFallback(text, displayLabel) {
         var ta = document.createElement("textarea");
-        ta.value = path;
+        ta.value = text;
         ta.style.position = "fixed";
         ta.style.left = "-9999px";
         document.body.appendChild(ta);
         ta.select();
+        var ok = false;
         try {
-            document.execCommand("copy");
-            showToast("Copied: " + path, "success");
-        } catch(e) {
-            showToast("Copy failed — select manually: " + path, "error");
-        }
+            ok = document.execCommand("copy");
+        } catch(e) { ok = false; }
         document.body.removeChild(ta);
+        if (ok) {
+            showToast("Copied: " + displayLabel, "success");
+        } else {
+            showToast("Copy failed — select manually: " + displayLabel, "error");
+        }
+        return ok;
     }
+
+    /* Back-compat: copy a file path with the path itself as the toast label. */
+    function copyPath(path) { copyToClipboard(path, path); }
 
     function showToast(message, type) {
         type = type || "info";
