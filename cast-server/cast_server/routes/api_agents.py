@@ -10,7 +10,7 @@ from cast_server import config as _config
 from cast_server.deps import templates
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
-from cast_server.services import agent_service
+from cast_server.services import agent_service, user_invocation_service
 from cast_server.services.agent_service import (
     MalformedOutputError,
     MissingExternalProjectDirError,
@@ -27,6 +27,16 @@ class InvokeRequest(BaseModel):
 
 class ContinueRunRequest(BaseModel):
     message: str
+
+
+class UserInvocationOpenRequest(BaseModel):
+    agent_name: str
+    prompt: str
+    session_id: str | None = None
+
+
+class UserInvocationCompleteRequest(BaseModel):
+    session_id: str | None = None
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
 
@@ -123,6 +133,32 @@ async def trigger_agent(request: Request, name: str):
     except ValueError as e:
         return JSONResponse(status_code=422, content={"detail": str(e)})
     return {"run_id": run_id, "status": "scheduled" if scheduled_at else "pending"}
+
+
+@router.post("/user-invocations")
+async def open_user_invocation(req: UserInvocationOpenRequest):
+    """Open a user-invocation row for a Claude Code slash-command prompt.
+
+    Server is agnostic to the ``/cast-`` prefix (Decision #13) — any non-empty
+    ``agent_name`` is accepted; the hook handler is responsible for filtering.
+    """
+    run_id = user_invocation_service.register(
+        agent_name=req.agent_name,
+        prompt=req.prompt,
+        session_id=req.session_id,
+    )
+    return {"run_id": run_id}
+
+
+@router.post("/user-invocations/complete")
+async def complete_user_invocation(req: UserInvocationCompleteRequest):
+    """Close every still-running user-invocation row in this session.
+
+    A missing or empty ``session_id`` is **not** an error — the contract
+    returns ``{"closed": 0}`` so the Stop hook can fire unconditionally.
+    """
+    closed = user_invocation_service.complete(req.session_id)
+    return {"closed": closed}
 
 
 @router.get("/jobs/{run_id}")
