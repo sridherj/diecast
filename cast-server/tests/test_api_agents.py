@@ -247,3 +247,156 @@ def test_complete_does_not_close_subprocess_rows(env):
     assert user_row["status"] == "completed"
     assert sub_row["status"] == "running"
     assert sub_row["completed_at"] is None
+
+
+# ---------------------------------------------------------------------------
+# POST /api/agents/subagent-invocations*
+# Sub-phase 2 of cast-subagent-and-skill-capture. One named test per route.
+# ---------------------------------------------------------------------------
+
+
+SUBAGENT_SESSION = "session-subagent-1"
+
+
+def test_subagent_invocation_open_endpoint(env):
+    """POST /subagent-invocations: validates request shape, response shape, DB write.
+
+    Covers the cast-* scope filter (Decision #2): a non-cast ``agent_type``
+    returns ``{"run_id": null}`` and creates no row, while a cast-* type
+    returns a real run_id and persists ``claude_agent_id``.
+    """
+    # Cast-* agent → run_id + persisted claude_agent_id.
+    r_cast = env["client"].post(
+        "/api/agents/subagent-invocations",
+        json={
+            "agent_type": "cast-detailed-plan",
+            "session_id": SUBAGENT_SESSION,
+            "claude_agent_id": "claude-agent-open-1",
+            "transcript_path": "/tmp/t.jsonl",
+            "prompt": "do the thing",
+        },
+    )
+    assert r_cast.status_code == 200
+    body = r_cast.json()
+    assert isinstance(body["run_id"], str)
+    assert body["run_id"]
+
+    row = _row(env["db_path"], body["run_id"])
+    assert row["agent_name"] == "cast-detailed-plan"
+    assert row["status"] == "running"
+    assert row["session_id"] == SUBAGENT_SESSION
+    assert row["claude_agent_id"] == "claude-agent-open-1"
+    payload = json.loads(row["input_params"])
+    assert payload == {
+        "source": "subagent-start",
+        "prompt": "do the thing",
+        "transcript_path": "/tmp/t.jsonl",
+    }
+
+    # Non-cast agent → run_id is null and no new row inserted.
+    r_explore = env["client"].post(
+        "/api/agents/subagent-invocations",
+        json={
+            "agent_type": "Explore",
+            "session_id": "session-non-cast",
+            "claude_agent_id": "claude-agent-explore",
+        },
+    )
+    assert r_explore.status_code == 200
+    assert r_explore.json() == {"run_id": None}
+
+    from cast_server.db.connection import get_connection
+    conn = get_connection(env["db_path"])
+    try:
+        n = conn.execute(
+            "SELECT COUNT(*) AS n FROM agent_runs WHERE session_id = ?",
+            ("session-non-cast",),
+        ).fetchone()["n"]
+    finally:
+        conn.close()
+    assert n == 0
+
+
+def test_subagent_invocation_complete_endpoint(env):
+    """POST /subagent-invocations/complete: round-trips a single ``claude_agent_id``."""
+    # Open two distinct subagents in the same session — only one should close.
+    open_r1 = env["client"].post(
+        "/api/agents/subagent-invocations",
+        json={
+            "agent_type": "cast-controller",
+            "session_id": SUBAGENT_SESSION,
+            "claude_agent_id": "agent-A",
+        },
+    )
+    open_r2 = env["client"].post(
+        "/api/agents/subagent-invocations",
+        json={
+            "agent_type": "cast-service",
+            "session_id": SUBAGENT_SESSION,
+            "claude_agent_id": "agent-B",
+        },
+    )
+    assert open_r1.status_code == 200 and open_r2.status_code == 200
+    run_a = open_r1.json()["run_id"]
+    run_b = open_r2.json()["run_id"]
+
+    close_r = env["client"].post(
+        "/api/agents/subagent-invocations/complete",
+        json={"claude_agent_id": "agent-A"},
+    )
+    assert close_r.status_code == 200
+    assert close_r.json() == {"closed": 1}
+
+    row_a = _row(env["db_path"], run_a)
+    row_b = _row(env["db_path"], run_b)
+    assert row_a["status"] == "completed"
+    assert row_a["completed_at"] is not None
+    assert row_b["status"] == "running"
+
+    # Unknown id → 200 + {"closed": 0} (FR-010 — never 4xx on miss).
+    miss_r = env["client"].post(
+        "/api/agents/subagent-invocations/complete",
+        json={"claude_agent_id": "never-seen"},
+    )
+    assert miss_r.status_code == 200
+    assert miss_r.json() == {"closed": 0}
+
+
+def test_subagent_invocation_skill_endpoint(env):
+    """POST /subagent-invocations/skill: ``skill`` (singular) lands on most-recent cast-* row."""
+    # Slash-command parent so the skill has a cast-* row to attach to.
+    open_r = env["client"].post(
+        "/api/agents/user-invocations",
+        json={
+            "agent_name": "cast-plan-review",
+            "prompt": "/cast-plan-review",
+            "session_id": SUBAGENT_SESSION,
+        },
+    )
+    assert open_r.status_code == 200
+    parent_run_id = open_r.json()["run_id"]
+
+    skill_r = env["client"].post(
+        "/api/agents/subagent-invocations/skill",
+        json={
+            "session_id": SUBAGENT_SESSION,
+            "skill": "landing-report",
+            "invoked_at": "2026-05-01T12:00:00+00:00",
+        },
+    )
+    assert skill_r.status_code == 200
+    assert skill_r.json() == {"appended": 1}
+
+    row = _row(env["db_path"], parent_run_id)
+    skills = json.loads(row["skills_used"])
+    assert skills == [
+        {"name": "landing-report", "invoked_at": "2026-05-01T12:00:00+00:00"}
+    ]
+
+    # No candidate cast-* row in a different session → 200 + {"appended": 0}.
+    miss_r = env["client"].post(
+        "/api/agents/subagent-invocations/skill",
+        json={"session_id": "session-empty", "skill": "anything"},
+    )
+    assert miss_r.status_code == 200
+    assert miss_r.json() == {"appended": 0}

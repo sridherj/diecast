@@ -9,9 +9,12 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from cast_server.config import CAST_ROOT, DB_URL, STATIC_DIR
+from cast_server.config import CAST_ROOT, DB_URL, DEFAULT_CAST_HOST, STATIC_DIR
 from cast_server.db.connection import init_db
 from cast_server.services.agent_service import recover_stale_runs, start_dispatcher
+
+# Hosts treated as loopback for the unauthenticated-hook-endpoint warning.
+_LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 ALEMBIC_INI = CAST_ROOT / "cast-server" / "alembic.ini"
 
@@ -121,10 +124,30 @@ def _ensure_db_at_head() -> None:
     command.upgrade(cfg, "head")
 
 
+def _warn_if_non_loopback_host() -> None:
+    """Warn when ``CAST_HOST`` is non-loopback — hook endpoints have no auth.
+
+    The ``/api/agents/subagent-invocations/`` and
+    ``/api/agents/user-invocations/`` POSTs are unauthenticated by design
+    (Claude Code hooks fire-and-forget over loopback). Exposing cast-server
+    on a public interface lets anyone forge agent_run rows.
+    """
+    host = (DEFAULT_CAST_HOST or "").strip().lower()
+    if host and host not in _LOOPBACK_HOSTS:
+        logger.warning(
+            "CAST_HOST is bound to %r; hook endpoints under "
+            "/api/agents/subagent-invocations/ and "
+            "/api/agents/user-invocations/ are unauthenticated. "
+            "Do not expose cast-server publicly.",
+            host,
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize DB, start dispatcher."""
     logger.info("Starting Diecast — initializing DB...")
+    _warn_if_non_loopback_host()
     init_db()
     _ensure_db_at_head()
     logger.info("DB initialized")

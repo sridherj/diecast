@@ -10,7 +10,11 @@ from cast_server import config as _config
 from cast_server.deps import templates
 from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
-from cast_server.services import agent_service, user_invocation_service
+from cast_server.services import (
+    agent_service,
+    subagent_invocation_service,
+    user_invocation_service,
+)
 from cast_server.services.agent_service import (
     MalformedOutputError,
     MissingExternalProjectDirError,
@@ -37,6 +41,25 @@ class UserInvocationOpenRequest(BaseModel):
 
 class UserInvocationCompleteRequest(BaseModel):
     session_id: str | None = None
+
+
+class SubagentInvocationOpenRequest(BaseModel):
+    agent_type: str
+    session_id: str
+    claude_agent_id: str
+    transcript_path: str | None = None
+    prompt: str | None = None
+
+
+class SubagentInvocationCompleteRequest(BaseModel):
+    claude_agent_id: str
+
+
+class SubagentInvocationSkillRequest(BaseModel):
+    session_id: str
+    skill: str
+    invoked_at: str | None = None
+
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
 
@@ -159,6 +182,51 @@ async def complete_user_invocation(req: UserInvocationCompleteRequest):
     """
     closed = user_invocation_service.complete(req.session_id)
     return {"closed": closed}
+
+
+@router.post("/subagent-invocations")
+async def open_subagent_invocation(req: SubagentInvocationOpenRequest):
+    """Open a subagent-invocation row for a Task()-dispatched cast-* subagent.
+
+    Returns ``{"run_id": null}`` (200) when ``agent_type`` is not a cast-*
+    name — hook scripts must exit 0 (FR-010). The handler authoritatively
+    enforces the cast-* scope filter via ``AGENT_TYPE_PATTERN``.
+    """
+    run_id = subagent_invocation_service.register(
+        agent_type=req.agent_type,
+        session_id=req.session_id,
+        claude_agent_id=req.claude_agent_id,
+        transcript_path=req.transcript_path,
+        prompt=req.prompt,
+    )
+    return {"run_id": run_id}
+
+
+@router.post("/subagent-invocations/complete")
+async def complete_subagent_invocation(req: SubagentInvocationCompleteRequest):
+    """Close the running subagent row whose ``claude_agent_id`` matches.
+
+    Returns ``{"closed": 0 | 1}`` (200) — never 4xx, even on miss, so a
+    SubagentStop hook never has reason to retry.
+    """
+    closed = subagent_invocation_service.complete(req.claude_agent_id)
+    return {"closed": closed}
+
+
+@router.post("/subagent-invocations/skill")
+async def record_subagent_skill(req: SubagentInvocationSkillRequest):
+    """Append a skill invocation to the most-recent running cast-* row.
+
+    Wire field ``skill`` is singular (matches ``tool_input.skill`` from the
+    empirical ``PreToolUse(Skill)`` payload). Returns
+    ``{"appended": 0 | 1}`` (200) — 0 when no candidate row exists.
+    """
+    appended = subagent_invocation_service.record_skill(
+        session_id=req.session_id,
+        skill_name=req.skill,
+        invoked_at=req.invoked_at,
+    )
+    return {"appended": appended}
 
 
 @router.get("/jobs/{run_id}")
