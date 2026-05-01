@@ -380,7 +380,7 @@ uv run pytest tests/test_b6_terminal_resolution.py -v
 uv run pytest tests/ -k "tmux or agent_service or terminal" -v   # broader sanity sweep
 ```
 
-Fix any failures. Do not skip or @xfail — every test in the broader sweep should pass. If you hit an unrelated pre-existing failure, document it in `_review_summary.md` Open Questions and ask SJ before proceeding.
+Fix any failures. Do not skip or @xfail — every test in the broader sweep should pass. If you hit an unrelated pre-existing failure, document it in `_review_summary.md` Open Questions and ask the maintainer before proceeding.
 
 ## Verification
 

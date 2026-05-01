@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # setup — Diecast installer.
 #
-# Mirrors ~/workspace/linkedout-oss/setup. Takes a fresh clone of
+# Takes a fresh clone of
 # github.com/sridherj/diecast on a machine with `uv` + `git` + Claude Code
 # and produces a usable Diecast install in under 90 seconds.
 #

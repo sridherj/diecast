@@ -43,7 +43,7 @@ FIX_TERMINAL=0
 # CI parity test (tests/test_cast_doctor.py::test_fallback_list_matches_supported)
 # asserts equality. Used only when python3 / agents._shared.terminal is not
 # importable (e.g., install-time gate before deps are installed).
-SUPPORTED_TERMINALS_FALLBACK=(ptyxis gnome-terminal kitty alacritty iterm terminal)  # diecast-lint: ignore-line
+SUPPORTED_TERMINALS_FALLBACK=(ptyxis gnome-terminal kitty alacritty iterm terminal)
 
 print_help() {
   cat <<'EOF'

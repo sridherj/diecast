@@ -4,14 +4,14 @@ Lightweight review of the 2 sub-phase plan files (small-change mode: max 1 issue
 
 ## Open Questions
 
-These need SJ's decision **before sp1 starts** because they affect `_SUPPORTED` membership, which sp2's parity test asserts on.
+These need the maintainer's decision **before sp1 starts** because they affect `_SUPPORTED` membership, which sp2's parity test asserts on.
 
 1. **Add `foot` and/or `konsole` to `_SUPPORTED`?**
    The plan says "add `foot`/`konsole` to `_SUPPORTED` if approved" (`docs/plan/2026-04-30-terminal-intelligent-defaults.collab.md:67`) but defers the decision. Adding them broadens auto-detect coverage to KDE-first / Wayland-first users. Skipping them keeps the canonical list at 6 entries (today's value). Either way, the parity test in sp2 will enforce that `bin/cast-doctor`'s fallback array exactly matches `_SUPPORTED.keys()` — so the answer must be settled before sp1 modifies the table.
    **Recommendation:** add `foot` (modern Wayland-native, increasingly common); skip `konsole` for v1 (KDE users are a small slice and `konsole`'s `--workdir` flag has historical quirks worth deferring to a follow-up).
 
 2. **`config.headless=True` warning text — keep, soften, or remove?**
-   Plan says "the existing `config.interactive` / `config.headless` flags stay as-is. Until a real headless mechanism is built, `config.headless=True` continues to take the existing interactive path; the warning at `agent_service.py:1704-1708` keeps describing today's behavior accurately." The warning today reads "interactive overrides headless" — accurate but hides the fact that `headless=True` alone is also de-facto interactive (no real headless dispatch exists). No action required if SJ is fine with the message as-is; a one-line clarifying tweak is in scope for sp1 if desired.
+   Plan says "the existing `config.interactive` / `config.headless` flags stay as-is. Until a real headless mechanism is built, `config.headless=True` continues to take the existing interactive path; the warning at `agent_service.py:1704-1708` keeps describing today's behavior accurately." The warning today reads "interactive overrides headless" — accurate but hides the fact that `headless=True` alone is also de-facto interactive (no real headless dispatch exists). No action required if the maintainer is fine with the message as-is; a one-line clarifying tweak is in scope for sp1 if desired.
    **Recommendation:** leave as-is for this PR; flag for the follow-up effort that explores real headless dispatch.
 
 3. **`cast-server` `sys.path` fix — preferred location?**
