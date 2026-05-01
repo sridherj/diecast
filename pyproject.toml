@@ -26,6 +26,14 @@ dev = [
     "pyyaml>=6.0",
 ]
 
+# NOTE: After `pip install -e ".[test]"`, run `playwright install chromium` once
+# to fetch the browser binary. Auto-install is intentionally avoided.
+[project.optional-dependencies]
+test = [
+    "playwright>=1.45.0",
+    "pytest-rerunfailures>=14.0",
+]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
