@@ -101,8 +101,8 @@ def install(project_root: Path, user_scope: bool = False) -> int:
 
     installed: list[str] = []
     skipped: list[str] = []
-    for event, _sub, _handler in HOOK_EVENTS:
-        cmd = COMMAND_FOR_EVENT[event]
+    for event, sub, _handler, matcher in HOOK_EVENTS:
+        cmd = f"{CAST_HOOK_BIN} {sub}"
         bucket = hooks.setdefault(event, [])
         if not isinstance(bucket, list):
             raise SystemExit(
@@ -110,12 +110,15 @@ def install(project_root: Path, user_scope: bool = False) -> int:
                 f"(got {type(bucket).__name__}); refusing to modify."
             )
         if any(_entry_is_ours(e) for e in bucket):
-            skipped.append(event)
+            skipped.append(sub)
             continue
-        bucket.append({
+        entry: dict[str, Any] = {
             "hooks": [{"type": "command", "command": cmd, "timeout": HOOK_TIMEOUT_SECONDS}]
-        })
-        installed.append(event)
+        }
+        if matcher is not None:
+            entry["matcher"] = matcher
+        bucket.append(entry)
+        installed.append(sub)
 
     _atomic_write(path, settings)
 
@@ -139,7 +142,7 @@ def uninstall(project_root: Path, user_scope: bool = False) -> int:
         return 0
 
     removed: list[str] = []
-    for event, _sub, _handler in HOOK_EVENTS:
+    for event, _sub, _handler, _matcher in HOOK_EVENTS:
         bucket = hooks.get(event)
         if not isinstance(bucket, list):
             continue

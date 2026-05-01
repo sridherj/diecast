@@ -3,6 +3,9 @@
 Subcommands:
   user-prompt-start   (UserPromptSubmit hook)
   user-prompt-stop    (Stop hook)
+  subagent-start      (SubagentStart hook)
+  subagent-stop       (SubagentStop hook)
+  skill-invoke        (PreToolUse hook with matcher: "Skill")
   install [--user]    (write entries to .claude/settings.json)
   uninstall [--user]  (remove our entries; preserve everything else)
 """
@@ -17,7 +20,8 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if not argv:
         print(
-            "Usage: cast-hook {user-prompt-start | user-prompt-stop | install | uninstall} [args]",
+            "Usage: cast-hook {user-prompt-start | user-prompt-stop | "
+            "subagent-start | subagent-stop | skill-invoke | install | uninstall} [args]",
             file=sys.stderr,
         )
         return 0

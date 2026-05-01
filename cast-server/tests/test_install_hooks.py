@@ -340,3 +340,107 @@ def test_round_trip_install_then_uninstall_restores_original_shape(tmp_project_r
     install_hooks.uninstall(tmp_project_root)
 
     assert _read(path) == seed
+
+
+# ---------------------------------------------------------------------------
+# sp3: PreToolUse matcher support + new subagent / skill events
+# ---------------------------------------------------------------------------
+
+def test_install_hooks_writes_pretooluse_with_skill_matcher(tmp_project_root):
+    """sp3: ``cast-hook install`` writes a ``PreToolUse`` entry with
+    ``matcher: "Skill"`` that points at ``cast-hook skill-invoke``."""
+    install_hooks.install(tmp_project_root)
+    data = _read(_settings(tmp_project_root))
+    bucket = data["hooks"]["PreToolUse"]
+    assert len(bucket) == 1
+    entry = bucket[0]
+    assert entry["matcher"] == "Skill"
+    cmd = entry["hooks"][0]["command"]
+    assert cmd.endswith(" skill-invoke")
+    # Sibling entries with no matcher must NOT carry a matcher key.
+    assert "matcher" not in data["hooks"]["UserPromptSubmit"][0]
+    assert "matcher" not in data["hooks"]["Stop"][0]
+    assert "matcher" not in data["hooks"]["SubagentStart"][0]
+    assert "matcher" not in data["hooks"]["SubagentStop"][0]
+
+
+def test_install_preserves_third_party_pretooluse_with_different_matcher(
+    tmp_project_root,
+):
+    """A third-party ``PreToolUse`` entry with matcher ``"Bash"`` must remain
+    intact, and ``cast-hook install`` must not duplicate ours on re-run."""
+    third_party = {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "echo audit-bash", "timeout": 5}],
+    }
+    seed = {"hooks": {"PreToolUse": [third_party]}}
+    path = _settings(tmp_project_root)
+    _write(path, seed)
+
+    install_hooks.install(tmp_project_root)
+    install_hooks.install(tmp_project_root)  # idempotent under matcher
+    data = _read(path)
+
+    bucket = data["hooks"]["PreToolUse"]
+    assert third_party in bucket
+    assert _ours_count(bucket) == 1
+    # Exactly two entries: third-party Bash + ours Skill.
+    assert len(bucket) == 2
+
+
+def test_uninstall_removes_ours_regardless_of_matcher(tmp_project_root):
+    """``cast-hook uninstall`` must remove our ``PreToolUse`` entry by HOOK_MARKER
+    on the inner command, even when a third-party entry with a different matcher
+    sits beside it."""
+    third_party = {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "echo audit-bash", "timeout": 5}],
+    }
+    seed = {"hooks": {"PreToolUse": [third_party]}}
+    path = _settings(tmp_project_root)
+    _write(path, seed)
+
+    install_hooks.install(tmp_project_root)
+    install_hooks.uninstall(tmp_project_root)
+    data = _read(path)
+
+    assert data["hooks"]["PreToolUse"] == [third_party]
+
+
+def test_round_trip_install_uninstall_byte_equivalent(tmp_project_root):
+    """A fresh ``install`` followed by ``uninstall`` on a settings file with
+    third-party PreToolUse / SubagentStart / SubagentStop / UserPromptSubmit
+    / Stop entries must restore the original shape exactly."""
+    seed = {
+        "hooks": {
+            "UserPromptSubmit": [
+                {"hooks": [{"type": "command", "command": "echo up", "timeout": 5}]}
+            ],
+            "Stop": [
+                {"hooks": [{"type": "command", "command": "echo stop", "timeout": 5}]}
+            ],
+            "SubagentStart": [
+                {"hooks": [{"type": "command", "command": "echo ss", "timeout": 5}]}
+            ],
+            "SubagentStop": [
+                {"hooks": [{"type": "command", "command": "echo ss-stop", "timeout": 5}]}
+            ],
+            "PreToolUse": [
+                {
+                    "matcher": "Bash",
+                    "hooks": [{"type": "command", "command": "echo bash", "timeout": 5}],
+                }
+            ],
+            "PostToolUse": [
+                {"hooks": [{"type": "command", "command": "echo post", "timeout": 5}]}
+            ],
+        },
+        "permissions": {"allow": ["Read", "Bash"]},
+    }
+    path = _settings(tmp_project_root)
+    _write(path, seed)
+
+    install_hooks.install(tmp_project_root)
+    install_hooks.uninstall(tmp_project_root)
+
+    assert _read(path) == seed
