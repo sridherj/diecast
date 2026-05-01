@@ -1,0 +1,87 @@
+Read the delegation context from `/data/workspace/diecast/goals/child-delegation-integration-tests/.delegation-run_20260501_133500_7b94db.json` first, then follow the instructions within.
+
+Your run ID: run_20260501_133500_7b94db
+Goal slug: child-delegation-integration-tests
+
+Diecast API routes (http://localhost:8005):
+  POST /api/agents/{name}/trigger        — dispatch a child agent
+  GET  /api/agents/jobs/{run_id}          — get run details/status
+  POST /api/agents/jobs/{run_id}/recheck  — recheck a completed/failed run
+  POST /api/agents/runs/{run_id}/continue — send message to idle agent
+  POST /api/agents/runs/{run_id}/cancel   — cancel an active run
+  POST /api/agents/runs/{run_id}/fail     — mark run as failed
+  POST /api/agents/runs/{run_id}/complete — mark run as completed
+  DELETE /api/agents/runs/{run_id}        — delete a terminal run
+  GET  /api/agents/runs                     — list all runs
+  GET  /api/agents/runs?status=running      — filter runs by status
+  GET  /api/agents/jobs/{run_id}?include=children — descendant tree (rollups attached)
+  POST /api/tasks/{task_id}/run-agent     — trigger agent for a task
+  Health check: curl -s http://localhost:8005/api/agents/runs?status=running | head -1
+Use the cast-create-execution-plan agent.
+
+Goal: child-delegation-integration-tests
+Task: 
+Expected outcome: 
+Output directory: /data/workspace/diecast
+
+INTERACTIVE SESSION: A human is watching this terminal and will respond to your questions.
+You MUST ask clarifying questions before proceeding when the agent calls for it (e.g., scope
+clarification, approval gates, ambiguous requirements). Do NOT auto-resolve or guess — pause
+and wait for the user's response. Type your question, then STOP and wait for input.
+
+When you delegate to child agents: after reviewing their output (see delegation instructions
+below), present your findings to the user — gaps found, issues spotted, open questions — and ask
+whether to fix, re-delegate, or accept as-is. Do NOT silently absorb child output without
+giving the user a chance to weigh in.
+
+## External Project Directory
+You are running inside the project directory (/data/workspace/diecast).
+Goal artifacts (plans, research, playbooks) are in `.cast/`.
+Code and execution artifacts go in the current working directory.
+Work in /data/workspace/diecast. Write all artifacts there.
+
+Agent composition: If your task would benefit from another agent's capabilities,
+invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
+dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
+
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /data/workspace/diecast/.cast/.agent-run_20260501_133500_7b94db.output.json:
+
+{
+    "contract_version": "2",
+    "agent_name": "cast-create-execution-plan",
+    "task_title": "",
+    "status": "completed | partial | failed",
+    "summary": "One paragraph describing what you accomplished",
+    "artifacts": [
+        {"path": "relative/to/goal/dir/file.md", "type": "research|playbook|plan|code|data", "description": "What this file contains"}
+    ],
+    "errors": [],
+    "next_steps": ["Suggested follow-up actions for the user"],
+    "human_action_needed": false,
+    "human_action_items": [],
+    "started_at": "2026-05-01T13:35:05.934739+00:00",
+    "completed_at": "<fill in current ISO timestamp when you write this file>"
+}
+
+Status values:
+- "completed" = all requested work done successfully
+- "partial" = some work done, but not everything (explain in summary)
+- "failed" = could not accomplish the task (explain in errors)
+
+Set human_action_needed to true when:
+- You need human approval before changes take effect
+- You found data issues that need manual correction
+- You have open questions that block completion
+- You completed the work but something needs human verification
+Keep human_action_items specific and actionable (what exactly to do).
+
+Artifact paths must be relative to /data/workspace/diecast/.cast.
+
+## Known Error Patterns for This Agent
+
+The following errors have occurred in past runs. Avoid repeating them:
+
+- **unknown** (1x, last: 2026-05-01): Malformed output.json: 2 validation errors for AgentOutput
+agent_name
+  Field required [type=missing, input_value={'run_id': 'run_20260501_..., 'issues_surfaced': []}, input_type=dict]
+    For further

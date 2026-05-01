@@ -1,0 +1,17 @@
+# AUTO-GENERATED: Read-only render of DB state. Do not edit directly.
+# Changes: use /cast-goals agent or goal_service API.
+# Directory config: gstack_dir = reference-only external context (not authoritative),
+#   external_project_dir = code/execution artifacts destination.
+slug: cast-ui-test-children-completion
+title: Cast UI Test Children Completion
+status: accepted
+phase: requirements
+origin: manual
+in_focus: false
+created_at: '2026-05-01'
+tags:
+- ui
+- testing
+- investigation
+accepted_at: '2026-05-01'
+external_project_dir: /data/workspace/diecast

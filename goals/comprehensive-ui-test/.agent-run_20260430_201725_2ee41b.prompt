@@ -1,0 +1,103 @@
+Your run ID: run_20260430_201725_2ee41b
+Goal slug: comprehensive-ui-test
+
+Diecast API routes (http://localhost:8000):
+  POST /api/agents/{name}/trigger        — dispatch a child agent
+  GET  /api/agents/jobs/{run_id}          — get run details/status
+  POST /api/agents/jobs/{run_id}/recheck  — recheck a completed/failed run
+  POST /api/agents/runs/{run_id}/continue — send message to idle agent
+  POST /api/agents/runs/{run_id}/cancel   — cancel an active run
+  POST /api/agents/runs/{run_id}/fail     — mark run as failed
+  POST /api/agents/runs/{run_id}/complete — mark run as completed
+  DELETE /api/agents/runs/{run_id}        — delete a terminal run
+  GET  /api/agents/runs                     — list all runs
+  GET  /api/agents/runs?status=running      — filter runs by status
+  GET  /api/agents/runs/{run_id}/children — list child runs
+  POST /api/tasks/{task_id}/run-agent     — trigger agent for a task
+  Health check: curl -s http://localhost:8000/api/agents/runs?status=running | head -1
+Use the cast-subphase-runner agent.
+
+Goal: comprehensive-ui-test
+Task: 
+Expected outcome: 
+Output directory: /home/sridherj/workspace/diecast
+
+Additional context: Project dir: /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness. Sub-phase file: /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness/sp2_test_infra_fixtures/plan.md. Sub-phase ID: 2. Read /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness/_shared_context.md before executing the sub-phase plan. AUTONOMOUS MODE: do not ask the user clarifying questions; resolve ambiguities by inspecting the codebase per the review summary.
+## External Project Directory
+You are running inside the project directory (/home/sridherj/workspace/diecast).
+Goal artifacts (plans, research, playbooks) are in `.cast/`.
+Code and execution artifacts go in the current working directory.
+Work in /home/sridherj/workspace/diecast. Write all artifacts there.
+
+CRITICAL: NEVER inline an agent's work yourself. When a task calls for one of your allowed_delegations, you MUST dispatch to that agent — do not attempt the work yourself, summarize what the agent would produce, or paraphrase its output.
+Your allowed_delegations: [cast-review-code]
+
+HTTP-dispatched delegations: [cast-review-code]
+NEVER use the Agent tool for these targets. All child agent work for the listed agents MUST go through HTTP dispatch via the delegation skill. If HTTP dispatch fails (curl error, server down), STOP and ask the user — do NOT fall back to the Agent tool.
+
+Agent composition: If your task would benefit from another agent's capabilities,
+invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
+dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
+
+Quick reference (full patterns in the skill):
+
+  CHILD_RUN_ID=$(curl -s -X POST http://localhost:8000/api/agents/{agent}/trigger \
+    -H "Content-Type: application/json" \
+    -d '{
+      "goal_slug": "comprehensive-ui-test",
+      "parent_run_id": "run_20260430_201725_2ee41b",
+      "delegation_context": {
+        "agent_name": "{agent}",
+        "instructions": "What the child should do",
+        "context": {
+          "goal_title": "...",
+          "artifacts": ["relevant artifact paths"],
+          "prior_output": "summary of your work so far"
+        },
+        "output": {
+          "output_dir": "{output_dir}",
+          "expected_artifacts": ["what you expect back"]
+        }
+      }
+    }' | jq -r '.run_id')
+
+  GOAL_DIR="/home/sridherj/workspace/diecast/.cast"   # use this exact value — injected from your prompt preamble
+  TIMEOUT=2700; ELAPSED=0
+  while [ $ELAPSED -lt $TIMEOUT ]; do
+    [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
+    sleep 10; ELAPSED=$((ELAPSED + 10))
+  done
+  # On timeout, check: curl http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
+
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /home/sridherj/workspace/diecast/.cast/.agent-run_20260430_201725_2ee41b.output.json:
+
+{
+    "contract_version": "2",
+    "agent_name": "cast-subphase-runner",
+    "task_title": "",
+    "status": "completed | partial | failed",
+    "summary": "One paragraph describing what you accomplished",
+    "artifacts": [
+        {"path": "relative/to/goal/dir/file.md", "type": "research|playbook|plan|code|data", "description": "What this file contains"}
+    ],
+    "errors": [],
+    "next_steps": ["Suggested follow-up actions for the user"],
+    "human_action_needed": false,
+    "human_action_items": [],
+    "started_at": "2026-04-30T20:17:47.238966+00:00",
+    "completed_at": "<fill in current ISO timestamp when you write this file>"
+}
+
+Status values:
+- "completed" = all requested work done successfully
+- "partial" = some work done, but not everything (explain in summary)
+- "failed" = could not accomplish the task (explain in errors)
+
+Set human_action_needed to true when:
+- You need human approval before changes take effect
+- You found data issues that need manual correction
+- You have open questions that block completion
+- You completed the work but something needs human verification
+Keep human_action_items specific and actionable (what exactly to do).
+
+Artifact paths must be relative to /home/sridherj/workspace/diecast/.cast.
