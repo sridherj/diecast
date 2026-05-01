@@ -85,6 +85,8 @@ CREATE TABLE IF NOT EXISTS agent_runs (
     completed_at TEXT,
     scheduled_at TEXT,                    -- ISO timestamp for scheduled runs (nullable)
     created_at TEXT NOT NULL DEFAULT '',  -- ISO timestamp, always set at insertion
+    skills_used TEXT DEFAULT '[]',        -- JSON array of {name, invoked_at}
+    claude_agent_id TEXT,                 -- Claude Code SubagentStart.agent_id (subagent rows only)
     FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE SET NULL,
     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL
 );

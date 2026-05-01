@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from cast_server.db.connection import get_connection
+from cast_server.services._invocation_sources import USER_PROMPT, source_filter_clause
 from cast_server.services.agent_service import create_agent_run, update_agent_run
 
 # Decision #5: Stop only closes rows whose started_at is within this window.
@@ -45,7 +46,7 @@ def register(agent_name: str, prompt: str, session_id: str | None,
         agent_name=agent_name,
         goal_slug=_GOAL_SLUG,
         task_id=None,
-        input_params={"source": "user-prompt", "prompt": prompt},
+        input_params={"source": USER_PROMPT, "prompt": prompt},
         session_id=session_id,
         status="running",
         parent_run_id=None,
@@ -77,16 +78,16 @@ def complete(session_id: str | None,
     conn = get_connection(db_path)
     try:
         cur = conn.execute(
-            """
+            f"""
             UPDATE agent_runs
                SET status = 'completed',
                    completed_at = ?
              WHERE session_id = ?
                AND status = 'running'
-               AND json_extract(input_params, '$.source') = 'user-prompt'
+               AND {source_filter_clause()}
                AND started_at > ?
             """,
-            (now_iso, session_id, cutoff_iso),
+            (now_iso, session_id, USER_PROMPT, cutoff_iso),
         )
         conn.commit()
         return cur.rowcount

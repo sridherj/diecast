@@ -348,22 +348,91 @@ def create_agent_run(agent_name: str, goal_slug: str, task_id: int | None,
                      input_params: dict | None, session_id: str | None = None,
                      scheduled_at: str | None = None, status: str = "pending",
                      parent_run_id: str | None = None,
+                     claude_agent_id: str | None = None,
                      db_path=None) -> str:
-    """Insert agent_run record, return run_id."""
+    """Insert agent_run record, return run_id.
+
+    ``claude_agent_id`` is the Claude Code per-subagent runtime id from
+    ``SubagentStart.agent_id``. sp2 populates it for subagent-invocation rows;
+    user-invocation and CLI-dispatched rows leave it NULL.
+    """
     run_id = _generate_run_id()
     now = datetime.now(timezone.utc).isoformat()
     conn = get_connection(db_path)
     conn.execute(
         """INSERT INTO agent_runs (id, agent_name, goal_slug, task_id, status,
-           input_params, session_id, scheduled_at, parent_run_id, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           input_params, session_id, scheduled_at, parent_run_id,
+           claude_agent_id, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (run_id, agent_name, goal_slug, task_id, status,
          json.dumps(input_params) if input_params else None, session_id,
-         scheduled_at, parent_run_id, now),
+         scheduled_at, parent_run_id, claude_agent_id, now),
     )
     conn.commit()
     conn.close()
     return run_id
+
+
+def resolve_parent_for_subagent(
+    session_id: str,
+    db_path=None,
+) -> str | None:
+    """Return id of the most-recent running cast-* agent_run in ``session_id``, or None.
+
+    The ``agent_name LIKE 'cast-%'`` filter is contract: a non-cast subagent
+    (e.g. user-dispatched ``Explore``) MUST NOT become a parent of a later
+    cast-* subagent. The ``status='running'`` filter prevents stale
+    completed rows in the same session from being claimed as parents.
+    Most-recent-by-``started_at`` wins so a nested cast-* subagent
+    correctly picks the outer cast-* (not the user-invocation) as parent.
+    """
+    if not session_id:
+        return None
+    conn = get_connection(db_path)
+    try:
+        row = conn.execute(
+            """
+            SELECT id FROM agent_runs
+             WHERE session_id = ?
+               AND status = 'running'
+               AND agent_name LIKE 'cast-%'
+             ORDER BY started_at DESC
+             LIMIT 1
+            """,
+            (session_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+    return row["id"] if row else None
+
+
+def resolve_run_by_claude_agent_id(
+    claude_agent_id: str,
+    db_path=None,
+) -> str | None:
+    """Return id of the agent_run whose ``claude_agent_id`` matches, or None.
+
+    Used by the SubagentStop closure path. ``claude_agent_id`` is unique per
+    subagent dispatch — single-row exact lookup. ORDER BY started_at DESC +
+    LIMIT 1 is defensive: a duplicate should not happen, but if it does we
+    close the most-recent.
+    """
+    if not claude_agent_id:
+        return None
+    conn = get_connection(db_path)
+    try:
+        row = conn.execute(
+            """
+            SELECT id FROM agent_runs
+             WHERE claude_agent_id = ?
+             ORDER BY started_at DESC
+             LIMIT 1
+            """,
+            (claude_agent_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+    return row["id"] if row else None
 
 
 def update_agent_run(run_id: str, db_path=None, **fields):
@@ -610,19 +679,21 @@ _TREE_DEPTH_CAP = 10
 
 
 def _row_to_tree_dict(row) -> dict:
-    """Tree-path row hydration: parses ONLY context_usage.
+    """Tree-path row hydration: parses context_usage, artifacts, output.
 
-    Other JSON columns (input_params, output, artifacts, directories) are
-    deferred to the detail-render path — the threaded /runs page does not
-    need them. Trimming the per-row JSON parse keeps tree assembly cheap.
+    The detail panel inside the threaded /runs macro renders run.artifacts
+    and run.output.summary, so leaving them as JSON strings makes Jinja
+    iterate the string character-by-character. input_params/directories
+    aren't read by the macro and stay deferred.
     """
     d = dict(row)
-    cu = d.get("context_usage")
-    if cu and isinstance(cu, str):
-        try:
-            d["context_usage"] = json.loads(cu)
-        except json.JSONDecodeError:
-            pass
+    for key in ("context_usage", "artifacts", "output"):
+        val = d.get(key)
+        if val and isinstance(val, str):
+            try:
+                d[key] = json.loads(val)
+            except json.JSONDecodeError:
+                pass
     return d
 
 

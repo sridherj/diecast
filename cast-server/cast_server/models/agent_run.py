@@ -4,7 +4,17 @@ from pydantic import BaseModel
 
 
 class AgentRun(BaseModel):
-    """Represents a single agent execution run, stored in the agent_runs table."""
+    """Represents a single agent execution run, stored in the agent_runs table.
+
+    ``session_id`` carries the Claude Code (parent main-loop) session id —
+    shared by every subagent in the session. Populated by the user-invocation
+    hook and by SubagentStart for cast-* subagents.
+
+    ``claude_agent_id`` carries the Claude Code per-subagent runtime id from
+    ``SubagentStart.agent_id``. NULL for user-invocation rows and CLI
+    dispatches; populated only on subagent rows. Closure on ``SubagentStop``
+    keys on this column for an exact-match single-row update.
+    """
 
     id: str
     agent_name: str
@@ -17,6 +27,7 @@ class AgentRun(BaseModel):
     error_message: str | None = None
     exit_code: int | None = None
     session_id: str | None = None
+    claude_agent_id: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
     cost_usd: float | None = None
@@ -28,6 +39,7 @@ class AgentRun(BaseModel):
     git_branch: str | None = None
     git_worktree_path: str | None = None
     rate_limit_pauses: str = "[]"
+    skills_used: list[dict] = []
     active_execution_seconds: int | None = None
     cache_read_tokens: int | None = None
     cache_write_tokens: int | None = None

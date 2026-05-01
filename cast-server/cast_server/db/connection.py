@@ -1,6 +1,7 @@
 """SQLite database connection for Task OS."""
 
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 
 from cast_server.config import DB_PATH
@@ -29,6 +30,14 @@ def init_db(db_path: Path | str | None = None) -> None:
 
 def get_connection(db_path: Path | str | None = None) -> sqlite3.Connection:
     """Get a SQLite connection. Auto-creates schema if DB file is new."""
+    # SQLite 3.9+ is a hard contract — record_skill (sp2) relies on
+    # json_insert(... '$[#]' ...) array-append semantics that landed in 3.9.
+    # 3.9 was released in 2015; the floor is a contract, not a fallback dance.
+    if sqlite3.sqlite_version_info < (3, 9, 0):
+        raise SystemExit(
+            "cast-server requires SQLite 3.9+ for record_skill's "
+            f"json_insert(... '$[#]' ...) semantics; got {sqlite3.sqlite_version}."
+        )
     if isinstance(db_path, str):
         db_path = Path(db_path)
     path = db_path or DB_PATH
@@ -139,3 +148,48 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     """)
     # Stop's close-by-session query needs this for sub-millisecond filtering as agent_runs grows.
     conn.execute("CREATE INDEX IF NOT EXISTS idx_agent_runs_session_status ON agent_runs(session_id, status)")
+
+    # Subagent capture (cast-subagent-and-skill-capture sp1).
+    # `skills_used` carries a JSON array of {name, invoked_at} appended on
+    # PreToolUse(Skill); `claude_agent_id` carries SubagentStart.agent_id and
+    # is the closure key on SubagentStop.
+    try:
+        conn.execute("ALTER TABLE agent_runs ADD COLUMN skills_used TEXT DEFAULT '[]'")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+    try:
+        conn.execute("ALTER TABLE agent_runs ADD COLUMN claude_agent_id TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+    # Partial index covers the SubagentStop closure path (exact-match WHERE
+    # claude_agent_id = ?). Partial because only subagent rows ever populate
+    # the column; user-invocation and CLI rows leave it NULL.
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_agent_runs_claude_agent_id "
+        "ON agent_runs(claude_agent_id) WHERE claude_agent_id IS NOT NULL"
+    )
+
+    _seed_system_goals(conn)
+
+
+def _seed_system_goals(conn: sqlite3.Connection) -> None:
+    """Idempotently ensure rows that other services FK into.
+
+    ``system-ops`` is the goal_slug used by user_invocation_service.register and
+    by agent_service.invoke_agent's fallback path. agent_runs.goal_slug is NOT
+    NULL with an FK to goals(slug) and ``PRAGMA foreign_keys=ON``, so any
+    insert against a missing target row would fail.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO goals (slug, title, status, in_focus, origin,
+                                     folder_path, created_at, accepted_at)
+        VALUES ('system-ops', 'System Ops', 'accepted', 0, 'manual',
+                'system-ops', ?, ?)
+        """,
+        (now, now),
+    )
+    conn.commit()
