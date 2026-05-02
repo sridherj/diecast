@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "next_steps array entry (output JSON contract v2, US14)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["command", "rationale", "artifact_anchor"],
+    "properties": {
+      "command": {"type": "string"},
+      "rationale": {"type": "string"},
+      "artifact_anchor": {"type": "string"}
+    },
+    "additionalProperties": false
+  }
+}

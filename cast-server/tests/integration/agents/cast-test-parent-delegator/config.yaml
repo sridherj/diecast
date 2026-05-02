@@ -1,0 +1,16 @@
+name: cast-test-parent-delegator
+description: |
+  Delegation-test parent fixture. Dispatches cast-test-child-worker via HTTP,
+  polls the child's output file, then writes a literal contract-v2 envelope.
+  Used by T1 integration suite and T2 live-HTTP E2E suite.
+entrypoint: cast-test-parent-delegator.md
+model: haiku
+dispatch_mode: http
+allowed_delegations:
+  - cast-test-child-worker
+  - cast-test-child-worker-subagent
+tags:
+  - test
+  - integration
+  - delegation
+visible: false

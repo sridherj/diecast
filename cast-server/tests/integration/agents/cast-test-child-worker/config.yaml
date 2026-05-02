@@ -1,0 +1,13 @@
+name: cast-test-child-worker
+description: |
+  Delegation-test HTTP child fixture. Writes a literal contract-v2 envelope
+  to <output_path> and exits. No HTTP calls, no further delegation.
+entrypoint: cast-test-child-worker.md
+model: haiku
+dispatch_mode: http
+allowed_delegations: []
+tags:
+  - test
+  - integration
+  - delegation
+visible: false

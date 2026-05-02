@@ -1,0 +1,58 @@
+name: Cast Delegation E2E (Nightly)
+
+# Nightly T2 live-HTTP delegation suite (sp5.4).
+#
+# Per Gate C decision (user-confirmed 2026-05-01): Option A — self-hosted
+# runner labeled `ptyxis`. The suite asserts on real tmux sessions and
+# ptyxis terminal-window titles, which hosted ubuntu-latest runners cannot
+# provide. Per-PR CI does NOT run this; it executes on a nightly cadence
+# and on-demand via workflow_dispatch.
+#
+# Production cadence: NO T1 env-var overrides
+# (CAST_DISABLE_SERVER / CAST_DELEGATION_BACKOFF_OVERRIDE /
+# CAST_DELEGATION_IDLE_TIMEOUT_SECONDS). The suite must exercise the real
+# polling/backoff path. Per-test timeout (360s) lives on
+# @pytest.mark.timeout in test_tier_delegation.py.
+#
+# CAST_E2E_PORT=8005 pins the e2e spawn fixture to the port hard-coded in
+# the four delegation fixture prompts at
+# cast-server/tests/integration/agents/<name>/<name>.md (sp5.1 hand-off).
+# The conftest spawn fixture defaults to 8765 to avoid colliding with a
+# developer cast-server on a workstation; in CI the host is dedicated, so
+# 8005 is the alignment port. Re-evaluate if the fixture prompts are ever
+# templated with a <cast_server_url> placeholder.
+
+on:
+  schedule:
+    - cron: "37 6 * * *"  # 06:37 UTC, off-peak from setup-correctness (06:17) and e2e (06:47)
+  workflow_dispatch: {}
+
+jobs:
+  delegation-e2e:
+    runs-on: [self-hosted, ptyxis]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          if ! command -v uv >/dev/null 2>&1; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Show prereq versions
+        run: |
+          uv --version
+          tmux -V
+          claude --version || true
+          ptyxis --version || echo "WARNING: ptyxis missing — runner label is wrong"
+
+      - name: Sync dev deps
+        run: uv sync --group dev
+
+      - name: Run T2 delegation e2e
+        env:
+          PYTHONUNBUFFERED: "1"
+          CAST_E2E_PORT: "8005"
+        run: uv run pytest cast-server/tests/e2e/test_tier_delegation.py -m e2e -v

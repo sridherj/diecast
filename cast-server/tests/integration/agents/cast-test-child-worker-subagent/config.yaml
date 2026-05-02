@@ -1,0 +1,15 @@
+name: cast-test-child-worker-subagent
+description: |
+  Delegation-test subagent-mode child fixture. Returns a structured literal
+  verdict string. Used by sp6.1 builder unit-tests; live exercise per the
+  sp6.2 manual checklist.
+entrypoint: cast-test-child-worker-subagent.md
+model: haiku
+dispatch_mode: subagent
+allowed_delegations: []
+tags:
+  - test
+  - integration
+  - delegation
+  - subagent
+visible: false
