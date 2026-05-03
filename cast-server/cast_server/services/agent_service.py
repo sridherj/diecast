@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import shlex
 import subprocess
 import time
 import uuid
@@ -45,6 +46,12 @@ _total_paused: dict[str, float] = {}    # run_id -> total paused seconds
 _cooldown_until: dict[str, datetime] = {}  # run_id -> resume_at (rate limit)
 _current_pause: dict[str, dict] = {}       # run_id -> pause entry being built
 _session_id_resolved: set[str] = set()     # run_ids whose Claude session ID has been discovered
+
+
+def _clean_child_env(*exclude: str) -> dict[str, str]:
+    """Return os.environ minus the specified keys. Never mutates the global env."""
+    skip = set(exclude)
+    return {k: v for k, v in os.environ.items() if k not in skip}
 
 
 def _get_tmux() -> TmuxSessionManager:
@@ -225,7 +232,7 @@ def _get_session_context_breakdown(
     or None if unavailable.
     """
     try:
-        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_SESSION_ID"}
+        env = _clean_child_env("CLAUDE_SESSION_ID", "CLAUDECODE")
         cwd = working_dir or str(Path.home())
         result = subprocess.run(
             ["claude", "--resume", session_id, "-p", "/context"],
@@ -1779,9 +1786,10 @@ def _finalize_run(run_id: str, goal_dir: Path, session_id: str | None = None,
     resume_command = None
     if session_id:
         if working_dir:
-            resume_command = f"cd {working_dir} && claude --resume {session_id} --dangerously-skip-permissions"
+            wd_quoted = shlex.quote(working_dir)
+            resume_command = f"cd {wd_quoted} && env -u CLAUDECODE claude --resume {session_id} --dangerously-skip-permissions"
         else:
-            resume_command = f"claude --resume {session_id} --dangerously-skip-permissions"
+            resume_command = f"env -u CLAUDECODE claude --resume {session_id} --dangerously-skip-permissions"
 
     # Populate result_summary (first 300 chars of output summary)
     result_summary = None
@@ -2221,7 +2229,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         model = config.model
         # Use --name flag to set human-readable session display name
         escaped_display = session_name_display.replace('"', '\\"')
-        cmd = f'claude --dangerously-skip-permissions --model {model} --name "{escaped_display}"'
+        cmd = f'env -u CLAUDECODE claude --dangerously-skip-permissions --model {model} --name "{escaped_display}"'
 
         # Child agent: own tmux session + terminal tab
         parent_run_id = run.get("parent_run_id")
@@ -2394,7 +2402,8 @@ async def _check_all_agents(db_path=None) -> None:
             real_session_id = _discover_claude_session_id(run["started_at"], run_id, working_dir=run.get("working_dir"))
             if real_session_id:
                 wd = run.get("working_dir") or ""
-                resume_cmd = f"cd {wd} && claude --resume {real_session_id} --dangerously-skip-permissions" if wd else f"claude --resume {real_session_id} --dangerously-skip-permissions"
+                wd_quoted = shlex.quote(wd) if wd else ""
+                resume_cmd = f"cd {wd_quoted} && env -u CLAUDECODE claude --resume {real_session_id} --dangerously-skip-permissions" if wd else f"env -u CLAUDECODE claude --resume {real_session_id} --dangerously-skip-permissions"
                 update_agent_run(run_id, session_id=real_session_id, resume_command=resume_cmd, db_path=db_path)
                 run["session_id"] = real_session_id
                 _session_id_resolved.add(run_id)

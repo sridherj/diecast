@@ -16,6 +16,24 @@ from cast_server.infra.terminal import (
 def _basename(cmd: str) -> str:
     return os.path.basename(cmd)
 
+
+_MACOS_TERMINAL_ALIASES: frozenset[str] = frozenset({
+    "iterm", "iterm.app", "iterm2", "iterm2.app",
+    "terminal", "terminal.app",
+})
+
+
+def _normalize_macos_terminal(name: str) -> str | None:
+    """Normalize macOS terminal names to canonical 'iterm' or 'terminal'.
+    Returns None if not a macOS terminal."""
+    lower = name.lower().removesuffix(".app")
+    if lower in ("iterm", "iterm2"):
+        return "iterm"
+    if lower == "terminal":
+        return "terminal"
+    return None
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -103,6 +121,66 @@ class TmuxSessionManager:
     def _split_flag(flag: str) -> list[str]:
         return flag.split() if flag else []
 
+    def _open_macos_terminal(self, session_name: str, terminal_name: str,
+                             title: str | None = None) -> None:
+        """Open a macOS terminal window attached to a tmux session via osascript."""
+        import shlex
+        tmux_target = shlex.quote(session_name)
+        tmux_cmd = f"tmux attach-session -t {tmux_target}"
+        # Escape for AppleScript string literal (backslash and double-quote)
+        as_safe = tmux_cmd.replace("\\", "\\\\").replace('"', '\\"')
+
+        if terminal_name == "iterm":
+            script = f'''
+            tell application "iTerm"
+                activate
+                set newWindow to (create window with default profile)
+                tell current session of newWindow
+                    write text "{as_safe}"
+                end tell
+            end tell
+            '''
+        else:  # terminal_name == "terminal"
+            script = f'''
+            tell application "Terminal"
+                activate
+                do script "{as_safe}"
+            end tell
+            '''
+        clean_env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        subprocess.Popen(["osascript", "-e", script], start_new_session=True, env=clean_env)
+
+    def _open_macos_terminal_tab(self, session_name: str, terminal_name: str,
+                                  title: str | None = None) -> None:
+        """Open a macOS terminal tab attached to a tmux session via osascript."""
+        import shlex
+        tmux_target = shlex.quote(session_name)
+        tmux_cmd = f"tmux attach-session -t {tmux_target}"
+        as_safe = tmux_cmd.replace("\\", "\\\\").replace('"', '\\"')
+
+        if terminal_name == "iterm":
+            script = f'''
+            tell application "iTerm"
+                activate
+                tell current window
+                    create tab with default profile
+                    tell current session
+                        write text "{as_safe}"
+                    end tell
+                end tell
+            end tell
+            '''
+        else:  # terminal_name == "terminal"
+            script = f'''
+            tell application "Terminal"
+                activate
+                tell application "System Events" to keystroke "t" using command down
+                do script "{as_safe}" in front window
+            end tell
+            '''
+        clean_env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        subprocess.Popen(["osascript", "-e", script], start_new_session=True, env=clean_env)
+
     def open_terminal(self, session_name: str, title: str | None = None) -> None:
         """Open a new terminal window attached to this tmux session.
 
@@ -114,13 +192,21 @@ class TmuxSessionManager:
                 PATH. Callers in agent_service catch this and fail the run.
         """
         resolved = self._resolved_terminal()
+        mac_name = _normalize_macos_terminal(_basename(resolved.command))
+
+        if mac_name is not None:
+            self._open_macos_terminal(session_name, mac_name, title)
+            return
+
+        # Linux terminals: existing flag-based dispatch
         cmd = [resolved.command, *resolved.args]
         cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         if title and _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
             # Only ptyxis honors -T; other terminals ignore unknown flags or error.  # diecast-lint: ignore-line
             cmd.extend(["-T", title])
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
-        subprocess.Popen(cmd, start_new_session=True)
+        clean_env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        subprocess.Popen(cmd, start_new_session=True, env=clean_env)
 
     def open_terminal_tab(self, session_name: str, title: str | None = None) -> None:
         """Open a new terminal tab attached to this tmux session.
@@ -134,6 +220,13 @@ class TmuxSessionManager:
                 PATH.
         """
         resolved = self._resolved_terminal()
+        mac_name = _normalize_macos_terminal(_basename(resolved.command))
+
+        if mac_name is not None:
+            self._open_macos_terminal_tab(session_name, mac_name, title)
+            return
+
+        # Linux terminals: existing flag-based dispatch (unchanged)
         cmd = [resolved.command, *resolved.args]
         if _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
             cmd.append("--tab")
@@ -142,7 +235,8 @@ class TmuxSessionManager:
         else:
             cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
-        subprocess.Popen(cmd, start_new_session=True)
+        clean_env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        subprocess.Popen(cmd, start_new_session=True, env=clean_env)
 
     def get_pane_command(self, target: str) -> str:
         result = self._run([
