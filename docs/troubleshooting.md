@@ -34,10 +34,11 @@ overwritten before the failure; the originals are safe in
    `./setup`. The next run will create a fresh `.cast-bak-<ts>/` and the
    retention pass keeps the 5 newest by lex sort.
 
-**Mechanism.** `bin/_lib.sh::backup_if_exists` moves any pre-existing target
-into `${HOME}/.claude/.cast-bak-${RUN_TIMESTAMP}/` before `./setup` writes
-its replacement. All moves in one run share a directory, so the entire
-prior install state is recoverable as a unit.
+**Mechanism.** The installer's `backup_if_exists` helper (in
+`cast_server.bootstrap.common`) moves any pre-existing target into
+`~/.claude/.cast-bak-<UTC-timestamp>/` before `./setup` writes its
+replacement. All moves in one run share a directory, so the entire prior
+install state is recoverable as a unit.
 
 ## `/cast-upgrade` restart killed an in-flight run
 
@@ -165,10 +166,10 @@ order matches the table in [`docs/terminals.md`](terminals.md)).
    terminal" section in [`docs/terminals.md`](terminals.md). PRs welcome.
 
 **Mechanism.** The supported list is the single source of truth in
-`agents/_shared/terminal.py::SUPPORTED_TERMINALS`, mirrored in
-`bin/cast-doctor`'s `SUPPORTED_TERMINALS` array and in the table at
-[`docs/terminals.md`](terminals.md). All three update together when a new
-terminal lands.
+`agents/_shared/terminal.py::_SUPPORTED`, consumed directly by
+`bin/cast-doctor` (via `cast_server.bootstrap.doctor`) and documented in
+the table at [`docs/terminals.md`](terminals.md). Both update together
+when a new terminal lands.
 
 ## Migration failure during `./setup --upgrade`
 
@@ -209,8 +210,8 @@ exception (bug in the migration, schema drift, environment mismatch).
    `~/.cast/migrations.applied`; the previously-failed one is retried.
 
 **Mechanism.** `bin/run-migrations.py` raises on the first failure,
-which propagates up through `./setup --upgrade`'s `set -e` and triggers
-the `/cast-upgrade` rollback path (Decision #9). Migrations are expected
+which propagates up through `./setup`'s error handling and triggers the
+`/cast-upgrade` rollback path (Decision #9). Migrations are expected
 to be idempotent (re-running `up()` on an already-migrated state is a
 no-op) — see [`migrations/README.md`](../migrations/README.md). At v1
 zero migrations ship, so this entry is forward-looking.

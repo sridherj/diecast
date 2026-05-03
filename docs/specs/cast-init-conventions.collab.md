@@ -155,7 +155,7 @@ same commit as the substantive edit.
   `docs/execution/<goal>/<phase>/…`); the directory already namespaces them.
 
 The date is the UTC date the agent ran (matches the date component of the run's
-`RUN_TIMESTAMP` per `bin/_lib.sh`).
+`RUN_TIMESTAMP` per the bootstrap helpers in `cast_server.bootstrap.common`).
 
 ## `_v2` versioning
 

@@ -12,10 +12,8 @@ inside Claude Code.
 ## Internal — invoked by `setup` or CI
 
 - `cast-doctor` — diagnostic prerequisite checker. User surface: `/cast-doctor`
-  slash command inside Claude Code; this script remains the shell fallback and
-  the gate `setup`'s `step1_doctor` runs.
-- `_lib.sh` — shared bash helpers (`log`, `warn`, `fail`, `backup_if_exists`,
-  `prune_old_backups`). Sourced, not executed.
+  slash command inside Claude Code; also callable directly from a terminal.
+  Gates `setup`'s `step1_doctor`.
 - `generate-skills` — produces `~/.claude/skills/cast-*/SKILL.md` from
   `agents/` and `skills/claude-code/`. Invoked by `step4_install_skills`.
 - `set-proactive-defaults.py` — seeds per-agent `proactive` defaults in

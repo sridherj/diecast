@@ -1,37 +1,53 @@
-import subprocess
+import os
 from pathlib import Path
-import yaml
 import sys
-import re
 
-def test_setup_merger(tmp_path):
-    # Extract the inline Python merger script from setup
-    setup_script = Path("setup").read_text()
-    match = re.search(r"cat > \"\$\{merger\}\" <<'PY'\n(.*?)\nPY", setup_script, re.DOTALL)
-    assert match is not None, "Could not find Python merger script in setup"
-    py_code = match.group(1)
-    
-    merger_script = tmp_path / "merger.py"
-    merger_script.write_text(py_code)
-    
+import yaml
+
+_CAST_SERVER = Path(__file__).resolve().parent.parent / "cast-server"
+if str(_CAST_SERVER) not in sys.path:
+    sys.path.insert(0, str(_CAST_SERVER))
+
+from cast_server.bootstrap.setup_flow import _merge_config
+
+
+def _merge_with_repo_env(cfg: Path, terminal_seed: str) -> dict:
+    old_repo = os.environ.get("REPO_DIR")
+    os.environ["REPO_DIR"] = str(Path(__file__).resolve().parents[1])
+    try:
+        _merge_config(cfg, terminal_seed)
+    finally:
+        if old_repo is None:
+            os.environ.pop("REPO_DIR", None)
+        else:
+            os.environ["REPO_DIR"] = old_repo
+    return yaml.safe_load(cfg.read_text())
+
+
+def test_setup_merger_migrates_terminal_alias(tmp_path):
     cfg = tmp_path / "config.yaml"
-    
-    # Scenario 1: Fresh install, terminal detected
-    subprocess.run([sys.executable, str(merger_script), str(cfg), "gnome-terminal"], check=True)
-    data = yaml.safe_load(cfg.read_text())
-    assert data["terminal_default"] == "gnome-terminal"
-    assert "terminal" not in data
-    
-    # Scenario 2: Legacy config with terminal alias gets migrated cleanly
     cfg.write_text(yaml.safe_dump({"terminal": "kitty"}))
-    subprocess.run([sys.executable, str(merger_script), str(cfg), "gnome-terminal"], check=True)
-    data = yaml.safe_load(cfg.read_text())
-    assert data["terminal_default"] == "kitty"  # migrated!
-    assert "terminal" not in data  # old key removed!
-    
-    # Scenario 3: Legacy config with both terminal and terminal_default keeps terminal_default
+
+    data = _merge_with_repo_env(cfg, "gnome-terminal")
+
+    assert data["terminal_default"] == "kitty"
+    assert "terminal" not in data
+
+
+def test_setup_merger_preserves_terminal_default(tmp_path):
+    cfg = tmp_path / "config.yaml"
     cfg.write_text(yaml.safe_dump({"terminal": "kitty", "terminal_default": "alacritty"}))
-    subprocess.run([sys.executable, str(merger_script), str(cfg), "gnome-terminal"], check=True)
-    data = yaml.safe_load(cfg.read_text())
+
+    data = _merge_with_repo_env(cfg, "gnome-terminal")
+
     assert data["terminal_default"] == "alacritty"
+    assert "terminal" not in data
+
+
+def test_setup_merger_uses_seed_for_fresh_config(tmp_path):
+    cfg = tmp_path / "config.yaml"
+
+    data = _merge_with_repo_env(cfg, "gnome-terminal")
+
+    assert data["terminal_default"] == "gnome-terminal"
     assert "terminal" not in data

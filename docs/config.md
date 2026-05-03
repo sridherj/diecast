@@ -11,7 +11,7 @@ here is honored by Diecast — extra keys are tolerated but ignored.
 # ~/.cast/config.yaml — Diecast user-level config.
 # Schema reference: docs/config.md inside the diecast repo.
 # Edits here are preserved by ./setup re-runs and /cast-upgrade.
-terminal: ""
+terminal_default: ""
 host: localhost
 port: 8005
 auto_upgrade: false
@@ -25,19 +25,23 @@ proactive_overrides: {}
 
 ## Keys
 
-### `terminal`
+### `terminal_default`
 
 - **Default:** `""` (empty string).
 - **Valid values:** any non-empty string from the supported terminal list, or
   `""` to fall back to `$TERMINAL` and PATH discovery. The full list of
-  recognised names lives in `bin/cast-doctor` and `docs/terminals.md` (the
-  latter is owned by sp3).
+  recognised names lives in `agents/_shared/terminal.py` and
+  `docs/terminals.md` (the latter is owned by sp3).
 - **When read:** `cast-spawn-child` reads it via the `$CAST_TERMINAL` env-var
   contract before launching a child agent in a new terminal window.
   `bin/cast-doctor` also surfaces the value during prereq checks.
-- **Set by:** `./setup` Step 7 (interactive prompt or `read -rp`), or by hand.
-  An unsupported value soft-falls back to the first supported terminal on
-  `PATH` (Decision #3) and prints a warning.
+- **Set by:** `./setup` Step 7 (interactive prompt), `bin/cast-doctor
+  --fix-terminal`, or by hand.  An unsupported value soft-falls back to the
+  first supported terminal on `PATH` (Decision #3) and prints a warning.
+- **Legacy alias:** `terminal` is accepted as a read-time alias for
+  back-compatibility. When `./setup` encounters a config with the old
+  `terminal` key, it migrates the value to `terminal_default` and removes
+  the legacy key. New installs always write `terminal_default`.
 
 ### `host`
 

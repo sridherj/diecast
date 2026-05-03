@@ -81,7 +81,7 @@ case_clean_install() {
       "${REPO_DIR}/setup" --no-prompt >/dev/null || return 1
 
     assert_file "${fake_home}/.cast/config.yaml" || return 1
-    assert_grep "^terminal:" "${fake_home}/.cast/config.yaml" || return 1
+    assert_grep "^terminal_default:" "${fake_home}/.cast/config.yaml" || return 1
     assert_grep "auto_upgrade:" "${fake_home}/.cast/config.yaml" || return 1
 
     # gstack-pattern install seam: ~/.claude/skills/diecast symlink → repo,

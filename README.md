@@ -147,6 +147,12 @@ Every cast-* step ends with 1–3 suggested next commands grounded in what you j
 - `uv` (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - Git
 
+> **Shell note:** Diecast does not require bash and does not change your default
+> shell. `./setup`, `bin/cast-doctor`, `bin/cast-server`, and `bin/cast-hook` are
+> all Python-based and work from any POSIX shell (zsh, fish, dash, etc.). If you
+> have bash installed you can still invoke CI test scripts via `bash tests/…`,
+> but end-user workflows never depend on it.
+
 ### Setup
 
 ```bash

@@ -1,10 +1,37 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# bin/cast-server — portable launcher for the Diecast uvicorn server.
+#
+# Resolves the repository root via __file__ (no BASH_SOURCE dependency) and
+# delegates to `uv run uvicorn ...` with the same arguments the previous bash
+# launcher accepted.  Uses only stdlib so it works on any system with Python 3
+# on PATH — bash is NOT required.
+"""Portable Python launcher for cast-server."""
+from __future__ import annotations
 
-REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd -P)"
+import os
+import sys
+from pathlib import Path
 
-exec uv run --project "${REPO_DIR}" -- uvicorn cast_server.app:app \
-  --app-dir "${REPO_DIR}/cast-server" \
-  --host "${CAST_BIND_HOST:-127.0.0.1}" \
-  --port "${CAST_PORT:-8005}" \
-  "$@"
+
+def main() -> None:
+    repo_dir = str(Path(__file__).resolve().parent.parent)
+    bind_host = os.environ.get("CAST_BIND_HOST") or "127.0.0.1"
+    port = os.environ.get("CAST_PORT") or "8005"
+
+    argv = [
+        "uv", "run",
+        "--project", repo_dir,
+        "--",
+        "uvicorn", "cast_server.app:app",
+        "--app-dir", os.path.join(repo_dir, "cast-server"),
+        "--host", bind_host,
+        "--port", port,
+        *sys.argv[1:],
+    ]
+
+    os.execvp("uv", argv)
+
+
+if __name__ == "__main__":
+    main()
