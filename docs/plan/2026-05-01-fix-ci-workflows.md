@@ -73,7 +73,7 @@ Key activities:
 - In `setup:5`, surgically delete the `"Mirrors <LINKEDOUT_ROOT>/setup. "`
   sentence only. Keep the rest of the comment ("Takes a fresh clone of
   github.com/sridherj/diecast..." onward) intact — the canonical GitHub URL is
-  allowlisted by the lint's `(?<!github\.com/)` lookaround for `\bsridherj\b`.
+  allowlisted by the lint's `(?<!github\.com/)` lookaround for `\bsridherj\b`. <!-- diecast-lint: ignore-line -->
 - Run `bin/lint-anonymization` locally; confirm exit 0.
 
 **Design review:**
@@ -81,7 +81,7 @@ Key activities:
   source of truth per its docstring D6). No conflict.
 - **Ripple check:** Dropping `ptyxis` from the lint must not silently weaken the broader
   anonymization contract. The pattern was an outlier (a public terminal name, not a
-  PII token); removing it does not affect the SJ/sridherj/email/path rules. ✓
+  PII token); removing it does not affect the SJ/sridherj/email/path rules. ✓ <!-- diecast-lint: ignore-line -->
 - **Verification gap:** Re-run the lint after each scrub batch — easy to miss a hit if you
   fix the obvious ones and skip a quoted form. ✓ (covered in activities)
 
