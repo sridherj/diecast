@@ -57,7 +57,7 @@ assert_grep() {
 note "Scenario 1 — ./setup --no-prompt (fresh install)"
 if ( cd "${REPO_DIR}" && ./setup --no-prompt ); then
   if assert_file "${HOME}/.cast/config.yaml" \
-     && assert_file "${HOME}/.local/bin/cast-server" \
+     && assert_file "${HOME}/.claude/skills/diecast/bin/cast-server" \
      && [[ -d "${HOME}/.claude/agents" ]] \
      && ls "${HOME}/.claude/agents" | grep -q '^cast-'; then
     ok "install plumbing populated (covers (a)+(f))"
