@@ -7,9 +7,12 @@ Single source of truth: delegates to agents._shared.terminal._autodetect().
 import sys
 from pathlib import Path
 
-# Bootstrap agents/ onto sys.path (same pattern as cast_server/__init__.py)
-sys.path.insert(0, str(Path(__file__).parent.parent / "agents"))
-from _shared.terminal import _autodetect
+# Add the repo root to sys.path so `agents._shared.terminal` is importable.
+# Aligned with the pattern used in cast_server.bootstrap.doctor.
+_repo_root = str(Path(__file__).resolve().parent.parent)
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+from agents._shared.terminal import _autodetect
 
 candidates = _autodetect()
 print(candidates[0] if candidates else "", end="")

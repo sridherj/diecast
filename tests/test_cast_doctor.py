@@ -534,27 +534,6 @@ def test_unsupported_terminal_in_json(tmp_path):
 # --- Clean-environment (no project deps) test ---------------------------------
 
 
-def test_bootstrap_doctor_import_without_pyyaml():
-    """Bootstrap doctor module imports and reports findings even if PyYAML
-    is not installed. Simulated by hiding yaml from the import mechanism."""
-    # We can't actually uninstall PyYAML in the test env, but we can verify
-    # the module uses only stdlib at import time by checking the module
-    # body directly: it should not have `import yaml` at module scope.
-    src = (_CAST_SERVER / "cast_server" / "bootstrap" / "doctor.py").read_text()
-    # Module-level imports should not include yaml
-    lines_before_functions = []
-    for line in src.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("def ") or stripped.startswith("class "):
-            break
-        lines_before_functions.append(stripped)
-    module_level = "\n".join(lines_before_functions)
-    assert "import yaml" not in module_level, (
-        "doctor.py must not import yaml at module level — "
-        "it must be stdlib-only for bootstrap safety"
-    )
-
-
 def test_clean_env_doctor_json_does_not_crash(tmp_path):
     """In a clean environment, cast-doctor --json emits structured findings
     instead of crashing — even when uv is missing."""

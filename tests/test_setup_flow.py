@@ -11,16 +11,15 @@ Covers:
 """
 from __future__ import annotations
 
-import json
 import os
 import shutil
 import subprocess
 import sys
-import textwrap
 from pathlib import Path
 from unittest import mock
 
 import pytest
+import yaml
 
 # Ensure cast-server/ and tests/ are importable
 _CAST_SERVER = Path(__file__).resolve().parent.parent / "cast-server"
@@ -33,6 +32,8 @@ if _TESTS_DIR not in sys.path:
 from cast_server.bootstrap.setup_flow import (
     STEP_ORDER,
     SetupState,
+    _merge_config,
+    _persist_terminal_choice,
     parse_args,
     print_next_steps,
     step1_doctor,
@@ -62,7 +63,12 @@ def _make_state(
     upgrade_mode: bool = False,
     no_prompt: bool = False,
 ) -> SetupState:
-    """Create a SetupState with an isolated repo dir and backup root."""
+    """Create a SetupState with an isolated repo dir and backup root.
+
+    Uses ``__new__`` to bypass ``__init__`` intentionally: the real
+    constructor calls ``os.environ.setdefault("RUN_TIMESTAMP", ...)``
+    which would leak side-effects across tests.
+    """
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "bin").mkdir()
@@ -273,18 +279,19 @@ class TestConfigMergeSemantics:
         # We test the merge logic by checking the inline _CONFIG_DEFAULTS dict
         from cast_server.bootstrap.setup_flow import _CONFIG_DEFAULTS
 
-        assert "terminal" in _CONFIG_DEFAULTS
+        assert "terminal_default" in _CONFIG_DEFAULTS
+        assert "terminal" not in _CONFIG_DEFAULTS
         assert "host" in _CONFIG_DEFAULTS
         assert "port" in _CONFIG_DEFAULTS
         assert _CONFIG_DEFAULTS["port"] == 8005
         assert _CONFIG_DEFAULTS["auto_upgrade"] is False
 
-    def test_config_defaults_match_bash_original(self) -> None:
-        """Python config defaults match the bash setup's DEFAULTS dict."""
+    def test_config_defaults_has_expected_keys(self) -> None:
+        """Python config defaults contain exactly the expected keys."""
         from cast_server.bootstrap.setup_flow import _CONFIG_DEFAULTS
 
         expected_keys = {
-            "terminal", "host", "port", "auto_upgrade",
+            "terminal_default", "host", "port", "auto_upgrade",
             "upgrade_snooze_until", "upgrade_snooze_streak",
             "upgrade_never_ask", "last_upgrade_check_at",
             "proactive_global", "proactive_overrides",
@@ -301,6 +308,153 @@ class TestConfigMergeSemantics:
 
 
 # ── Interactive prompt skipping tests ────────────────────────────────────────
+
+
+class TestConfigMergeMigration:
+    """Verify setup config merge behavior uses terminal_default + alias migration."""
+
+    @staticmethod
+    def _run_inline_uv_script(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+        script = cmd[cmd.index("-c") + 1]
+        args = cmd[cmd.index("-c") + 2 :]
+        exec_globals = {"__name__": "__main__"}
+        old_argv = sys.argv
+        sys.argv = ["python", *args]
+        try:
+            exec(script, exec_globals)
+        finally:
+            sys.argv = old_argv
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    def test_merge_config_migrates_legacy_terminal_alias(self, tmp_path: Path) -> None:
+        cfg = tmp_path / "config.yaml"
+        cfg.write_text(yaml.safe_dump({"terminal": "kitty", "host": "example"}))
+
+        env = os.environ.copy()
+        env["REPO_DIR"] = str(REPO_ROOT)
+        with mock.patch.dict(os.environ, env, clear=True):
+            _merge_config(cfg, "gnome-terminal")
+
+        data = yaml.safe_load(cfg.read_text())
+        assert data["terminal_default"] == "kitty"
+        assert data["host"] == "example"
+        assert "terminal" not in data
+
+    def test_merge_config_prefers_existing_terminal_default(self, tmp_path: Path) -> None:
+        cfg = tmp_path / "config.yaml"
+        cfg.write_text(
+            yaml.safe_dump({"terminal": "kitty", "terminal_default": "alacritty"})
+        )
+
+        env = os.environ.copy()
+        env["REPO_DIR"] = str(REPO_ROOT)
+        with mock.patch.dict(os.environ, env, clear=True):
+            _merge_config(cfg, "gnome-terminal")
+
+        data = yaml.safe_load(cfg.read_text())
+        assert data["terminal_default"] == "alacritty"
+        assert "terminal" not in data
+
+    def test_merge_config_uses_detected_terminal_seed_when_empty(self, tmp_path: Path) -> None:
+        cfg = tmp_path / "config.yaml"
+
+        env = os.environ.copy()
+        env["REPO_DIR"] = str(REPO_ROOT)
+        with mock.patch.dict(os.environ, env, clear=True):
+            _merge_config(cfg, "gnome-terminal")
+
+        data = yaml.safe_load(cfg.read_text())
+        assert data["terminal_default"] == "gnome-terminal"
+        assert "terminal" not in data
+
+    def test_persist_terminal_choice_writes_terminal_default(self, tmp_path: Path) -> None:
+        state = _make_state(tmp_path)
+        home = tmp_path / "home"
+        home.mkdir()
+        cfg_dir = home / ".cast"
+        cfg_dir.mkdir(parents=True)
+        (cfg_dir / "config.yaml").write_text(yaml.safe_dump({"terminal": "kitty", "host": "localhost"}))
+
+        with mock.patch("cast_server.bootstrap.setup_flow.Path.home", return_value=home):
+            _persist_terminal_choice("alacritty", state)
+
+        data = yaml.safe_load((cfg_dir / "config.yaml").read_text())
+        assert data["terminal_default"] == "alacritty"
+        assert data["host"] == "localhost"
+        assert "terminal" not in data
+
+    def test_step6_write_config_uses_cast_terminal_without_autodetect(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        state = _make_state(tmp_path)
+        home = tmp_path / "home"
+        home.mkdir()
+        monkeypatch.setenv("CAST_TERMINAL", "kitty")
+
+        calls: list[list[str]] = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(list(cmd))
+            if "-c" in cmd:
+                return self._run_inline_uv_script(cmd)
+            raise AssertionError(f"Unexpected subprocess.run call: {cmd}")
+
+        with mock.patch("cast_server.bootstrap.setup_flow.Path.home", return_value=home):
+            with mock.patch("cast_server.bootstrap.setup_flow.subprocess.run", side_effect=fake_run):
+                step6_write_config(state)
+
+        assert all(str(state.repo_dir / "bin" / "cast-detect-terminal") not in cmd for cmd in calls)
+        data = yaml.safe_load((home / ".cast" / "config.yaml").read_text())
+        assert data["terminal_default"] == "kitty"
+        assert "terminal" not in data
+
+    def test_step6_write_config_uses_detect_terminal_when_env_empty(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        state = _make_state(tmp_path)
+        home = tmp_path / "home"
+        home.mkdir()
+        monkeypatch.delenv("CAST_TERMINAL", raising=False)
+
+        def fake_run(cmd, **kwargs):
+            if cmd[:4] == ["uv", "run", "--project", str(state.repo_dir)]:
+                if str(state.repo_dir / "bin" / "cast-detect-terminal") in cmd:
+                    return subprocess.CompletedProcess(cmd, 0, stdout="konsole\n", stderr="")
+                if "-c" in cmd:
+                    return self._run_inline_uv_script(cmd)
+            raise AssertionError(f"Unexpected subprocess.run call: {cmd}")
+
+        with mock.patch("cast_server.bootstrap.setup_flow.Path.home", return_value=home):
+            with mock.patch("cast_server.bootstrap.setup_flow.subprocess.run", side_effect=fake_run):
+                step6_write_config(state)
+
+        data = yaml.safe_load((home / ".cast" / "config.yaml").read_text())
+        assert data["terminal_default"] == "konsole"
+        assert "terminal" not in data
+
+    def test_step6_write_config_ignores_detect_terminal_failures(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        state = _make_state(tmp_path)
+        home = tmp_path / "home"
+        home.mkdir()
+        monkeypatch.delenv("CAST_TERMINAL", raising=False)
+
+        def fake_run(cmd, **kwargs):
+            if cmd[:4] == ["uv", "run", "--project", str(state.repo_dir)]:
+                if str(state.repo_dir / "bin" / "cast-detect-terminal") in cmd:
+                    return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="boom")
+                if "-c" in cmd:
+                    return self._run_inline_uv_script(cmd)
+            raise AssertionError(f"Unexpected subprocess.run call: {cmd}")
+
+        with mock.patch("cast_server.bootstrap.setup_flow.Path.home", return_value=home):
+            with mock.patch("cast_server.bootstrap.setup_flow.subprocess.run", side_effect=fake_run):
+                step6_write_config(state)
+
+        data = yaml.safe_load((home / ".cast" / "config.yaml").read_text())
+        assert data["terminal_default"] == ""
+        assert "terminal" not in data
 
 
 class TestInteractivePromptSkipping:

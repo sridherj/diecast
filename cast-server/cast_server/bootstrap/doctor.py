@@ -59,8 +59,8 @@ def _load_terminal_table() -> tuple[dict, tuple]:
     except Exception:
         # Fallback — matches the keys in terminal.py at time of writing.
         _fb: dict[str, dict[str, str]] = {
-            "ptyxis": {}, "gnome-terminal": {}, "kitty": {},
-            "alacritty": {}, "iterm": {}, "terminal": {},
+            "ptyxis": {}, "gnome-terminal": {}, "konsole": {},
+            "kitty": {}, "alacritty": {}, "iterm": {}, "terminal": {},
         }
         _lo = tuple(k for k in _fb if k not in ("iterm", "terminal"))
         return _fb, _lo
@@ -323,7 +323,7 @@ def check_terminal(f: Findings) -> None:
         f.note_yellow(
             f"$CAST_TERMINAL={cast} is not a supported terminal. "
             "Run `/cast-doctor` from inside Claude Code to probe and configure "
-            "(or `bin/cast-doctor --fix-terminal` from a shell as fallback), "
+            "(or `bin/cast-doctor --fix-terminal` as a CLI alternative), "
             f"or set $CAST_TERMINAL to one of: {supported_str}. "
             "See docs/reference/supported-terminals.md."
         )
@@ -341,7 +341,7 @@ def check_terminal(f: Findings) -> None:
     f.note_yellow(
         "No supported terminal found. "
         "Run `/cast-doctor` from inside Claude Code to probe and configure "
-        "(or `bin/cast-doctor --fix-terminal` from a shell as fallback), "
+        "(or `bin/cast-doctor --fix-terminal` as a CLI alternative), "
         f"or set $CAST_TERMINAL manually. (Supported: {supported_str})"
     )
 

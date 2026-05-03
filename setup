@@ -41,6 +41,3 @@ from cast_server.bootstrap.setup_flow import run_setup  # noqa: E402
 
 if __name__ == "__main__":
     run_setup(repo_dir=_SCRIPT_DIR)
-else:
-    # Imported as a module or exec'd — still run.
-    run_setup(repo_dir=_SCRIPT_DIR)

@@ -19,6 +19,7 @@ Flags
 """
 from __future__ import annotations
 
+import json as _json_mod
 import os
 import platform
 import shutil
@@ -60,7 +61,7 @@ for the full ~/.cast/config.yaml schema.
 """
 
 _CONFIG_DEFAULTS: dict[str, object] = {
-    "terminal": "",
+    "terminal_default": "",
     "host": "localhost",
     "port": 8005,
     "auto_upgrade": False,
@@ -321,32 +322,20 @@ def _merge_config(cfg_path: Path, terminal_seed: str = "") -> None:
 
     Args:
         cfg_path: Path to ``~/.cast/config.yaml``.
-        terminal_seed: Value for the ``terminal`` key when empty.
+        terminal_seed: Value for the ``terminal_default`` key when empty.
     """
     # Inline merger using project's PyYAML (same approach as the bash version).
+    # DEFAULTS and HEADER are generated from the module-level constants so the
+    # inline script and _CONFIG_DEFAULTS / _CONFIG_HEADER can never drift apart.
+    defaults_repr = _json_mod.dumps(_CONFIG_DEFAULTS)
+    header_repr = repr(_CONFIG_HEADER)
     script = (
-        "import sys\n"
+        "import sys, json\n"
         "from pathlib import Path\n"
         "import yaml\n"
         "\n"
-        "DEFAULTS = {\n"
-        '    "terminal": "",\n'
-        '    "host": "localhost",\n'
-        '    "port": 8005,\n'
-        '    "auto_upgrade": False,\n'
-        '    "upgrade_snooze_until": None,\n'
-        '    "upgrade_snooze_streak": 0,\n'
-        '    "upgrade_never_ask": False,\n'
-        '    "last_upgrade_check_at": None,\n'
-        '    "proactive_global": None,\n'
-        '    "proactive_overrides": {},\n'
-        "}\n"
-        "\n"
-        "HEADER = (\n"
-        '    "# ~/.cast/config.yaml — Diecast user-level config.\\n"\n'
-        '    "# Schema reference: docs/config.md inside the diecast repo.\\n"\n'
-        '    "# Edits here are preserved by ./setup re-runs and /cast-upgrade.\\n"\n'
-        ")\n"
+        f"DEFAULTS = json.loads({defaults_repr!r})\n"
+        f"HEADER = {header_repr}\n"
         "\n"
         "def main(path, terminal_seed=''):\n"
         "    p = Path(path)\n"
@@ -358,12 +347,15 @@ def _merge_config(cfg_path: Path, terminal_seed: str = "") -> None:
         "        raw = {}\n"
         "    merged = {}\n"
         "    for key, default in DEFAULTS.items():\n"
-        "        if key in raw:\n"
+        "        if key == 'terminal_default' and 'terminal_default' not in raw and 'terminal' in raw:\n"
+        "            merged[key] = raw['terminal']\n"
+        "        elif key in raw:\n"
         "            merged[key] = raw[key]\n"
         "        else:\n"
         "            merged[key] = default\n"
-        "    if terminal_seed and not merged.get('terminal'):\n"
-        "        merged['terminal'] = terminal_seed\n"
+        "    if terminal_seed and not merged.get('terminal_default'):\n"
+        "        merged['terminal_default'] = terminal_seed\n"
+        "    merged.pop('terminal', None)\n"
         "    p.write_text(HEADER + yaml.safe_dump(merged, sort_keys=False))\n"
         "\n"
         "main(*sys.argv[1:])\n"
@@ -408,12 +400,26 @@ def step6_write_config(state: SetupState) -> None:
 
     cfg_dir.mkdir(parents=True, exist_ok=True)
     os.environ["REPO_DIR"] = str(state.repo_dir)
-    _merge_config(cfg_file, os.environ.get("CAST_TERMINAL", ""))
+    detected_terminal = os.environ.get("CAST_TERMINAL", "")
+    if not detected_terminal:
+        detect_script = state.repo_dir / "bin" / "cast-detect-terminal"
+        result = subprocess.run(
+            ["uv", "run", "--project", str(state.repo_dir), "python", str(detect_script)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            detected_terminal = result.stdout.strip()
+    _merge_config(cfg_file, detected_terminal)
     log(f"  wrote/merged {cfg_file}")
 
 
 def _persist_terminal_choice(choice: str, state: SetupState) -> None:
-    """Write the terminal choice into config.yaml.
+    """Write the ``terminal_default`` key into ``~/.cast/config.yaml``.
+
+    Removes any legacy ``terminal`` key and writes ``terminal_default``
+    as the canonical config key.
 
     Args:
         choice: Terminal name or empty/"skip" for no-op.
@@ -422,7 +428,7 @@ def _persist_terminal_choice(choice: str, state: SetupState) -> None:
     if not choice or choice == "skip":
         return
     if state.dry_run:
-        log(f"DRY: persist terminal={choice} into ~/.cast/config.yaml")
+        log(f"DRY: persist terminal_default={choice} into ~/.cast/config.yaml")
         return
 
     cfg_file = Path.home() / ".cast" / "config.yaml"
@@ -438,7 +444,8 @@ def _persist_terminal_choice(choice: str, state: SetupState) -> None:
         "    data = yaml.safe_load(p.read_text()) or {}\n"
         "    if not isinstance(data, dict):\n"
         "        data = {}\n"
-        "data['terminal'] = choice\n"
+        "data.pop('terminal', None)\n"
+        "data['terminal_default'] = choice\n"
         "p.write_text(yaml.safe_dump(data, sort_keys=False))\n"
     )
     result = subprocess.run(

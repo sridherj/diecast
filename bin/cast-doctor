@@ -41,6 +41,3 @@ from cast_server.bootstrap.doctor import main  # noqa: E402
 
 if __name__ == "__main__":
     main()
-else:
-    # Imported as a module or exec'd by a shell — still run.
-    main()
