@@ -2119,7 +2119,10 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         if not expanded_ext.is_dir():
             raise MissingExternalProjectDirError(goal_slug, external_project_dir)
         working_dir = str(expanded_ext)
-        goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
+        goal_service.ensure_cast_symlink(
+            goal_slug, external_project_dir,
+            folder_path=goal_data.get("folder_path") if goal_data else None,
+        )
         cast_goal_dir = str(expanded_ext / ".cast")
 
         # Determine phase-aware output directory

@@ -230,6 +230,7 @@ case $(( STREAK < 2 ? STREAK : 2 )) in
   1) HOURS=48 ;;
   2) HOURS=168 ;;
 esac
+# python3 instead of `date -d` for macOS portability (BSD date has no -d flag)
 NEXT=$(python3 -c "from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(hours=${HOURS})).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 NEW_STREAK=$(( STREAK + 1 < 3 ? STREAK + 1 : 3 ))
 yq -i ".upgrade_snooze_until = \"$NEXT\" | .upgrade_snooze_streak = $NEW_STREAK" ~/.cast/config.yaml

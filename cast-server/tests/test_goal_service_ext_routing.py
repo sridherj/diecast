@@ -230,3 +230,158 @@ class TestCastSymlinkTargetsRoutedPath:
         symlink = ext_dir / ".cast"
         assert symlink.is_symlink()
         assert symlink.resolve() == goal_dir.resolve()
+
+
+class TestLaunchAgentDoesNotRevertSymlink:
+    """Regression: _launch_agent must pass folder_path to ensure_cast_symlink
+    so a routed goal's .cast symlink is not reverted to the old goals_dir."""
+
+    def test_ensure_cast_symlink_with_folder_path_preserves_route(self, tmp_path):
+        """After routing, calling ensure_cast_symlink *with* folder_path should
+        keep .cast pointing at docs/goal/<slug>, not revert to goals_dir/<slug>."""
+        from cast_server.services.goal_service import (
+            update_config, ensure_cast_symlink, get_goal,
+        )
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        # Route the goal
+        update_config(
+            "my-goal",
+            external_project_dir=str(ext_dir),
+            goals_dir=goals_dir,
+            db_path=db_path,
+        )
+
+        expected_target = ext_dir / "docs" / "goal" / "my-goal"
+        symlink = ext_dir / ".cast"
+        assert symlink.resolve() == expected_target.resolve()
+
+        # Simulate what _launch_agent does: call ensure_cast_symlink with
+        # the goal's folder_path from DB (the fix) — must NOT revert.
+        goal_data = get_goal("my-goal", db_path=db_path)
+        ensure_cast_symlink(
+            "my-goal", str(ext_dir), goals_dir,
+            folder_path=goal_data["folder_path"],
+        )
+
+        assert symlink.resolve() == expected_target.resolve(), (
+            "ensure_cast_symlink with folder_path should preserve the routed target"
+        )
+
+    def test_ensure_cast_symlink_without_folder_path_reverts(self, tmp_path):
+        """Without folder_path, ensure_cast_symlink falls back to goals_dir/<slug>
+        — this is the bug that the _launch_agent fix prevents."""
+        from cast_server.services.goal_service import (
+            update_config, ensure_cast_symlink,
+        )
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        update_config(
+            "my-goal",
+            external_project_dir=str(ext_dir),
+            goals_dir=goals_dir,
+            db_path=db_path,
+        )
+
+        expected_target = ext_dir / "docs" / "goal" / "my-goal"
+        symlink = ext_dir / ".cast"
+        assert symlink.resolve() == expected_target.resolve()
+
+        # Call WITHOUT folder_path — falls back to goals_dir/<slug>
+        ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
+
+        # This demonstrates the old bug: symlink now points at goals_dir
+        assert symlink.resolve() == goal_dir.resolve(), (
+            "Without folder_path the symlink should fall back to goals_dir/<slug>"
+        )
+
+
+class TestRoutedGoalWritePaths:
+    """Regression: update_phase, toggle_focus, and tasks.md rendering must
+    write to the routed folder_path, not the default goals_dir/<slug>."""
+
+    def _route_goal(self, tmp_path):
+        """Helper: create a goal, route it, return (db_path, goals_dir, ext_dir, routed_dir)."""
+        from cast_server.services.goal_service import update_config
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        update_config(
+            "my-goal",
+            external_project_dir=str(ext_dir),
+            goals_dir=goals_dir,
+            db_path=db_path,
+        )
+        routed_dir = ext_dir / "docs" / "goal" / "my-goal"
+        return db_path, goals_dir, ext_dir, routed_dir
+
+    def test_update_phase_writes_to_routed_dir(self, tmp_path):
+        """update_phase should write goal.yaml in the routed directory."""
+        from cast_server.services.goal_service import update_phase
+
+        db_path, goals_dir, ext_dir, routed_dir = self._route_goal(tmp_path)
+
+        import yaml
+        update_phase("my-goal", "execution", goals_dir=goals_dir, db_path=db_path)
+
+        yaml_path = routed_dir / "goal.yaml"
+        assert yaml_path.exists(), "goal.yaml should be in the routed directory"
+        with open(yaml_path) as f:
+            data = yaml.safe_load(f)
+        assert data["phase"] == "execution"
+
+    def test_toggle_focus_writes_to_routed_dir(self, tmp_path):
+        """toggle_focus should write goal.yaml in the routed directory."""
+        from cast_server.services.goal_service import toggle_focus
+
+        db_path, goals_dir, ext_dir, routed_dir = self._route_goal(tmp_path)
+
+        import yaml
+        toggle_focus("my-goal", True, goals_dir=goals_dir, db_path=db_path)
+
+        yaml_path = routed_dir / "goal.yaml"
+        assert yaml_path.exists(), "goal.yaml should be in the routed directory"
+        with open(yaml_path) as f:
+            data = yaml.safe_load(f)
+        assert data["in_focus"] is True
+
+    def test_rerender_tasks_md_writes_to_routed_dir(self, tmp_path):
+        """_rerender_tasks_md should write tasks.md in the routed directory."""
+        from cast_server.services.task_service import _rerender_tasks_md
+
+        db_path, goals_dir, ext_dir, routed_dir = self._route_goal(tmp_path)
+
+        _rerender_tasks_md("my-goal", goals_dir=goals_dir, db_path=db_path)
+
+        tasks_path = routed_dir / "tasks.md"
+        assert tasks_path.exists(), "tasks.md should be in the routed directory"
+
+    def test_artifact_sidebar_resolves_routed_goal_dir(self, tmp_path):
+        """artifact_sidebar should look for artifacts in the routed folder_path."""
+        from cast_server.services.goal_service import get_goal
+
+        db_path, goals_dir, ext_dir, routed_dir = self._route_goal(tmp_path)
+
+        # Create an artifact in the routed dir
+        artifact = routed_dir / "notes.ai.md"
+        artifact.write_text("# Notes\nSome content\n")
+
+        goal = get_goal("my-goal", db_path=db_path)
+        fp = goal.get("folder_path")
+        assert fp is not None
+
+        # Verify the resolved path points to the routed location
+        from pathlib import Path
+        goal_dir = Path(fp)
+        resolved = (goal_dir / "notes.ai.md").resolve()
+        assert resolved.exists(), (
+            "Artifact should be found via folder_path, not goals_dir/<slug>"
+        )

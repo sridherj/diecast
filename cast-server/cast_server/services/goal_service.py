@@ -18,6 +18,20 @@ from cast_server.db.connection import get_connection
 logger = logging.getLogger(__name__)
 
 
+def _resolve_goal_dir(goal: dict | None, slug: str, goals_dir: Path) -> Path:
+    """Return the authoritative goal directory for writing goal.yaml / tasks.md.
+
+    If the goal has been routed to an external project (i.e. folder_path differs
+    from the default ``goals_dir / slug``), use the DB ``folder_path``.
+    Otherwise fall back to ``goals_dir / slug``.
+    """
+    if goal and goal.get("folder_path"):
+        fp = Path(goal["folder_path"])
+        if fp.exists():
+            return fp
+    return goals_dir / slug
+
+
 def _parse_tags(raw: str | None) -> list:
     """Parse tags from DB — handles both JSON and Python repr formats."""
     if not raw:
@@ -135,8 +149,8 @@ def update_status(slug: str, target_status: str,
     finally:
         conn.close()
 
-    # Write changes to goal.yaml
-    goal_dir = goals_dir / slug
+    # Write changes to goal.yaml — use DB folder_path for routed goals
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     yaml_updates = {"status": target_status}
     if current == "idea" and target_status == "accepted":
         yaml_updates["phase"] = "requirements"
@@ -173,7 +187,7 @@ def update_phase(slug: str, target_phase: str,
     finally:
         conn.close()
 
-    goal_dir = goals_dir / slug
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     _update_goal_yaml_fields(goal_dir, {"phase": target_phase})
 
     return get_goal(slug, db_path)
@@ -335,7 +349,7 @@ def toggle_focus(slug: str, in_focus: bool,
     finally:
         conn.close()
 
-    goal_dir = goals_dir / slug
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     _update_goal_yaml_fields(goal_dir, {"in_focus": in_focus})
 
     return get_goal(slug, db_path)

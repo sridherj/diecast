@@ -446,8 +446,9 @@ def _rerender_tasks_md(goal_slug: str, goals_dir: Path = None, db_path=None):
     finally:
         conn.close()
 
-    # Write file
-    goal_dir = goals_dir / goal_slug
+    # Write file — use DB folder_path for routed goals
+    fp = goal.get("folder_path") if goal else None
+    goal_dir = Path(fp) if fp and Path(fp).exists() else goals_dir / goal_slug
     tasks_path = goal_dir / "tasks.md"
     try:
         tasks_path.write_text("\n".join(lines))
