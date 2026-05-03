@@ -346,12 +346,12 @@ case_cache_ttl() {
   # skill prescribes returns "fresh" within an hour and "stale" beyond.
   local now fresh stale
   now=$(date -u +%s)
-  fresh=$(date -u -d "@$(( now - 600 ))"  +%Y-%m-%dT%H:%M:%SZ)   # 10 min ago
-  stale=$(date -u -d "@$(( now - 7200 ))" +%Y-%m-%dT%H:%M:%SZ)   # 2  h  ago
+  fresh=$(python3 -c "from datetime import datetime,timezone; print(datetime.fromtimestamp($(( now - 600 )),tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")   # 10 min ago
+  stale=$(python3 -c "from datetime import datetime,timezone; print(datetime.fromtimestamp($(( now - 7200 )),tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")   # 2  h  ago
 
   local fresh_epoch stale_epoch one_hour_ago
-  fresh_epoch=$(date -u -d "${fresh}" +%s)
-  stale_epoch=$(date -u -d "${stale}" +%s)
+  fresh_epoch=$(python3 -c "from datetime import datetime,timezone; print(int(datetime.strptime('${fresh}','%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc).timestamp()))")
+  stale_epoch=$(python3 -c "from datetime import datetime,timezone; print(int(datetime.strptime('${stale}','%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc).timestamp()))")
   one_hour_ago=$(( now - 3600 ))
 
   [[ "${fresh_epoch}" -gt "${one_hour_ago}" ]] || return 1
