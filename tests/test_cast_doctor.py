@@ -49,7 +49,7 @@ def _make_fake_bin(dir_: Path, names: list[str]) -> Path:
         wrapper.chmod(0o755)
     for tool in (
         "env", "sh", "bash", "uname", "mkdir", "date",
-        "dirname", "tr", "grep", "head", "cat",
+        "dirname", "tr", "grep", "head", "cat", "sed", "xargs",
     ):
         real = shutil.which(tool)
         if real and not (dir_ / tool).exists():
@@ -276,7 +276,7 @@ def test_cast_doctor_red_on_old_python(tmp_path):
 
     # Add real essentials so the script runs at all.
     for tool in ("env", "sh", "bash", "uname", "mkdir", "tr", "grep", "head",
-                 "cat", "dirname", "tmux", "uv", "git", "claude"):
+                 "cat", "dirname", "tmux", "uv", "git", "claude", "sed", "xargs"):
         real = shutil.which(tool)
         if real and not (fake_bin / tool).exists():
             (fake_bin / tool).symlink_to(real)

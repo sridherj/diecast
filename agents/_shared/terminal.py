@@ -33,6 +33,7 @@ import yaml
 _SUPPORTED: dict[str, dict[str, str]] = {
     "ptyxis":         {"new_tab_flag": "--new-window",          "cwd_flag": "--working-directory="},  # diecast-lint: ignore-line
     "gnome-terminal": {"new_tab_flag": "--tab",                  "cwd_flag": "--working-directory="},
+    "konsole":        {"new_tab_flag": "--new-tab",              "cwd_flag": "--workdir"},
     "kitty":          {"new_tab_flag": "@launch --type=tab",     "cwd_flag": "--directory="},
     "alacritty":      {"new_tab_flag": "",                       "cwd_flag": "--working-directory"},
     "iterm":          {"new_tab_flag": "",                       "cwd_flag": ""},
@@ -185,8 +186,6 @@ def _autodetect(
         # ptyxis already first; gnome-terminal already second — keep as-is.  # diecast-lint: ignore-line
         pass
     elif "KDE" in desktop and "konsole" in _SUPPORTED:
-        # konsole bumps to front when KDE is detected (only when konsole is in
-        # _SUPPORTED — currently it is not, so this branch is dormant).
         order.remove("konsole")
         order.insert(0, "konsole")
     return [name for name in order if which(name) is not None]

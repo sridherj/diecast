@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Print the best available terminal for this host, or empty string if none found.
+
+Called by setup/step6 and bin/cast-doctor --fix-terminal.
+Single source of truth: delegates to agents._shared.terminal._autodetect().
+"""
+import sys
+from pathlib import Path
+
+# Bootstrap agents/ onto sys.path (same pattern as cast_server/__init__.py)
+sys.path.insert(0, str(Path(__file__).parent.parent / "agents"))
+from _shared.terminal import _autodetect
+
+candidates = _autodetect()
+print(candidates[0] if candidates else "", end="")

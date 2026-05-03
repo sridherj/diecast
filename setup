@@ -228,7 +228,7 @@ from pathlib import Path
 import yaml
 
 DEFAULTS = {
-    "terminal": "",
+    "terminal_default": "",
     "host": "localhost",
     "port": 8005,
     "auto_upgrade": False,
@@ -257,12 +257,16 @@ def main(path: str, terminal_seed: str = "") -> None:
         raw = {}
     merged = {}
     for key, default in DEFAULTS.items():
-        if key in raw:
+        if key == "terminal_default" and "terminal_default" not in raw and "terminal" in raw:
+            merged[key] = raw["terminal"]
+        elif key in raw:
             merged[key] = raw[key]
         else:
             merged[key] = default
-    if terminal_seed and not merged.get("terminal"):
-        merged["terminal"] = terminal_seed
+    
+    if terminal_seed and not merged.get("terminal_default"):
+        merged["terminal_default"] = terminal_seed
+        
     p.write_text(HEADER + yaml.safe_dump(merged, sort_keys=False))
 
 
@@ -270,7 +274,13 @@ if __name__ == "__main__":
     main(*sys.argv[1:])
 PY
 
-  uv run --project "${REPO_DIR}" python "${merger}" "${cfg_file}" "${CAST_TERMINAL:-}" \
+  local detected_terminal="${CAST_TERMINAL:-}"
+  if [[ -z "$detected_terminal" ]]; then
+      detected_terminal=$(uv run --project "${REPO_DIR}" \
+                          python "${REPO_DIR}/bin/cast-detect-terminal" 2>/dev/null || true)
+  fi
+
+  uv run --project "${REPO_DIR}" python "${merger}" "${cfg_file}" "${detected_terminal}" \
     || { rm -f "${merger}"; fail "Failed to write ${cfg_file}. Check that uv + pyyaml are available."; }
   rm -f "${merger}"
   log "  wrote/merged ${cfg_file}"
@@ -298,7 +308,7 @@ if p.exists():
     data = yaml.safe_load(p.read_text()) or {}
     if not isinstance(data, dict):
         data = {}
-data["terminal"] = choice
+data["terminal_default"] = choice
 p.write_text(yaml.safe_dump(data, sort_keys=False))
 PY
   uv run --project "${REPO_DIR}" python "${merger}" "${HOME}/.cast/config.yaml" "${choice}" \
@@ -430,11 +440,6 @@ step8_launch_and_open_browser() {
     return 0   # never fail setup over the launch step
   fi
 
-  # Terminal wire-up (skipped on --no-prompt / CI — already filtered above).
-  if [[ -x "${REPO_DIR}/bin/cast-doctor" ]]; then
-    "${REPO_DIR}/bin/cast-doctor" --fix-terminal \
-      || warn "  bin/cast-doctor --fix-terminal returned non-zero (continuing)"
-  fi
 
   _open_browser "${url}"
 

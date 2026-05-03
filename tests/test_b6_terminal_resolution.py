@@ -192,7 +192,6 @@ def test_autodetect_excludes_macos_only_keys_on_linux(clean_env):
     assert "terminal" not in candidates
 
 
-@pytest.mark.skipif("konsole" not in _SUPPORTED, reason="konsole not in _SUPPORTED")
 def test_autodetect_linux_kde_prefers_konsole(clean_env):
     fake_path = {"konsole": "/usr/bin/konsole", "alacritty": "/usr/bin/alacritty"}
     candidates = _autodetect(

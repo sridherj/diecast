@@ -45,7 +45,7 @@ FIX_TERMINAL=0
 # CI parity test (tests/test_cast_doctor.py::test_fallback_list_matches_supported)
 # asserts equality. Used only when python3 / agents._shared.terminal is not
 # importable (e.g., install-time gate before deps are installed).
-SUPPORTED_TERMINALS_FALLBACK=(ptyxis gnome-terminal kitty alacritty iterm terminal)
+SUPPORTED_TERMINALS_FALLBACK=(ptyxis gnome-terminal konsole kitty alacritty iterm terminal)
 
 print_help() {
   cat <<'EOF'
@@ -359,6 +359,25 @@ check_terminal() {
   if [[ -n "$sysnal" ]]; then
     note_green "\$TERMINAL=${sysnal} (will be used as fallback)"
     return
+  fi
+
+  # Step 3: ~/.cast/config.yaml (terminal_default)
+  local cfg_path="${HOME}/.cast/config.yaml"
+  if [[ -f "$cfg_path" ]]; then
+      local cfg_term
+      cfg_term=$(grep -E '^\s*terminal_default:\s*\S' "$cfg_path" 2>/dev/null \
+                 | head -1 \
+                 | sed 's/^[^:]*:[[:space:]]*//' \
+                 | tr -d "\"'" \
+                 | xargs 2>/dev/null)
+      if [[ -n "$cfg_term" ]]; then
+          if is_supported_terminal "$cfg_term"; then
+              note_green "config terminal_default=${cfg_term} (supported)"
+              return
+          fi
+          note_yellow "config terminal_default=${cfg_term} is not in the supported list."
+          return
+      fi
   fi
 
   local t
