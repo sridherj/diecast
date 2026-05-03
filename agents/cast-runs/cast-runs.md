@@ -19,7 +19,7 @@ Manage Diecast agent runs directly via `uv run python -c` commands from the `die
 All commands must set PYTHONPATH to resolve the diecast package:
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "..."
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "..."
 ```
 
 ## Operations
@@ -27,7 +27,7 @@ PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python
 ### List Runs for a Goal
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import get_runs_for_goal
 import json
 runs = get_runs_for_goal('GOAL_SLUG')
@@ -41,7 +41,7 @@ for r in runs:
 ### List Runs Filtered by Status
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import get_runs_for_goal
 runs = get_runs_for_goal('GOAL_SLUG', status='running')
 for r in runs:
@@ -52,7 +52,7 @@ for r in runs:
 ### Get a Single Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import get_run
 import json
 r = get_run('RUN_ID')
@@ -63,7 +63,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Create a Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import create_run
 import json
 r = create_run(
@@ -83,7 +83,7 @@ All parameters except `agent_name` and `goal_slug` are optional.
 ### Create a Child Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import create_run
 import json
 r = create_run(
@@ -101,7 +101,7 @@ Children inherit goal context from the parent run.
 ### List Child Runs
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import get_child_runs
 for r in get_child_runs('PARENT_RUN_ID'):
     print(f'[{r[\"run_id\"]}] {r[\"status\"]:12s} {r[\"agent_name\"]}')
@@ -111,7 +111,7 @@ for r in get_child_runs('PARENT_RUN_ID'):
 ### Change Run Status
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import update_run_status
 import json
 r = update_run_status('RUN_ID', 'running')
@@ -122,7 +122,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Complete a Run (with output)
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import complete_run
 import json
 r = complete_run(
@@ -137,7 +137,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Fail a Run (with error)
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import fail_run
 import json
 r = fail_run('RUN_ID', error='Stack trace or message describing the failure')
@@ -148,7 +148,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Cancel a Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import cancel_run
 import json
 r = cancel_run('RUN_ID')
@@ -159,7 +159,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Recheck a Completed/Failed Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import recheck_run
 import json
 r = recheck_run('RUN_ID')
@@ -170,7 +170,7 @@ print(json.dumps(r, indent=2, default=str))
 ### Delete a Terminal Run
 
 ```bash
-PYTHONPATH=$(readlink -f ~/.claude/skills/diecast)/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from diecast.services.run_service import delete_run
 delete_run('RUN_ID')
 print('Deleted')

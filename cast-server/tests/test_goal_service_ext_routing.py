@@ -186,3 +186,47 @@ class TestUpdateConfigExternalRouting:
         goal = get_goal("my-goal", db_path=db_path)
         assert goal["folder_path"] == str(new_goal_dir)
         assert artifact.exists(), "Artifact should still exist after idempotent call"
+
+
+class TestCastSymlinkTargetsRoutedPath:
+    """Tests that .cast symlink points to the routed docs/goal/<slug> path
+    (not the old goals_dir/<slug>) after external routing."""
+
+    def test_cast_symlink_targets_docs_goal_slug(self, tmp_path):
+        """After routing, .cast should point to docs/goal/<slug>, not
+        the original goals_dir/<slug>."""
+        from cast_server.services.goal_service import update_config
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        update_config(
+            "my-goal",
+            external_project_dir=str(ext_dir),
+            goals_dir=goals_dir,
+            db_path=db_path,
+        )
+
+        symlink = ext_dir / ".cast"
+        assert symlink.is_symlink(), ".cast symlink should exist"
+        expected_target = ext_dir / "docs" / "goal" / "my-goal"
+        assert symlink.resolve() == expected_target.resolve(), (
+            f".cast should point to {expected_target}, got {symlink.resolve()}"
+        )
+
+    def test_cast_symlink_without_routing_targets_goals_dir(self, tmp_path):
+        """Without external routing, .cast should point to goals_dir/<slug>."""
+        from cast_server.services.goal_service import ensure_cast_symlink
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        # No folder_path override — should use goals_dir/slug
+        result = ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
+
+        assert result is not None
+        symlink = ext_dir / ".cast"
+        assert symlink.is_symlink()
+        assert symlink.resolve() == goal_dir.resolve()

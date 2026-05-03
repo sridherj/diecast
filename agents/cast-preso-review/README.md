@@ -114,7 +114,7 @@ cast-preso-review/
 
 ## Invocation conventions
 
-- Run from repo root `$(readlink -f ~/.claude/skills/diecast)`.
+- Run from repo root `$(cd ~/.claude/skills/diecast && pwd -P)`.
 - The tool resolves `goal_slug` under `cast/goals/` relative to the repo root,
   discovered via `REPO_ROOT = Path(__file__).resolve().parents[2]` in `build.py`.
 - The slash wrapper `.claude/commands/cast-preso-review.md` (wired in 1d)

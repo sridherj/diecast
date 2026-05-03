@@ -4,6 +4,7 @@ import ast
 import json
 import logging
 import re
+import shutil
 from datetime import date
 from pathlib import Path
 
@@ -179,8 +180,14 @@ def update_phase(slug: str, target_phase: str,
 
 
 def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
-                        goals_dir: Path = None) -> Path | None:
+                        goals_dir: Path = None,
+                        folder_path: str | None = None) -> Path | None:
     """Create/update .cast symlink in external project pointing to goal dir.
+
+    When *folder_path* is provided (i.e. the goal has been routed to
+    ``<ext_dir>/docs/goal/<slug>``), the symlink targets that path so that
+    agents writing through ``.cast`` land in the same directory the UI reads.
+    Otherwise falls back to ``goals_dir / goal_slug``.
 
     Returns the symlink path, or None if external_project_dir is invalid.
     """
@@ -191,7 +198,10 @@ def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
         return None
 
     symlink_path = ext_path / ".cast"
-    target = (goals_dir / goal_slug).resolve()
+    if folder_path:
+        target = Path(folder_path).resolve()
+    else:
+        target = (goals_dir / goal_slug).resolve()
 
     if symlink_path.is_symlink():
         if symlink_path.resolve() == target:
@@ -271,32 +281,36 @@ def update_config(slug: str, gstack_dir: str | None = None,
             new_goal_dir.mkdir(parents=True, exist_ok=True)
             # Move existing artifacts from old goal dir to new
             if old_goal_dir.exists():
-                import shutil
                 for item in old_goal_dir.iterdir():
                     dest = new_goal_dir / item.name
                     if not dest.exists():
                         shutil.move(str(item), str(dest))
             # Update folder_path in DB
-            conn2 = get_connection(db_path)
+            conn_fp = get_connection(db_path)
             try:
-                conn2.execute(
+                conn_fp.execute(
                     "UPDATE goals SET folder_path = ? WHERE slug = ?",
                     (str(new_goal_dir), slug),
                 )
-                conn2.commit()
+                conn_fp.commit()
             finally:
-                conn2.close()
+                conn_fp.close()
             # Update goal.yaml in new location
             if (new_goal_dir / "goal.yaml").exists() or (old_goal_dir / "goal.yaml").exists():
                 _update_goal_yaml_fields(new_goal_dir, {"external_project_dir": external_project_dir})
 
-    # Manage .cast symlink
+    # Manage .cast symlink — re-read the goal to get the current folder_path
+    # so the symlink targets the routed docs/goal/<slug> directory when set.
     new_ext_dir = updates.get("external_project_dir", old_ext_dir)
     if external_project_dir is not None:
         if old_ext_dir and old_ext_dir != new_ext_dir:
             remove_cast_symlink(old_ext_dir)
         if new_ext_dir:
-            ensure_cast_symlink(slug, new_ext_dir, goals_dir)
+            refreshed = get_goal(slug, db_path)
+            ensure_cast_symlink(
+                slug, new_ext_dir, goals_dir,
+                folder_path=refreshed["folder_path"] if refreshed else None,
+            )
         elif old_ext_dir:
             remove_cast_symlink(old_ext_dir)
 

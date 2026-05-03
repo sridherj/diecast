@@ -2,30 +2,24 @@
 
 Covers:
 - _normalize_macos_terminal name resolution
-- _open_macos_terminal osascript dispatch (window)
-- _open_macos_terminal_tab osascript dispatch (tab)
-- env= parameter excludes CLAUDECODE
+- _run_osascript osascript dispatch (window and tab)
+- _env_without helper excludes CLAUDECODE
 - Session names with quotes/spaces are properly escaped
 - Linux terminals still use flag-based dispatch
+- macOS terminal aliases bypass shutil.which in _resolved_terminal
 """
 
 from __future__ import annotations
 
 import os
-import sys
-from dataclasses import dataclass, field
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-CAST_SERVER_DIR = REPO_ROOT / "cast-server"
-if str(CAST_SERVER_DIR) not in sys.path:
-    sys.path.insert(0, str(CAST_SERVER_DIR))
-
+from cast_server.infra.terminal import ResolvedTerminal
 from cast_server.infra.tmux_manager import (
     TmuxSessionManager,
+    _env_without,
     _normalize_macos_terminal,
 )
 
@@ -55,6 +49,33 @@ class TestNormalizeMacosTerminal:
 
 
 # ---------------------------------------------------------------------------
+# _env_without tests
+# ---------------------------------------------------------------------------
+
+
+class TestEnvWithout:
+    """Unit tests for the _env_without helper."""
+
+    @patch.dict(os.environ, {"CLAUDECODE": "1", "PATH": "/usr/bin"}, clear=True)
+    def test_excludes_specified_key(self) -> None:
+        result = _env_without("CLAUDECODE")
+        assert "CLAUDECODE" not in result
+        assert result["PATH"] == "/usr/bin"
+
+    @patch.dict(os.environ, {"A": "1", "B": "2", "C": "3"}, clear=True)
+    def test_excludes_multiple_keys(self) -> None:
+        result = _env_without("A", "B")
+        assert "A" not in result
+        assert "B" not in result
+        assert result["C"] == "3"
+
+    @patch.dict(os.environ, {"PATH": "/usr/bin"}, clear=True)
+    def test_missing_key_is_harmless(self) -> None:
+        result = _env_without("NONEXISTENT")
+        assert result == {"PATH": "/usr/bin"}
+
+
+# ---------------------------------------------------------------------------
 # Helper: create a TmuxSessionManager without tmux binary check
 # ---------------------------------------------------------------------------
 
@@ -67,17 +88,17 @@ def _make_manager() -> TmuxSessionManager:
 
 
 # ---------------------------------------------------------------------------
-# _open_macos_terminal tests
+# _run_osascript tests (window mode, tab=False)
 # ---------------------------------------------------------------------------
 
 
-class TestOpenMacosTerminal:
-    """Tests for the _open_macos_terminal helper method."""
+class TestRunOsascriptWindow:
+    """Tests for the _run_osascript helper method in window mode (tab=False)."""
 
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_iterm_calls_osascript_with_correct_script(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal("my-session", "iterm")
+        mgr._run_osascript("my-session", "iterm")
 
         mock_popen.assert_called_once()
         args, kwargs = mock_popen.call_args
@@ -93,7 +114,7 @@ class TestOpenMacosTerminal:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_terminal_app_calls_osascript_with_correct_script(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal("my-session", "terminal")
+        mgr._run_osascript("my-session", "terminal")
 
         mock_popen.assert_called_once()
         args, kwargs = mock_popen.call_args
@@ -106,7 +127,7 @@ class TestOpenMacosTerminal:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_session_name_with_spaces_is_escaped(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal("my session with spaces", "iterm")
+        mgr._run_osascript("my session with spaces", "iterm")
 
         mock_popen.assert_called_once()
         script = mock_popen.call_args[0][0][2]
@@ -116,7 +137,7 @@ class TestOpenMacosTerminal:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_session_name_with_quotes_is_escaped(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal('session"with"quotes', "terminal")
+        mgr._run_osascript('session"with"quotes', "terminal")
 
         mock_popen.assert_called_once()
         script = mock_popen.call_args[0][0][2]
@@ -130,7 +151,7 @@ class TestOpenMacosTerminal:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_env_excludes_claudecode(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal("test-session", "iterm")
+        mgr._run_osascript("test-session", "iterm")
 
         mock_popen.assert_called_once()
         env = mock_popen.call_args[1]["env"]
@@ -142,7 +163,7 @@ class TestOpenMacosTerminal:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_env_works_when_claudecode_not_set(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal("test-session", "terminal")
+        mgr._run_osascript("test-session", "terminal")
 
         mock_popen.assert_called_once()
         env = mock_popen.call_args[1]["env"]
@@ -151,17 +172,17 @@ class TestOpenMacosTerminal:
 
 
 # ---------------------------------------------------------------------------
-# _open_macos_terminal_tab tests
+# _run_osascript tests (tab mode, tab=True)
 # ---------------------------------------------------------------------------
 
 
-class TestOpenMacosTerminalTab:
-    """Tests for the _open_macos_terminal_tab helper method."""
+class TestRunOsascriptTab:
+    """Tests for the _run_osascript helper method in tab mode (tab=True)."""
 
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_iterm_tab_calls_osascript(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal_tab("my-session", "iterm")
+        mgr._run_osascript("my-session", "iterm", tab=True)
 
         mock_popen.assert_called_once()
         script = mock_popen.call_args[0][0][2]
@@ -172,7 +193,7 @@ class TestOpenMacosTerminalTab:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_terminal_tab_calls_osascript(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal_tab("my-session", "terminal")
+        mgr._run_osascript("my-session", "terminal", tab=True)
 
         mock_popen.assert_called_once()
         script = mock_popen.call_args[0][0][2]
@@ -185,22 +206,67 @@ class TestOpenMacosTerminalTab:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_tab_env_excludes_claudecode(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._open_macos_terminal_tab("test-session", "iterm")
+        mgr._run_osascript("test-session", "iterm", tab=True)
 
         env = mock_popen.call_args[1]["env"]
         assert "CLAUDECODE" not in env
 
 
 # ---------------------------------------------------------------------------
-# open_terminal / open_terminal_tab macOS dispatch tests
+# _resolved_terminal: macOS alias bypass for shutil.which (Review #1)
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class _FakeResolvedTerminal:
-    command: str
-    args: list[str] = field(default_factory=list)
-    flags: dict[str, str] = field(default_factory=dict)
+class TestResolvedTerminalMacosAlias:
+    """macOS terminal aliases bypass shutil.which since they are app names,
+    not executables on PATH."""
+
+    @patch("cast_server.infra.tmux_manager.resolve_terminal")
+    @patch("cast_server.infra.tmux_manager.shutil.which", return_value=None)
+    def test_terminal_alias_bypasses_which(self, mock_which: MagicMock,
+                                            mock_resolve: MagicMock) -> None:
+        """'terminal' resolves even when shutil.which returns None."""
+        mock_resolve.return_value = ResolvedTerminal(command="terminal")
+        mgr = _make_manager()
+
+        result = mgr._resolved_terminal()
+
+        assert result.command == "terminal"
+        # shutil.which should NOT have been called to gate this
+        mock_which.assert_not_called()
+
+    @patch("cast_server.infra.tmux_manager.resolve_terminal")
+    @patch("cast_server.infra.tmux_manager.shutil.which", return_value=None)
+    def test_iterm_alias_bypasses_which(self, mock_which: MagicMock,
+                                         mock_resolve: MagicMock) -> None:
+        """'iterm' resolves even when shutil.which returns None."""
+        mock_resolve.return_value = ResolvedTerminal(command="iterm")
+        mgr = _make_manager()
+
+        result = mgr._resolved_terminal()
+
+        assert result.command == "iterm"
+        mock_which.assert_not_called()
+
+    @patch("cast_server.infra.tmux_manager.resolve_terminal")
+    @patch("cast_server.infra.tmux_manager.shutil.which", return_value=None)
+    def test_non_macos_terminal_still_checks_which(self, mock_which: MagicMock,
+                                                     mock_resolve: MagicMock) -> None:
+        """Non-macOS terminals still require shutil.which to succeed."""
+        from cast_server.infra.terminal import ResolutionError
+
+        mock_resolve.return_value = ResolvedTerminal(command="ptyxis")
+        mgr = _make_manager()
+
+        with pytest.raises(ResolutionError, match="not on PATH"):
+            mgr._resolved_terminal()
+
+        mock_which.assert_called_once_with("ptyxis")
+
+
+# ---------------------------------------------------------------------------
+# open_terminal / open_terminal_tab macOS dispatch tests
+# ---------------------------------------------------------------------------
 
 
 class TestOpenTerminalMacosDispatch:
@@ -210,7 +276,7 @@ class TestOpenTerminalMacosDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_open_terminal_dispatches_to_macos_for_iterm(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(command="/Applications/iTerm.app")
+        mgr._terminal = ResolvedTerminal(command="/Applications/iTerm.app")
         mgr.open_terminal("agent-123")
 
         mock_popen.assert_called_once()
@@ -222,7 +288,7 @@ class TestOpenTerminalMacosDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_open_terminal_dispatches_to_macos_for_terminal(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(command="/usr/bin/Terminal.app")
+        mgr._terminal = ResolvedTerminal(command="/usr/bin/Terminal.app")
         mgr.open_terminal("agent-456")
 
         mock_popen.assert_called_once()
@@ -234,7 +300,7 @@ class TestOpenTerminalMacosDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_open_terminal_tab_dispatches_to_macos_for_iterm2(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(command="/Applications/iTerm2.app")
+        mgr._terminal = ResolvedTerminal(command="/Applications/iTerm2.app")
         mgr.open_terminal_tab("agent-789")
 
         mock_popen.assert_called_once()
@@ -252,7 +318,7 @@ class TestOpenTerminalLinuxDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_ptyxis_uses_flag_based_dispatch(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(
+        mgr._terminal = ResolvedTerminal(
             command="ptyxis",
             args=[],
             flags={"new_tab_flag": "--new-window"},
@@ -274,7 +340,7 @@ class TestOpenTerminalLinuxDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_gnome_terminal_uses_flag_based_dispatch(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(
+        mgr._terminal = ResolvedTerminal(
             command="gnome-terminal",
             args=[],
             flags={"new_tab_flag": "--window"},
@@ -291,7 +357,7 @@ class TestOpenTerminalLinuxDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_linux_dispatch_env_excludes_claudecode(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(command="ptyxis")
+        mgr._terminal = ResolvedTerminal(command="ptyxis")
         mgr.open_terminal("agent-clean")
 
         env = mock_popen.call_args[1]["env"]
@@ -302,7 +368,7 @@ class TestOpenTerminalLinuxDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_linux_open_terminal_tab_ptyxis_uses_tab_flag(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(
+        mgr._terminal = ResolvedTerminal(
             command="ptyxis",
             args=[],
             flags={},
@@ -320,7 +386,7 @@ class TestOpenTerminalLinuxDispatch:
     @patch("cast_server.infra.tmux_manager.subprocess.Popen")
     def test_linux_open_terminal_tab_env_excludes_claudecode(self, mock_popen: MagicMock) -> None:
         mgr = _make_manager()
-        mgr._terminal = _FakeResolvedTerminal(
+        mgr._terminal = ResolvedTerminal(
             command="gnome-terminal",
             args=[],
             flags={"new_tab_flag": "--tab"},

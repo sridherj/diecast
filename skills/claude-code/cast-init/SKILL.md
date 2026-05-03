@@ -136,7 +136,7 @@ mtime but is otherwise a no-op. The eight canonical areas are exactly: `explorat
 ### 3.2 Render `CLAUDE.md` template
 
 1. Read `templates/CLAUDE.md.template` from the installed Diecast repo. Resolve the
-   repo via `${CAST_REPO_DIR:-$(readlink -f ~/.claude/skills/diecast)}` — `./setup`
+   repo via `${CAST_REPO_DIR:-$(cd ~/.claude/skills/diecast && pwd -P)}` — `./setup`
    creates `~/.claude/skills/diecast` as a symlink pointing at the repo root.
 2. Substitute `{{PROJECT_NAME}}` ← `basename "$(pwd)"` (markdown-sanitized).
 3. Substitute `{{SKILLS_LIST}}` ← Step 3.3 output.
