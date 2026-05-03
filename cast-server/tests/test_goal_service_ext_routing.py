@@ -188,13 +188,12 @@ class TestUpdateConfigExternalRouting:
         assert artifact.exists(), "Artifact should still exist after idempotent call"
 
 
-class TestCastSymlinkTargetsRoutedPath:
-    """Tests that .cast symlink points to the routed docs/goal/<slug> path
-    (not the old goals_dir/<slug>) after external routing."""
+class TestCastSymlinkTargetsRuntimeDir:
+    """Runtime tracking symlink should always point at the central goals dir."""
 
-    def test_cast_symlink_targets_docs_goal_slug(self, tmp_path):
-        """After routing, .cast should point to docs/goal/<slug>, not
-        the original goals_dir/<slug>."""
+    def test_cast_symlink_targets_goals_dir_even_when_routed(self, tmp_path):
+        """After routing user artifacts to docs/goal/<slug>, .cast should still
+        point to the central goals_dir/<slug> runtime directory."""
         from cast_server.services.goal_service import update_config
 
         db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
@@ -210,9 +209,8 @@ class TestCastSymlinkTargetsRoutedPath:
 
         symlink = ext_dir / ".cast"
         assert symlink.is_symlink(), ".cast symlink should exist"
-        expected_target = ext_dir / "docs" / "goal" / "my-goal"
-        assert symlink.resolve() == expected_target.resolve(), (
-            f".cast should point to {expected_target}, got {symlink.resolve()}"
+        assert symlink.resolve() == goal_dir.resolve(), (
+            f".cast should point to {goal_dir}, got {symlink.resolve()}"
         )
 
     def test_cast_symlink_without_routing_targets_goals_dir(self, tmp_path):
@@ -223,7 +221,6 @@ class TestCastSymlinkTargetsRoutedPath:
         ext_dir = tmp_path / "ext-project"
         ext_dir.mkdir()
 
-        # No folder_path override — should use goals_dir/slug
         result = ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
 
         assert result is not None
@@ -231,49 +228,8 @@ class TestCastSymlinkTargetsRoutedPath:
         assert symlink.is_symlink()
         assert symlink.resolve() == goal_dir.resolve()
 
-
-class TestLaunchAgentDoesNotRevertSymlink:
-    """Regression: _launch_agent must pass folder_path to ensure_cast_symlink
-    so a routed goal's .cast symlink is not reverted to the old goals_dir."""
-
-    def test_ensure_cast_symlink_with_folder_path_preserves_route(self, tmp_path):
-        """After routing, calling ensure_cast_symlink *with* folder_path should
-        keep .cast pointing at docs/goal/<slug>, not revert to goals_dir/<slug>."""
-        from cast_server.services.goal_service import (
-            update_config, ensure_cast_symlink, get_goal,
-        )
-
-        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
-        ext_dir = tmp_path / "ext-project"
-        ext_dir.mkdir()
-
-        # Route the goal
-        update_config(
-            "my-goal",
-            external_project_dir=str(ext_dir),
-            goals_dir=goals_dir,
-            db_path=db_path,
-        )
-
-        expected_target = ext_dir / "docs" / "goal" / "my-goal"
-        symlink = ext_dir / ".cast"
-        assert symlink.resolve() == expected_target.resolve()
-
-        # Simulate what _launch_agent does: call ensure_cast_symlink with
-        # the goal's folder_path from DB (the fix) — must NOT revert.
-        goal_data = get_goal("my-goal", db_path=db_path)
-        ensure_cast_symlink(
-            "my-goal", str(ext_dir), goals_dir,
-            folder_path=goal_data["folder_path"],
-        )
-
-        assert symlink.resolve() == expected_target.resolve(), (
-            "ensure_cast_symlink with folder_path should preserve the routed target"
-        )
-
-    def test_ensure_cast_symlink_without_folder_path_reverts(self, tmp_path):
-        """Without folder_path, ensure_cast_symlink falls back to goals_dir/<slug>
-        — this is the bug that the _launch_agent fix prevents."""
+    def test_re_calling_ensure_cast_symlink_after_routing_preserves_runtime_target(self, tmp_path):
+        """Re-calling ensure_cast_symlink after routing should keep .cast at goals_dir/<slug>."""
         from cast_server.services.goal_service import (
             update_config, ensure_cast_symlink,
         )
@@ -289,16 +245,12 @@ class TestLaunchAgentDoesNotRevertSymlink:
             db_path=db_path,
         )
 
-        expected_target = ext_dir / "docs" / "goal" / "my-goal"
-        symlink = ext_dir / ".cast"
-        assert symlink.resolve() == expected_target.resolve()
-
-        # Call WITHOUT folder_path — falls back to goals_dir/<slug>
+        # Re-call — should be idempotent, still pointing at central goals_dir
         ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
 
-        # This demonstrates the old bug: symlink now points at goals_dir
+        symlink = ext_dir / ".cast"
         assert symlink.resolve() == goal_dir.resolve(), (
-            "Without folder_path the symlink should fall back to goals_dir/<slug>"
+            "Runtime .cast should stay pointed at goals_dir/<slug>"
         )
 
 

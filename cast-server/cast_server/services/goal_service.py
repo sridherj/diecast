@@ -194,14 +194,12 @@ def update_phase(slug: str, target_phase: str,
 
 
 def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
-                        goals_dir: Path = None,
-                        folder_path: str | None = None) -> Path | None:
-    """Create/update .cast symlink in external project pointing to goal dir.
+                        goals_dir: Path = None) -> Path | None:
+    """Create/update .cast symlink in external project pointing to runtime goal dir.
 
-    When *folder_path* is provided (i.e. the goal has been routed to
-    ``<ext_dir>/docs/goal/<slug>``), the symlink targets that path so that
-    agents writing through ``.cast`` land in the same directory the UI reads.
-    Otherwise falls back to ``goals_dir / goal_slug``.
+    Runtime tracking files stay in the central ``goals_dir / goal_slug``
+    directory even when user-facing artifacts are routed to
+    ``<ext_dir>/docs/goal/<slug>``.
 
     Returns the symlink path, or None if external_project_dir is invalid.
     """
@@ -212,10 +210,7 @@ def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
         return None
 
     symlink_path = ext_path / ".cast"
-    if folder_path:
-        target = Path(folder_path).resolve()
-    else:
-        target = (goals_dir / goal_slug).resolve()
+    target = (goals_dir / goal_slug).resolve()
 
     if symlink_path.is_symlink():
         if symlink_path.resolve() == target:
@@ -313,18 +308,14 @@ def update_config(slug: str, gstack_dir: str | None = None,
             if (new_goal_dir / "goal.yaml").exists() or (old_goal_dir / "goal.yaml").exists():
                 _update_goal_yaml_fields(new_goal_dir, {"external_project_dir": external_project_dir})
 
-    # Manage .cast symlink — re-read the goal to get the current folder_path
-    # so the symlink targets the routed docs/goal/<slug> directory when set.
+    # Manage .cast symlink — runtime tracking stays in goals_dir/<slug> even
+    # when user-facing artifacts are routed to docs/goal/<slug>.
     new_ext_dir = updates.get("external_project_dir", old_ext_dir)
     if external_project_dir is not None:
         if old_ext_dir and old_ext_dir != new_ext_dir:
             remove_cast_symlink(old_ext_dir)
         if new_ext_dir:
-            refreshed = get_goal(slug, db_path)
-            ensure_cast_symlink(
-                slug, new_ext_dir, goals_dir,
-                folder_path=refreshed["folder_path"] if refreshed else None,
-            )
+            ensure_cast_symlink(slug, new_ext_dir, goals_dir)
         elif old_ext_dir:
             remove_cast_symlink(old_ext_dir)
 
