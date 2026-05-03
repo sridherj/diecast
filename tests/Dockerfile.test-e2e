@@ -11,7 +11,8 @@
 
 FROM python:3.12-slim
 
-# Tools: bash >= 4.0 (Decision #4), git >= 2.30, curl for uv install.
+# Tools: git >= 2.30, curl for uv install.  bash is included for CI shell
+# regression tests (tests/*.sh) but is NOT a user-facing prerequisite.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git curl ca-certificates bash procps tmux \
     && rm -rf /var/lib/apt/lists/*

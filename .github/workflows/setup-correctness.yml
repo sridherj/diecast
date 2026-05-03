@@ -39,7 +39,7 @@ jobs:
 
       - name: Show prereq versions
         run: |
-          bash --version | head -n 1
+          python3 --version
           uv --version
           git --version
           tmux -V

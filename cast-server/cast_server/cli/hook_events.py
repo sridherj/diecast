@@ -20,7 +20,8 @@ HOOK_EVENTS = [
 ]
 
 # Absolute path to the cast-hook entry, resolved through the diecast skill
-# umbrella symlink that ./setup creates (see bin/_lib.sh::install_diecast_skill_root).
+# umbrella symlink that ./setup creates (see bootstrap/common.py or the
+# install_diecast_skill_root helper — previously bin/_lib.sh).
 # Hook commands are written into .claude/settings.json with this absolute prefix
 # so Claude Code does not have to rely on PATH composition. PATH-based
 # resolution was unreliable: Claude Code fires hooks with a restricted shell

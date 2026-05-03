@@ -4,7 +4,7 @@ Resolution order (during dispatch — never auto-detects):
     1. $CAST_TERMINAL (preferred, project-scoped)
     2. $TERMINAL (POSIX convention)
     3. ~/.cast/config.yaml: terminal_default (canonical) or terminal (alias)
-    4. raise ResolutionError pointing at /cast-doctor (shell fallback:
+    4. raise ResolutionError pointing at /cast-doctor (CLI alternative:
        bin/cast-doctor --fix-terminal)
 
 Returns: ResolvedTerminal(command, args, flags).
@@ -26,8 +26,6 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional
-
-import yaml
 
 
 _SUPPORTED: dict[str, dict[str, str]] = {
@@ -53,7 +51,7 @@ class ResolutionError(RuntimeError):
 
     The error message names every resolution source actually checked and
     points the user at `/cast-doctor` (with `bin/cast-doctor --fix-terminal`
-    as the shell fallback) and docs/reference/supported-terminals.md.
+    as the CLI alternative) and docs/reference/supported-terminals.md.
     """
 
 
@@ -65,12 +63,20 @@ class ResolvedTerminal:
 
 
 def _config_default(config_path: Optional[Path] = None) -> Optional[str]:
+    """Read terminal_default (or terminal alias) from a YAML config file.
+
+    PyYAML is imported lazily inside this function so that the module-level
+    ``_SUPPORTED`` table and ``_LINUX_PROBE_ORDER`` tuple can be imported by
+    bootstrap code without requiring PyYAML to be installed.
+    """
     path = config_path or Path.home() / ".cast" / "config.yaml"
     if not path.exists():
         return None
     try:
+        import yaml  # lazy import — keeps module bootstrap-safe
         cfg = yaml.safe_load(path.read_text()) or {}
-    except yaml.YAMLError:
+    except Exception:
+        # Covers yaml.YAMLError and ImportError (PyYAML missing at bootstrap).
         return None
     if not isinstance(cfg, dict):
         return None
@@ -99,7 +105,7 @@ def resolve_terminal(config_path: Optional[Path] = None) -> ResolvedTerminal:
     Raises:
         ResolutionError: if no source provides a terminal name. The message
             names every source checked and points at ``/cast-doctor`` (with
-            ``bin/cast-doctor --fix-terminal`` as the shell fallback).
+            ``bin/cast-doctor --fix-terminal`` as the CLI alternative).
     """
     cast_term = os.environ.get("CAST_TERMINAL")
     sys_term = os.environ.get("TERMINAL")

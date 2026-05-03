@@ -99,9 +99,10 @@ Behavior per option:
 - **A (Skip):** print `Cast-init detected existing layout. No changes made.`; emit
   `next_steps: []`; exit 0.
 - **B (Overwrite CLAUDE.md only):**
-  1. Call `bin/_lib.sh::backup_if_exists "<cwd>/CLAUDE.md"` via subprocess (the helper
-     places the file under `~/.claude/.cast-bak-${RUN_TIMESTAMP}/`). The skill MUST NOT
-     replicate the backup primitive in Python — single source of truth.
+  1. Back up `<cwd>/CLAUDE.md` using the bootstrap `backup_if_exists` helper
+     (`cast_server.bootstrap.common.backup_if_exists`), which moves the file to
+     `~/.claude/.cast-bak-<UTC-timestamp>/`. The skill MUST NOT replicate the
+     backup primitive — single source of truth.
   2. Render the template (Step 3.2) and write `<cwd>/CLAUDE.md`.
   3. Skip directory creation.
   4. Run Step 4 (install cast-hook entries) unless `--no-hooks`.
@@ -256,7 +257,7 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
 
 - `.gitkeep` writes are safe to repeat (`touch` is a no-op on existing files).
 - `CLAUDE.md` is **never** overwritten without explicit user confirmation. The Overwrite
-  branch backs up first via `bin/_lib.sh::backup_if_exists`.
+  branch backs up first via `cast_server.bootstrap.common.backup_if_exists`.
 - Existing populated `docs/`: if the user already has `docs/api/` (e.g., from MkDocs),
   `/cast-init` only adds the eight canonical subdirectories. It never touches existing
   top-level files in `docs/` or unrelated subdirectories.
@@ -296,8 +297,9 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
 - **Inlining the conventions in the template.** Push elaboration into the spec instead.
   The template is a pointer.
 - **Adding a fifth option to the merge prompt.** Decision #5 locks it at four. Resist.
-- **Replicating `backup_if_exists` in Python.** Call the bash helper via subprocess.
-  Forking the helper between languages was an explicit anti-pattern in the plan.
+- **Replicating `backup_if_exists` inline.** Call the canonical helper
+  (`cast_server.bootstrap.common.backup_if_exists`). Forking the helper
+  between callers was an explicit anti-pattern in the plan.
 - **Touching existing top-level `docs/` files.** `/cast-init` only adds the eight
   canonical subdirectories. Anything else is the user's.
 - **Accepting a user-supplied target directory.** `<cwd>` is always `pwd`. No flag

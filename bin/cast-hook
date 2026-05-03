@@ -1,10 +1,35 @@
-#!/usr/bin/env bash
-# Generated entry point for the cast-hook console script.
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# bin/cast-hook — portable launcher for the cast-hook console script.
+#
 # Mirrors bin/cast-server: routes through `uv run` so .venv lifecycle is
 # managed by uv and we don't depend on .venv/ already existing at install
-# time. The console script itself is declared in pyproject.toml's
+# time.  The console script itself is declared in pyproject.toml's
 # [project.scripts] table and produced inside the project venv.
-set -euo pipefail
+#
+# Resolves the repository root via __file__ (no BASH_SOURCE dependency).
+# Uses only stdlib — bash is NOT required.
+"""Portable Python launcher for cast-hook."""
+from __future__ import annotations
 
-REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd -P)"
-exec uv run --project "${REPO_DIR}" -- cast-hook "$@"
+import os
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    repo_dir = str(Path(__file__).resolve().parent.parent)
+
+    argv = [
+        "uv", "run",
+        "--project", repo_dir,
+        "--",
+        "cast-hook",
+        *sys.argv[1:],
+    ]
+
+    os.execvp("uv", argv)
+
+
+if __name__ == "__main__":
+    main()

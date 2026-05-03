@@ -31,10 +31,9 @@ The `_SUPPORTED` table in `agents/_shared/terminal.py` mirrors this list and is 
 ## Adding a new terminal
 
 1. Add an entry to `_SUPPORTED` in `agents/_shared/terminal.py`. Use the binary's basename as the key. Required keys: `new_tab_flag` (string, may be empty if no tabbed mode), `cwd_flag` (string, including the trailing `=` if applicable).
-2. Update `bin/cast-doctor`'s `SUPPORTED_TERMINALS_FALLBACK` array (look for the `# KEEP IN SYNC WITH _SUPPORTED` comment) so the install-time fallback list — used before deps are installed — stays in lockstep with `_SUPPORTED.keys()`.
-3. Document the terminal in the table above. Include the install command and any quirks.
-4. Add a row to the parametrized `test_supported_table_drives_resolution` in `tests/test_b6_terminal_resolution.py` so the resolver is exercised against the new entry. The parity test in `tests/test_cast_doctor.py::test_fallback_list_matches_supported` will catch any drift between the bash fallback list and `_SUPPORTED.keys()` automatically.
-5. Run `bin/lint-anonymization` before committing — it runs in CI and will block any non-public reference.
+2. Document the terminal in the table above. Include the install command and any quirks.
+3. Add a row to the parametrized `test_supported_table_drives_resolution` in `tests/test_b6_terminal_resolution.py` so the resolver is exercised against the new entry.
+4. Run `bin/lint-anonymization` before committing — it runs in CI and will block any non-public reference.
 
 ## Quirks
 
@@ -54,7 +53,7 @@ The `_SUPPORTED` table in `agents/_shared/terminal.py` mirrors this list and is 
 
 When that's the case, run `bin/cast-doctor --fix-terminal`. The script:
 
-1. Probes installed terminals on `PATH` from the canonical `_SUPPORTED` list (read live via `python3 -c '...'`; falls back to the in-script `SUPPORTED_TERMINALS_FALLBACK` array when Python or the `agents._shared.terminal` import is unavailable, e.g., during install-time gating).
+1. Probes installed terminals on `PATH` from the canonical `_SUPPORTED` list (read live from `agents._shared.terminal`).
 2. With one candidate, asks the user to confirm `[Y/n]` before writing.
 3. With multiple, presents a numbered prompt (default: first).
 4. With none, prints platform-appropriate install instructions and exits 1.
