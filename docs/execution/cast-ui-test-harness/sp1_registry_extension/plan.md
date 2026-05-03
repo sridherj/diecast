@@ -183,7 +183,7 @@ the dataclass at the top of `agent_service.py` first.
 ### Step 1.5: Run the meta-test locally
 
 ```bash
-cd /home/sridherj/workspace/diecast
+cd <DIECAST_ROOT>
 pytest cast-server/tests/ui/test_registry_visibility.py -v
 ```
 

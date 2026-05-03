@@ -39,7 +39,7 @@ Add shellcheck coverage for every bash script in `setup` + `bin/*` so the new la
 ### Step 5.1: Inventory bash scripts
 
 ```bash
-for f in /data/workspace/diecast/setup /data/workspace/diecast/bin/*; do
+for f in <DIECAST_ROOT>/setup <DIECAST_ROOT>/bin/*; do
   [ -f "$f" ] || continue
   head -1 "$f" | grep -q 'bash' && echo "$f"
 done
@@ -52,7 +52,7 @@ Record the list — these are the in-scope shellcheck targets.
 For each in-scope script, run `shellcheck` and collect violations:
 
 ```bash
-for f in /data/workspace/diecast/setup /data/workspace/diecast/bin/*; do
+for f in <DIECAST_ROOT>/setup <DIECAST_ROOT>/bin/*; do
   [ -f "$f" ] || continue
   head -1 "$f" | grep -q 'bash' && shellcheck "$f"
 done

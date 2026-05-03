@@ -452,7 +452,7 @@ def test_preserves_unrelated_config_keys(tmp_path):
 ### Step 2.7: Run the full test suite locally
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 uv run pytest tests/test_cast_doctor.py -v
 uv run pytest tests/test_b6_terminal_resolution.py tests/test_cast_doctor.py -v   # combined
 uv run pytest tests/ -k "doctor or terminal" -v   # broader

@@ -13,7 +13,7 @@ questions_asked: 4
 
 > **Spec maturity:** draft
 > **Version:** 0.1.0
-> **Linked files:** docs/specs/cast-delegation-contract.collab.md, docs/specs/cast-output-json-contract.collab.md, skills/claude-code/cast-child-delegation/SKILL.md, cast-server/cast_server/services/agent_service.py, cast-server/cast_server/models/agent_config.py, cast-server/tests/, ~/workspace/second-brain/taskos/tests/test_delegation.py (reference), ~/workspace/second-brain/taskos/tests/e2e/test_tier2_delegation.py (reference)
+> **Linked files:** docs/specs/cast-delegation-contract.collab.md, docs/specs/cast-output-json-contract.collab.md, skills/claude-code/cast-child-delegation/SKILL.md, cast-server/cast_server/services/agent_service.py, cast-server/cast_server/models/agent_config.py, cast-server/tests/, <SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py (reference), <SECOND_BRAIN_ROOT>/taskos/tests/e2e/test_tier2_delegation.py (reference)
 
 ## Intent
 

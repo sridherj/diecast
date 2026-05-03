@@ -41,7 +41,7 @@ else evaporates.
    Playwright-Python against its assigned screen.
 
 **Why this dual-purpose shape rather than a plain pytest harness:** the user explicitly
-asked for "test agents with delegation capability, like in `~/workspace/second-brain`."
+asked for "test agents with delegation capability, like in `<SECOND_BRAIN_ROOT>`."
 A pytest-only harness would skip the agent layer the user wants validated by use. The
 chosen architecture mirrors `test-parent-delegator` / `test-child-worker` but pointed at
 real UI assertions.

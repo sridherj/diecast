@@ -213,7 +213,7 @@ from agents._shared.terminal import (  # noqa: F401
 Verify the import works in cast-server's runtime context:
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 uv run --package cast-server python -c "from cast_server.infra.terminal import resolve_terminal, _SUPPORTED; print(sorted(_SUPPORTED))"
 ```
 
@@ -375,7 +375,7 @@ The existing `test_first_run_prompt_*` trio still works because `needs_first_run
 ### Step 1.9: Run the full test suite locally
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 uv run pytest tests/test_b6_terminal_resolution.py -v
 uv run pytest tests/ -k "tmux or agent_service or terminal" -v   # broader sanity sweep
 ```
@@ -400,7 +400,7 @@ Fix any failures. Do not skip or @xfail — every test in the broader sweep shou
 
 - Confirm `cast-server` imports the de-vendored module correctly:
   ```bash
-  cd /data/workspace/diecast
+  cd <DIECAST_ROOT>
   uv run --package cast-server python -c \
     "from cast_server.infra.terminal import resolve_terminal, ResolutionError, _SUPPORTED; \
      assert hasattr(resolve_terminal, '__call__'); print('OK', sorted(_SUPPORTED))"

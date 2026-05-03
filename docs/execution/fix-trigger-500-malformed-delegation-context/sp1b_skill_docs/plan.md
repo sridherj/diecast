@@ -54,7 +54,7 @@ The replacement is a single line; do not split it across multiple lines unless t
 ### Step 2.2: Confirm no collateral damage
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 git diff skills/claude-code/cast-child-delegation/SKILL.md
 ```
 

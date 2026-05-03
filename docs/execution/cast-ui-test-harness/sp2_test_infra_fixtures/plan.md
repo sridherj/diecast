@@ -256,7 +256,7 @@ Once `cast-server/tests/ui/agents/` exists (sp4a/sp4b), the `test_server` fixtur
 runnable. Until then, you can sanity-check the fixture logic without dispatching agents:
 
 ```bash
-cd /home/sridherj/workspace/diecast
+cd <DIECAST_ROOT>
 mkdir -p cast-server/tests/ui/agents  # placeholder; sp4 fills it
 pytest cast-server/tests/ui/conftest.py --collect-only
 # Expect: no test files collected, but no import errors.

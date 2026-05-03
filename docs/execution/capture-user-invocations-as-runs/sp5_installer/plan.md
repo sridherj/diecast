@@ -320,6 +320,6 @@ grep -n "_isolate_settings_filesystem\|autouse=True" cast-server/tests/test_inst
 - **Skill/agent delegation:** `/cast-pytest-best-practices` is a hard requirement before
   declaring sp5 done. Document the findings in the sub-phase output (or comment in the
   test file).
-- The `gstack-settings-hook` reference at `~/workspace/reference_repos/gstack/bin/gstack-settings-hook`
+- The `gstack-settings-hook` reference at `<GSTACK_ROOT>/bin/gstack-settings-hook`
   is the canonical pattern. Worth diffing your final output against to catch missed
   edge cases.

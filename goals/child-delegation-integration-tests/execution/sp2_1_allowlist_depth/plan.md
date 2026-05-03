@@ -45,7 +45,7 @@ the suite-wide `pytest-timeout = 5` defense per Review #7.
 ### Step 2.1.1: Read second-brain reference for the five classes
 
 For each of the five classes, read the corresponding class in
-`~/workspace/second-brain/taskos/tests/test_delegation.py` to understand the test
+`<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py` to understand the test
 intent. **Do NOT copy code.** Adapt the behavior to diecast's symbols.
 
 ### Step 2.1.2: Create suite-wide pytest.ini

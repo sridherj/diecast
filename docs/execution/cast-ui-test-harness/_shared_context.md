@@ -1,9 +1,9 @@
 # Shared Context: Cast-UI E2E Test Harness
 
 ## Source Documents
-- Plan: `/home/sridherj/workspace/diecast/docs/plan/2026-05-01-cast-ui-e2e-test-harness.collab.md`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-ui-e2e-test-harness.collab.md`
 - Writeup: (none — plan is self-contained)
-- Canonical delegation contract: `/home/sridherj/workspace/diecast/skills/claude-code/cast-child-delegation/SKILL.md`
+- Canonical delegation contract: `<DIECAST_ROOT>/skills/claude-code/cast-child-delegation/SKILL.md`
 
 ## Project Background
 
@@ -34,7 +34,7 @@ are swept by a port-scoped pattern. Test agent definitions persist on disk.
 
 ## Codebase Conventions
 
-- **Repo root:** `/home/sridherj/workspace/diecast/`
+- **Repo root:** `<DIECAST_ROOT>/`
 - **Server package:** `cast-server/cast_server/` (Python). Routes under `routes/`, services under `services/`, templates under `templates/pages/`.
 - **Test package:** `cast-server/tests/` (existing pytest harness, will get a new `ui/` subdir).
 - **Server entrypoint:** `bin/cast-server` (a shell script that launches uvicorn). Tests should `Popen` this directly with `start_new_session=True`.

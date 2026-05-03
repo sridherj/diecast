@@ -12,8 +12,8 @@ will populate the TODO markers as each diecast counterpart class lands.
 
 - **Requires completed:** None (parallel-safe with sp1.1, sp1.2, sp1.3).
 - **Assumed codebase state:** the second-brain reference suite is at
-  `~/workspace/second-brain/taskos/tests/test_delegation.py`. If that path differs
-  on the executor's host, locate it via `find ~/workspace/second-brain -name test_delegation.py`.
+  `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py`. If that path differs
+  on the executor's host, locate it via `find <SECOND_BRAIN_ROOT> -name test_delegation.py`.
 
 ## Scope
 
@@ -38,7 +38,7 @@ will populate the TODO markers as each diecast counterpart class lands.
 
 ### Step 1.4.1: Enumerate second-brain test classes
 
-Read `~/workspace/second-brain/taskos/tests/test_delegation.py` and extract ONLY
+Read `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py` and extract ONLY
 the class names (e.g., grep for `^class Test`). Do not copy implementation.
 
 Expected ~11 classes, matching the plan §Phase 2 list:

@@ -54,7 +54,7 @@ that is not a cast-subphase-runner child**.
 pkill -f 'cast-server' || true
 sleep 1
 # Start fresh (cast-server reads schema.sql + applies migrations on boot).
-uv run --project /data/workspace/diecast cast-server &
+uv run --project <DIECAST_ROOT> cast-server &
 # Wait for boot.
 until curl -s http://localhost:8005/api/agents/runs?status=running >/dev/null 2>&1; do sleep 1; done
 # Verify the new endpoints exist.
@@ -67,7 +67,7 @@ curl -s -X POST http://localhost:8005/api/agents/subagent-invocations/complete \
 ### Step 2 — Install hooks for this project
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 cast-hook install
 # Expect: 5 entries written to .claude/settings.json
 #   - UserPromptSubmit  → user-prompt-start
@@ -80,7 +80,7 @@ jq '.hooks | keys' .claude/settings.json
 
 ### Step 3 — Trigger a real cast-* slash command in Claude Code
 
-In a new Claude Code session at `/data/workspace/diecast`, type at the
+In a new Claude Code session at `<DIECAST_ROOT>`, type at the
 prompt:
 
 ```

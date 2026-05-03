@@ -1,4 +1,4 @@
-Read the delegation context from `/data/workspace/diecast/goals/child-delegation-integration-tests/.delegation-run_20260501_133500_7b94db.json` first, then follow the instructions within.
+Read the delegation context from `<DIECAST_ROOT>/goals/child-delegation-integration-tests/.delegation-run_20260501_133500_7b94db.json` first, then follow the instructions within.
 
 Your run ID: run_20260501_133500_7b94db
 Goal slug: child-delegation-integration-tests
@@ -22,7 +22,7 @@ Use the cast-create-execution-plan agent.
 Goal: child-delegation-integration-tests
 Task: 
 Expected outcome: 
-Output directory: /data/workspace/diecast
+Output directory: <DIECAST_ROOT>
 
 INTERACTIVE SESSION: A human is watching this terminal and will respond to your questions.
 You MUST ask clarifying questions before proceeding when the agent calls for it (e.g., scope
@@ -35,16 +35,16 @@ whether to fix, re-delegate, or accept as-is. Do NOT silently absorb child outpu
 giving the user a chance to weigh in.
 
 ## External Project Directory
-You are running inside the project directory (/data/workspace/diecast).
+You are running inside the project directory (<DIECAST_ROOT>).
 Goal artifacts (plans, research, playbooks) are in `.cast/`.
 Code and execution artifacts go in the current working directory.
-Work in /data/workspace/diecast. Write all artifacts there.
+Work in <DIECAST_ROOT>. Write all artifacts there.
 
 Agent composition: If your task would benefit from another agent's capabilities,
 invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
 dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
 
-IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /data/workspace/diecast/.cast/.agent-run_20260501_133500_7b94db.output.json:
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to <DIECAST_ROOT>/.cast/.agent-run_20260501_133500_7b94db.output.json:
 
 {
     "contract_version": "2",
@@ -75,7 +75,7 @@ Set human_action_needed to true when:
 - You completed the work but something needs human verification
 Keep human_action_items specific and actionable (what exactly to do).
 
-Artifact paths must be relative to /data/workspace/diecast/.cast.
+Artifact paths must be relative to <DIECAST_ROOT>/.cast.
 
 ## Known Error Patterns for This Agent
 

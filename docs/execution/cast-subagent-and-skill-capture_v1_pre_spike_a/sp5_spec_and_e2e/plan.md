@@ -63,7 +63,7 @@ expected tree + skill chips.
 
 Provide context to the agent:
 - This plan's path:
-  `/data/workspace/diecast/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
+  `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
 - The requirements doc path (refined requirements under `goals/cast-subagent-and-skill-capture/`).
 - FR-001..FR-013 verbatim from refined requirements (with FR-013
   NOTED-AS-RESOLVED since sibling shipped).

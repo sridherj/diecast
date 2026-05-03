@@ -1,7 +1,7 @@
 # Shared Context: Cast-Server First-Run Launch
 
 ## Source Documents
-- Plan: `/data/workspace/diecast/docs/plan/2026-04-30-cast-server-first-run-launch.collab.md`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-04-30-cast-server-first-run-launch.collab.md`
 - Writeup: (none — plan is self-contained, with full Decisions block)
 
 ## Project Background

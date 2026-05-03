@@ -20,18 +20,18 @@ Use the cast-subphase-runner agent.
 Goal: runs-threaded-tree
 Task: 
 Expected outcome: 
-Output directory: /data/workspace/diecast
+Output directory: <DIECAST_ROOT>
 
 Additional context: Execute sub-phase 3 (sp3_htmx_endpoint) of the runs-threaded-tree execution plan. RE-DISPATCH after a stale run was killed by an unrelated process.
 
-Project dir: /data/workspace/diecast
+Project dir: <DIECAST_ROOT>
 Shared context: docs/execution/runs-threaded-tree/_shared_context.md
 Sub-phase plan: docs/execution/runs-threaded-tree/sp3_htmx_endpoint/plan.md
 Manifest: docs/execution/runs-threaded-tree/_manifest.md
 
 Dependency: sp1 + sp2 are Done. get_runs_tree() exists; the macro + fragment + route swaps are live. fragments/run_status_cells.html already has the conditional hx-get/hx-trigger/hx-swap pointing at /api/agents/runs/{id}/status_cells — your job is to add that endpoint plus the markup-shape test.
 
-CRITICAL: Write your terminal output.json to /data/workspace/diecast/goals/runs-threaded-tree/.agent-<YOUR_RUN_ID>.output.json — DO NOT write to .cast/ or any other goal_dir. The path is goals/runs-threaded-tree/ under the project root. The goal_slug is runs-threaded-tree, not anything else you might infer from the dashboard.
+CRITICAL: Write your terminal output.json to <DIECAST_ROOT>/goals/runs-threaded-tree/.agent-<YOUR_RUN_ID>.output.json — DO NOT write to .cast/ or any other goal_dir. The path is goals/runs-threaded-tree/ under the project root. The goal_slug is runs-threaded-tree, not anything else you might infer from the dashboard.
 
 Steps:
 1. Read _shared_context.md and sp3_htmx_endpoint/plan.md.
@@ -40,12 +40,12 @@ Steps:
 4. Create cast-server/tests/test_runs_template.py with 3 markup-shape tests: (a) status cells carry hx-get/hx-trigger/hx-swap when run.status in (running, pending, rate_limited); (b) outer .run-node MUST NOT carry hx-* attrs; (c) hx-target lands on the inner cells span by id.
 5. Run: uv run precommit-tests --suite unit  (must pass).
 6. Update _manifest.md row 3 status to Done.
-7. Write contract-v2 output.json at /data/workspace/diecast/goals/runs-threaded-tree/.agent-<RUN_ID>.output.json (atomic write). status=completed, summary, artifacts[], human_action_needed=false.
+7. Write contract-v2 output.json at <DIECAST_ROOT>/goals/runs-threaded-tree/.agent-<RUN_ID>.output.json (atomic write). status=completed, summary, artifacts[], human_action_needed=false.
 ## External Project Directory
-You are running inside the project directory (/data/workspace/diecast).
+You are running inside the project directory (<DIECAST_ROOT>).
 Goal artifacts (plans, research, playbooks) are in `.cast/`.
 Code and execution artifacts go in the current working directory.
-Work in /data/workspace/diecast. Write all artifacts there.
+Work in <DIECAST_ROOT>. Write all artifacts there.
 
 CRITICAL: NEVER inline an agent's work yourself. When a task calls for one of your allowed_delegations, you MUST dispatch to that agent — do not attempt the work yourself, summarize what the agent would produce, or paraphrase its output.
 Your allowed_delegations: [cast-review-code]
@@ -79,7 +79,7 @@ Quick reference (full patterns in the skill):
       }
     }' | jq -r '.run_id')
 
-  GOAL_DIR="/data/workspace/diecast/.cast"   # use this exact value — injected from your prompt preamble
+  GOAL_DIR="<DIECAST_ROOT>/.cast"   # use this exact value — injected from your prompt preamble
   TIMEOUT=2700; ELAPSED=0
   while [ $ELAPSED -lt $TIMEOUT ]; do
     [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
@@ -87,7 +87,7 @@ Quick reference (full patterns in the skill):
   done
   # On timeout, check: curl http://localhost:8005/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
 
-IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /data/workspace/diecast/.cast/.agent-run_20260501_074719_70611d.output.json:
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to <DIECAST_ROOT>/.cast/.agent-run_20260501_074719_70611d.output.json:
 
 {
     "contract_version": "2",
@@ -118,10 +118,10 @@ Set human_action_needed to true when:
 - You completed the work but something needs human verification
 Keep human_action_items specific and actionable (what exactly to do).
 
-Artifact paths must be relative to /data/workspace/diecast/.cast.
+Artifact paths must be relative to <DIECAST_ROOT>/.cast.
 
 ## Known Error Patterns for This Agent
 
 The following errors have occurred in past runs. Avoid repeating them:
 
-- **timeout** (2x, last: 2026-05-01): Dynamic verification (re-running pytest cast-server/tests/ui/) blocked: /data/workspace/diecast/.venv is owned by root and uv cannot manage it. uv error: `failed to remove directory /data/workspace/di
+- **timeout** (2x, last: 2026-05-01): Dynamic verification (re-running pytest cast-server/tests/ui/) blocked: <DIECAST_ROOT>/.venv is owned by root and uv cannot manage it. uv error: `failed to remove directory /data/workspace/di

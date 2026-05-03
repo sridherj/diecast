@@ -5,17 +5,17 @@
 User invocation of `/cast-refine-requirements`, 2026-05-01:
 
 > we had some very good integration tests for child-delegation in
-> ~/workspace/second-brain. Can you take a look? though the contracts have
+> <SECOND_BRAIN_ROOT>. Can you take a look? though the contracts have
 > changed, it was very useful to confirm this important feature worked. Right
 > now I feel its breaking in quite a few ways. It probably had a spec as well.
 
 ## Reference material identified
 
-- `~/workspace/second-brain/docs/specs/taskos_agent_delegation.collab.md` (310 lines) — the previous spec
-- `~/workspace/second-brain/taskos/tests/test_delegation.py` (869 lines) — the integration suite
-- `~/workspace/second-brain/taskos/tests/e2e/test_tier2_delegation.py` (129 lines) — live E2E
-- `~/workspace/second-brain/agents/test-parent-delegator/`, `agents/test-child-worker/` — fixture agents
-- `~/workspace/second-brain/docs/plan/2026-03-28-delegation-test-plan.md` — plan that drove the suite
+- `<SECOND_BRAIN_ROOT>/docs/specs/taskos_agent_delegation.collab.md` (310 lines) — the previous spec
+- `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py` (869 lines) — the integration suite
+- `<SECOND_BRAIN_ROOT>/taskos/tests/e2e/test_tier2_delegation.py` (129 lines) — live E2E
+- `<SECOND_BRAIN_ROOT>/agents/test-parent-delegator/`, `agents/test-child-worker/` — fixture agents
+- `<SECOND_BRAIN_ROOT>/docs/plan/2026-03-28-delegation-test-plan.md` — plan that drove the suite
 
 Existing diecast counterparts:
 - `docs/specs/cast-delegation-contract.collab.md` (264 lines) — file-canonical contract spec

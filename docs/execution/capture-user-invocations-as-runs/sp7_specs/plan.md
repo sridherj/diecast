@@ -141,7 +141,7 @@ Lead with the polite-citizen framing.
 - `cast-server/cast_server/cli/hook_events.py`
 - `cast-server/cast_server/cli/hook.py`
 - `pyproject.toml` (`[project.scripts]` entry)
-- Reference: `~/workspace/reference_repos/gstack/bin/gstack-settings-hook` (canonical pattern)
+- Reference: `<GSTACK_ROOT>/bin/gstack-settings-hook` (canonical pattern)
 
 **User Stories (10):**
 - **US1:** Coexists with third-party `UserPromptSubmit` hooks — installing into a

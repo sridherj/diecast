@@ -302,7 +302,7 @@ That's it. `pytest cast-server/tests/ui/` will pick it up on the next run.
 ### Step 5.4: Run the suite end-to-end
 
 ```bash
-cd /home/sridherj/workspace/diecast
+cd <DIECAST_ROOT>
 pip install -e "cast-server[test]"
 playwright install chromium
 

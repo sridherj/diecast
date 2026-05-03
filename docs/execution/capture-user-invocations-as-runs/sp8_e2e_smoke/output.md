@@ -224,7 +224,7 @@ fallback documented in the plan stays parked.
 
 ```
 $ which cast-hook
-/data/workspace/diecast/.venv/bin/cast-hook
+<DIECAST_ROOT>/.venv/bin/cast-hook
 ```
 
 `cast-hook` resolves on the same PATH the parent shell exposes. For a real

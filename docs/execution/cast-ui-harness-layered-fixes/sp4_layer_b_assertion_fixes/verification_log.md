@@ -115,12 +115,12 @@ Two attempts, two distinct environmental failures:
    even started:
    ```
    warning: Ignoring existing virtual environment linked to non-existent Python interpreter: .venv/bin/python3 -> python
-   error: failed to remove directory `/data/workspace/diecast/.venv/lib64`: Permission denied (os error 13)
+   error: failed to remove directory `<DIECAST_ROOT>/.venv/lib64`: Permission denied (os error 13)
    ```
    The repo's `.venv/` is now owned by `root`, and `uv` cannot rebuild it
    without elevated privileges. Inspecting:
    ```
-   $ ls -la /data/workspace/diecast/.venv/
+   $ ls -la <DIECAST_ROOT>/.venv/
    drwxr-xr-x 5 root root ... .venv/
    ```
    The `python` symlink inside also dangles (`-> /usr/local/bin/python3`,
@@ -145,7 +145,7 @@ functions`), they are out of scope here.
 
 Two unblockers, both outside sp4 scope:
 
-1. Restore ownership of `/data/workspace/diecast/.venv/` to the user account
+1. Restore ownership of `<DIECAST_ROOT>/.venv/` to the user account
    (or wipe and let `uv sync` rebuild it as the user). After that, re-run
    `uv run pytest cast-server/tests/ui/test_full_sweep.py` to capture the
    post-sp4 red list.

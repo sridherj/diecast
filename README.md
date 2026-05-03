@@ -49,8 +49,8 @@ Diecast doesn't fix the model. It fixes the workflow around the model.
 
 ```bash
 # 1. Clone
-git clone https://github.com/sridherj/diecast.git ~/workspace/diecast
-cd ~/workspace/diecast
+git clone https://github.com/sridherj/diecast.git
+cd diecast
 
 # 2. Install (drops cast-* skills + agents into ~/.claude/, links the repo as ~/.claude/skills/diecast/, and starts cast-server on first install)
 ./setup
@@ -150,8 +150,8 @@ Every cast-* step ends with 1–3 suggested next commands grounded in what you j
 ### Setup
 
 ```bash
-git clone https://github.com/sridherj/diecast.git ~/workspace/diecast
-cd ~/workspace/diecast
+git clone https://github.com/sridherj/diecast.git
+cd diecast
 ./setup
 ```
 

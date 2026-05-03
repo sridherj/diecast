@@ -345,7 +345,7 @@ coverage lives. The plan
 rationale archive — read it for the "why" behind the locked decisions
 referenced above. The canonical reference pattern (atomic settings.json
 injection in another tool) is
-`~/workspace/reference_repos/gstack/bin/gstack-settings-hook`.
+`<GSTACK_ROOT>/bin/gstack-settings-hook`.
 
 ## Out of scope
 
@@ -384,7 +384,7 @@ deferred to future sub-phases.
   `--no-hooks`): `/cast-init` Step 4 in
   [`skills/claude-code/cast-init/SKILL.md`](../../skills/claude-code/cast-init/SKILL.md).
 - Reference pattern for atomic `settings.json` injection:
-  `~/workspace/reference_repos/gstack/bin/gstack-settings-hook`.
+  `<GSTACK_ROOT>/bin/gstack-settings-hook`.
 
 ## Open Questions
 

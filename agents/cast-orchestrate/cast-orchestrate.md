@@ -102,7 +102,7 @@ On success, read the child's output to find the `project_dir` (the execution dir
 Parse the manifest to build the dependency graph and execution groups:
 
 ```bash
-cd $HOME/workspace/diecast/cast-server && .venv/bin/python -m cast_server.services.orchestration_service parse-manifest <project_dir>/_manifest.md
+cd "$(readlink -f ~/.claude/skills/diecast)/cast-server" && .venv/bin/python -m cast_server.services.orchestration_service parse-manifest <project_dir>/_manifest.md
 ```
 
 This outputs JSON with `subphases` and `groups` arrays. Each group is a set of sub-phases that can run in parallel.
@@ -183,7 +183,7 @@ For each completed sub-phase:
 2. Classify result: `completed`, `partial`, or `failed`
 3. Update the manifest:
    ```bash
-   cd $HOME/workspace/diecast/cast-server && .venv/bin/python -m cast_server.services.orchestration_service update-status <manifest_path> <subphase_id> Done
+   cd "$(readlink -f ~/.claude/skills/diecast)/cast-server" && .venv/bin/python -m cast_server.services.orchestration_service update-status <manifest_path> <subphase_id> Done
    ```
    For failed sub-phases, use status "Failed".
 
@@ -235,7 +235,7 @@ For successful completion:
 ## Environment Notes
 
 - Always use absolute file paths (working directory resets between bash calls)
-- Run Python commands with the project venv: `cd $HOME/workspace/diecast/cast-server && .venv/bin/python`
+- Run Python commands with the project venv: `cd "$(readlink -f ~/.claude/skills/diecast)/cast-server" && .venv/bin/python`
 - Never use system Python
 - Your run ID (from the prompt preamble) links dispatched children to this orchestrator session
 - Sub-phase runner output files appear at `<goal_dir>/.agent-<run_id>.output.json`

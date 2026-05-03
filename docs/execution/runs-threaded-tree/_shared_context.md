@@ -1,8 +1,8 @@
 # Shared Context: Threaded `/runs` Page (Recursive Parent/Child Tree)
 
 ## Source Documents
-- Plan: `/data/workspace/diecast/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
-- Visual mockup (locked source of truth): `/data/workspace/diecast/docs/plan/mockups/runs-threaded.html`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
+- Visual mockup (locked source of truth): `<DIECAST_ROOT>/docs/plan/mockups/runs-threaded.html`
 - Plan-review verdict: cast-plan-review BIG (16 issues raised, all resolved into the plan's Decisions block). Implementation proceeds without re-litigation.
 
 ## Project Background

@@ -141,6 +141,6 @@ Minimal example (full schema lives in the spec):
 ## Environment Notes
 
 - Always use absolute file paths
-- Run Python tests with the project venv: `cd $HOME/workspace/diecast/cast-server && .venv/bin/python -m pytest`
+- Run Python tests with the project venv: `cd "$(readlink -f ~/.claude/skills/diecast)/cast-server" && .venv/bin/python -m pytest`
 - Never use system Python for project tests
 - The working directory resets between bash calls -- use absolute paths in every command
