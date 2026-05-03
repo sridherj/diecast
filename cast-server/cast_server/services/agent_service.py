@@ -517,6 +517,34 @@ def _validate_dispatch_preconditions(goal_slug: str, db_path=None) -> None:
         raise MissingExternalProjectDirError(goal_slug, configured)
 
 
+def _resolve_runtime_artifact_dir(goal_slug: str, db_path=None) -> Path:
+    """Return the authoritative runtime artifact directory for a goal.
+
+    For routed goals (those with ``external_project_dir`` set and an existing
+    ``folder_path`` in the DB), the runtime dir is the routed ``folder_path``
+    — the same location the ``.cast`` symlink targets and where agents are
+    instructed to write ``.agent-<id>.output.json``.
+
+    For non-routed goals, falls back to ``GOALS_DIR / goal_slug``.
+
+    This is the **single source of truth** for where runtime dot-files
+    (``.agent-*.output.json``, ``.agent-*.done``, ``.agent-*.prompt``,
+    ``.delegation-*.json``, ``.agent-*.continue``, ``.context-map.md``)
+    live at runtime. Every function that reads or writes these files must
+    call this helper instead of hard-coding ``GOALS_DIR / slug``.
+    """
+    from cast_server.services import goal_service
+    goal_data = goal_service.get_goal(goal_slug, db_path=db_path)
+    if goal_data and goal_data.get("external_project_dir"):
+        # Routed goal — use folder_path (the .cast symlink target)
+        fp = goal_data.get("folder_path")
+        if fp:
+            fp_path = Path(fp)
+            if fp_path.exists():
+                return fp_path
+    return GOALS_DIR / goal_slug
+
+
 def load_canonical_file(goal_dir: Path, run_id: str) -> dict | None:
     """Read the canonical agent-run output JSON from disk.
 
@@ -1137,7 +1165,7 @@ def cancel_run(run_id: str, db_path=None) -> dict | None:
     )
 
     # Clean up dot-files
-    goal_dir = GOALS_DIR / run.get("goal_slug", "")
+    goal_dir = _resolve_runtime_artifact_dir(run.get("goal_slug", ""), db_path=db_path)
     for pattern in [f".agent-{run_id}.prompt", f".delegation-{run_id}.json"]:
         f = goal_dir / pattern
         if f.exists():
@@ -1211,10 +1239,11 @@ def _row_to_dict(row) -> dict:
 
 def _inject_context(agent_name: str, goal_slug: str,
                     gstack_dir: str | None = None,
-                    external_project_dir: str | None = None) -> str:
+                    external_project_dir: str | None = None,
+                    db_path=None) -> str:
     """Build context section based on agent's context_mode and goal config."""
     config = load_agent_config(agent_name)
-    goal_dir = GOALS_DIR / goal_slug
+    goal_dir = _resolve_runtime_artifact_dir(goal_slug, db_path=db_path)
     context_parts = []
 
     if config.context_mode == "lightweight":
@@ -1926,7 +1955,8 @@ async def trigger_agent(agent_name: str, goal_slug: str, context: str = "",
 
     # Write delegation context file
     if delegation_context:
-        goal_dir = GOALS_DIR / goal_slug
+        goal_dir = _resolve_runtime_artifact_dir(goal_slug, db_path=db_path)
+        goal_dir.mkdir(parents=True, exist_ok=True)
         context_file = goal_dir / f".delegation-{run_id}.json"
         context_file.write_text(delegation_context.model_dump_json(indent=2))
 
@@ -1997,7 +2027,7 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
             task_title = task.get("title", "")
             task_outcome = task.get("outcome", "")
 
-    goal_dir = str(GOALS_DIR / effective_slug)
+    goal_dir = str(_resolve_runtime_artifact_dir(effective_slug, db_path=db_path))
 
     # Resolve directory metadata for invoke path (Phase 3.1, Req 4.1)
     from cast_server.services import goal_service
@@ -2061,7 +2091,7 @@ async def continue_agent_run(run_id: str, message: str, db_path=None) -> None:
         raise ValueError(f"Session for {run_id} no longer exists -- use trigger_agent for a new run")
 
     # Deliver message via file (avoids Claude Code paste-preview mode for multiline text)
-    goal_dir = GOALS_DIR / run["goal_slug"]
+    goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"], db_path=db_path)
     prompt_file = goal_dir / f".agent-{run_id}.continue"
     prompt_file.write_text(message)
     tmux.send_keys(session_name, f"Read {prompt_file} and follow its instructions.")
@@ -2094,7 +2124,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         goal_slug = run["goal_slug"]
         task_id = run.get("task_id")
         input_params = run.get("input_params") or {}
-        goal_dir = GOALS_DIR / goal_slug
+        goal_dir = _resolve_runtime_artifact_dir(goal_slug, db_path=db_path)
         session_id = None  # Discovered by monitor loop from Claude CLI JSONL
         session_name = f"agent-{run_id}"
 
@@ -2171,6 +2201,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             agent_name, goal_slug,
             gstack_dir=gstack_dir,
             external_project_dir=external_project_dir,
+            db_path=db_path,
         )
 
         started_at = datetime.now(timezone.utc).isoformat()
@@ -2193,11 +2224,13 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         )
 
         # Build directory metadata JSON (Phase 3.1, Req 4.1)
+        # goal_dir must agree with cast_goal_dir (the prompt tells agents
+        # to write output there), keeping metadata consistent.
         directories_json = json.dumps({
             "tracking_dir": cast_goal_dir,
             "artifact_dir": output_dir,
             "working_dir": working_dir,
-            "goal_dir": str(goal_dir),
+            "goal_dir": cast_goal_dir,
             "external_project_dir": external_project_dir or None,
         })
 
@@ -2426,7 +2459,7 @@ async def _handle_state_transition(run: dict, state: AgentState, db_path=None) -
 
     if state in (AgentState.IDLE, AgentState.SHELL_RETURNED):
         # Check for .done file (dual completion signal)
-        goal_dir = GOALS_DIR / run["goal_slug"]
+        goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"], db_path=db_path)
         done_file = goal_dir / f".agent-{run_id}.done"
         output_file = goal_dir / f".agent-{run_id}.output.json"
 
@@ -2532,7 +2565,7 @@ async def _handle_state_transition(run: dict, state: AgentState, db_path=None) -
 async def _finalize_run_from_monitor(run: dict, db_path=None) -> None:
     """Finalize a run detected as complete by the monitor loop, including timing."""
     run_id = run["id"]
-    goal_dir = GOALS_DIR / run["goal_slug"]
+    goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"], db_path=db_path)
 
     config = load_agent_config(run["agent_name"])
     input_params = run.get("input_params") or {}
@@ -2622,7 +2655,7 @@ def recheck_failed_run(run_id: str, db_path=None) -> dict | None:
     if not goal_slug:
         return None
 
-    goal_dir = GOALS_DIR / goal_slug
+    goal_dir = _resolve_runtime_artifact_dir(goal_slug, db_path=db_path)
     done_file = goal_dir / f".agent-{run_id}.done"
     output_file = goal_dir / f".agent-{run_id}.output.json"
 
@@ -2773,7 +2806,7 @@ def recover_stale_runs(db_path=None) -> list[dict]:
             continue
 
         # Session dead — try dot-file recovery
-        goal_dir = GOALS_DIR / run["goal_slug"]
+        goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"], db_path=db_path)
         done_file = goal_dir / f".agent-{run_id}.done"
         output_file = goal_dir / f".agent-{run_id}.output.json"
 
