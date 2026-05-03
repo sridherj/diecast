@@ -48,14 +48,14 @@ Eight coordinated edits. Order below = order of execution.
    - **Inside ```bash / ```sh / inline `code` containing `curl` or `http://`:** replace `http://localhost:8000` → `http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}` (and same for `127.0.0.1`).
    - **Narrative prose elsewhere:** replace with the literal `http://localhost:8005` (and `http://127.0.0.1:8005`).
 
-   Pre-flight `grep -rn '\(localhost\|127\.0\.0\.1\):8000' /data/workspace/diecast/` to enumerate the actual hits and verify ~30 matches.
+   Pre-flight `grep -rn '\(localhost\|127\.0\.0\.1\):8000' <DIECAST_ROOT>/` to enumerate the actual hits and verify ~30 matches.
 
    Targets (Decision #6: add cast-server/README.md, exclude tests/):
-   - `/data/workspace/diecast/skills/claude-code/cast-*/**/*.md` (~13 hits in cast-child-delegation alone)
-   - `/data/workspace/diecast/agents/cast-*/**/*.md`
-   - `/data/workspace/diecast/cast-server/README.md` *(added per Decision #6 — env-var table at :23 + intro at :4)*
-   - `/data/workspace/diecast/README.md`
-   - `/data/workspace/diecast/docs/**/*.md`
+   - `<DIECAST_ROOT>/skills/claude-code/cast-*/**/*.md` (~13 hits in cast-child-delegation alone)
+   - `<DIECAST_ROOT>/agents/cast-*/**/*.md`
+   - `<DIECAST_ROOT>/cast-server/README.md` *(added per Decision #6 — env-var table at :23 + intro at :4)*
+   - `<DIECAST_ROOT>/README.md`
+   - `<DIECAST_ROOT>/docs/**/*.md`
 
    **Exclude:** `tests/` — `tests/test_cast_upgrade.sh:298` literal `localhost:8000` is intentional (mock-curl payload, not a real URL); changing it would alter test semantics.
 
@@ -353,7 +353,7 @@ No bats, no integration smoke test of `./setup --dry-run`. The 20-scenario verif
 - Bootstrap chicken/egg solved: `bin/cast-doctor` *must* stay as a script because `step1_doctor` runs *before* Claude Code is verified working — but it's no longer documented as a user surface.
 - Future ops are slash commands by default; no temptation to add another `bin/cast-thing` script.
 
-**Risk:** users who today rely on `cd ~/workspace/diecast && bin/cast-doctor` from a shell will need to switch to `/cast-doctor` inside Claude Code. The bin script still works (we don't delete it), so the worst case is a confused user reading old docs. Mitigation: CHANGELOG entry plus the bin/README.md split.
+**Risk:** users who today rely on `cd <DIECAST_ROOT> && bin/cast-doctor` from a shell will need to switch to `/cast-doctor` inside Claude Code. The bin script still works (we don't delete it), so the worst case is a confused user reading old docs. Mitigation: CHANGELOG entry plus the bin/README.md split.
 
 **Why this beats a unified `cast` CLI:** ~6 file touches vs ~50–80 for the unified CLI. No PATH rename. Plays to Claude Code's strengths (rich .md docs, autocomplete, AskUserQuestion). The unified CLI remains a possible future direction if the slash-command surface ever grows unwieldy.
 
@@ -371,33 +371,33 @@ No bats, no integration smoke test of `./setup --dry-run`. The 20-scenario verif
 
 ## Files to modify
 
-- `/data/workspace/diecast/bin/cast-server` — port default 8005; rename `${CAST_HOST:-127.0.0.1}` → `${CAST_BIND_HOST:-127.0.0.1}` (Decision #3)
-- `/data/workspace/diecast/cast-server/cast_server/config.py` — add `DEFAULT_CAST_PORT` / `DEFAULT_CAST_HOST` / `DEFAULT_CAST_BIND_HOST` constants; configure `RotatingFileHandler` writing to `server.log` (§F)
-- `/data/workspace/diecast/cast-server/cast_server/main.py` — `_ensure_db_at_head()` skip-if-stamped check (Decision #15); call before FastAPI accepts requests (§E)
-- `/data/workspace/diecast/cast-server/cast_server/services/agent_service.py` — replace hardcoded `http://localhost:8000` at lines 889/915 (runtime prompt content) and 992/1005 (docstrings) with `f"http://{DEFAULT_CAST_HOST}:{DEFAULT_CAST_PORT}"` from config constants (Decision #2)
-- `/data/workspace/diecast/cast-server/cast_server/db/schema.sql` — read by the baseline migration (no edits to schema.sql itself; it remains source of truth)
-- `/data/workspace/diecast/cast-server/pyproject.toml` — add `alembic` dependency (§E)
-- `/data/workspace/diecast/cast-server/alembic/`, `cast-server/alembic.ini` — new migration tree with hand-authored baseline that `op.execute()`s `schema.sql` (§E, Decision #14)
-- `/data/workspace/diecast/cast-server/README.md` — env-var table at :23 (CAST_HOST → CAST_BIND_HOST + new CAST_HOST entry; CAST_PORT default → 8005), intro at :4 (Decision #6)
-- `/data/workspace/diecast/bin/cast-doctor` — add `python3 ≥3.11` and `tmux` to RED list with OS-aware install hints (Decision #12, §D)
-- `/data/workspace/diecast/bin/sweep-port-refs.py` (new) — markdown-aware Python script that walks fenced bash blocks vs prose and applies the right substitution (Decision #5)
-- `/data/workspace/diecast/setup` — port defaults in `step6_write_config`; new `step8_launch_and_open_browser` (port pre-flight + cast-doctor wire-up + PATH check, mkdir on happy path only); `alembic upgrade head` between step 5 and step 8; rewrite `print_next_steps`; renumber Step X/7 → X/8
-- `/data/workspace/diecast/skills/claude-code/cast-*/**/*.md` — markdown-aware sweep (bash blocks → env-var pattern; prose → literal `localhost:8005`)
-- `/data/workspace/diecast/agents/cast-*/**/*.md` — same sweep
-- `/data/workspace/diecast/README.md` — add "Run the server" subsection, tweak install blurb
-- `/data/workspace/diecast/docs/config.md` — add `host` / `port` keys to schema reference; document `CAST_HOST` (client) vs `CAST_BIND_HOST` (server) env-var asymmetry
-- `/data/workspace/diecast/docs/**/*.md` — sweep narrative prose (delegation-pattern.md, troubleshooting.md, etc.)
-- `/data/workspace/diecast/tests/test_migrations.py` (new) — round-trip test (`alembic upgrade head` from empty DB ↔ schema.sql) + idempotency test (re-running upgrade is a no-op) (Decision #16)
-- `/data/workspace/diecast/.github/workflows/shellcheck.yml` (new) — shebang-aware sweep over `bin/*` (Decision #17, §G)
-- `/data/workspace/diecast/bin/cast-doctor` — header docstring update at lines 8–12 (mark internal-only, point post-install diagnosis at `/cast-doctor`, Decision #18, §H step 1); presentation-shift at lines 12, 57, 224, 241 (point users at `/cast-doctor` rather than `bin/cast-doctor --fix-terminal`, Decision #19, §H step 7). Also gets the python3/tmux additions per Decision #12, §D.
-- `/data/workspace/diecast/agents/_shared/terminal.py` — `ResolutionError` improved-message text shifts from "run `bin/cast-doctor --fix-terminal`" to "run `/cast-doctor` from inside Claude Code" (Decision #19, §H step 7). Overrides part of the in-flight terminal-defaults plan's §2.
-- `/data/workspace/diecast/agents/cast-doctor/cast-doctor.md` (new) — canonical agent source for the `/cast-doctor` skill; bin/generate-skills produces the SKILL.md (Decision #18, §H step 2)
-- `/data/workspace/diecast/cast-server/cast_server/routes/api_health.py` (new) — `/api/health` endpoint returning `{"red","yellow","green"}` shape; reuses cast-doctor's prereq checks (Decision #18, §H step 3). Also serves §B step 4's readiness probe.
-- `/data/workspace/diecast/cast-server/cast_server/app.py` — register the new `api_health` router
-- `/data/workspace/diecast/bin/cast-spec-checker`, `bin/check-doc-links`, `bin/audit-interdependencies`, `bin/lint-anonymization`, `bin/generate-skills`, `bin/migrate-legacy-estimates.py`, `bin/migrate-next-steps-shape.py`, `bin/run-migrations.py`, `bin/set-proactive-defaults.py` — header docstrings updated to "Internal use; not on user PATH" (Decision #18, §H step 4). `bin/run-migrations.py` also gets a deprecation note pointing at §E's Alembic.
-- `/data/workspace/diecast/bin/README.md` — rewrite top section to split user-facing (`cast-server` only) vs internal (everything else) (Decision #18, §H step 5)
-- `/data/workspace/diecast/README.md` — also gets the §H mental-model postscript in the "Run the server" subsection (Decision #18, §H step 6)
-- `/data/workspace/diecast/CHANGELOG.md` — note the 8000 → 8005 default port shift, the env-var rename, the Alembic introduction, and the `/cast-doctor` slash command (with the bin/cast-doctor docstring change)
+- `<DIECAST_ROOT>/bin/cast-server` — port default 8005; rename `${CAST_HOST:-127.0.0.1}` → `${CAST_BIND_HOST:-127.0.0.1}` (Decision #3)
+- `<DIECAST_ROOT>/cast-server/cast_server/config.py` — add `DEFAULT_CAST_PORT` / `DEFAULT_CAST_HOST` / `DEFAULT_CAST_BIND_HOST` constants; configure `RotatingFileHandler` writing to `server.log` (§F)
+- `<DIECAST_ROOT>/cast-server/cast_server/main.py` — `_ensure_db_at_head()` skip-if-stamped check (Decision #15); call before FastAPI accepts requests (§E)
+- `<DIECAST_ROOT>/cast-server/cast_server/services/agent_service.py` — replace hardcoded `http://localhost:8000` at lines 889/915 (runtime prompt content) and 992/1005 (docstrings) with `f"http://{DEFAULT_CAST_HOST}:{DEFAULT_CAST_PORT}"` from config constants (Decision #2)
+- `<DIECAST_ROOT>/cast-server/cast_server/db/schema.sql` — read by the baseline migration (no edits to schema.sql itself; it remains source of truth)
+- `<DIECAST_ROOT>/cast-server/pyproject.toml` — add `alembic` dependency (§E)
+- `<DIECAST_ROOT>/cast-server/alembic/`, `cast-server/alembic.ini` — new migration tree with hand-authored baseline that `op.execute()`s `schema.sql` (§E, Decision #14)
+- `<DIECAST_ROOT>/cast-server/README.md` — env-var table at :23 (CAST_HOST → CAST_BIND_HOST + new CAST_HOST entry; CAST_PORT default → 8005), intro at :4 (Decision #6)
+- `<DIECAST_ROOT>/bin/cast-doctor` — add `python3 ≥3.11` and `tmux` to RED list with OS-aware install hints (Decision #12, §D)
+- `<DIECAST_ROOT>/bin/sweep-port-refs.py` (new) — markdown-aware Python script that walks fenced bash blocks vs prose and applies the right substitution (Decision #5)
+- `<DIECAST_ROOT>/setup` — port defaults in `step6_write_config`; new `step8_launch_and_open_browser` (port pre-flight + cast-doctor wire-up + PATH check, mkdir on happy path only); `alembic upgrade head` between step 5 and step 8; rewrite `print_next_steps`; renumber Step X/7 → X/8
+- `<DIECAST_ROOT>/skills/claude-code/cast-*/**/*.md` — markdown-aware sweep (bash blocks → env-var pattern; prose → literal `localhost:8005`)
+- `<DIECAST_ROOT>/agents/cast-*/**/*.md` — same sweep
+- `<DIECAST_ROOT>/README.md` — add "Run the server" subsection, tweak install blurb
+- `<DIECAST_ROOT>/docs/config.md` — add `host` / `port` keys to schema reference; document `CAST_HOST` (client) vs `CAST_BIND_HOST` (server) env-var asymmetry
+- `<DIECAST_ROOT>/docs/**/*.md` — sweep narrative prose (delegation-pattern.md, troubleshooting.md, etc.)
+- `<DIECAST_ROOT>/tests/test_migrations.py` (new) — round-trip test (`alembic upgrade head` from empty DB ↔ schema.sql) + idempotency test (re-running upgrade is a no-op) (Decision #16)
+- `<DIECAST_ROOT>/.github/workflows/shellcheck.yml` (new) — shebang-aware sweep over `bin/*` (Decision #17, §G)
+- `<DIECAST_ROOT>/bin/cast-doctor` — header docstring update at lines 8–12 (mark internal-only, point post-install diagnosis at `/cast-doctor`, Decision #18, §H step 1); presentation-shift at lines 12, 57, 224, 241 (point users at `/cast-doctor` rather than `bin/cast-doctor --fix-terminal`, Decision #19, §H step 7). Also gets the python3/tmux additions per Decision #12, §D.
+- `<DIECAST_ROOT>/agents/_shared/terminal.py` — `ResolutionError` improved-message text shifts from "run `bin/cast-doctor --fix-terminal`" to "run `/cast-doctor` from inside Claude Code" (Decision #19, §H step 7). Overrides part of the in-flight terminal-defaults plan's §2.
+- `<DIECAST_ROOT>/agents/cast-doctor/cast-doctor.md` (new) — canonical agent source for the `/cast-doctor` skill; bin/generate-skills produces the SKILL.md (Decision #18, §H step 2)
+- `<DIECAST_ROOT>/cast-server/cast_server/routes/api_health.py` (new) — `/api/health` endpoint returning `{"red","yellow","green"}` shape; reuses cast-doctor's prereq checks (Decision #18, §H step 3). Also serves §B step 4's readiness probe.
+- `<DIECAST_ROOT>/cast-server/cast_server/app.py` — register the new `api_health` router
+- `<DIECAST_ROOT>/bin/cast-spec-checker`, `bin/check-doc-links`, `bin/audit-interdependencies`, `bin/lint-anonymization`, `bin/generate-skills`, `bin/migrate-legacy-estimates.py`, `bin/migrate-next-steps-shape.py`, `bin/run-migrations.py`, `bin/set-proactive-defaults.py` — header docstrings updated to "Internal use; not on user PATH" (Decision #18, §H step 4). `bin/run-migrations.py` also gets a deprecation note pointing at §E's Alembic.
+- `<DIECAST_ROOT>/bin/README.md` — rewrite top section to split user-facing (`cast-server` only) vs internal (everything else) (Decision #18, §H step 5)
+- `<DIECAST_ROOT>/README.md` — also gets the §H mental-model postscript in the "Run the server" subsection (Decision #18, §H step 6)
+- `<DIECAST_ROOT>/CHANGELOG.md` — note the 8000 → 8005 default port shift, the env-var rename, the Alembic introduction, and the `/cast-doctor` slash command (with the bin/cast-doctor docstring change)
 
 **Exclusions:**
 - `tests/test_cast_upgrade.sh:298` — literal `:8000` is intentional (mock-curl payload, not a real URL); changing it would alter test semantics (Decision #6).
@@ -421,7 +421,7 @@ No bats, no integration smoke test of `./setup --dry-run`. The 20-scenario verif
 5. **CI/headless path:** `CI=1 ./setup --no-prompt` — no launch, no browser, no `~/.cache/diecast/` created.
 6. **Already-running path:** start the server manually on `:8005`, then run `./setup`. Expect: skip launch, still open the browser, message reflects "running at …".
 7. **No-display Linux path:** `unset DISPLAY WAYLAND_DISPLAY; ./setup` — server launches, browser open is skipped with a one-line "visit … manually" log.
-8. **Hardcoded-port sweep verification:** after the sweep, `grep -rn '\(localhost\|127\.0\.0\.1\):8000' /data/workspace/diecast/ --include='*.md' --include='*.py' --include='*.sh' --exclude-dir=tests` should return zero hits (or only intentional CHANGELOG entries documenting the shift).
+8. **Hardcoded-port sweep verification:** after the sweep, `grep -rn '\(localhost\|127\.0\.0\.1\):8000' <DIECAST_ROOT>/ --include='*.md' --include='*.py' --include='*.sh' --exclude-dir=tests` should return zero hits (or only intentional CHANGELOG entries documenting the shift).
 9. **Skill runtime resolution:** invoke a cast-* skill that hits the server (e.g. `/cast-runs`) — confirm the curl resolves `${CAST_HOST:-localhost}:${CAST_PORT:-8005}` correctly via bash and reaches the server.
 10. **Sweep prose-vs-bash correctness:** spot-check `README.md:95` ("A local web UI at `http://localhost:8005`" — literal, not `${CAST_HOST:-...}`) and `cast-child-delegation/SKILL.md:30` (curl with the bash env-var pattern). Confirms the markdown-aware sweep applied the right substitution per region.
 11. **Test suite:** `uv run pytest` continues to pass (109/109 baseline + 2 new `test_migrations.py` tests). The new step has no Python surface area; the existing `test_us14_next_steps_typed.py` checks shape, not literal text.

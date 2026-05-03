@@ -386,9 +386,18 @@ step8_launch_and_open_browser() {
       return 0
     fi
     # Bound by something else.
-    local pid cmd
-    pid="$(lsof -ti ":${port}" 2>/dev/null | head -1 || true)"
-    cmd="$(ps -p "${pid:-0}" -o comm= 2>/dev/null || echo "?")"
+    local pid="" cmd="?"
+    if command -v lsof >/dev/null 2>&1; then
+      pid="$(lsof -ti ":${port}" 2>/dev/null | head -1 || true)"
+    elif command -v ss >/dev/null 2>&1; then
+      pid="$(ss -tlnp "sport = :${port}" 2>/dev/null \
+        | sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | head -1 || true)"
+    elif command -v fuser >/dev/null 2>&1; then
+      pid="$(fuser "${port}/tcp" 2>/dev/null | awk '{print $1}' || true)"
+    fi
+    if [[ -n "${pid}" ]]; then
+      cmd="$(ps -p "${pid}" -o comm= 2>/dev/null || echo "?")"
+    fi
     warn "port ${port} in use by PID ${pid:-?} (${cmd})."
     warn "       set CAST_PORT=<n> ./setup, or stop the process and re-run."
     warn "       (skipping launch — install otherwise complete)"
@@ -400,7 +409,7 @@ step8_launch_and_open_browser() {
   mkdir -p "${HOME}/.cache/diecast"
 
   # Detached background launch (Decision #4 — drop disown; Decision #13 — bootstrap.log).
-  ( nohup "${HOME}/.local/bin/cast-server" \
+  ( nohup "${HOME}/.claude/skills/diecast/bin/cast-server" \
         >"${HOME}/.cache/diecast/bootstrap.log" 2>&1 & ) >/dev/null 2>&1
 
   # Readiness poll: 30 × 0.5s = 15s (Decision #10).
@@ -429,14 +438,6 @@ step8_launch_and_open_browser() {
 
   _open_browser "${url}"
 
-  # Post-install PATH check.
-  case ":${PATH}:" in
-    *":${HOME}/.local/bin:"*) : ;;
-    *) warn "cast-server installed to ~/.local/bin, which is not on your \$PATH.
-       Add this to your shell rc (e.g. ~/.zshrc, ~/.bashrc):
-         export PATH=\"\$HOME/.local/bin:\$PATH\"
-       Then restart your shell or: source ~/.zshrc" ;;
-  esac
 }
 
 # ── Typed next_steps printout (two-branch: running vs deferred) ───

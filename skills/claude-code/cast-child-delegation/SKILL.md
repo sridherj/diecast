@@ -569,7 +569,7 @@ cat "$DELEGATION_FILE" | jq .
     "constraints": "Do not modify candidate names; only add release data."
   },
   "output": {
-    "output_dir": "~/workspace/diecast/docs/execution/my_plan",
+    "output_dir": "<DIECAST_ROOT>/docs/execution/my_plan",
     "expected_artifacts": ["research_result.json"]
   }
 }

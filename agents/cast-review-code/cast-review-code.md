@@ -34,7 +34,7 @@ Check `docs/specs/_registry.md` for specs. For each spec, parse its YAML frontma
 
 The review brief is the ONLY context the reviewer has. It must capture the full picture -- not just what changed, but WHY it changed, what it depends on, and what the reviewer should watch for.
 
-Write a review brief file to `~/workspace/diecast/.tmp/review-brief-$(date +%s).md` with the following sections:
+Write a review brief file to `$(cd ~/.claude/skills/diecast && pwd -P)/.tmp/review-brief-$(date +%s).md` with the following sections:
 
 ```markdown
 # Review Brief

@@ -2,9 +2,9 @@
 
 ## Source Documents
 
-- Plan: `/data/workspace/diecast/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
-- Sibling shipped: `/data/workspace/diecast/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
-- Sibling shipped: `/data/workspace/diecast/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
+- Sibling shipped: `<DIECAST_ROOT>/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
+- Sibling shipped: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
 
 ## Project Background
 

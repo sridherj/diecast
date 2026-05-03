@@ -11,4 +11,4 @@ in_focus: false
 created_at: '2026-04-30'
 tags: []
 accepted_at: '2026-04-30'
-external_project_dir: /data/workspace/diecast
+external_project_dir: <DIECAST_ROOT>

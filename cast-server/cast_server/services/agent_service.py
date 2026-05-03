@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import shlex
 import subprocess
 import time
 import uuid
@@ -45,6 +46,12 @@ _total_paused: dict[str, float] = {}    # run_id -> total paused seconds
 _cooldown_until: dict[str, datetime] = {}  # run_id -> resume_at (rate limit)
 _current_pause: dict[str, dict] = {}       # run_id -> pause entry being built
 _session_id_resolved: set[str] = set()     # run_ids whose Claude session ID has been discovered
+
+
+def _clean_child_env(*exclude: str) -> dict[str, str]:
+    """Return os.environ minus the specified keys. Never mutates the global env."""
+    skip = set(exclude)
+    return {k: v for k, v in os.environ.items() if k not in skip}
 
 
 def _get_tmux() -> TmuxSessionManager:
@@ -225,7 +232,7 @@ def _get_session_context_breakdown(
     or None if unavailable.
     """
     try:
-        env = {k: v for k, v in os.environ.items() if k != "CLAUDE_SESSION_ID"}
+        env = _clean_child_env("CLAUDE_SESSION_ID", "CLAUDECODE")
         cwd = working_dir or str(Path.home())
         result = subprocess.run(
             ["claude", "--resume", session_id, "-p", "/context"],
@@ -508,6 +515,36 @@ def _validate_dispatch_preconditions(goal_slug: str, db_path=None) -> None:
         raise MissingExternalProjectDirError(goal_slug, None)
     if not Path(configured).expanduser().is_dir():
         raise MissingExternalProjectDirError(goal_slug, configured)
+
+
+def _resolve_runtime_artifact_dir(goal_slug: str) -> Path:
+    """Return the authoritative runtime artifact directory for a goal.
+
+    Runtime tracking files always live in the central ``GOALS_DIR / goal_slug``
+    directory, even when user-facing goal artifacts are routed to an external
+    project's ``docs/goal/<slug>``. This keeps polling/finalization/cleanup in a
+    stable location while the UI continues reading useful artifacts from the
+    goal's DB ``folder_path``.
+    """
+    return GOALS_DIR / goal_slug
+
+
+def _resolve_user_artifact_dir(goal_slug: str, db_path=None) -> Path:
+    """Return the directory containing user-facing goal artifacts.
+
+    Routed goals store useful artifacts such as plans, research notes, and
+    context files in their DB ``folder_path`` (typically
+    ``<external_project_dir>/docs/goal/<slug>``). Goals without routed
+    artifacts fall back to ``GOALS_DIR / goal_slug``.
+    """
+    from cast_server.services import goal_service
+
+    goal_data = goal_service.get_goal(goal_slug, db_path=db_path)
+    if goal_data and goal_data.get("folder_path"):
+        folder_path = Path(goal_data["folder_path"])
+        if folder_path.exists():
+            return folder_path
+    return GOALS_DIR / goal_slug
 
 
 def load_canonical_file(goal_dir: Path, run_id: str) -> dict | None:
@@ -1130,7 +1167,7 @@ def cancel_run(run_id: str, db_path=None) -> dict | None:
     )
 
     # Clean up dot-files
-    goal_dir = GOALS_DIR / run.get("goal_slug", "")
+    goal_dir = _resolve_runtime_artifact_dir(run.get("goal_slug", ""))
     for pattern in [f".agent-{run_id}.prompt", f".delegation-{run_id}.json"]:
         f = goal_dir / pattern
         if f.exists():
@@ -1204,21 +1241,24 @@ def _row_to_dict(row) -> dict:
 
 def _inject_context(agent_name: str, goal_slug: str,
                     gstack_dir: str | None = None,
-                    external_project_dir: str | None = None) -> str:
-    """Build context section based on agent's context_mode and goal config."""
+                    external_project_dir: str | None = None,
+                    db_path=None) -> str:
+    """Build context section based on agent's context_mode and goal config.
+
+    NOTE: context-map references are handled exclusively by
+    ``_build_agent_prompt`` (via its ``context_map_exists`` / ``context_dir``
+    parameters) to avoid duplicate instructions.  This function only injects
+    full-mode artifact listings, gstack context, and external-project metadata.
+    """
     config = load_agent_config(agent_name)
-    goal_dir = GOALS_DIR / goal_slug
+    artifact_dir = _resolve_user_artifact_dir(goal_slug, db_path=db_path)
     context_parts = []
 
-    if config.context_mode == "lightweight":
-        context_map = goal_dir / ".context-map.md"
-        if context_map.exists():
-            context_parts.append(f"\n\nRead `{context_map}` for goal context overview.")
-    else:
-        # Full context mode: instruct agent to read all goal artifacts
+    if config.context_mode != "lightweight":
+        # Full context mode: instruct agent to read all user-facing goal artifacts
         artifacts = []
         for suffix in [".human.md", ".collab.md", ".ai.md"]:
-            artifacts.extend(goal_dir.glob(f"**/*{suffix}"))
+            artifacts.extend(artifact_dir.glob(f"**/*{suffix}"))
         if artifacts:
             paths = "\n".join(f"- `{p}`" for p in sorted(artifacts))
             context_parts.append(f"\n\nRead these goal artifacts for full context:\n{paths}")
@@ -1252,7 +1292,8 @@ def _inject_context(agent_name: str, goal_slug: str,
             context_parts.append(
                 f"\n## External Project Directory\n"
                 f"You are running inside the project directory ({expanded}).\n"
-                f"Goal artifacts (plans, research, playbooks) are in `.cast/`.\n"
+                f"Runtime tracking files live in `.cast/`.\n"
+                f"User-facing goal artifacts (plans, research, playbooks) live in `{artifact_dir}`.\n"
                 f"Code and execution artifacts go in the current working directory."
             )
         else:
@@ -1352,7 +1393,7 @@ def _subagent_dispatch_rules(subagent_targets: list[str]) -> str:
     )
 
 
-def _quick_reference_curl(goal_dir: str) -> str:
+def _quick_reference_curl(runtime_dir: str) -> str:
     """HTTP-dispatch curl + poll reference. Emitted only when http_targets is non-empty.
 
     Retains the `{YOUR_RUN_ID}` / `{GOAL_SLUG}` placeholders for post-assembly
@@ -1381,7 +1422,7 @@ Quick reference (full patterns in the skill):
       }}
     }}' | jq -r '.run_id')
 
-  GOAL_DIR="{goal_dir}"   # use this exact value — injected from your prompt preamble
+  GOAL_DIR="{runtime_dir}"   # use this exact value — injected from your prompt preamble
   TIMEOUT=2700; ELAPSED=0
   while [ $ELAPSED -lt $TIMEOUT ]; do
     [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
@@ -1420,7 +1461,7 @@ def _partition_delegations_by_mode(
 # ---------------------------------------------------------------------------
 
 def _build_agent_prompt(agent_name: str, goal_title: str, task_title: str,
-                        task_outcome: str, goal_dir: str, run_id: str,
+                        task_outcome: str, runtime_dir: str, run_id: str,
                         start_time_iso: str, context: str = "",
                         output_dir: str = "",
                         context_map_exists: bool = False,
@@ -1428,21 +1469,23 @@ def _build_agent_prompt(agent_name: str, goal_title: str, task_title: str,
                         interactive: bool = False,
                         goal_context: str = "",
                         goal_slug: str = "",
-                        allowed_delegations: list[str] | None = None) -> str:
+                        allowed_delegations: list[str] | None = None,
+                        context_dir: str | None = None) -> str:
     """Build the structured agent prompt with output.json instructions."""
     context_line = f"\nAdditional context: {context}" if context else ""
-    artifact_dir = output_dir or goal_dir
+    artifact_dir = output_dir or runtime_dir
+    context_source_dir = context_dir or runtime_dir
 
     context_map_block = ""
     if context_map_exists and context_mode == "lightweight":
         context_map_block = f"""
-Context: Read {goal_dir}/.context-map.md for goal context overview.
+Context: Read {context_source_dir}/.context-map.md for goal context overview.
 """
     elif context_map_exists:
         context_map_block = f"""
-Context instructions for this goal directory ({goal_dir}):
+Context instructions for this user-artifact directory ({context_source_dir}):
 - Always read .collab.md and .human.md files directly — these are authoritative.
-- For .ai.md files: read {goal_dir}/.context-map.md first for a TOC overview.
+- For .ai.md files: read {context_source_dir}/.context-map.md first for a TOC overview.
   Only deep-read individual .ai.md files when you need specific details beyond the TOC.
 - If no .context-map.md exists, fall back to reading .ai.md files directly.
 """
@@ -1488,7 +1531,7 @@ Diecast API routes ({SERVER_URL}):
         + _subagent_dispatch_rules(subagent_targets)
     )
 
-    quick_reference_block = _quick_reference_curl(goal_dir) if http_targets else ""
+    quick_reference_block = _quick_reference_curl(runtime_dir) if http_targets else ""
 
     raw_prompt = f"""{preamble}Use the {agent_name} agent.
 
@@ -1503,7 +1546,7 @@ Agent composition: If your task would benefit from another agent's capabilities,
 invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
 dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
 {quick_reference_block}
-IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to {goal_dir}/.agent-{run_id}.output.json:
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to {runtime_dir}/.agent-{run_id}.output.json:
 
 {{
     "contract_version": "2",
@@ -1534,7 +1577,7 @@ Set human_action_needed to true when:
 - You completed the work but something needs human verification
 Keep human_action_items specific and actionable (what exactly to do).
 
-Artifact paths must be relative to {goal_dir}.""" + _inject_error_memories(agent_name)
+Artifact paths must be relative to {runtime_dir}.""" + _inject_error_memories(agent_name)
 
     # Substitute concrete values in delegation template
     raw_prompt = raw_prompt.replace("{YOUR_RUN_ID}", run_id).replace("{GOAL_SLUG}", goal_slug)
@@ -1779,9 +1822,10 @@ def _finalize_run(run_id: str, goal_dir: Path, session_id: str | None = None,
     resume_command = None
     if session_id:
         if working_dir:
-            resume_command = f"cd {working_dir} && claude --resume {session_id} --dangerously-skip-permissions"
+            wd_quoted = shlex.quote(working_dir)
+            resume_command = f"cd {wd_quoted} && env -u CLAUDECODE claude --resume {session_id} --dangerously-skip-permissions"
         else:
-            resume_command = f"claude --resume {session_id} --dangerously-skip-permissions"
+            resume_command = f"env -u CLAUDECODE claude --resume {session_id} --dangerously-skip-permissions"
 
     # Populate result_summary (first 300 chars of output summary)
     result_summary = None
@@ -1918,7 +1962,8 @@ async def trigger_agent(agent_name: str, goal_slug: str, context: str = "",
 
     # Write delegation context file
     if delegation_context:
-        goal_dir = GOALS_DIR / goal_slug
+        goal_dir = _resolve_runtime_artifact_dir(goal_slug)
+        goal_dir.mkdir(parents=True, exist_ok=True)
         context_file = goal_dir / f".delegation-{run_id}.json"
         context_file.write_text(delegation_context.model_dump_json(indent=2))
 
@@ -1989,7 +2034,8 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
             task_title = task.get("title", "")
             task_outcome = task.get("outcome", "")
 
-    goal_dir = str(GOALS_DIR / effective_slug)
+    goal_dir = str(_resolve_runtime_artifact_dir(effective_slug))
+    context_dir = _resolve_user_artifact_dir(effective_slug, db_path=db_path)
 
     # Resolve directory metadata for invoke path (Phase 3.1, Req 4.1)
     from cast_server.services import goal_service
@@ -2011,19 +2057,29 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
     })
     update_agent_run(run_id, directories=directories_json, working_dir=_invoke_working_dir, db_path=db_path)
 
+    context_map_exists = False
+    try:
+        from cast_server.services.context_map import ensure_context_map
+        context_map_path = ensure_context_map(context_dir)
+        context_map_exists = context_map_path is not None
+    except Exception:
+        logger.exception("Failed to generate context map for %s", effective_slug)
+
     prompt = _build_agent_prompt(
         agent_name=agent_name,
         goal_title=goal_title,
         task_title=task_title or context,
         task_outcome=task_outcome or context,
-        goal_dir=goal_dir,
+        runtime_dir=goal_dir,
         run_id=run_id,
         start_time_iso=now,
         context=context,
+        context_map_exists=context_map_exists,
         context_mode=config.context_mode,
         interactive=config.interactive,
         goal_slug=effective_slug,
         allowed_delegations=config.allowed_delegations or None,
+        context_dir=str(context_dir),
     )
 
     return {
@@ -2053,7 +2109,7 @@ async def continue_agent_run(run_id: str, message: str, db_path=None) -> None:
         raise ValueError(f"Session for {run_id} no longer exists -- use trigger_agent for a new run")
 
     # Deliver message via file (avoids Claude Code paste-preview mode for multiline text)
-    goal_dir = GOALS_DIR / run["goal_slug"]
+    goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"])
     prompt_file = goal_dir / f".agent-{run_id}.continue"
     prompt_file.write_text(message)
     tmux.send_keys(session_name, f"Read {prompt_file} and follow its instructions.")
@@ -2086,7 +2142,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         goal_slug = run["goal_slug"]
         task_id = run.get("task_id")
         input_params = run.get("input_params") or {}
-        goal_dir = GOALS_DIR / goal_slug
+        goal_dir = _resolve_runtime_artifact_dir(goal_slug)
         session_id = None  # Discovered by monitor loop from Claude CLI JSONL
         session_name = f"agent-{run_id}"
 
@@ -2113,12 +2169,15 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         working_dir = str(expanded_ext)
         goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
         cast_goal_dir = str(expanded_ext / ".cast")
+        context_dir = str(_resolve_user_artifact_dir(goal_slug, db_path=db_path))
 
         # Determine phase-aware output directory
+        # Exploration artifacts are user-facing (research, playbooks) so they
+        # go under the routed user-artifact dir, not the runtime .cast dir.
         task = task_service.get_task(task_id, db_path=db_path) if task_id else None
         is_exploration = bool(task and task.get("phase") == "exploration")
         if is_exploration:
-            output_dir = str(Path(cast_goal_dir) / "exploration")
+            output_dir = str(Path(context_dir) / "exploration")
             Path(output_dir).mkdir(parents=True, exist_ok=True)
         else:
             output_dir = working_dir
@@ -2146,11 +2205,11 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
                     agent_name, goal_slug,
                 )
 
-        # Generate/update context map
+        # Generate/update context map for user-facing goal artifacts
         context_map_exists = False
         try:
             from cast_server.services.context_map import ensure_context_map
-            context_map_path = ensure_context_map(goal_dir)
+            context_map_path = ensure_context_map(Path(context_dir))
             context_map_exists = context_map_path is not None
         except Exception:
             logger.exception("Failed to generate context map for %s", goal_slug)
@@ -2160,6 +2219,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             agent_name, goal_slug,
             gstack_dir=gstack_dir,
             external_project_dir=external_project_dir,
+            db_path=db_path,
         )
 
         started_at = datetime.now(timezone.utc).isoformat()
@@ -2168,7 +2228,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             goal_title=goal_title,
             task_title=task_title,
             task_outcome=task_outcome,
-            goal_dir=cast_goal_dir,
+            runtime_dir=cast_goal_dir,
             run_id=run_id,
             start_time_iso=started_at,
             context=input_params.get("context", ""),
@@ -2179,6 +2239,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             goal_context=goal_context,
             goal_slug=goal_slug,
             allowed_delegations=config.allowed_delegations or None,
+            context_dir=context_dir,
         )
 
         # Build directory metadata JSON (Phase 3.1, Req 4.1)
@@ -2221,7 +2282,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
         model = config.model
         # Use --name flag to set human-readable session display name
         escaped_display = session_name_display.replace('"', '\\"')
-        cmd = f'claude --dangerously-skip-permissions --model {model} --name "{escaped_display}"'
+        cmd = f'env -u CLAUDECODE claude --dangerously-skip-permissions --model {model} --name "{escaped_display}"'
 
         # Child agent: own tmux session + terminal tab
         parent_run_id = run.get("parent_run_id")
@@ -2394,7 +2455,8 @@ async def _check_all_agents(db_path=None) -> None:
             real_session_id = _discover_claude_session_id(run["started_at"], run_id, working_dir=run.get("working_dir"))
             if real_session_id:
                 wd = run.get("working_dir") or ""
-                resume_cmd = f"cd {wd} && claude --resume {real_session_id} --dangerously-skip-permissions" if wd else f"claude --resume {real_session_id} --dangerously-skip-permissions"
+                wd_quoted = shlex.quote(wd) if wd else ""
+                resume_cmd = f"cd {wd_quoted} && env -u CLAUDECODE claude --resume {real_session_id} --dangerously-skip-permissions" if wd else f"env -u CLAUDECODE claude --resume {real_session_id} --dangerously-skip-permissions"
                 update_agent_run(run_id, session_id=real_session_id, resume_command=resume_cmd, db_path=db_path)
                 run["session_id"] = real_session_id
                 _session_id_resolved.add(run_id)
@@ -2414,7 +2476,7 @@ async def _handle_state_transition(run: dict, state: AgentState, db_path=None) -
 
     if state in (AgentState.IDLE, AgentState.SHELL_RETURNED):
         # Check for .done file (dual completion signal)
-        goal_dir = GOALS_DIR / run["goal_slug"]
+        goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"])
         done_file = goal_dir / f".agent-{run_id}.done"
         output_file = goal_dir / f".agent-{run_id}.output.json"
 
@@ -2520,7 +2582,7 @@ async def _handle_state_transition(run: dict, state: AgentState, db_path=None) -
 async def _finalize_run_from_monitor(run: dict, db_path=None) -> None:
     """Finalize a run detected as complete by the monitor loop, including timing."""
     run_id = run["id"]
-    goal_dir = GOALS_DIR / run["goal_slug"]
+    goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"])
 
     config = load_agent_config(run["agent_name"])
     input_params = run.get("input_params") or {}
@@ -2610,7 +2672,7 @@ def recheck_failed_run(run_id: str, db_path=None) -> dict | None:
     if not goal_slug:
         return None
 
-    goal_dir = GOALS_DIR / goal_slug
+    goal_dir = _resolve_runtime_artifact_dir(goal_slug)
     done_file = goal_dir / f".agent-{run_id}.done"
     output_file = goal_dir / f".agent-{run_id}.output.json"
 
@@ -2761,7 +2823,7 @@ def recover_stale_runs(db_path=None) -> list[dict]:
             continue
 
         # Session dead — try dot-file recovery
-        goal_dir = GOALS_DIR / run["goal_slug"]
+        goal_dir = _resolve_runtime_artifact_dir(run["goal_slug"])
         done_file = goal_dir / f".agent-{run_id}.done"
         output_file = goal_dir / f".agent-{run_id}.output.json"
 

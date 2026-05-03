@@ -209,7 +209,7 @@ If the delegation file is not written synchronously during the request (e.g., it
 ### Step 1.4: Run the test suite
 
 ```bash
-cd /data/workspace/diecast
+cd <DIECAST_ROOT>
 pytest cast-server/tests/test_dispatch_precondition.py -v
 ```
 

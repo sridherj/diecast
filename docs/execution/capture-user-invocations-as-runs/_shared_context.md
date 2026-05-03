@@ -1,8 +1,8 @@
 # Shared Context: capture-user-invocations-as-runs
 
 ## Source Documents
-- Plan: `/data/workspace/diecast/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
-- Reference settings-injection pattern: `~/workspace/reference_repos/gstack/bin/gstack-settings-hook`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
+- Reference settings-injection pattern: `<GSTACK_ROOT>/bin/gstack-settings-hook`
 
 ## Project Background
 

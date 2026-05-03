@@ -106,7 +106,7 @@ inter-sp dependency chain is sequential.
 
 ## Project Directory
 
-Absolute project_dir: `/data/workspace/diecast`
+Absolute project_dir: `<DIECAST_ROOT>`
 
 ## Progress Log
 

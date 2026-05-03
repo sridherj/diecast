@@ -20,7 +20,7 @@ Manage Diecast goals directly via `uv run python -c` commands from the `diecast/
 All commands must set PYTHONPATH to resolve the cast_server package:
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "..."
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "..."
 ```
 
 ## Operations
@@ -28,7 +28,7 @@ PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "..."
 ### List All Goals
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import get_all_goals
 goals = get_all_goals()
 for g in goals:
@@ -39,7 +39,7 @@ for g in goals:
 ### Get a Single Goal
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import get_goal
 import json
 g = get_goal('SLUG_HERE')
@@ -50,7 +50,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Create a Goal
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import create_goal
 import json
 g = create_goal(title='TITLE_HERE', tags=['tag1', 'tag2'], in_focus=False)
@@ -63,7 +63,7 @@ Creates directory, goal.yaml, DB record, and starter tasks. Status starts as `ac
 ### Update Status
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import update_status
 import json
 g = update_status('SLUG_HERE', 'TARGET_STATUS')
@@ -74,7 +74,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Update Phase
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import update_phase
 import json
 g = update_phase('SLUG_HERE', 'TARGET_PHASE')
@@ -85,7 +85,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Toggle Focus
 
 ```bash
-PYTHONPATH=$HOME/workspace/diecast/cast-server/src uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server/src uv run python -c "
 from cast_server.services.goal_service import toggle_focus
 import json
 g = toggle_focus('SLUG_HERE', True)   # or False to unfocus

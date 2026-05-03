@@ -199,7 +199,7 @@ resolves via the running cast-server's registry. No production code changes.
 
 **Outcome:** `cast-server/tests/integration/test_child_delegation.py` exists with
 a module-level docstring listing all 11 second-brain test classes (from
-`~/workspace/second-brain/taskos/tests/test_delegation.py`) with TODO markers
+`<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py`) with TODO markers
 that sp2.x will replace as each diecast counterpart lands. The file is
 syntactically valid Python with zero tests yet — pytest collects it as empty.
 
@@ -212,7 +212,7 @@ syntactically valid Python with zero tests yet — pytest collects it as empty.
   discovery).
 
 **Atomic tasks:**
-- Read `~/workspace/second-brain/taskos/tests/test_delegation.py`; enumerate
+- Read `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py`; enumerate
   all 11 test classes by name (do NOT copy code — just names).
 - Write docstring with format: `<second-brain class name> → <diecast counterpart
   TBD> | <US/scenario citation>`.
@@ -273,7 +273,7 @@ red tests are part of the plan):
 
 **Atomic tasks:**
 - For each class, read the second-brain reference at
-  `~/workspace/second-brain/taskos/tests/test_delegation.py` (named class).
+  `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py` (named class).
 - Write the diecast counterpart against `agent_service.py` symbols:
   `trigger_agent`, `_get_delegation_depth`, `_launch_agent`, terminal-title
   helper. Use `tmp_path` for any goal directory.

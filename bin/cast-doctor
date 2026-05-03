@@ -322,7 +322,7 @@ check_diecast_skill_root() {
   local target="${HOME}/.claude/skills/diecast"
   local hook_bin="${target}/bin/cast-hook"
   if [[ ! -L "${target}" ]]; then
-    note_yellow "~/.claude/skills/diecast is not a symlink. Run ./setup --upgrade from the diecast repo to install it."
+    note_yellow "$HOME/.claude/skills/diecast is not a symlink. Run ./setup --upgrade from the diecast repo to install it."
     return
   fi
   if [[ ! -x "${hook_bin}" ]]; then

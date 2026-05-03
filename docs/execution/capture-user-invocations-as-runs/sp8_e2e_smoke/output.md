@@ -18,7 +18,7 @@ the post-install `settings.json` shape and the `which cast-hook` PATH check.
 
 ## Step 8.1 — pre-install snapshot
 
-Tmp project: `/home/sridherj/tmp.R83M0mxyO7` (with `git init`).
+Tmp project: `/home/<USER>/tmp.R83M0mxyO7` (with `git init`).
 
 `.claude/settings.json` before install (third-party PreCompact + UserPromptSubmit):
 
@@ -41,7 +41,7 @@ Snapshot saved to `/tmp/cast-e2e-pre-install.json`.
 
 ```
 $ cast-hook install
-cast-hook: installed entries for UserPromptSubmit, Stop in /home/sridherj/tmp.R83M0mxyO7/.claude/settings.json
+cast-hook: installed entries for UserPromptSubmit, Stop in /home/<USER>/tmp.R83M0mxyO7/.claude/settings.json
 ```
 
 Semantic diff (parsed JSON, ignoring whitespace):
@@ -178,7 +178,7 @@ byte-for-byte; empty event arrays are dropped after uninstall.
 ```
 $ chmod 0444 .claude/settings.json && chmod 0555 .claude
 $ cast-hook install
-cast-hook: cannot write /home/sridherj/tmp.R83M0mxyO7/.claude/settings.json:
+cast-hook: cannot write /home/<USER>/tmp.R83M0mxyO7/.claude/settings.json:
 [Errno 13] Permission denied: '....settings.json.<random>'.
 Try `cast-hook install --user` to write to ~/.claude/settings.json instead.
 exit: 1
@@ -224,7 +224,7 @@ fallback documented in the plan stays parked.
 
 ```
 $ which cast-hook
-/data/workspace/diecast/.venv/bin/cast-hook
+<DIECAST_ROOT>/.venv/bin/cast-hook
 ```
 
 `cast-hook` resolves on the same PATH the parent shell exposes. For a real

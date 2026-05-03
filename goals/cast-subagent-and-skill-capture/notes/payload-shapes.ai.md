@@ -1,6 +1,6 @@
 # Spike A — empirical payload shapes
 
-Captured 2026-05-01 from a live Claude Code session in `/data/workspace/diecast`,
+Captured 2026-05-01 from a live Claude Code session in `<DIECAST_ROOT>`,
 agent_type=`Explore` (built-in) and via Skill tool calling `landing-report`.
 Session-id values redacted to `<session_id>` / `<agent_id>` / `<tool_use_id>` for stability.
 
@@ -29,7 +29,7 @@ authoritative for fields the docs leave unspecified.
 {
   "session_id":      "<parent main-loop session_id>",
   "transcript_path": "/home/<user>/.claude/projects/<dashed-cwd>/<session_id>.jsonl",
-  "cwd":             "/data/workspace/diecast",
+  "cwd":             "<DIECAST_ROOT>",
   "agent_id":        "<subagent's unique id, e.g. acf8973253da14ff6>",
   "agent_type":      "Explore",
   "hook_event_name": "SubagentStart"
@@ -54,7 +54,7 @@ authoritative for fields the docs leave unspecified.
 {
   "session_id":            "<parent main-loop session_id>",
   "transcript_path":       "/home/<user>/.claude/projects/<dashed-cwd>/<session_id>.jsonl",
-  "cwd":                   "/data/workspace/diecast",
+  "cwd":                   "<DIECAST_ROOT>",
   "permission_mode":       "bypassPermissions",
   "agent_id":              "<matches the SubagentStart agent_id>",
   "agent_type":            "Explore",
@@ -82,7 +82,7 @@ Fired when the main loop or a subagent invokes the `Agent` / `Task` tool.
 {
   "session_id":      "<parent main-loop session_id>",
   "transcript_path": "/home/<user>/.claude/projects/<dashed-cwd>/<session_id>.jsonl",
-  "cwd":             "/data/workspace/diecast",
+  "cwd":             "<DIECAST_ROOT>",
   "permission_mode": "bypassPermissions",
   "hook_event_name": "PreToolUse",
   "tool_name":       "Agent",
@@ -118,7 +118,7 @@ Fired when any Skill is invoked.
 {
   "session_id":      "<parent main-loop session_id>",
   "transcript_path": "/home/<user>/.claude/projects/<dashed-cwd>/<session_id>.jsonl",
-  "cwd":             "/data/workspace/diecast",
+  "cwd":             "<DIECAST_ROOT>",
   "permission_mode": "bypassPermissions",
   "hook_event_name": "PreToolUse",
   "tool_name":       "Skill",

@@ -20,14 +20,14 @@ Use the cast-subphase-runner agent.
 Goal: comprehensive-ui-test
 Task: 
 Expected outcome: 
-Output directory: /home/sridherj/workspace/diecast
+Output directory: <DIECAST_ROOT>
 
-Additional context: Project dir: /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness. Sub-phase file: /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness/sp2_test_infra_fixtures/plan.md. Sub-phase ID: 2. Read /home/sridherj/workspace/diecast/docs/execution/cast-ui-test-harness/_shared_context.md before executing the sub-phase plan. AUTONOMOUS MODE: do not ask the user clarifying questions; resolve ambiguities by inspecting the codebase per the review summary.
+Additional context: Project dir: <DIECAST_ROOT>/docs/execution/cast-ui-test-harness. Sub-phase file: <DIECAST_ROOT>/docs/execution/cast-ui-test-harness/sp2_test_infra_fixtures/plan.md. Sub-phase ID: 2. Read <DIECAST_ROOT>/docs/execution/cast-ui-test-harness/_shared_context.md before executing the sub-phase plan. AUTONOMOUS MODE: do not ask the user clarifying questions; resolve ambiguities by inspecting the codebase per the review summary.
 ## External Project Directory
-You are running inside the project directory (/home/sridherj/workspace/diecast).
+You are running inside the project directory (<DIECAST_ROOT>).
 Goal artifacts (plans, research, playbooks) are in `.cast/`.
 Code and execution artifacts go in the current working directory.
-Work in /home/sridherj/workspace/diecast. Write all artifacts there.
+Work in <DIECAST_ROOT>. Write all artifacts there.
 
 CRITICAL: NEVER inline an agent's work yourself. When a task calls for one of your allowed_delegations, you MUST dispatch to that agent — do not attempt the work yourself, summarize what the agent would produce, or paraphrase its output.
 Your allowed_delegations: [cast-review-code]
@@ -61,7 +61,7 @@ Quick reference (full patterns in the skill):
       }
     }' | jq -r '.run_id')
 
-  GOAL_DIR="/home/sridherj/workspace/diecast/.cast"   # use this exact value — injected from your prompt preamble
+  GOAL_DIR="<DIECAST_ROOT>/.cast"   # use this exact value — injected from your prompt preamble
   TIMEOUT=2700; ELAPSED=0
   while [ $ELAPSED -lt $TIMEOUT ]; do
     [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
@@ -69,7 +69,7 @@ Quick reference (full patterns in the skill):
   done
   # On timeout, check: curl http://localhost:8000/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
 
-IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /home/sridherj/workspace/diecast/.cast/.agent-run_20260430_201725_2ee41b.output.json:
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to <DIECAST_ROOT>/.cast/.agent-run_20260430_201725_2ee41b.output.json:
 
 {
     "contract_version": "2",
@@ -100,4 +100,4 @@ Set human_action_needed to true when:
 - You completed the work but something needs human verification
 Keep human_action_items specific and actionable (what exactly to do).
 
-Artifact paths must be relative to /home/sridherj/workspace/diecast/.cast.
+Artifact paths must be relative to <DIECAST_ROOT>/.cast.

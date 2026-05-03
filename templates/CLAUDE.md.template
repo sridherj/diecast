@@ -41,6 +41,7 @@ section a pointer so updates to the spec propagate automatically.
 | `/cast-update-spec` | `docs/spec/<spec>.collab.md` |
 | `/cast-orchestrate` | `docs/execution/<goal>/<phase>/` |
 | `/cast-subphase-runner` | `docs/execution/<goal>/<phase>/<subphase>/` |
+| Goal tracking | `docs/goal/<goal-slug>/` (goal artifacts, tasks, exploration) |
 
 See the [conventions spec][conventions-spec] for the complete agent table including the
 `cast-preso-*` family and `cast-task-suggester`.

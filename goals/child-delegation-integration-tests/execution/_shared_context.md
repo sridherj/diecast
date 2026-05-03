@@ -5,8 +5,8 @@
 - Detailed plan (authority): `goals/child-delegation-integration-tests/plan_detailed.collab.md`
 - Refined requirements (spec): `goals/child-delegation-integration-tests/refined_requirements.collab.md`
 - Reference suites (read-only, on neighbor repo):
-  - `~/workspace/second-brain/taskos/tests/test_delegation.py`
-  - `~/workspace/second-brain/taskos/tests/e2e/test_tier2_delegation.py`
+  - `<SECOND_BRAIN_ROOT>/taskos/tests/test_delegation.py`
+  - `<SECOND_BRAIN_ROOT>/taskos/tests/e2e/test_tier2_delegation.py`
 
 ## Project Background
 

@@ -1,13 +1,13 @@
 # `bin/`
 
-**User-facing:** only `cast-server` (symlinked to `~/.local/bin/cast-server` by
-`./setup`). All other entries are internal tooling — invoked by `setup`, CI, or
+**User-facing:** only `cast-server` (reachable via `~/.claude/skills/diecast/bin/cast-server`
+after `./setup` creates the diecast skill-root symlink). All other entries are internal tooling — invoked by `setup`, CI, or
 one-shot migrations. Post-install user surface lives in `/cast-*` slash commands
 inside Claude Code.
 
 ## User-facing
 
-- `cast-server` — the daemon; the only Diecast binary on your `$PATH`.
+- `cast-server` — the daemon; reachable via the `~/.claude/skills/diecast` symlink (no PATH entry needed).
 
 ## Internal — invoked by `setup` or CI
 

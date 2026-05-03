@@ -110,7 +110,7 @@ Header docstring should say "Internal use; not on user PATH. Markdown-aware swee
 ### Step 1.5: Pre-flight `grep` to enumerate hits
 
 ```bash
-grep -rn '\(localhost\|127\.0\.0\.1\):8000' /data/workspace/diecast/ \
+grep -rn '\(localhost\|127\.0\.0\.1\):8000' <DIECAST_ROOT>/ \
   --include='*.md' --include='*.py' --include='*.sh' \
   --exclude-dir=tests --exclude-dir=.git --exclude-dir=node_modules
 ```
@@ -123,15 +123,15 @@ Targets (Decision #6):
 
 ```bash
 python3 bin/sweep-port-refs.py --apply \
-  /data/workspace/diecast/skills/claude-code/cast-* \
-  /data/workspace/diecast/agents/cast-* \
-  /data/workspace/diecast/cast-server/README.md \
-  /data/workspace/diecast/README.md \
-  /data/workspace/diecast/docs/
+  <DIECAST_ROOT>/skills/claude-code/cast-* \
+  <DIECAST_ROOT>/agents/cast-* \
+  <DIECAST_ROOT>/cast-server/README.md \
+  <DIECAST_ROOT>/README.md \
+  <DIECAST_ROOT>/docs/
 ```
 
 Exclusions:
-- `/data/workspace/diecast/tests/` — `tests/test_cast_upgrade.sh:298` literal `:8000` is intentional mock payload.
+- `<DIECAST_ROOT>/tests/` — `tests/test_cast_upgrade.sh:298` literal `:8000` is intentional mock payload.
 - The "Run the server" content sp7 will add to `README.md` — sp7 hasn't run yet, so README only needs the *existing* sites updated; sp7 will write the new subsection with the right values from the start.
 
 After the sweep, re-run the grep from step 1.5 — should return zero hits.
@@ -176,31 +176,31 @@ Add a single entry under the next-version heading:
 
 ```bash
 # 1. Zero hits remaining (excluding tests/, CHANGELOG entries):
-grep -rn '\(localhost\|127\.0\.0\.1\):8000' /data/workspace/diecast/ \
+grep -rn '\(localhost\|127\.0\.0\.1\):8000' <DIECAST_ROOT>/ \
   --include='*.md' --include='*.py' --include='*.sh' \
   --exclude-dir=tests --exclude-dir=.git \
   | grep -v CHANGELOG
 
 # 2. Bash-block pattern is correct:
-grep -n 'CAST_HOST:-localhost' /data/workspace/diecast/skills/claude-code/cast-child-delegation/SKILL.md
+grep -n 'CAST_HOST:-localhost' <DIECAST_ROOT>/skills/claude-code/cast-child-delegation/SKILL.md
 # Expect: a curl line using ${CAST_HOST:-localhost}:${CAST_PORT:-8005}
 
 # 3. Prose pattern is correct:
-grep -n 'localhost:8005' /data/workspace/diecast/README.md
+grep -n 'localhost:8005' <DIECAST_ROOT>/README.md
 # Expect: e.g. "A local web UI at http://localhost:8005" (literal, not env-substitution)
 
 # 4. agent_service.py uses constants:
 grep -n 'DEFAULT_CAST_HOST\|DEFAULT_CAST_PORT' \
-  /data/workspace/diecast/cast-server/cast_server/services/agent_service.py
+  <DIECAST_ROOT>/cast-server/cast_server/services/agent_service.py
 # Expect: import + usage in the f-string at the four old hardcode sites.
 
 # 5. config.py constants exist:
 grep -n 'DEFAULT_CAST_PORT\|DEFAULT_CAST_HOST\|DEFAULT_CAST_BIND_HOST' \
-  /data/workspace/diecast/cast-server/cast_server/config.py
+  <DIECAST_ROOT>/cast-server/cast_server/config.py
 # Expect: three lines.
 
 # 6. bin/cast-server uses CAST_BIND_HOST:
-grep -n 'CAST_BIND_HOST\|CAST_PORT' /data/workspace/diecast/bin/cast-server
+grep -n 'CAST_BIND_HOST\|CAST_PORT' <DIECAST_ROOT>/bin/cast-server
 # Expect: line 19 references both.
 ```
 

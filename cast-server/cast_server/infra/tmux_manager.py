@@ -1,6 +1,7 @@
 """Thin wrapper around tmux subprocess commands."""
 
 import os
+import shlex
 import shutil
 import subprocess
 import time
@@ -15,6 +16,26 @@ from cast_server.infra.terminal import (
 
 def _basename(cmd: str) -> str:
     return os.path.basename(cmd)
+
+
+def _normalize_macos_terminal(name: str) -> str | None:
+    """Normalize macOS terminal names to canonical 'iterm' or 'terminal'.
+
+    Returns None if not a macOS terminal.
+    """
+    lower = name.lower().removesuffix(".app")
+    if lower in ("iterm", "iterm2"):
+        return "iterm"
+    if lower == "terminal":
+        return "terminal"
+    return None
+
+
+def _env_without(*keys: str) -> dict[str, str]:
+    """Return ``os.environ`` minus the specified keys. Never mutates the global env."""
+    exclude = set(keys)
+    return {k: v for k, v in os.environ.items() if k not in exclude}
+
 
 logger = logging.getLogger(__name__)
 
@@ -80,16 +101,26 @@ class TmuxSessionManager:
     def _resolved_terminal(self) -> ResolvedTerminal:
         """Resolve $CAST_TERMINAL once and cache.
 
+        macOS terminal aliases (``terminal``, ``iterm``, etc.) are app names
+        that are never on ``$PATH``, so they bypass the ``shutil.which`` check.
+        The osascript dispatcher addresses them by application name directly.
+
         Raises:
-            ResolutionError: when no terminal is configured, or when the
-                configured command is not on PATH. Callers (agent_service)
-                catch this and fail the run with the structured message —
-                no more silent fallback into a 30s readiness timeout.
+            ResolutionError: when no terminal is configured, or when a
+                non-macOS terminal command is not on PATH. Callers
+                (agent_service) catch this and fail the run with the
+                structured message — no more silent fallback into a 30s
+                readiness timeout.
         """
         if self._terminal is not None:
             return self._terminal
         resolved = resolve_terminal()
-        if shutil.which(resolved.command) is None:
+        # macOS app aliases (iterm, terminal, etc.) are never on PATH — they
+        # are dispatched via osascript and addressed by application name.
+        is_macos_app = _normalize_macos_terminal(
+            _basename(resolved.command)
+        ) is not None
+        if not is_macos_app and shutil.which(resolved.command) is None:
             raise ResolutionError(
                 f"configured terminal '{resolved.command}' is not on PATH. "
                 f"fix: install {resolved.command} or run "
@@ -103,6 +134,72 @@ class TmuxSessionManager:
     def _split_flag(flag: str) -> list[str]:
         return flag.split() if flag else []
 
+    def _run_osascript(self, session_name: str, terminal_name: str,
+                        tab: bool = False) -> None:
+        """Open a macOS terminal window or tab attached to a tmux session.
+
+        Builds the tmux attach command, escapes it for AppleScript, selects
+        the correct AppleScript body based on *terminal_name* (``"iterm"`` or
+        ``"terminal"``) and *tab*, then fires ``osascript`` in a detached
+        subprocess with ``CLAUDECODE`` stripped from the environment.
+
+        Args:
+            session_name: tmux session to attach to.
+            terminal_name: canonical macOS terminal name (``"iterm"`` or
+                ``"terminal"``).
+            tab: If True, open a new tab instead of a new window.
+        """
+        tmux_target = shlex.quote(session_name)
+        tmux_cmd = f"tmux attach-session -t {tmux_target}"
+        # Escape for AppleScript string literal (backslash and double-quote)
+        as_safe = tmux_cmd.replace("\\", "\\\\").replace('"', '\\"')
+
+        if terminal_name == "iterm":
+            if tab:
+                script = f'''
+                tell application "iTerm"
+                    activate
+                    tell current window
+                        create tab with default profile
+                        tell current session
+                            write text "{as_safe}"
+                        end tell
+                    end tell
+                end tell
+                '''
+            else:
+                script = f'''
+                tell application "iTerm"
+                    activate
+                    set newWindow to (create window with default profile)
+                    tell current session of newWindow
+                        write text "{as_safe}"
+                    end tell
+                end tell
+                '''
+        else:  # terminal_name == "terminal"
+            if tab:
+                script = f'''
+                tell application "Terminal"
+                    activate
+                    tell application "System Events" to keystroke "t" using command down
+                    do script "{as_safe}" in front window
+                end tell
+                '''
+            else:
+                script = f'''
+                tell application "Terminal"
+                    activate
+                    do script "{as_safe}"
+                end tell
+                '''
+
+        subprocess.Popen(
+            ["osascript", "-e", script],
+            start_new_session=True,
+            env=_env_without("CLAUDECODE"),
+        )
+
     def open_terminal(self, session_name: str, title: str | None = None) -> None:
         """Open a new terminal window attached to this tmux session.
 
@@ -114,13 +211,20 @@ class TmuxSessionManager:
                 PATH. Callers in agent_service catch this and fail the run.
         """
         resolved = self._resolved_terminal()
+        mac_name = _normalize_macos_terminal(_basename(resolved.command))
+
+        if mac_name is not None:
+            self._run_osascript(session_name, mac_name)
+            return
+
+        # Linux terminals: existing flag-based dispatch
         cmd = [resolved.command, *resolved.args]
         cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         if title and _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
             # Only ptyxis honors -T; other terminals ignore unknown flags or error.  # diecast-lint: ignore-line
             cmd.extend(["-T", title])
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
-        subprocess.Popen(cmd, start_new_session=True)
+        subprocess.Popen(cmd, start_new_session=True, env=_env_without("CLAUDECODE"))
 
     def open_terminal_tab(self, session_name: str, title: str | None = None) -> None:
         """Open a new terminal tab attached to this tmux session.
@@ -134,6 +238,13 @@ class TmuxSessionManager:
                 PATH.
         """
         resolved = self._resolved_terminal()
+        mac_name = _normalize_macos_terminal(_basename(resolved.command))
+
+        if mac_name is not None:
+            self._run_osascript(session_name, mac_name, tab=True)
+            return
+
+        # Linux terminals: existing flag-based dispatch (unchanged)
         cmd = [resolved.command, *resolved.args]
         if _basename(resolved.command) == "ptyxis":  # diecast-lint: ignore-line
             cmd.append("--tab")
@@ -142,7 +253,7 @@ class TmuxSessionManager:
         else:
             cmd.extend(self._split_flag(resolved.flags.get("new_tab_flag", "")))
         cmd.extend(["--", "tmux", "attach-session", "-t", session_name])
-        subprocess.Popen(cmd, start_new_session=True)
+        subprocess.Popen(cmd, start_new_session=True, env=_env_without("CLAUDECODE"))
 
     def get_pane_command(self, target: str) -> str:
         result = self._run([

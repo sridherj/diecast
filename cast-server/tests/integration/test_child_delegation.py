@@ -524,6 +524,41 @@ class TestChildLaunchIsolation:
         assert mock_tmux.create_session.call_args[0][0] == f"agent-{run_id}"
         mock_tmux.open_terminal.assert_called_once()
 
+    def test_launch_prompt_uses_routed_context_dir_and_runtime_output_path(
+        self, env, monkeypatch,
+    ):
+        from cast_server.services import agent_service, goal_service
+        from cast_server.models.agent_config import AgentConfig
+
+        slug = "g_prompt_ctx"
+        _insert_goal(env["db_path"], slug, str(env["ext_project"]), env["goals_dir"])
+        goal_service.update_config(
+            slug,
+            external_project_dir=str(env["ext_project"]),
+            goals_dir=env["goals_dir"],
+            db_path=env["db_path"],
+        )
+        routed_dir = env["ext_project"] / "docs" / "goal" / slug
+        (routed_dir / "notes.ai.md").write_text("# Notes\n\nContext body\n")
+
+        run_id = agent_service.create_agent_run(
+            "cast-test-parent-delegator", slug, None, None,
+            db_path=env["db_path"],
+        )
+
+        cfg = AgentConfig(
+            agent_id="cast-test-parent-delegator",
+            model="haiku",
+            context_mode="lightweight",
+        )
+        self._launch_with_mocks(env, monkeypatch, run_id, cfg)
+        prompt_path = env["goals_dir"] / slug / f".agent-{run_id}.prompt"
+        assert prompt_path.exists()
+        prompt = prompt_path.read_text()
+
+        assert f"Read {routed_dir}/.context-map.md for goal context overview." in prompt
+        assert f"write this exact JSON structure to {env['ext_project']}/.cast/.agent-{run_id}.output.json" in prompt
+
 
 # ---------------------------------------------------------------------------
 # Terminal title formatting (TestPtyxisTitleFormatting → TestTerminalTitleFormatting)
@@ -982,7 +1017,10 @@ class TestFinalizeCleanup:
 
 def _build_prompt_with_modes(monkeypatch, *, allowed_delegations,
                               interactive: bool = False,
-                              modes: dict[str, str] | None = None) -> str:
+                              modes: dict[str, str] | None = None,
+                              context_dir: str | None = None,
+                              context_map_exists: bool = False,
+                              context_mode: str = "full") -> str:
     """Call ``_build_agent_prompt`` with hermetic delegation-mode wiring.
 
     ``_build_agent_prompt`` calls ``_partition_delegations_by_mode`` which in
@@ -1000,6 +1038,7 @@ def _build_prompt_with_modes(monkeypatch, *, allowed_delegations,
         return AgentConfig(
             agent_id=name,
             dispatch_mode=mode_map.get(name, "http"),
+            context_mode=context_mode,
         )
 
     monkeypatch.setattr(agent_service, "load_agent_config", fake_load)
@@ -1009,12 +1048,15 @@ def _build_prompt_with_modes(monkeypatch, *, allowed_delegations,
         goal_title="Test Goal",
         task_title="Test Task",
         task_outcome="ship it",
-        goal_dir="/tmp/goal",
+        runtime_dir="/tmp/goal",
         run_id="run_xyz",
         start_time_iso="2026-05-01T00:00:00+00:00",
         interactive=interactive,
         goal_slug="g_preamble",
         allowed_delegations=allowed_delegations,
+        context_dir=context_dir,
+        context_map_exists=context_map_exists,
+        context_mode=context_mode,
     )
 
 
@@ -1088,6 +1130,33 @@ class TestPromptBuilder:
             assert "Your allowed_delegations:" in out
         else:
             assert "Your allowed_delegations:" not in out
+
+    def test_lightweight_context_map_uses_context_dir_while_output_json_stays_in_goal_dir(
+        self, monkeypatch,
+    ):
+        out = _build_prompt_with_modes(
+            monkeypatch,
+            allowed_delegations=[],
+            context_dir="/tmp/docs/goal/g_preamble",
+            context_map_exists=True,
+            context_mode="lightweight",
+        )
+
+        assert "Read /tmp/docs/goal/g_preamble/.context-map.md for goal context overview." in out
+        assert "write this exact JSON structure to /tmp/goal/.agent-run_xyz.output.json" in out
+        assert "Artifact paths must be relative to /tmp/goal." in out
+
+    def test_full_context_block_labels_user_artifact_directory(self, monkeypatch):
+        out = _build_prompt_with_modes(
+            monkeypatch,
+            allowed_delegations=[],
+            context_dir="/tmp/docs/goal/g_preamble",
+            context_map_exists=True,
+            context_mode="full",
+        )
+
+        assert "Context instructions for this user-artifact directory (/tmp/docs/goal/g_preamble):" in out
+        assert "For .ai.md files: read /tmp/docs/goal/g_preamble/.context-map.md first" in out
 
 
 # ---------------------------------------------------------------------------
@@ -1490,6 +1559,42 @@ class TestExternalProjectDirPrecondition:
         # exit that masked the carve-out check.
         assert "run_id" in result
         assert "prompt" in result
+
+    def test_invoke_prompt_uses_routed_context_dir_when_context_map_exists(
+        self, env, monkeypatch,
+    ):
+        from cast_server.services import agent_service, goal_service
+        from cast_server.models.agent_config import AgentConfig
+
+        slug = "g_invoke_ctx"
+        _insert_goal(env["db_path"], slug, str(env["ext_project"]), env["goals_dir"])
+        goal_service.update_config(
+            slug,
+            external_project_dir=str(env["ext_project"]),
+            goals_dir=env["goals_dir"],
+            db_path=env["db_path"],
+        )
+        routed_dir = env["ext_project"] / "docs" / "goal" / slug
+        (routed_dir / "notes.ai.md").write_text("# Notes\n\nContext body\n")
+
+        monkeypatch.setattr(
+            agent_service, "load_agent_config",
+            lambda _name: AgentConfig(
+                agent_id="cast-test-child-worker",
+                allowed_delegations=[],
+                context_mode="lightweight",
+            ),
+        )
+
+        result = asyncio.run(agent_service.invoke_agent(
+            agent_name="cast-test-child-worker",
+            goal_slug=slug,
+            db_path=env["db_path"],
+        ))
+
+        prompt = result["prompt"]
+        assert f"Read {routed_dir}/.context-map.md for goal context overview." in prompt
+        assert f"write this exact JSON structure to {env['goals_dir'] / slug}/.agent-{result['run_id']}.output.json" in prompt
 
 
 # ---------------------------------------------------------------------------

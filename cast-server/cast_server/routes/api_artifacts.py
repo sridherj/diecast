@@ -118,8 +118,12 @@ async def artifact_sidebar(request: Request, task_id: int, artifact_path: str):
 
     goal_slug = task["goal_slug"]
 
-    # Resolve path relative to goal directory
-    goal_dir = GOALS_DIR / goal_slug
+    # Resolve path relative to goal directory — use DB folder_path for
+    # routed goals so artifacts under docs/goal/<slug> are reachable.
+    from cast_server.services import goal_service
+    goal = goal_service.get_goal(goal_slug)
+    fp = goal.get("folder_path") if goal else None
+    goal_dir = Path(fp) if fp and Path(fp).exists() else GOALS_DIR / goal_slug
     full_path_str = str((goal_dir / artifact_path).resolve())
 
     try:

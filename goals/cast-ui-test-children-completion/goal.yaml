@@ -14,4 +14,4 @@ tags:
 - testing
 - investigation
 accepted_at: '2026-05-01'
-external_project_dir: /data/workspace/diecast
+external_project_dir: <DIECAST_ROOT>

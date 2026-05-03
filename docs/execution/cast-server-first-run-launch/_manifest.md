@@ -4,7 +4,7 @@
 
 Each sub-phase runs in a **separate Claude context**. For each sub-phase:
 
-1. Start a new Claude session in `/data/workspace/diecast`.
+1. Start a new Claude session in `<DIECAST_ROOT>`.
 2. Tell Claude: "Read `docs/execution/cast-server-first-run-launch/_shared_context.md` then execute `docs/execution/cast-server-first-run-launch/spN_<name>/plan.md`."
 3. After completion, update the Status column below and commit.
 

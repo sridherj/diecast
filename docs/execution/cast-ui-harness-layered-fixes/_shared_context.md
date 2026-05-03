@@ -2,11 +2,11 @@
 
 ## Source Documents
 
-- **Plan (do not modify):** `/data/workspace/diecast/docs/plan/2026-05-01-cast-ui-harness-layered-fixes.collab.md`
-- **Governing spec:** `/data/workspace/diecast/docs/specs/cast-ui-testing.collab.md`
-- **Original harness plan:** `/data/workspace/diecast/docs/plan/2026-05-01-cast-ui-e2e-test-harness.collab.md`
-- **Output-filename contract:** `/data/workspace/diecast/docs/specs/cast-output-json-contract.collab.md`
-- **Original execution dir (built the harness this plan repairs):** `/data/workspace/diecast/docs/execution/cast-ui-test-harness/`
+- **Plan (do not modify):** `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-ui-harness-layered-fixes.collab.md`
+- **Governing spec:** `<DIECAST_ROOT>/docs/specs/cast-ui-testing.collab.md`
+- **Original harness plan:** `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-ui-e2e-test-harness.collab.md`
+- **Output-filename contract:** `<DIECAST_ROOT>/docs/specs/cast-output-json-contract.collab.md`
+- **Original execution dir (built the harness this plan repairs):** `<DIECAST_ROOT>/docs/execution/cast-ui-test-harness/`
 
 ## Project Background
 
@@ -43,7 +43,7 @@ This execution plan removes the failure modes in strict dependency order:
 
 ## Codebase Conventions
 
-- **Repo root:** `/data/workspace/diecast/`
+- **Repo root:** `<DIECAST_ROOT>/`
 - **Server package:** `cast-server/cast_server/` (Python). Routes under `routes/api_*.py`,
   services under `services/`, templates under `templates/pages/` and `templates/fragments/`.
 - **Test entry:** `cast-server/tests/ui/test_full_sweep.py::test_ui_e2e`.

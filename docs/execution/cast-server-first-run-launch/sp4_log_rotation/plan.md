@@ -38,7 +38,7 @@ Bound the long-running cast-server's disk footprint by configuring Python `loggi
 Search for `logging.basicConfig`, `getLogger`, `dictConfig`, or any custom logger setup:
 
 ```bash
-grep -rn 'logging\.\(basicConfig\|getLogger\|dictConfig\)' /data/workspace/diecast/cast-server/cast_server/
+grep -rn 'logging\.\(basicConfig\|getLogger\|dictConfig\)' <DIECAST_ROOT>/cast-server/cast_server/
 ```
 
 Two likely outcomes:

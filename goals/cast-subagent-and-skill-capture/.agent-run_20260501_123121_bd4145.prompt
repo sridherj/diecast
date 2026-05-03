@@ -1,4 +1,4 @@
-Read the delegation context from `/data/workspace/diecast/goals/cast-subagent-and-skill-capture/.delegation-run_20260501_123121_bd4145.json` first, then follow the instructions within.
+Read the delegation context from `<DIECAST_ROOT>/goals/cast-subagent-and-skill-capture/.delegation-run_20260501_123121_bd4145.json` first, then follow the instructions within.
 
 Your run ID: run_20260501_123121_bd4145
 Goal slug: cast-subagent-and-skill-capture
@@ -22,18 +22,18 @@ Use the cast-subphase-runner agent.
 Goal: cast-subagent-and-skill-capture
 Task: 
 Expected outcome: 
-Output directory: /data/workspace/diecast
+Output directory: <DIECAST_ROOT>
 
-Context: Read /data/workspace/diecast/.cast/.context-map.md for goal context overview.
+Context: Read <DIECAST_ROOT>/.cast/.context-map.md for goal context overview.
 
 
-Read `/data/workspace/diecast/goals/cast-subagent-and-skill-capture/.context-map.md` for goal context overview.
+Read `<DIECAST_ROOT>/goals/cast-subagent-and-skill-capture/.context-map.md` for goal context overview.
 
 ## External Project Directory
-You are running inside the project directory (/data/workspace/diecast).
+You are running inside the project directory (<DIECAST_ROOT>).
 Goal artifacts (plans, research, playbooks) are in `.cast/`.
 Code and execution artifacts go in the current working directory.
-Work in /data/workspace/diecast. Write all artifacts there.
+Work in <DIECAST_ROOT>. Write all artifacts there.
 
 CRITICAL: NEVER inline an agent's work yourself. When a task calls for one of your allowed_delegations, you MUST dispatch to that agent — do not attempt the work yourself, summarize what the agent would produce, or paraphrase its output.
 Your allowed_delegations: [cast-review-code]
@@ -67,7 +67,7 @@ Quick reference (full patterns in the skill):
       }
     }' | jq -r '.run_id')
 
-  GOAL_DIR="/data/workspace/diecast/.cast"   # use this exact value — injected from your prompt preamble
+  GOAL_DIR="<DIECAST_ROOT>/.cast"   # use this exact value — injected from your prompt preamble
   TIMEOUT=2700; ELAPSED=0
   while [ $ELAPSED -lt $TIMEOUT ]; do
     [ -f "$GOAL_DIR/.agent-$CHILD_RUN_ID.output.json" ] && break
@@ -75,7 +75,7 @@ Quick reference (full patterns in the skill):
   done
   # On timeout, check: curl http://localhost:8005/api/agents/jobs/$CHILD_RUN_ID | jq '.status'
 
-IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /data/workspace/diecast/.cast/.agent-run_20260501_123121_bd4145.output.json:
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to <DIECAST_ROOT>/.cast/.agent-run_20260501_123121_bd4145.output.json:
 
 {
     "contract_version": "2",
@@ -106,13 +106,13 @@ Set human_action_needed to true when:
 - You completed the work but something needs human verification
 Keep human_action_items specific and actionable (what exactly to do).
 
-Artifact paths must be relative to /data/workspace/diecast/.cast.
+Artifact paths must be relative to <DIECAST_ROOT>/.cast.
 
 ## Known Error Patterns for This Agent
 
 The following errors have occurred in past runs. Avoid repeating them:
 
-- **timeout** (2x, last: 2026-05-01): Dynamic verification (re-running pytest cast-server/tests/ui/) blocked: /data/workspace/diecast/.venv is owned by root and uv cannot manage it. uv error: `failed to remove directory /data/workspace/di
+- **timeout** (2x, last: 2026-05-01): Dynamic verification (re-running pytest cast-server/tests/ui/) blocked: <DIECAST_ROOT>/.venv is owned by root and uv cannot manage it. uv error: `failed to remove directory /data/workspace/di
 - **unknown** (1x, last: 2026-05-01): Malformed output.json: 7 validation errors for AgentOutput
 errors.0
   Input should be a valid string [type=string_type, input_value={'code': 'blocker.run_row...`closest .run-group`)."}, input_type=dic

@@ -5,12 +5,12 @@
 
 ## Source Documents
 
-- Plan: `/data/workspace/diecast/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
-- Refined requirements: `/data/workspace/diecast/goals/cast-subagent-and-skill-capture/refined_requirements.collab.md`
+- Plan: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-subagent-and-skill-capture.collab.md`
+- Refined requirements: `<DIECAST_ROOT>/goals/cast-subagent-and-skill-capture/refined_requirements.collab.md`
 - Spike A empirical capture (authoritative for payload field names):
-  `/data/workspace/diecast/goals/cast-subagent-and-skill-capture/notes/payload-shapes.ai.md`
-- Sibling shipped: `/data/workspace/diecast/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
-- Sibling shipped: `/data/workspace/diecast/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
+  `<DIECAST_ROOT>/goals/cast-subagent-and-skill-capture/notes/payload-shapes.ai.md`
+- Sibling shipped: `<DIECAST_ROOT>/docs/plan/2026-05-01-capture-user-invocations-as-runs.collab.md`
+- Sibling shipped: `<DIECAST_ROOT>/docs/plan/2026-05-01-cast-runs-threaded-tree.collab.md`
 
 ## Project Background
 

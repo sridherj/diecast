@@ -75,6 +75,19 @@ assert_no_grep() {
   return 0
 }
 
+# ── Portable date helpers (python3, no GNU date -d) ──────────────
+epoch_to_iso() {
+  python3 -c "
+from datetime import datetime, timezone
+print(datetime.fromtimestamp($1, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))"
+}
+
+iso_to_epoch() {
+  python3 -c "
+from datetime import datetime, timezone
+print(int(datetime.strptime('$1', '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc).timestamp()))"
+}
+
 # Clone the bare-repo fixture into a fresh worktree under $1.
 clone_fixture() {
   local dest="$1"
@@ -346,12 +359,14 @@ case_cache_ttl() {
   # skill prescribes returns "fresh" within an hour and "stale" beyond.
   local now fresh stale
   now=$(date -u +%s)
-  fresh=$(date -u -d "@$(( now - 600 ))"  +%Y-%m-%dT%H:%M:%SZ)   # 10 min ago
-  stale=$(date -u -d "@$(( now - 7200 ))" +%Y-%m-%dT%H:%M:%SZ)   # 2  h  ago
+  fresh=$(epoch_to_iso $(( now - 600 )))    # 10 min ago
+  stale=$(epoch_to_iso $(( now - 7200 )))   # 2  h  ago
 
+  # Round-trip through ISO to verify format fidelity (the skill writes ISO
+  # strings into config.yaml and later parses them back to compare epochs).
   local fresh_epoch stale_epoch one_hour_ago
-  fresh_epoch=$(date -u -d "${fresh}" +%s)
-  stale_epoch=$(date -u -d "${stale}" +%s)
+  fresh_epoch=$(iso_to_epoch "${fresh}")
+  stale_epoch=$(iso_to_epoch "${stale}")
   one_hour_ago=$(( now - 3600 ))
 
   [[ "${fresh_epoch}" -gt "${one_hour_ago}" ]] || return 1

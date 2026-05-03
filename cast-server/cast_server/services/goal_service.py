@@ -4,6 +4,7 @@ import ast
 import json
 import logging
 import re
+import shutil
 from datetime import date
 from pathlib import Path
 
@@ -15,6 +16,20 @@ from cast_server.config import (
 from cast_server.db.connection import get_connection
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_goal_dir(goal: dict | None, slug: str, goals_dir: Path) -> Path:
+    """Return the authoritative goal directory for writing goal.yaml / tasks.md.
+
+    If the goal has been routed to an external project (i.e. folder_path differs
+    from the default ``goals_dir / slug``), use the DB ``folder_path``.
+    Otherwise fall back to ``goals_dir / slug``.
+    """
+    if goal and goal.get("folder_path"):
+        fp = Path(goal["folder_path"])
+        if fp.exists():
+            return fp
+    return goals_dir / slug
 
 
 def _parse_tags(raw: str | None) -> list:
@@ -134,8 +149,8 @@ def update_status(slug: str, target_status: str,
     finally:
         conn.close()
 
-    # Write changes to goal.yaml
-    goal_dir = goals_dir / slug
+    # Write changes to goal.yaml — use DB folder_path for routed goals
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     yaml_updates = {"status": target_status}
     if current == "idea" and target_status == "accepted":
         yaml_updates["phase"] = "requirements"
@@ -172,7 +187,7 @@ def update_phase(slug: str, target_phase: str,
     finally:
         conn.close()
 
-    goal_dir = goals_dir / slug
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     _update_goal_yaml_fields(goal_dir, {"phase": target_phase})
 
     return get_goal(slug, db_path)
@@ -180,7 +195,11 @@ def update_phase(slug: str, target_phase: str,
 
 def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
                         goals_dir: Path = None) -> Path | None:
-    """Create/update .cast symlink in external project pointing to goal dir.
+    """Create/update .cast symlink in external project pointing to runtime goal dir.
+
+    Runtime tracking files stay in the central ``goals_dir / goal_slug``
+    directory even when user-facing artifacts are routed to
+    ``<ext_dir>/docs/goal/<slug>``.
 
     Returns the symlink path, or None if external_project_dir is invalid.
     """
@@ -261,7 +280,36 @@ def update_config(slug: str, gstack_dir: str | None = None,
     if yaml_updates:
         _update_goal_yaml_fields(goal_dir, yaml_updates)
 
-    # Manage .cast symlink
+    # When external_project_dir is set, route goal artifacts to docs/goal/<slug>
+    if external_project_dir:
+        ext_path = Path(external_project_dir).expanduser()
+        new_goal_dir = ext_path / "docs" / "goal" / slug
+        old_goal_dir = Path(goal.get("folder_path", str(goals_dir / slug)))
+
+        if new_goal_dir.resolve() != old_goal_dir.resolve():
+            new_goal_dir.mkdir(parents=True, exist_ok=True)
+            # Move existing artifacts from old goal dir to new
+            if old_goal_dir.exists():
+                for item in old_goal_dir.iterdir():
+                    dest = new_goal_dir / item.name
+                    if not dest.exists():
+                        shutil.move(str(item), str(dest))
+            # Update folder_path in DB
+            conn_fp = get_connection(db_path)
+            try:
+                conn_fp.execute(
+                    "UPDATE goals SET folder_path = ? WHERE slug = ?",
+                    (str(new_goal_dir), slug),
+                )
+                conn_fp.commit()
+            finally:
+                conn_fp.close()
+            # Update goal.yaml in new location
+            if (new_goal_dir / "goal.yaml").exists() or (old_goal_dir / "goal.yaml").exists():
+                _update_goal_yaml_fields(new_goal_dir, {"external_project_dir": external_project_dir})
+
+    # Manage .cast symlink — runtime tracking stays in goals_dir/<slug> even
+    # when user-facing artifacts are routed to docs/goal/<slug>.
     new_ext_dir = updates.get("external_project_dir", old_ext_dir)
     if external_project_dir is not None:
         if old_ext_dir and old_ext_dir != new_ext_dir:
@@ -292,7 +340,7 @@ def toggle_focus(slug: str, in_focus: bool,
     finally:
         conn.close()
 
-    goal_dir = goals_dir / slug
+    goal_dir = _resolve_goal_dir(goal, slug, goals_dir)
     _update_goal_yaml_fields(goal_dir, {"in_focus": in_focus})
 
     return get_goal(slug, db_path)
