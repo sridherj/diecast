@@ -353,6 +353,21 @@ class TestRoutedGoalWritePaths:
             data = yaml.safe_load(f)
         assert data["in_focus"] is True
 
+    def test_update_status_writes_to_routed_dir(self, tmp_path):
+        """update_status should write goal.yaml in the routed directory."""
+        from cast_server.services.goal_service import update_status
+
+        db_path, goals_dir, ext_dir, routed_dir = self._route_goal(tmp_path)
+
+        import yaml
+        update_status("my-goal", "completed", goals_dir=goals_dir, db_path=db_path)
+
+        yaml_path = routed_dir / "goal.yaml"
+        assert yaml_path.exists(), "goal.yaml should be in the routed directory"
+        with open(yaml_path) as f:
+            data = yaml.safe_load(f)
+        assert data["status"] == "completed"
+
     def test_rerender_tasks_md_writes_to_routed_dir(self, tmp_path):
         """_rerender_tasks_md should write tasks.md in the routed directory."""
         from cast_server.services.task_service import _rerender_tasks_md
