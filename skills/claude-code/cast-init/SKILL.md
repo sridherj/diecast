@@ -2,7 +2,7 @@
 name: cast-init
 description: >
   Scaffold the Diecast docs/ tree (exploration, spec, requirement, plan, design, execution,
-  ui-design) and write a project-local CLAUDE.md that points at the canonical conventions
+  ui-design, goal) and write a project-local CLAUDE.md that points at the canonical conventions
   spec. Re-runnable; non-destructive 4-option merge prompt on existing layout.
 trigger_phrases:
   - /cast-init
@@ -14,7 +14,7 @@ trigger_phrases:
 # /cast-init — Project Scaffold
 
 Initialize a project for use with Diecast. After a successful run the project root
-contains the seven canonical `docs/<area>/` directories (each with a `.gitkeep`) plus a
+contains the eight canonical `docs/<area>/` directories (each with a `.gitkeep`) plus a
 project-local `CLAUDE.md` that points at the
 [`cast-init-conventions` spec](../../../docs/specs/cast-init-conventions.collab.md).
 
@@ -59,8 +59,8 @@ The skill is **idempotent and non-destructive** on re-run: detection logic surfa
 
 For each path, record whether it exists:
 
-- The seven canonical directories: `docs/exploration/`, `docs/spec/`, `docs/requirement/`,
-  `docs/plan/`, `docs/design/`, `docs/execution/`, `docs/ui-design/`.
+- The eight canonical directories: `docs/exploration/`, `docs/spec/`, `docs/requirement/`,
+  `docs/plan/`, `docs/design/`, `docs/execution/`, `docs/ui-design/`, `docs/goal/`.
 - `<cwd>/CLAUDE.md`.
 
 Branch:
@@ -80,7 +80,7 @@ diff before deciding") — the selective-expansion budget is already spent on
 ```text
 **Question #1: Existing project layout detected**
 
-I found {{N}} of the seven canonical docs/ directories already present and CLAUDE.md
+I found {{N}} of the eight canonical docs/ directories already present and CLAUDE.md
 {{exists | does not exist}}. How should I proceed?
 
 - **Option A — Skip (keep existing) (Recommended):** Most existing layouts are intentional;
@@ -127,10 +127,10 @@ touch docs/<area>/.gitkeep
 ```
 
 `touch` is idempotent — re-running on a populated directory updates the `.gitkeep`
-mtime but is otherwise a no-op. The seven canonical areas are exactly: `exploration`,
-`spec`, `requirement`, `plan`, `design`, `execution`, `ui-design`.
+mtime but is otherwise a no-op. The eight canonical areas are exactly: `exploration`,
+`spec`, `requirement`, `plan`, `design`, `execution`, `ui-design`, `goal`.
 
-> Do **not** modify the seven names. The US2 acceptance scenarios enumerate them
+> Do **not** modify the eight names. The US2 acceptance scenarios enumerate them
 > verbatim; renaming breaks downstream agent contracts and the conventions spec.
 
 ### 3.2 Render `CLAUDE.md` template
@@ -258,7 +258,7 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
 - `CLAUDE.md` is **never** overwritten without explicit user confirmation. The Overwrite
   branch backs up first via `bin/_lib.sh::backup_if_exists`.
 - Existing populated `docs/`: if the user already has `docs/api/` (e.g., from MkDocs),
-  `/cast-init` only adds the seven canonical subdirectories. It never touches existing
+  `/cast-init` only adds the eight canonical subdirectories. It never touches existing
   top-level files in `docs/` or unrelated subdirectories.
 - The skill never accepts user-supplied paths — `<cwd>` is always derived from `pwd`.
   Eliminates path-traversal concerns.
@@ -271,7 +271,7 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
   "agent_name": "cast-init",
   "task_title": "Initialize Diecast project layout",
   "status": "completed",
-  "summary": "Scaffolded seven docs/ subdirectories and wrote project-local CLAUDE.md.",
+  "summary": "Scaffolded eight docs/ subdirectories and wrote project-local CLAUDE.md.",
   "artifacts": [
     {"path": "docs/exploration/.gitkeep", "type": "data", "description": "Canonical exploration directory keeper."},
     {"path": "docs/spec/.gitkeep", "type": "data", "description": "Canonical spec directory keeper."},
@@ -280,6 +280,7 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
     {"path": "docs/design/.gitkeep", "type": "data", "description": "Canonical design directory keeper."},
     {"path": "docs/execution/.gitkeep", "type": "data", "description": "Canonical execution directory keeper."},
     {"path": "docs/ui-design/.gitkeep", "type": "data", "description": "Canonical ui-design directory keeper."},
+    {"path": "docs/goal/.gitkeep", "type": "data", "description": "Canonical goal directory keeper."},
     {"path": "CLAUDE.md", "type": "data", "description": "Project-local Claude Code conventions; references cast-init-conventions spec."},
     {"path": ".claude/settings.json", "type": "data", "description": "Claude Code settings with appended cast-hook UserPromptSubmit + Stop entries (omitted from artifacts when --no-hooks was passed)."}
   ],
@@ -297,7 +298,7 @@ contract (Phase 3a sp4d) for "human action, not an invocable skill".
 - **Adding a fifth option to the merge prompt.** Decision #5 locks it at four. Resist.
 - **Replicating `backup_if_exists` in Python.** Call the bash helper via subprocess.
   Forking the helper between languages was an explicit anti-pattern in the plan.
-- **Touching existing top-level `docs/` files.** `/cast-init` only adds the seven
+- **Touching existing top-level `docs/` files.** `/cast-init` only adds the eight
   canonical subdirectories. Anything else is the user's.
 - **Accepting a user-supplied target directory.** `<cwd>` is always `pwd`. No flag
   surface to override — eliminates path-traversal and "wrong project" footguns.
