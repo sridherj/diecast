@@ -1,0 +1,2055 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diecast — Vision Prototype</title>
+
+<!-- Network dependency: CDN imports + Google Fonts required until Phase 6 inlines assets. Acceptable for the dev loop. -->
+
+<!-- Import map: exact-pinned CDN versions so a CDN bump can't break the demo mid-walkthrough.
+     driver.js is imported NOWHERE in Phase 1 — it lives in the map only to keep the
+     <15KB library-weight check honest (Phase 6 wires its usage). -->
+<script type="importmap">
+{
+  "imports": {
+    "preact": "https://esm.sh/preact@10.26.2",
+    "preact/hooks": "https://esm.sh/preact@10.26.2/hooks",
+    "htm/preact": "https://esm.sh/htm@3.1.1/preact?external=preact",
+    "driver.js": "https://esm.sh/driver.js@1.3.1"
+  }
+}
+</script>
+
+<!-- Identity fonts: IBM Plex Mono (headings/mono) + DM Sans (body). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Design tokens (Contract 7) — lifted VERBATIM from
+   goals/product-revamp-diecast/exploration/design-samples/app-shell.html :root block.
+   Extend-not-rename downstream. ── */
+:root{
+  --cream:#F5F4F0; --cream-deep:#EDEBE4; --cream-shadow:#E3E0D6;
+  --paper:#FFFFFF; --ink:#1A1A28; --ink-60:#4A4860; --ink-35:#9C99AC;
+  --hairline:#DDD8CD; --hairline-soft:#E8E5DC;
+  --rasp:#D6235C; --rasp-08:rgba(214,35,92,.08); --rasp-15:rgba(214,35,92,.15);
+  --maker:#3B5BB0; --checker:#6B47B0; --ok:#2D7D4F; --warn:#B5821A;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+
+  /* ── Motion tokens (Contract 6) — consumed by 1.2/1.3. ── */
+  --morph-duration:350ms;
+  --ease-morph:cubic-bezier(0.2,0.8,0.2,1);
+  --motion-fast:120ms;
+  /* reduced-motion fade target = 180ms (consumed in 1.2/1.3 reduced-motion branch). */
+
+  /* ── Radius tokens. ── */
+  --radius-sm:4px;
+  --radius-md:8px;
+
+  /* ── 2b additions (Contract 7) — extend, never rename. ── */
+  --fail:#B22439;            /* test-red for E2/E3 repro — semantic red, DISTINCT from raspberry (needs-you). */
+  /* L-level badge mapping → .lbadge--l1/l2/l3 (L1=--ink-35 · L2=--warn · L3=--rasp). Implemented as classes below. */
+  /* Confidence glyphs ● high / ◐ med / ○ low are a render convention (confGlyph), never a percentage. */
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;
+  padding:28px;
+}
+h1,h2,h3,h4{font-family:var(--mono);font-weight:500;margin:0;}
+
+/* ── View-transition register (1.3, Contract 6) — the locked morph motion.
+   Every snapshot group (the named anchors + the root old/new crossfade) animates at
+   ~350ms on the morph easing. The five vt- anchors GLIDE/resize independently; the
+   unnamed spine/body zones ride the root crossfade (segment bar → loop band). ── */
+::view-transition-group(*){
+  animation-duration:var(--morph-duration);          /* 350ms */
+  animation-timing-function:var(--ease-morph);        /* cubic-bezier(0.2,0.8,0.2,1) */
+}
+/* Reduced-motion belt-and-suspenders: the JS dispatch path already bypasses
+   startViewTransition under prefers-reduced-motion (180ms fade instead). This CSS
+   guard neutralizes any view-transition animation that still fires, so nothing slides. */
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){ animation-duration:1ms !important; }
+}
+
+/* ── Three-tier shell: nav rail · CanvasFrame · ChatRail (layout reference: app-shell.html). ── */
+#app{width:min(1280px,100%);}
+.shell{
+  display:grid;grid-template-columns:236px minmax(0,1fr) 304px;
+  height:min(780px,calc(100vh - 56px));
+  background:var(--cream);border:1px solid var(--hairline);
+  box-shadow:0 24px 60px -30px rgba(26,26,40,.25), 0 2px 6px rgba(26,26,40,.05);
+  border-radius:14px;overflow:hidden;
+}
+
+/* Left nav rail — persistent (vt-nav-rail anchor; mounted across BOTH families). */
+.nav-rail{
+  background:var(--cream);border-right:1px solid var(--hairline);
+  display:flex;flex-direction:column;padding:20px 12px 14px;gap:2px;
+  view-transition-name:vt-nav-rail;        /* 1.3 anchor (Contract 5) — glides, never crossfades. */
+}
+.brand{font-family:var(--mono);font-weight:600;font-size:18px;letter-spacing:-.5px;}
+.brand em{color:var(--rasp);font-style:normal;}
+.tagline{font-size:11px;color:var(--ink-35);margin:2px 0 16px;}
+.rail-h{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-35);margin:12px 4px 6px;}
+.nav-goal{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--radius-sm);
+  cursor:pointer;color:var(--ink-60);text-decoration:none;}
+.nav-goal:hover{background:var(--cream-deep);}
+.nav-goal.sel{background:var(--rasp-08);color:var(--ink);}
+.nav-goal .fam{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.04em;
+  color:var(--ink-35);min-width:34px;}
+.nav-goal.sel .fam{color:var(--rasp);}
+.nav-goal .t{flex:1;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-dead{color:var(--ink-35);cursor:default;}
+.nav-dead:hover{background:transparent;}
+.nav-spacer{flex:1;}
+
+/* Center CanvasFrame — renders the resolved route's view. */
+.canvas-frame{
+  position:relative;overflow-y:auto;padding:26px 32px 30px;
+  background:
+    radial-gradient(circle, rgba(26,26,40,.045) 1px, transparent 1.2px) 0 0/18px 18px,
+    var(--cream);
+}
+
+/* Right ChatRail — persistent across routes (vt-chat-rail anchor). */
+.chat-rail{
+  background:var(--paper);border-left:1px solid var(--hairline);
+  display:flex;flex-direction:column;min-height:0;padding:18px 16px;
+  view-transition-name:vt-chat-rail;       /* 1.3 anchor (Contract 5). */
+}
+.chat-h{display:flex;align-items:center;gap:10px;padding-bottom:14px;
+  border-bottom:1px solid var(--hairline-soft);}
+.chat-h .t{font-family:var(--mono);font-weight:600;font-size:13px;}
+.chat-h .s{font-size:11px;color:var(--ink-35);}
+.chat-body{flex:1;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-35);font-size:12px;text-align:center;padding:0 8px;}
+.chat-inp{border:1px solid var(--hairline);border-radius:var(--radius-md);
+  padding:9px 11px;color:var(--ink-35);font-size:12px;}
+
+/* ── GoalCanvas (two-part anatomy stubs). ── */
+.crumb{font-family:var(--mono);font-size:11px;color:var(--ink-60);margin-bottom:14px;}
+.crumb b{color:var(--ink);}
+.goal-header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  view-transition-name:vt-goal-header;     /* 1.3 anchor (Contract 5) — title/crumb glide; fampill content crossfades. */
+  padding:2px 0;}
+.gtitle{font-family:var(--mono);font-weight:500;font-size:22px;letter-spacing:-.4px;}
+.fampill{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;padding:3px 8px;border-radius:999px;
+  background:var(--rasp-08);color:var(--rasp);}
+.fampill.debug{background:rgba(107,71,176,.1);color:var(--checker);}
+.guide-line{display:flex;align-items:center;gap:8px;margin:14px 0 4px;
+  font-size:12.5px;color:var(--ink-60);}
+/* ── Stage-spine ZONE WRAPPER. Carries NO view-transition-name → it rides the root
+   crossfade, so on a morph the feature segment bar dissolves into the debug loop band
+   ("same goal, new shape"). The four shapes + the PLACEHOLDER watermark now render through
+   the StageSpine component (spine-* prefix, 2b.2a); the Phase-1 inline shape/`.ph-mark`
+   CSS retired in 2b.3 with the stub markup it styled (dead-class + raw-hex sweep). ── */
+.spine-zone{position:relative;margin:20px 0 18px;}
+/* 2b.2b: the nudge ZONE WRAPPER — keeps the vt-nudge-card morph anchor (Contract 5/9) on a
+   stable shell element; the visual card now renders INSIDE via the NudgeCard component
+   (.nudge-card, nudge-* prefix). The stub child rules (.nudge .who/.do/.why) retired with the stub. */
+.nudge{margin:6px 0 20px;
+  view-transition-name:vt-nudge-card;      /* 1.3 anchor (Contract 5) — zone glides; NudgeCard copy crossfades. */}
+/* GoalCanvas Part-2 body — stacked zones (2b.3): the work stream (line-density
+   ColleagueCards) above the stage-artifacts EvidenceBlock. Was a 1fr·1fr grid of stub
+   panels; the E1 block needs the full content width, so the body now flows in one column. */
+.body{display:flex;flex-direction:column;gap:24px;margin-top:10px;}
+.body > section{min-width:0;}
+.sect-h{font-family:var(--mono);font-size:11px;color:var(--ink-60);margin-bottom:9px;}
+.sect-h .k{color:var(--ink);font-weight:600;}
+.panel{border:1px solid var(--hairline);border-radius:var(--radius-md);
+  background:var(--paper);padding:14px;color:var(--ink-35);font-size:12px;}
+/* work stream — a column of line-density ColleagueCards (the In-flight-work zone). */
+.work-stream{display:flex;flex-direction:column;gap:8px;max-width:460px;}
+.receipt-trail{margin-top:18px;padding-top:12px;border-top:1px dashed var(--hairline);
+  font-family:var(--mono);font-size:11px;color:var(--ink-35);min-height:18px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  view-transition-name:vt-receipt-trail;   /* 1.3 anchor (Contract 5) — trail glides; receipt pill crossfades in. */}
+
+/* ── Home + BoardStub. ── */
+.stub-wrap{padding:48px 8px;max-width:520px;}
+.stub-wrap h1{font-size:26px;margin-bottom:10px;}
+.stub-wrap p{color:var(--ink-60);margin:0 0 20px;}
+/* a cream board frame for the #/board density-drift drop (one 4C ColleagueCard) — the real
+   board is Phase 5; this is just enough surface to prove the 4C lockup off-canvas (2b.3). */
+.board-frame{background:var(--cream-deep);border:1px solid var(--hairline-soft);
+  border-radius:var(--radius-md);padding:18px;display:inline-block;}
+.stub-link{display:inline-block;font-family:var(--mono);font-size:13px;color:var(--rasp);
+  text-decoration:none;border:1px solid var(--rasp-15);border-radius:var(--radius-sm);
+  padding:8px 14px;}
+.stub-link:hover{background:var(--rasp-08);}
+
+/* ── Decision receipts in the trail now render through the kit `Decision` component at the
+   6A `pill` layer (2b.3 composition) — the Phase-1 inline `.receipt` pill CSS retired here,
+   superseded by the full 6A→6B→6C ladder shipped in 2b.2b (dec-* prefix). ── */
+
+/* ── Pinned objects (promote / pin ops). ── */
+.pinned-wrap{margin-top:18px;}
+.pinned-card{border:1px solid var(--hairline);border-left:3px solid var(--checker);
+  border-radius:var(--radius-md);background:var(--paper);padding:10px 12px;margin-bottom:8px;}
+.pinned-card .name{font-weight:600;font-size:12.5px;}
+.pinned-card .prov{font-family:var(--mono);font-size:10px;color:var(--ink-35);margin-top:3px;}
+
+/* ── Drill-in execution panel (drillInto op). ── */
+.drill-panel{margin-top:18px;border:1px dashed var(--checker);border-radius:var(--radius-md);
+  padding:12px 14px;background:rgba(107,71,176,.04);}
+
+/* ── DEV op strip (TEMPORARY — removed/gated in 1.3). ── */
+.dev-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:24px;padding:8px 10px;
+  border:1px dashed var(--rasp);border-radius:var(--radius-sm);background:var(--rasp-08);}
+.dev-strip .dev-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--rasp);margin-right:4px;}
+.dev-strip button{font-family:var(--mono);font-size:11px;cursor:pointer;
+  border:1px solid var(--hairline);background:var(--paper);color:var(--ink-60);
+  border-radius:var(--radius-sm);padding:4px 8px;}
+.dev-strip button:hover{border-color:var(--rasp);color:var(--ink);}
+
+/* ── ChatRail conversation log + "Next ▸" scripted-send control. ── */
+.chat-log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
+  padding:14px 2px;min-height:0;}
+.chat-empty{margin:auto;color:var(--ink-35);font-size:12px;text-align:center;}
+.msg{display:flex;flex-direction:column;gap:3px;}
+.msg .mfrom{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-35);}
+.msg .mtext{font-size:12.5px;color:var(--ink);border-radius:var(--radius-md);
+  padding:8px 10px;background:var(--cream-deep);}
+.msg.you{align-items:flex-end;}
+.msg.you .mtext{background:var(--rasp-08);}
+/* Guide voice (locked, 2b.3): hue-free — a left-rule + the ◈ diamond carry the Guide's
+   identity, NOT color (the label-free distinctness contract; the Guide is never the checker hue). */
+.msg.guide .mfrom{color:var(--ink-60);}
+.msg.guide .mtext{border-left:2px solid var(--ink);border-radius:0 var(--radius-md) var(--radius-md) 0;}
+.msg.system .mtext{background:transparent;color:var(--ink-35);font-style:italic;padding:2px 10px;}
+.msg .mops{display:flex;gap:6px;margin-top:2px;}
+.opbtn{font-family:var(--mono);font-size:11px;cursor:pointer;border:1px solid var(--rasp-15);
+  background:var(--paper);color:var(--rasp);border-radius:var(--radius-sm);padding:4px 9px;}
+.opbtn:hover{background:var(--rasp-08);}
+.next-btn{font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;
+  border:1px solid var(--rasp);background:var(--rasp);color:var(--paper);border-radius:var(--radius-md);
+  padding:9px 12px;margin:10px 0;}
+.next-btn:hover{filter:brightness(1.05);}
+.next-btn:disabled{background:var(--cream-deep);color:var(--ink-35);border-color:var(--hairline);
+  cursor:default;filter:none;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.1 — GRAMMAR LAYER STYLES (Avatar · ColleagueCard · L-badge · Guide voice ·
+   #/kit harness). Token-only colors (the single 2b raw-hex addition is --fail in
+   :root). Prefixes: av- (avatar) · cc- (colleague card) · lbadge- · gm-/gv- (guide
+   mark + voice) · kit- (harness-only chrome). No view-transition-name lives here
+   (Contract 9 — kit components render twice; anchors are shell-only).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── L-level reversibility badge (Contract 7 mapping). ── */
+.lbadge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;
+  padding:1px 7px;border-radius:999px;border:1px solid;}
+.lbadge--l1{color:var(--ink-35);border-color:var(--ink-35);}
+.lbadge--l2{color:var(--warn);border-color:var(--warn);}
+.lbadge--l3{color:var(--rasp);border-color:var(--rasp);}
+
+/* ── Avatar primitive (Contract 6): one component, four kinds. .av-mk is the shape
+   geometry, optically scaled so circle/square/diamond read as the SAME visual mass
+   (square is heaviest → inset; circle ≈ full; diamond bumped to fill the rotation
+   silhouette). .av-face is the glyph layer — never rotated, always upright. Size via
+   the --avatar-size custom property (inherited; default 30px), not per-call markup. ── */
+.av{position:relative;flex:none;display:inline-grid;place-items:center;
+  width:var(--avatar-size,30px);height:var(--avatar-size,30px);
+  font-family:var(--mono);font-weight:600;
+  font-size:calc(var(--avatar-size,30px) * .36);letter-spacing:-.03em;}
+.av-mk{grid-area:1/1;width:100%;height:100%;}
+.av-face{grid-area:1/1;z-index:1;line-height:1;}
+.av--human  .av-mk{border-radius:50%;background:var(--ink);transform:scale(.98);}
+.av--human  .av-face{color:var(--cream);}
+.av--maker  .av-mk{border-radius:var(--radius-sm);background:var(--paper);
+  border:2px solid var(--maker);transform:scale(.88);}
+.av--maker  .av-face{color:var(--maker);}
+.av--checker .av-mk{border-radius:var(--radius-sm);background:var(--checker);transform:scale(.88);}
+.av--checker .av-face{color:var(--paper);}
+.av--guide  .av-mk{border-radius:2px;background:var(--ink);transform:rotate(45deg) scale(.62);}
+.av--guide  .av-face{color:var(--cream);}
+
+/* ── ColleagueCard (Contract 1, pick 4C+4B): ONE component, two densities. The five
+   lockup slots render in IDENTICAL order both densities (zero field drift); density is
+   purely a container-layout concern + the card-only stat footer. ── */
+.cc{--avatar-size:30px;font-size:12.5px;color:var(--ink);}
+.cc-slot{display:inline-flex;align-items:center;gap:7px;min-width:0;}
+.cc-slot--head{gap:8px;}
+.cc-name{font-family:var(--mono);font-weight:600;font-size:13px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cc-pair{font-family:var(--mono);font-size:11px;color:var(--ink-60);}
+.cc-pair .cc-tie{color:var(--ink-35);margin-right:2px;}
+.cc-pair--broken{color:var(--rasp);font-weight:600;}   /* missing checker = needs-you, never silent */
+.cc-pair--solo{color:var(--ink-35);}
+.cc-meter{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);
+  font-size:11px;color:var(--ink-60);}
+.cc-meter > i.cc-seg{width:11px;height:5px;border-radius:2px;background:var(--hairline);}
+.cc-meter > i.cc-seg--used{background:var(--warn);}
+.cc-meter--na{color:var(--ink-35);}
+.cc-flight{font-family:var(--mono);font-size:11px;color:var(--checker);}
+.cc-flight--idle{color:var(--ink-35);}                 /* inflight:null → visible absence, not a gap */
+
+/* card density — 4C mini-card: head spans the top, the other four slots flow into a
+   four-column row beneath (order preserved), stat footer last. */
+.cc--card{--avatar-size:34px;display:grid;grid-template-columns:auto auto auto auto;
+  gap:9px 16px;align-items:center;max-width:380px;
+  border:1px solid var(--hairline);border-radius:var(--radius-md);
+  background:var(--paper);padding:13px 15px;}
+.cc--card .cc-slot--head{grid-column:1 / -1;}
+.cc--card .cc-foot{grid-column:1 / -1;display:flex;justify-content:space-between;
+  border-top:1px solid var(--hairline-soft);padding-top:9px;margin-top:1px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-35);}
+
+/* line density — 4B compact row: same five slots, one line. */
+.cc--line{--avatar-size:22px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 13px;
+  padding:8px 11px;border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);
+  background:var(--paper);}
+.cc--line .cc-name{font-size:12px;}
+
+/* ── Guide character — chosen treatment A (diamond + mono wordmark; voice = typography
+   + structure, NO new hue). GuideMark reuses the Avatar diamond (single-source grammar). ── */
+.gm{display:inline-flex;align-items:center;gap:7px;}
+.gm-word{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--ink);}
+/* chat voice: hairline left-rule + cream-deep tint (color-free distinction). */
+.gv-chat-h{display:flex;align-items:center;gap:9px;padding-bottom:9px;
+  border-bottom:1px solid var(--hairline-soft);}
+.gv-chat-sub{font-family:var(--mono);font-size:11px;color:var(--ink-35);}
+.gv-chat-msg{margin-top:10px;padding:9px 12px;font-size:12.5px;color:var(--ink);
+  border-left:2px solid var(--ink);background:var(--cream-deep);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+/* nudge attribution (card carries the needs-you accent; the Guide mark stays ink). */
+.gv-nudge{border:1px solid var(--hairline);border-left:3px solid var(--rasp);
+  border-radius:var(--radius-md);background:var(--paper);padding:12px 14px;max-width:360px;}
+.gv-nudge-who{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.05em;color:var(--ink-60);text-transform:uppercase;}
+.gv-nudge-do{font-weight:600;font-size:14px;margin:5px 0 2px;}
+.gv-nudge-why{font-size:12px;color:var(--ink-60);}
+/* receipt byline. */
+.gv-receipt{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+  color:var(--ink-60);border:1px solid var(--hairline);border-radius:999px;
+  background:var(--paper);padding:4px 11px;}
+.gv-receipt-by{display:inline-flex;align-items:center;gap:5px;color:var(--ink-35);}
+
+/* ── #/kit harness chrome (kit- prefix — Phase 6 strips this without touching product CSS). ── */
+.kit-wrap{max-width:760px;}
+.kit-banner{border-bottom:1px solid var(--hairline);padding-bottom:14px;margin-bottom:6px;}
+.kit-title{font-family:var(--mono);font-weight:600;font-size:16px;}
+.kit-sub{font-size:12px;color:var(--ink-35);margin-top:3px;}
+.kit-sect{padding:20px 0;border-bottom:1px dashed var(--hairline-soft);}
+.kit-h{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);}
+.kit-cap{font-family:var(--mono);font-size:11px;color:var(--ink-35);margin:3px 0 14px;}
+.kit-note{font-size:11px;color:var(--ink-35);margin-top:10px;font-style:italic;}
+.kit-tokrow{display:flex;flex-wrap:wrap;gap:16px;align-items:center;}
+.kit-tok{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--ink-60);}
+.kit-sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--hairline);}
+.kit-avrow{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;}
+.kit-avrow--lg{margin-top:18px;gap:24px;}
+.kit-avcell{display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:11px;color:var(--ink-35);font-family:var(--mono);}
+.kit-frame{margin:0 0 10px;}
+.kit-frame--board{background:var(--cream);border:1px solid var(--hairline-soft);
+  border-radius:var(--radius-md);padding:16px;display:inline-block;}
+.kit-frame--row{background:var(--paper);border:1px solid var(--hairline-soft);
+  border-radius:var(--radius-md);padding:4px 10px;display:inline-block;min-width:420px;}
+.kit-cand-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:640px;}
+.kit-cand{border:1px solid var(--hairline);border-radius:var(--radius-md);
+  background:var(--paper);padding:14px;text-align:center;}
+.kit-cand--keep{border-color:var(--ink);}
+.kit-cand--rej{opacity:.6;}
+.kit-cand-mark{height:40px;display:grid;place-items:center;--avatar-size:30px;}
+.cand-seal{font-size:26px;color:var(--ink);}
+.cand-typo{font-family:var(--mono);font-weight:600;font-size:15px;color:var(--ink-60);letter-spacing:.06em;}
+.kit-cand-id{font-family:var(--mono);font-size:11px;margin-top:8px;color:var(--ink);}
+.kit-cand-v{font-size:11px;color:var(--ink-35);margin-top:6px;}
+.kit-cand-v--keep{color:var(--ok);font-weight:600;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.2a — SPINE + EVIDENCE LAYER STYLES (StageSpine · EvidenceBlock).
+   Prefixes: spine-* (four canvas shapes) · ev-* (the E1–E5 evidence family).
+   Token-only colors. NO view-transition-name lives here (Contract 9 — StageSpine
+   renders twice on #/kit and is swapped inside the shell's spine-zone wrapper; the
+   morph anchor is on the wrapper, never on the component). The loop-band checker
+   tint mirrors the Phase 1 .loopband values VERBATIM so the live feature→debug
+   morph crossfade keeps its established silhouette (load-bearing for the morph gate).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── StageSpine shared shell — position:relative anchors the PLACEHOLDER watermark
+   that every placeholder spine carries (Phase 1 convention; self-contained so #/kit
+   renders are honest without the shell zone wrapper). ── */
+.spine-root{position:relative;margin:0;}
+.spine-ph{position:absolute;top:-9px;right:0;font-family:var(--mono);font-size:8px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-35);
+  border:1px dashed var(--hairline);border-radius:999px;padding:1px 8px;background:var(--cream);
+  pointer-events:none;}
+.spine-unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);
+  border:1px dashed var(--rasp);border-radius:var(--radius-sm);padding:8px 11px;background:var(--rasp-08);}
+.spine-n{font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+
+/* shape A · SEGMENTS (1B) — labeled segment BAR: future hollow, done ink-tinted,
+   current accent-filled (raspberry = the active step). Silhouette: row of square chips. */
+.spine-segbar{display:flex;gap:8px;flex-wrap:wrap;margin:0;}
+.spine-seg{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:var(--radius-sm);
+  border:1px solid var(--hairline);font-size:12px;color:var(--ink-35);background:var(--paper);}
+.spine-seg--done{color:var(--ink-60);background:var(--cream-deep);border-color:var(--hairline-soft);}
+.spine-seg--now{border-color:var(--rasp);color:var(--ink);background:var(--rasp-08);}
+
+/* shape B · LOOP (2B) — staged checker-tinted pill BAND + `↺ iter n/m` badge. The loop
+   glyph is the signature; the counter is mono. Silhouette: rounded band, → separators. */
+.spine-loopband{display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin:0;
+  border:1px solid rgba(107,71,176,.25);border-radius:999px;
+  background:rgba(107,71,176,.06);padding:6px 8px;}
+.spine-loopstage{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+  font-size:12px;color:var(--ink-60);white-space:nowrap;}
+.spine-loopstage--now{background:var(--checker);color:var(--paper);}
+.spine-loopstage .spine-n{opacity:.7;}
+.spine-loopsep{color:var(--ink-35);font-size:12px;padding:0 1px;}
+.spine-iter{margin-left:auto;display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--checker);
+  background:rgba(107,71,176,.14);border-radius:999px;padding:3px 11px;}
+
+/* shape C · TIMEBOX — a single horizontal budget METER, deliberately lighter than a
+   spine (no phase nodes — a spike must never look like a mini-feature, playbook 03).
+   Silhouette: one thin track with a used-fill + a budget·used legend. */
+.spine-timebox{display:flex;flex-direction:column;gap:7px;max-width:340px;}
+.spine-tb-head{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--ink-60);}
+.spine-tb-glyph{font-size:12px;color:var(--ink-35);}
+.spine-tb-track{height:8px;border-radius:999px;background:var(--cream-deep);
+  border:1px solid var(--hairline-soft);overflow:hidden;}
+.spine-tb-fill{height:100%;background:var(--warn);border-radius:999px;}
+.spine-tb-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+
+/* shape D · PIPELINE — a data-stage NODE CHAIN (Question ▸ Sources ▸ Analysis ▸ Answer):
+   dots hollow/filled by `current`, ▸ flow arrows between. Silhouette: dotted chain, not
+   boxed chips (materially distinct from SEGMENTS). */
+.spine-pipeline{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:0;}
+.spine-node{display:inline-flex;align-items:center;gap:7px;padding:5px 4px;font-size:12px;color:var(--ink-35);}
+.spine-node--done{color:var(--ink-60);}
+.spine-node--now{color:var(--ink);font-weight:600;}
+.spine-dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink-35);background:var(--paper);}
+.spine-node--done .spine-dot{border-color:var(--ink-60);background:var(--ink-60);}
+.spine-node--now .spine-dot{border-color:var(--rasp);background:var(--rasp);}
+.spine-flow{color:var(--ink-35);font-size:11px;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   EvidenceBlock family — ONE component, five per-kind sub-renderers (E1–E5).
+   Shared vocabulary: .ev shell · .ev-head (kind tag + outcome-first line) · mono for
+   machine values. EVERY block carries a confidence or flag signal — NO bare green badge
+   anywhere (the "pass" counts read in ink, never a green seal). Unknown kind → visible
+   .ev-unknown + console.warn, never a throw (zero-silent-failure, Phase 1 posture).
+   ════════════════════════════════════════════════════════════════════════ */
+.ev{border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);
+  padding:14px 16px;max-width:460px;font-size:12.5px;color:var(--ink);}
+.ev-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--hairline-soft);}
+.ev-kind{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-35);white-space:nowrap;}
+.ev-outcome{font-weight:600;font-size:13px;color:var(--ink);line-height:1.35;}
+.ev-link{font-family:var(--mono);font-size:11px;color:var(--ink);
+  text-decoration:underline;text-decoration-color:var(--ink-35);text-underline-offset:2px;}
+.ev-link:hover{text-decoration-color:var(--ink);}
+
+/* E1 · Acceptance Panel — stat tiles + screenshot strip + checker-compliance rows + PR. */
+.ev-tiles{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:13px;}
+.ev-tile{border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);
+  padding:7px 12px;background:var(--cream);min-width:74px;}
+.ev-tile-n{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink);line-height:1.1;}
+.ev-tile-n--muted{color:var(--ink-35);}
+.ev-tile-n--delta{color:var(--ink-60);}
+.ev-tile-k{font-size:9px;color:var(--ink-35);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.ev-shots{display:flex;gap:8px;margin-bottom:13px;}
+.ev-shot{width:84px;}
+.ev-shot svg{display:block;border:1px solid var(--hairline);border-radius:var(--radius-sm);}
+.ev-shot-bg{fill:var(--paper);}
+.ev-shot-bar{fill:var(--cream-shadow);}
+.ev-shot-ln{fill:var(--hairline);}
+.ev-shot-cap{display:block;font-family:var(--mono);font-size:9px;color:var(--ink-35);margin-top:3px;text-align:center;}
+.ev-checks{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;}
+.ev-check{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-60);}
+.ev-check-code{font-weight:600;color:var(--ink);}
+.ev-check--flag{color:var(--rasp);}
+.ev-check--flag .ev-check-code{color:var(--rasp);}
+.ev-attrib{margin-top:4px;}
+.ev-attrib-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-35);margin-bottom:5px;}
+
+/* E2 · Confirm/Refute Ledger — refuted rows stay VISIBLE (struck), never removed. */
+.ev-hyp{border-top:1px solid var(--hairline-soft);padding:9px 0;}
+.ev-hyp:first-child{border-top:none;padding-top:0;}
+.ev-hyp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.ev-hyp-stmt{font-weight:600;}
+.ev-hyp--refuted .ev-hyp-stmt{text-decoration:line-through;color:var(--ink-35);}
+.ev-hyp-flow{font-family:var(--mono);font-size:11px;color:var(--ink-60);
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:5px;}
+.ev-hyp-arrow{color:var(--ink-35);}
+.ev-verdict{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.04em;
+  padding:1px 8px;border-radius:999px;border:1px solid;white-space:nowrap;text-transform:uppercase;}
+.ev-verdict--confirmed{color:var(--ok);border-color:var(--ok);}
+.ev-verdict--refuted{color:var(--fail);border-color:var(--fail);}
+.ev-verdict--open{color:var(--warn);border-color:var(--warn);}
+
+/* E3 · Red→Green Repro — same test name, fail header then pass header; mono excerpts. */
+.ev-run-name{font-family:var(--mono);font-size:11px;color:var(--ink-60);margin-bottom:8px;}
+.ev-run-name b{color:var(--ink);}
+.ev-repro{display:flex;flex-direction:column;gap:9px;}
+.ev-run{border:1px solid var(--hairline);border-radius:var(--radius-sm);overflow:hidden;}
+.ev-run-h{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 10px;color:var(--paper);
+  display:flex;justify-content:space-between;align-items:center;}
+.ev-run--fail .ev-run-h{background:var(--fail);}
+.ev-run--pass .ev-run-h{background:var(--ok);}
+.ev-run-body{font-family:var(--mono);font-size:11px;white-space:pre-wrap;
+  padding:8px 10px;color:var(--ink-60);background:var(--cream);margin:0;}
+
+/* E4 · Verdict Card — answer + H/M/L glyph (neutral; shape carries the signal) +
+   deciding data points + a first-class spike_ref link row. */
+.ev-answer{font-weight:600;font-size:14px;margin-bottom:9px;line-height:1.4;}
+.ev-conf{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink-60);}
+.ev-conf-glyph{font-size:13px;color:var(--ink);}
+.ev-points{list-style:none;padding:0;margin:11px 0;display:flex;flex-direction:column;gap:5px;}
+.ev-point{font-size:12px;color:var(--ink-60);padding-left:14px;position:relative;}
+.ev-point::before{content:'·';position:absolute;left:5px;color:var(--ink-35);font-weight:700;}
+.ev-spikeref{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+  border-top:1px solid var(--hairline-soft);padding-top:9px;margin-top:3px;color:var(--ink-35);}
+
+/* E5 · Rendered Report + Provenance — hand-rolled inline-SVG chart (NO chart library) +
+   a `show provenance` disclosure + a dated version chip (the freshness signal). */
+.ev-chart{margin:2px 0 11px;}
+.ev-svg{display:block;width:100%;height:auto;}
+.ev-svg .ev-bar{fill:var(--ink-35);}
+.ev-svg .ev-bar--latest{fill:var(--ink);}
+.ev-svg .ev-axis{stroke:var(--hairline);stroke-width:1;}
+.ev-svg text{font-family:var(--mono);}
+.ev-prov{margin-top:4px;}
+.ev-prov summary{font-family:var(--mono);font-size:11px;color:var(--ink);cursor:pointer;
+  text-decoration:underline;text-decoration-color:var(--ink-35);text-underline-offset:2px;width:fit-content;}
+.ev-prov-body{font-size:11px;color:var(--ink-60);margin-top:9px;}
+.ev-prov-src{font-family:var(--mono);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.ev-prov-chip{border:1px solid var(--hairline);border-radius:var(--radius-sm);padding:1px 7px;color:var(--ink-60);}
+.ev-prov-q{font-family:var(--mono);font-size:10.5px;background:var(--cream);color:var(--ink-60);
+  padding:6px 9px;border-radius:var(--radius-sm);white-space:pre-wrap;}
+.ev-ver{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+  color:var(--ink-60);border:1px solid var(--hairline);border-radius:999px;padding:2px 10px;margin-top:11px;}
+.ev-ver-dot{width:6px;height:6px;border-radius:50%;background:var(--warn);flex:none;}
+.ev-unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);border:1px dashed var(--rasp);
+  border-radius:var(--radius-md);padding:12px 14px;background:var(--rasp-08);}
+
+/* #/kit — 2b.2a gallery layout (spine grid + evidence grid). kit- prefix (harness-only). */
+.kit-spinegrid{display:grid;grid-template-columns:1fr;gap:22px;max-width:620px;}
+.kit-spinecell{display:flex;flex-direction:column;gap:8px;}
+.kit-spinecell > .kit-cap{margin:0;}
+.kit-evgrid{display:flex;flex-direction:column;gap:18px;}
+.kit-evcell{display:flex;flex-direction:column;gap:8px;}
+.kit-evcell > .kit-cap{margin:0;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.2b — JUDGMENT LAYER STYLES (Decision ladder · NudgeCard · EscalationRail ·
+   AutonomyDial). Prefixes: dec-* (decision 6A pill / 6B callout / 6C trail row) ·
+   nudge-* (3B card) · rail-* (7A escalation) · dial-* (8A autonomy). Token-only
+   colors. NO view-transition-name lives here (Contract 9 — these render on #/kit;
+   the only morph anchor is vt-nudge-card on the GoalCanvas .nudge ZONE WRAPPER,
+   never on NudgeCard). ACCENT DISCIPLINE: raspberry is confined to the L3 L-badge
+   mapping (Contract 7), the rail's hero option, and the dial's L3 threshold-legend
+   entry — nowhere else in normal render (error-path fallbacks reuse the semantic
+   alert-red, the same posture as 2b.2a's ev-unknown / spine-unknown).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Decision ladder — ONE atom, three projections. The DEC- id renders in every
+   layer (ID-match verifiable); `diff` is the mono scan-line. ── */
+/* 6A · inline pill: ⚖ + field diff (mono scan-line) + L-badge + DEC id. */
+.dec-pill{display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--hairline);border-radius:999px;background:var(--paper);
+  padding:4px 11px 4px 9px;font-size:12px;color:var(--ink-60);
+  box-shadow:0 1px 2px rgba(26,26,40,.04);}
+.dec-scale{font-size:13px;color:var(--ink-35);line-height:1;}
+.dec-diff{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:500;}
+.dec-id{font-family:var(--mono);font-size:10px;color:var(--ink-35);letter-spacing:.02em;}
+.dec-pill--superseded .dec-diff{text-decoration:line-through;color:var(--ink-35);font-weight:400;}
+.dec-pill--awaiting{border-style:dashed;}
+/* awaiting tag — NON-animated (visible, not modal). */
+.dec-await-tag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:0 6px;}
+
+/* 6B · callout: the pill AS a button + a CSS-positioned popover (no portal library). */
+.dec-callout{position:relative;display:inline-flex;}
+.dec-pill--btn{cursor:pointer;font:inherit;}
+.dec-pill--btn:hover{border-color:var(--ink-35);}
+.dec-pill--btn:focus-visible{outline:2px solid var(--maker);outline-offset:2px;}
+.dec-pop{position:absolute;top:calc(100% + 7px);left:0;z-index:20;width:300px;
+  border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);
+  box-shadow:0 12px 30px -12px rgba(26,26,40,.3),0 2px 6px rgba(26,26,40,.06);
+  padding:13px 15px;font-size:12px;color:var(--ink-60);text-align:left;}
+.dec-pop-row{margin-bottom:9px;}
+.dec-pop-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-35);display:block;margin-bottom:3px;}
+.dec-pop-opt{display:flex;gap:7px;align-items:baseline;padding:2px 0;}
+.dec-pop-opt-mark{font-family:var(--mono);font-size:11px;color:var(--ink-35);width:12px;flex:none;}
+.dec-pop-opt--chosen{color:var(--ink);font-weight:500;}
+.dec-pop-opt--chosen .dec-pop-opt-mark{color:var(--ok);}
+.dec-pop-by{display:flex;align-items:center;gap:6px;border-top:1px solid var(--hairline-soft);
+  padding-top:9px;margin-top:3px;font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+.dec-pop-link{font-family:var(--mono);font-size:11px;color:var(--ink);
+  text-decoration:underline;text-decoration-color:var(--ink-35);text-underline-offset:2px;
+  display:inline-block;margin-top:9px;cursor:pointer;}
+
+/* 6C · trail row: time · phase · ⚖L · [diff over title] · who. The diff is the mono
+   scan-line and LEADS the decision cell (the eye lands on the change, not the prose);
+   the title rides secondary. Superseded rows strike the diff + link to superseded_by. */
+.dec-trail{display:flex;flex-direction:column;border:1px solid var(--hairline);
+  border-radius:var(--radius-md);background:var(--paper);overflow:hidden;max-width:620px;}
+.dec-row{display:grid;grid-template-columns:46px 92px 58px 1fr 110px;gap:10px;align-items:center;
+  padding:9px 13px;border-top:1px solid var(--hairline-soft);font-size:12px;}
+.dec-row:first-child{border-top:none;}
+.dec-row--head{background:var(--cream);font-family:var(--mono);font-size:9px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-35);}
+.dec-c-time{font-family:var(--mono);font-size:11px;color:var(--ink-35);}
+.dec-c-phase{font-family:var(--mono);font-size:10px;color:var(--ink-60);}
+.dec-c-title{min-width:0;}
+.dec-c-diff{font-family:var(--mono);font-size:11.5px;color:var(--ink);font-weight:600;display:block;}
+.dec-c-name{font-size:11px;color:var(--ink-35);display:block;margin-top:2px;}
+.dec-c-who{font-family:var(--mono);font-size:10.5px;color:var(--ink-60);}
+.dec-row--superseded .dec-c-diff{text-decoration:line-through;color:var(--ink-35);font-weight:400;}
+.dec-suplink{font-family:var(--mono);font-size:10px;color:var(--ink);text-decoration:underline;
+  text-decoration-color:var(--ink-35);text-underline-offset:2px;cursor:pointer;}
+.dec-unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);border:1px dashed var(--rasp);
+  border-radius:var(--radius-sm);padding:8px 11px;background:var(--rasp-08);}
+
+/* ── NudgeCard (3B): primary do-line CTA (INK-filled — hue-neutral; raspberry stays
+   reserved for the needs-you rail/dial per accent discipline) + ALWAYS-present
+   subordinate why-line (3B thesis: the product justifies, not just points) + ◈ Guide. ── */
+.nudge-card{border:1px solid var(--hairline);border-left:3px solid var(--ink);
+  border-radius:var(--radius-md);background:var(--paper);padding:13px 15px;max-width:380px;}
+.nudge-who{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink-60);}
+.nudge-do{display:inline-block;margin:9px 0 7px;padding:8px 14px;border:none;cursor:pointer;
+  font-family:var(--sans);font-size:14px;font-weight:600;color:var(--cream);
+  background:var(--ink);border-radius:var(--radius-sm);text-align:left;}
+.nudge-do:hover{filter:brightness(1.14);}
+.nudge-do:focus-visible{outline:2px solid var(--maker);outline-offset:2px;}
+.nudge-why{font-size:12px;color:var(--ink-60);}
+.nudge-card--empty{color:var(--rasp);font-family:var(--mono);font-size:12px;
+  border:1px dashed var(--rasp);border-radius:var(--radius-md);padding:12px 14px;background:var(--rasp-08);}
+
+/* ── EscalationRail (7A): L3 header + @you route · evidence pack · three RANK-WEIGHTED
+   option <button>s (A hero / B outline / C ghost), each with a consequence line. NOTHING
+   pre-selected — rank guides, a real click decides (owner's resolution of pb05 pitfall 2
+   vs the 7A pick). Raspberry = needs-you, on the hero card only. ── */
+.rail{border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);
+  padding:16px 18px;max-width:460px;}
+.rail-head{border-bottom:1px solid var(--hairline-soft);padding-bottom:12px;margin-bottom:13px;}
+.rail-head-top{display:flex;align-items:flex-start;gap:9px;}
+.rail-title{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--ink);line-height:1.35;}
+.rail-route{font-family:var(--mono);font-size:11px;color:var(--ink-60);margin-top:8px;}
+.rail-route b{color:var(--ink);}
+.rail-pack{background:var(--cream);border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-bottom:14px;display:flex;flex-direction:column;gap:7px;}
+.rail-pack-row{display:flex;gap:10px;font-size:12px;}
+.rail-pack-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-35);min-width:66px;flex:none;padding-top:2px;}
+.rail-pack-v{color:var(--ink-60);}
+.rail-opts{display:flex;flex-direction:column;gap:10px;}
+.rail-opt{display:grid;grid-template-columns:auto 1fr;gap:3px 11px;text-align:left;cursor:pointer;
+  border-radius:var(--radius-md);padding:11px 14px;font:inherit;width:100%;background:var(--paper);}
+.rail-opt-rank{grid-row:1 / span 2;align-self:start;font-family:var(--mono);font-weight:600;font-size:12px;
+  width:22px;height:22px;display:grid;place-items:center;border-radius:50%;
+  border:1px solid var(--hairline);color:var(--ink-60);}
+.rail-opt-label{font-weight:600;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.rail-opt-conseq{font-size:12px;color:var(--ink-60);}
+.rail-opt-tag{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--rasp);border:1px solid var(--rasp);border-radius:999px;padding:0 6px;}
+/* A · hero — accent-filled (raspberry = needs-you). */
+.rail-opt--hero{border:1px solid var(--rasp);background:var(--rasp-08);}
+.rail-opt--hero .rail-opt-rank{border-color:var(--rasp);color:var(--rasp);background:var(--paper);}
+.rail-opt--hero:hover{background:var(--rasp-15);}
+/* B · outline. */
+.rail-opt--outline{border:1px solid var(--hairline);}
+.rail-opt--outline:hover{border-color:var(--ink-35);}
+/* C · ghost — dashed, lightest weight. */
+.rail-opt--ghost{border:1px dashed var(--hairline);background:transparent;}
+.rail-opt--ghost .rail-opt-label{color:var(--ink-60);}
+.rail-opt--ghost:hover{border-color:var(--ink-35);}
+.rail-opt:focus-visible{outline:2px solid var(--maker);outline-offset:2px;}
+.rail-policy{font-family:var(--mono);font-size:10px;color:var(--ink-35);margin-top:13px;
+  padding-top:11px;border-top:1px solid var(--hairline-soft);}
+.rail-unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);border:1px dashed var(--rasp);
+  border-radius:var(--radius-sm);padding:8px 11px;background:var(--rasp-08);}
+
+/* ── AutonomyDial (8A, static): 3-position segmented control (Balanced default) +
+   plain-language legend + L-threshold teaching legend (L1 silent · L2 digest · L3 stop;
+   the L3 entry carries raspberry via the L-badge mapping) + earned-trust stat line. ── */
+.dial{max-width:460px;}
+.dial-seg{display:inline-flex;border:1px solid var(--hairline);border-radius:999px;
+  background:var(--cream);padding:3px;gap:2px;}
+.dial-pos{font-family:var(--mono);font-size:12px;font-weight:500;cursor:default;border:none;
+  background:transparent;color:var(--ink-60);border-radius:999px;padding:6px 16px;}
+.dial-pos--on{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(26,26,40,.1);}
+.dial-legend{display:flex;flex-direction:column;gap:6px;margin:14px 0 13px;}
+.dial-leg{display:grid;grid-template-columns:112px 1fr;gap:11px;font-size:12px;}
+.dial-leg-k{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);}
+.dial-leg-v{color:var(--ink-60);}
+.dial-leg--default .dial-leg-k::after{content:' · default';color:var(--ink-35);font-weight:400;font-size:9px;}
+.dial-llegend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:13px;}
+.dial-lchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-60);}
+.dial-trust{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+  color:var(--ink-60);border:1px solid var(--hairline);border-radius:999px;background:var(--cream);padding:5px 12px;}
+.dial-trust-i{color:var(--ink-35);}
+
+/* #/kit — 2b.2b gallery layout (decision ladder cells). kit- prefix (harness-only). */
+.kit-dec-ladder{display:flex;flex-direction:column;gap:20px;max-width:640px;}
+.kit-dec-cell{display:flex;flex-direction:column;gap:9px;align-items:flex-start;}
+.kit-dec-cell > .kit-cap{margin:0;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- ── 2a.3: the DATA SPINE, loaded as a CLASSIC script BEFORE the inline module ──
+     file:// forbids fetch() and local ES-module imports, so window.ORG must arrive via a
+     classic <script src> (Phase 1 packaging contract #1). This tag MUST precede the module
+     below so window.ORG exists when the module runs; if it is deleted or the file moves, the
+     module renders a visible error banner instead of silently painting stubs. Never refactor
+     this to fetch('org.json') — org.js's own header restates the same rule. -->
+<script src="data/org.js"></script>
+
+<script type="module">
+import { render } from 'preact';
+import { html } from 'htm/preact';
+import { useState, useEffect } from 'preact/hooks';   // 2b.2b: 6B decision-callout popover (LOCAL UI state only — never appState)
+
+/* ════════════════════════════════════════════════════════════════════════
+   2a.3 — SPINE BOOT. window.ORG (from the classic script above) is the single
+   source of every canonical token this app renders. To keep the drift grep clean,
+   NO canonical token (goal ids · checker rule codes · agent slugs · cred stats · org
+   name · rework budget) is hand-typed in the Phase-1 app surface below — each is DERIVED from ORG.
+   ════════════════════════════════════════════════════════════════════════ */
+const ORG = window.ORG;
+// Zero-silent-failure guard (Phase 1 dispatcher posture): if the spine did not load,
+// paint a visible one-line banner and STOP — never fall through to stub rendering.
+if (!ORG) {
+  const app = document.getElementById('app');
+  if (app) app.innerHTML =
+    '<div role="alert" style="max-width:620px;margin:24px auto;padding:14px 18px;'
+    + 'border:1px solid var(--rasp);border-left:4px solid var(--rasp);border-radius:var(--radius-md);'
+    + 'background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.5;">'
+    + '⚠ Diecast data spine not loaded — <b>window.ORG</b> is missing. '
+    + 'index.html needs <code>&lt;script src="data/org.js"&gt;</code> to load <em>before</em> this module '
+    + '(file:// forbids fetch/import, so the spine must arrive as a classic script first).'
+    + '</div>';
+  throw new Error('window.ORG missing — the classic <script src="data/org.js"> must precede the module.');
+}
+
+// ── Derived canonical handles (so no canonical literal is typed in this file). ──
+const goalIdByFamily = {};
+for (const [gid, g] of Object.entries(ORG.goals)) goalIdByFamily[g.family] = gid;
+const FEATURE_ID = goalIdByFamily.feature;                 // resolves to the feature goal id
+const FEATURE = ORG.goals[FEATURE_ID];
+// the single flagged checker rule code on the feature E1 panel (resolved from ORG, never typed).
+const FLAGGED_RULE = ((FEATURE.evidence?.E1?.checker_rows || []).find((r) => r.state === 'flagged') || {}).code || '';
+// the locked morph atom = the feature goal's L2 execution decision (uniquely the classify-as-bug
+// reclassification). Selected structurally so its id is never hand-typed in this file.
+const MORPH_ATOM = ORG.decisions.find(
+  (a) => a.goal_slug === FEATURE_ID && a.reversibility === 'L2' && a.phase === 'execution');
+
+// ── Spine derivation (Contract 5 / 2c mapping rule). appState.spines.<family> keeps Phase 1's
+//    shape EXACTLY: {placeholder, shape, steps:string[], current:<index>, iter?, timebox?}. Labels
+//    derive via stageModels.<f>.steps.map(s => s.shortLabel ?? s.label); spine_state.current (a step
+//    id) maps to the numeric index Phase 1's shape renderers expect. ──
+function tbMinutes(s) {                                      // '1h40m' / '3h' / '40m' → minutes
+  if (!s) return 0;
+  let n = 0; const h = s.match(/(\d+)\s*h/); const m = s.match(/(\d+)\s*m/);
+  if (h) n += +h[1] * 60; if (m) n += +m[1]; return n;
+}
+function deriveSpine(family) {
+  const sm = ORG.stageModels[family];
+  const ss = (ORG.goals[goalIdByFamily[family]] || {}).spine_state || {};
+  const steps = sm.steps.map((s) => s.shortLabel ?? s.label);
+  let current = sm.steps.findIndex((s) => s.id === ss.current);
+  if (current < 0) current = 0;
+  const spine = { placeholder: sm.placeholder, shape: sm.shape, steps, current };
+  if (ss.iter) spine.iter = { ...ss.iter };
+  if (sm.timebox) {
+    const budgetMin = tbMinutes(sm.timebox.budget);
+    const usedMin = tbMinutes(ss.timebox_used);
+    spine.timebox = {
+      budget: sm.timebox.budget,
+      used: ss.timebox_used || sm.timebox.used,
+      pct: budgetMin ? Math.round((usedMin / budgetMin) * 100) : 0,
+    };
+  }
+  return spine;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   appState (Contract 2 — v1). Phase 2a EXTENDS this; it must NOT rename keys.
+   Placeholder spine vocabulary carries placeholder:true so later phases never
+   mistake stub steps for the real Phase-2c per-family set.
+   ════════════════════════════════════════════════════════════════════════ */
+const appState = {
+  // ── appState v1.1 (2a.3) — EXTENDS Phase 1's v1; no key renamed. `family` now ranges over
+  //    all four families; `spines` gains spike+data (all four DERIVED from ORG.stageModels +
+  //    spine_state); `goal` is populated from ORG.goals[id]; NEW key `org`; receipts gain a
+  //    decision_id field (morph). Every value below comes from the spine — no canonical literal. ──
+  route:   '#/goal/' + FEATURE_ID,   // mirror of location.hash, set by router (derived id)
+  family:  'feature',                // 'feature' | 'debug' | 'spike' | 'data'
+  org:     ORG,                      // v1.1: the frozen data spine (window.ORG)
+  goal:    { id: FEATURE_ID, title: FEATURE.title, crumb: ORG.org.crumb },
+  spines:  {                         // all four DERIVED from stageModels + the family goal's spine_state
+    feature: deriveSpine('feature'),
+    debug:   deriveSpine('debug'),
+    spike:   deriveSpine('spike'),
+    data:    deriveSpine('data'),
+  },
+  nudge:   { ...FEATURE.nudge },     // the feature goal's nudge (who/do/why) — was the Phase 1 stub
+  receipts: [],                      // decision receipts, pushed by morph op (now derived from an atom)
+  pinned:  [],                       // canvas objects created by promote/pin ops (1.2)
+  drill:   null,                     // 'execution' | null — drillInto target (1.2)
+  chat:    { messages: [], scriptIndex: 0 },
+};
+// expose for console verification (manual click-through, Constraint C1 — not a test).
+window.appState = appState;
+
+/* ════════════════════════════════════════════════════════════════════════
+   Components — PascalCase. Layout references app-shell.html but markup is fresh.
+   The five future view-transition anchors (Contract 5) are mounted as PERSISTENT
+   structure now (stable wrappers), so 1.3 only adds CSS `view-transition-name`:
+     .nav-rail → vt-nav-rail   .chat-rail → vt-chat-rail
+     .goal-header → vt-goal-header   .nudge → vt-nudge-card   .receipt-trail → vt-receipt-trail
+   ════════════════════════════════════════════════════════════════════════ */
+
+// family → short nav tag (the four families the spine carries).
+const FAM_TAG = { feature: 'FEAT', debug: 'DEBUG', spike: 'SPIKE', data: 'DATA' };
+function NavRail() {
+  // 2a.3: the goal list renders from ORG.goals (all four ids resolve via the route guard) —
+  // the selected row keys on the routed goal id. No goal id/title is hand-typed here.
+  const goals = appState.org.goals;
+  const curId = appState.goal.id;
+  return html`
+    <nav class="nav-rail">
+      <div class="brand">die<em>cast</em></div>
+      <div class="tagline">cast to spec · no drift</div>
+      <div class="rail-h">Goals</div>
+      ${Object.entries(goals).map(([id, g]) => html`
+        <a class=${'nav-goal' + (id === curId ? ' sel' : '')} href=${'#/goal/' + id}>
+          <span class="fam">${FAM_TAG[g.family] || g.family}</span><span class="t">${g.title}</span>
+        </a>`)}
+      <div class="nav-spacer"></div>
+      <div class="rail-h">Workspace</div>
+      <a class="nav-goal" href="#/board"><span class="fam">▦</span><span class="t">Board</span></a>
+      <span class="nav-goal nav-dead"><span class="fam">⬡</span><span class="t">Marketplace</span></span>
+    </nav>`;
+}
+
+function labelFor(from) {
+  return ({ guide: '◈ Guide', you: 'You', narration: 'Narration', system: 'System' })[from] || 'Narration';
+}
+
+function ChatRail() {
+  const msgs = appState.chat.messages;
+  const done = appState.chat.scriptIndex >= script.length;
+  // 2b.3: the rail header speaks in the LOCKED Guide voice — the GuideMark (ink diamond +
+  // mono wordmark), no checker hue. The handle derives from the routed goal title (no
+  // hand-typed canonical token — the 2a.3 drift rule).
+  const handle = appState.goal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return html`
+    <aside class="chat-rail">
+      <div class="chat-h">
+        <${GuideMark} size=${20} wordmark=${true}/>
+        <div class="s">${handle}</div>
+      </div>
+      <div class="chat-log">
+        ${msgs.length === 0
+          ? html`<div class="chat-empty">Click <b>Next ▸</b> to walk the scripted demo.</div>`
+          : msgs.map((m) => html`
+              <div class=${'msg ' + (m.from || 'narration')}>
+                <div class="mfrom">${labelFor(m.from)}</div>
+                <div class="mtext">${m.text}</div>
+                ${m.ops ? html`
+                  <div class="mops">
+                    ${m.ops.map((o) => html`<button class="opbtn" data-op=${o.op}>${o.label}</button>`)}
+                  </div>` : null}
+              </div>`)}
+      </div>
+      <!-- "Next ▸" is scenario-advance (NOT an op) — wired to advance() directly, kept
+           visibly the same grammar as the data-op buttons it sits beside. -->
+      <button class="next-btn" onClick=${advance} disabled=${done}>
+        ${done ? 'Script complete · reload to replay' : 'Next ▸'}
+      </button>
+      <div class="chat-inp">Steer, ask, or override the Guide… ⏎</div>
+    </aside>`;
+}
+
+function AppShell({ children }) {
+  // Three-tier shell. NavRail + ChatRail are persistent chrome (rendered here, not
+  // per-route); CanvasFrame is the only slot that swaps with the route.
+  return html`
+    <div class="shell">
+      <${NavRail}/>
+      <main id="canvas-frame" class="canvas-frame">${children}</main>
+      <${ChatRail}/>
+    </div>`;
+}
+
+function GoalCanvas() {
+  const fam = appState.family;
+  const spine = appState.spines[fam];
+  const isDebug = fam === 'debug';
+  const devMode = location.hash.includes('/dev');   // dev op-strip gated behind a #/dev suffix (1.3 handoff tidy)
+  return html`
+    <div class="goal-view">
+      <div class="crumb">${appState.goal.crumb.replace(' / ', ' ')} <b>${appState.goal.id.toLowerCase()}</b></div>
+
+      <!-- Part 1 · goal anatomy (header / guide / spine / nudge) -->
+      <div class="goal-header">
+        <span class="gtitle">${appState.goal.title}</span>
+        <span class=${'fampill' + (isDebug ? ' debug' : '')}>${fam}</span>
+      </div>
+
+      <!-- Guide narration — 2b.3: the locked Guide voice (GuideMark diamond, hue-free) +
+           real narration derived from ORG (FLAGGED_RULE, never hand-typed). Replaced the
+           Phase-1 "character design lands in Phase 2b" placeholder. -->
+      <div class="guide-line">
+        <${GuideMark} size=${16}/>
+        <span>The Guide is tracking this goal — it flagged ${FLAGGED_RULE} on the open PR and queued a review for you.</span>
+      </div>
+
+      <!-- Stage spine — 2b.2a: swapped from the Phase 1 inline placeholder markup to the
+           StageSpine component (data UNCHANGED: appState.spines.<family>). The .spine-zone
+           wrapper + its (absent) anchor placement are kept BYTE-IDENTICAL — only the inner
+           content changes — so the morph contract holds: no vt-name here → the zone rides
+           the root crossfade, the feature segment bar dissolving into the debug loop band
+           ("same goal, new shape"). StageSpine renders its own PLACEHOLDER watermark. -->
+      <div class="spine-zone">
+        <${StageSpine} spine=${spine}/>
+      </div>
+
+      <!-- Nudge zone — 2b.2b: swapped from the Phase 1 inline stub to the NudgeCard (3B)
+           component. The .nudge ZONE WRAPPER keeps the vt-nudge-card anchor (Contract 9 —
+           anchor on the wrapper, NEVER on the kit component); only the inner content changes,
+           so the morph contract holds. data-op="nudge:n2" still cycles the card's content. -->
+      <div class="nudge">
+        <${NudgeCard} nudge=${appState.nudge}/>
+      </div>
+
+      <!-- Part 2 · stage artifacts + work happening -->
+      <div class="body">
+        <section>
+          <div class="sect-h"><span class="k">Stage</span> artifacts</div>
+          <div class="panel">Evidence tiles + screenshots — Phase 3.</div>
+        </section>
+        <section>
+          <div class="sect-h"><span class="k">In flight</span> work</div>
+          <!-- 2a.3: the Phase 1 hardcoded work-items carried canonical tokens (a goal id, an
+               agent slug, a PR id); neutralized to a shell stub here (drift sweep). The real
+               per-goal work-stream renderer (reads ORG.goals[id].work_stream) is Phase 3. -->
+          <div class="panel">Work-stream items — Phase 3.</div>
+        </section>
+      </div>
+
+      <!-- Pinned objects — created by promote (chat artifact) / pin (canvas-local stub). -->
+      ${appState.pinned.length > 0 ? html`
+        <div class="pinned-wrap">
+          <div class="sect-h"><span class="k">Pinned</span> on canvas</div>
+          ${appState.pinned.map((p) => html`
+            <div class="pinned-card">
+              <div class="name">${p.title}</div>
+              <div class="prov">${p.provenance}</div>
+            </div>`)}
+        </div>` : null}
+
+      <!-- Drill-in execution panel — toggled by drillInto:execution (real run_node.html lift = Phase 3). -->
+      ${appState.drill === 'execution' ? html`
+        <div class="drill-panel">
+          <div class="sect-h"><span class="k">Execution</span> drill-in (stub)</div>
+          <div class="panel">run_node.html lifts here in Phase 3 — this labeled panel proves the drillInto toggle.</div>
+        </div>` : null}
+
+      <!-- receipt-trail: morph op pushes decision receipts here. -->
+      <div class="receipt-trail">
+        ${appState.receipts.length === 0
+          ? html`receipt trail — decision receipts appear here.`
+          : appState.receipts.map((r) => html`
+              <div class="receipt">
+                <span class="rlevel">${r.level}</span>${r.label} · <span class="rat">${r.at}</span>
+              </div>`)}
+      </div>
+
+      <!-- DEV OP STRIP — GATED behind a #/dev hash suffix (1.3 handoff tidy). The showable
+           goal route never renders it; append /dev (e.g. the goal hash + /dev) to expose the
+           raw op buttons + the deliberately bad op (unknown-op console.warn guard path).
+           Verification crutch only — not part of the showable artifact. -->
+      ${devMode ? html`
+        <div class="dev-strip">
+          <span class="dev-label">DEV · ops</span>
+          <button data-op="morph:debug">morph:debug</button>
+          <button data-op="nudge:n2">nudge</button>
+          <button data-op="promote:a1">promote</button>
+          <button data-op="drillInto:execution">drillInto</button>
+          <button data-op="pin:c1">pin</button>
+          <button data-op="morf:debug">⚠ bad-op</button>
+        </div>` : null}
+    </div>`;
+}
+
+function Home() {
+  // 2a.3: the feature goal id/href derive from ORG (no hand-typed canonical token).
+  return html`
+    <div class="stub-wrap">
+      <h1>Diecast — Vision Prototype</h1>
+      <p>Scenario chooser stub. The real chooser lands in a later phase.</p>
+      <a class="stub-link" href=${'#/goal/' + FEATURE_ID}>▸ Open goal ${FEATURE_ID}</a>
+    </div>`;
+}
+
+function BoardStub() {
+  return html`
+    <div class="stub-wrap">
+      <h1>Board</h1>
+      <p>Workspace board placeholder — proves routing, nothing more.</p>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.1 — GRAMMAR LAYER (Avatar primitive · ColleagueCard · Guide character ·
+   FIXTURES · #/kit harness). Every component here is PURE (props)->vdom: it reads
+   PROPS ONLY (never appState — that is what makes #/kit honest isolation and Phase 3
+   reuse trivial), carries NO view-transition-name (Contract 9), and lives inline (C3).
+   Built against FIXTURES (C4) — when 2a's org.js lands, the data source swaps to
+   window.ORG with zero reshape.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── FIXTURES (Contract 2 shape · canonical vocabulary only — C4). ── */
+const FIXTURES = {
+  CO:  { id: 'CO', slug: 'crud-orchestrator', kind: 'maker',
+         pairedWith: 'crud-compliance-checker',
+         stats: { compliancePct: 99.9, loops: 2, runs: 505 },
+         autonomy: 'L2', rework: { used: 1, budget: 3 },
+         inflight: { label: 'CAST-412 · iteration 2/3' }, state: 'working' },
+  CC:  { id: 'CC', slug: 'crud-compliance-checker', kind: 'checker',
+         pairedWith: null,
+         stats: { compliancePct: 99.9, loops: 2, runs: 505 },
+         autonomy: 'L1', rework: { used: 0, budget: 3 },
+         inflight: null, state: 'idle' },
+  YOU: { id: 'SJ', slug: '@you', kind: 'human',
+         pairedWith: null, stats: null, autonomy: null,
+         rework: null, inflight: null, state: 'idle' },
+  GUIDE: { id: '', slug: 'the Guide', kind: 'guide',
+           pairedWith: null, stats: null, autonomy: null,
+           rework: null, inflight: null, state: 'working' },
+};
+// Broken-state stub: a maker that SHOULD carry a checker but doesn't (pairing is
+// load-bearing per US6.S5). Canonical name retained (spread of CO) so it stays a
+// real-vocabulary fixture, not an ad-hoc one — it exercises the visible fallback.
+FIXTURES.CO_SOLO = { ...FIXTURES.CO, pairedWith: null, autonomy: 'L3',
+                     rework: { used: 3, budget: 3 }, inflight: null, state: 'blocked' };
+
+/* ── 2b.2a spine fixtures (Contract 5). `segments`/`loop` mirror appState.spines.<family>
+   VERBATIM (same shape → 2c's real vocabulary lands as a pure data edit). `timebox`/`pipeline`
+   live here until 2a adds the spike/data families to appState. All placeholder:true →
+   watermarked. Canonical vocabulary only (C4). `timebox.pct` is a render hint for the meter
+   fill (budget/used stay the contract-5 human strings). ── */
+FIXTURES.SPINES = {
+  segments: { placeholder: true, shape: 'segments',
+              steps: ['Requirements', 'Exploration', 'Plan', 'Execution', 'Ship'], current: 3 },
+  loop:     { placeholder: true, shape: 'loop', iter: { current: 2, budget: 3 },
+              steps: ['Reproduce', 'Hypothesize', 'Experiment', 'Observe'], current: 1 },
+  timebox:  { placeholder: true, shape: 'timebox',
+              timebox: { budget: '3h', used: '1h 40m', pct: 56 }, steps: [], current: 0 },
+  pipeline: { placeholder: true, shape: 'pipeline',
+              steps: ['Question', 'Sources', 'Analysis', 'Answer'], current: 1 },
+};
+
+/* ── 2b.2a evidence fixtures (Contract 4 data shapes). Canonical vocabulary (C4):
+   CAST-412, rule codes M04/S03/R02, PR #2341. E1.checker reuses the FIXTURES.CC agent so the
+   acceptance panel's attribution renders through the 2b.1 line-density ColleagueCard. ── */
+FIXTURES.EVIDENCE = {
+  E1: {
+    tests: { passed: 47, failed: 0, coverageDelta: '+2.4%' },
+    screenshots: [{ label: 'checkout' }, { label: 'rbac gate' }, { label: 'denied' }],
+    checks: [
+      { code: 'M04', label: 'mvcs layering', status: 'resolved' },
+      { code: 'S03', label: 'service → schema', status: 'resolved' },
+      { code: 'R02', label: 'repo filter spec', status: 'flagged' },
+    ],
+    pr: { id: '#2341', label: 'Add RBAC to checkout' },
+    checker: FIXTURES.CC,
+  },
+  E2: {
+    hypotheses: [
+      { id: 'h1', statement: 'Token refresh races the auth guard',
+        prediction: 'fails under 50ms clock skew', observation: 'reproduced at 38ms skew', verdict: 'confirmed' },
+      { id: 'h2', statement: 'Connection-pool exhaustion under load',
+        prediction: 'errors climb with concurrency', observation: 'flat at 200 conns', verdict: 'refuted' },
+      { id: 'h3', statement: 'Stale role cache after a grant change',
+        prediction: 'old role persists one TTL', observation: 'trace still running', verdict: 'open' },
+    ],
+  },
+  E3: {
+    test: { name: 'test_checkout_denies_unscoped_token' },
+    before: { status: 'fail', excerpt: 'E   AssertionError: expected 403, got 200\n    checkout.py:142 — scope guard missing' },
+    after:  { status: 'pass', excerpt: '1 passed in 0.21s\n    checkout.py:142 — scope guard enforced' },
+  },
+  E4: {
+    answer: 'Enforce RBAC at the row layer, not per-endpoint guards.',
+    confidence: 'M',
+    dataPoints: [
+      '3 of 4 endpoints already row-scoped',
+      'endpoint guards duplicate 7 identical checks',
+      'spike measured +1.2ms / request',
+    ],
+    spike_ref: { decisionId: 'DEC-118', label: 'spike: RBAC enforcement layer' },
+  },
+  E5: {
+    headline: { kind: 'chart', unit: 'runs / week', bars: [
+      { label: 'wk1', value: 18 }, { label: 'wk2', value: 31 }, { label: 'wk3', value: 27 },
+      { label: 'wk4', value: 44 }, { label: 'wk5', value: 52 },
+    ] },
+    provenance: { sources: ['runs.db', 'ci-exports/2026-06'],
+                  query: 'SELECT week, count(*) FROM exec\nGROUP BY week ORDER BY week' },
+    version: { n: 2, date: '2026-06-11', note: 're-run on fresh data' },
+  },
+};
+
+/* ── 2b.2b judgment fixtures. DECISIONS: field names are Contract-3 (playbook 05) VERBATIM
+   — id · phase · title · reversibility · rationale · options_considered[] · consequences ·
+   revisit_if · originating_agent · author_type · timestamp · status · supersedes/superseded_by
+   · spike_ref · influenced[]. Phases 3/5 read these atoms UNCHANGED (a renamed field forks the
+   schema). `diff` is a presentational render hint (the mono scan-line, like 2b.2a's
+   timebox.pct), NOT a contract field. The chain proves "the product changes its mind":
+   DEC-CAST-412-01 (feature) is superseded_by DEC-CAST-412-03 (bug). The `awaiting` record
+   exercises the status:'awaiting_human' error path (visible, non-animated). ESCALATION/AUTONOMY:
+   canonical vocabulary (C4); trust mirrors the same stat shape the Phase-5 marketplace résumé reads. ── */
+FIXTURES.DECISIONS = {
+  primary: {
+    id: 'DEC-CAST-412-03', phase: 'execution',
+    title: 'Classify CAST-412 as bug, not feature', reversibility: 'L2',
+    diff: 'classification: feature → bug',
+    rationale: 'Repro is a regression from the v4.2 RBAC migration, not new scope.',
+    options_considered: [
+      { option: 'Treat as feature', consequence: 'new FR + re-estimate', chosen: false },
+      { option: 'Treat as bug', consequence: 'hotfix lane, no re-scope', chosen: true },
+    ],
+    consequences: 'Routes to the debug-loop canvas; skips the planning re-estimate.',
+    revisit_if: 'If the regression bisect lands outside the migration commit range.',
+    originating_agent: 'cast-crud-orchestrator', author_type: 'agent',
+    timestamp: '2026-06-11T14:22:00Z', status: 'recorded',
+    supersedes: 'DEC-CAST-412-01', superseded_by: null,
+    spike_ref: null, influenced: ['req-elem-FR-014', 'canvas-stage-classify'],
+  },
+  superseded: {
+    id: 'DEC-CAST-412-01', phase: 'exploration',
+    title: 'Treat CAST-412 as new feature scope', reversibility: 'L2',
+    diff: 'classification: — → feature',
+    rationale: 'First read: the RBAC gap looked like net-new checkout scope.',
+    options_considered: [
+      { option: 'New feature scope', consequence: 'full planning pass', chosen: true },
+      { option: 'Regression / bug', consequence: 'hotfix lane', chosen: false },
+    ],
+    consequences: 'Opened a feature spine + an estimate.',
+    revisit_if: 'If a bisect shows the behaviour regressed from a prior release.',
+    originating_agent: 'cast-crud-orchestrator', author_type: 'agent',
+    timestamp: '2026-06-10T09:18:00Z', status: 'superseded',
+    supersedes: null, superseded_by: 'DEC-CAST-412-03',
+    spike_ref: null, influenced: ['canvas-stage-classify'],
+  },
+  awaiting: {
+    id: 'DEC-CAST-412-05', phase: 'execution',
+    title: 'Drop the legacy roles column on prod', reversibility: 'L3',
+    diff: 'migration: additive → drop column',
+    rationale: 'The migration would drop a column that is irreversible on prod data.',
+    options_considered: [
+      { option: 'Additive migration, keep 90 days', consequence: 'safe, slower cleanup', chosen: false },
+      { option: 'Drop now with a snapshot', consequence: 'fast, snapshot-restore only', chosen: false },
+      { option: 'Spike a dual-write window', consequence: 'safest, +1 day', chosen: false },
+    ],
+    consequences: 'Blocked pending a human call (nothing pre-selected).',
+    revisit_if: 'On the human decision or an autonomy-dial change.',
+    originating_agent: 'cast-crud-orchestrator', author_type: 'agent',
+    timestamp: '2026-06-11T15:04:00Z', status: 'awaiting_human',
+    supersedes: null, superseded_by: null,
+    spike_ref: { decisionId: 'DEC-118', label: 'spike: RBAC enforcement layer' },
+    influenced: ['canvas-stage-migrate'],
+  },
+};
+FIXTURES.ESCALATION = {
+  title: 'The RBAC migration drops the legacy roles column — irreversible on prod data.',
+  route: '@you', expires: 'in 1h',
+  want: 'a call on how to handle the legacy roles column before the migration runs.',
+  tried: 'additive-only migration (fails the new schema check); a no-op shim (leaves dead data).',
+  options: [
+    { id: 'a', label: 'Additive migration, keep the column 90 days', consequence: 'Fully reversible; a cleanup task lands in 90 days.' },
+    { id: 'b', label: 'Drop now with a backup snapshot', consequence: 'Irreversible live; restore only from the snapshot.' },
+    { id: 'c', label: 'Spike a dual-write window first', consequence: 'Safest; adds ~1 day before the migration.' },
+  ],
+  policy: 'decisions/escalation-policy.md',
+};
+FIXTURES.AUTONOMY = { value: 'Balanced', trust: { compliancePct: 99.4, runs: 312 } };
+
+// expose for console verification (manual click-through, Constraint C1 — not a test).
+window.FIXTURES = FIXTURES;
+
+/* ── Render conventions (Contract 7). L-level reversibility badge + confidence glyph.
+   Confidence is a GLYPH, never a percentage. ── */
+const L_BADGE = { L1: 'lbadge--l1', L2: 'lbadge--l2', L3: 'lbadge--l3' };
+function LBadge({ level }) {
+  if (!level) return null;
+  return html`<span class=${'lbadge ' + (L_BADGE[level] || 'lbadge--l1')}>${level}</span>`;
+}
+const CONF_GLYPH = { H: '●', M: '◐', L: '○' };
+function confGlyph(level) { return CONF_GLYPH[level] || '○'; }
+
+/* ── Avatar primitive (Contract 6): one component, four kinds. The mark geometry is
+   .av-mk (optically scaled per shape — see CSS); the glyph/initials ride the upright
+   .av-face. Size flows from --avatar-size (inherited), not per-call markup. ── */
+function Avatar({ kind, initials = '', glyph }) {
+  const face = glyph || initials || '';
+  return html`
+    <span class=${'av av--' + kind} role="img" aria-label=${kind}>
+      <span class="av-mk"></span>
+      <span class="av-face">${face}</span>
+    </span>`;
+}
+
+/* ── ColleagueCard (Contract 1, pick 4C+4B): ONE function, two densities, five lockup
+   fields in IDENTICAL order both densities. The same `slots` fragment renders for both
+   — density only swaps the container class and the card-only stat footer. A grep for
+   `cc-slot` finds exactly one lockup definition (no second markup). ── */
+function ReworkMeter({ rework }) {
+  if (!rework) return html`<span class="cc-meter cc-meter--na">—</span>`;
+  const segs = [];
+  for (let i = 0; i < rework.budget; i++)
+    segs.push(html`<i class=${'cc-seg' + (i < rework.used ? ' cc-seg--used' : '')}></i>`);
+  return html`<span class="cc-meter" title=${`rework ${rework.used}/${rework.budget}`}>
+      ${segs}<span class="cc-meter-lbl">rework ${rework.used}/${rework.budget}</span></span>`;
+}
+function PairedTie({ agent }) {
+  if (agent.kind !== 'maker')                              // only makers carry a checker
+    return html`<span class="cc-pair cc-pair--solo">—</span>`;
+  if (!agent.pairedWith)                                   // broken state — visible, never silent
+    return html`<span class="cc-pair cc-pair--broken">⚠ paired: none</span>`;
+  return html`<span class="cc-pair"><span class="cc-tie">⌐</span>${agent.pairedWith}</span>`;
+}
+function InflightPill({ agent }) {
+  if (!agent.inflight)
+    return html`<span class="cc-flight cc-flight--idle">○ no run in flight</span>`;
+  return html`<span class="cc-flight">▸ ${agent.inflight.label}</span>`;
+}
+function ColleagueCard({ agent, density = 'card' }) {
+  // The five lockup fields, in ONE fixed order — shared verbatim by both densities.
+  const slots = html`
+    <span class="cc-slot cc-slot--head">
+      <${Avatar} kind=${agent.kind} initials=${agent.id}/>
+      <span class="cc-name">${agent.slug}</span>
+    </span>
+    <span class="cc-slot cc-slot--pair"><${PairedTie} agent=${agent}/></span>
+    <span class="cc-slot cc-slot--meter"><${ReworkMeter} rework=${agent.rework}/></span>
+    <span class="cc-slot cc-slot--badge"><${LBadge} level=${agent.autonomy}/></span>
+    <span class="cc-slot cc-slot--flight"><${InflightPill} agent=${agent}/></span>`;
+  const foot = (density === 'card' && agent.stats)
+    ? html`<div class="cc-foot"><span>${agent.stats.compliancePct}% compliant</span>
+        <span>${agent.stats.loops} loops · ${agent.stats.runs} runs</span></div>`
+    : null;
+  return html`<div class=${'cc cc--' + density} data-agent=${agent.id}>${slots}${foot}</div>`;
+}
+
+/* ── Guide character (Contract 8 deferred call). Chosen treatment = A (the diamond):
+   ink-filled diamond mark + mono GUIDE wordmark; voice = typography + structure, no new
+   hue. GuideMark reuses the Avatar diamond so the avatar grammar stays single-source.
+   Rubric + the B/C rejection reasoning are recorded in decisions-so-far.md. ── */
+function GuideMark({ size = 26, wordmark = false }) {
+  return html`<span class="gm" style=${'--avatar-size:' + size + 'px'}>
+      <${Avatar} kind="guide"/>
+      ${wordmark ? html`<span class="gm-word">GUIDE</span>` : null}</span>`;
+}
+
+/* ── #/kit — component isolation harness (Contract 8). Hash-only, hidden from demo nav;
+   renders every 2b.1 component from named FIXTURES, caption = fixture key. NO component
+   here carries a vt- anchor (Contract 9 — kit renders many copies). ── */
+function KitSection({ title, cap, children }) {
+  return html`
+    <section class="kit-sect">
+      <h3 class="kit-h">${title}</h3>
+      ${cap ? html`<div class="kit-cap">${cap}</div>` : null}
+      <div class="kit-body">${children}</div>
+    </section>`;
+}
+function KitHarness() {
+  return html`
+  <div class="kit-wrap">
+    <div class="kit-banner">
+      <div class="kit-title">#/kit · component harness</div>
+      <div class="kit-sub">2b.1 grammar — Avatar · ColleagueCard · Guide. Hash-only; hidden from demo nav.</div>
+    </div>
+
+    <${KitSection} title="Tokens & conventions" cap="contract #7">
+      <div class="kit-tokrow">
+        <span class="kit-tok"><i class="kit-sw" style="background:var(--fail)"></i>--fail</span>
+        <span class="kit-tok"><${LBadge} level="L1"/> reversible</span>
+        <span class="kit-tok"><${LBadge} level="L2"/> notable</span>
+        <span class="kit-tok"><${LBadge} level="L3"/> needs you</span>
+        <span class="kit-tok">confidence ${confGlyph('H')} high · ${confGlyph('M')} med · ${confGlyph('L')} low</span>
+      </div>
+    <//>
+
+    <${KitSection} title="Avatar" cap="FIXTURES.YOU · .CO · .CC · .GUIDE">
+      <div class="kit-avrow">
+        <div class="kit-avcell"><${Avatar} kind="human" initials="SJ"/><span>human · circle</span></div>
+        <div class="kit-avcell"><${Avatar} kind="maker" initials="CO"/><span>maker · square outline</span></div>
+        <div class="kit-avcell"><${Avatar} kind="checker" initials="CC"/><span>checker · square fill</span></div>
+        <div class="kit-avcell"><${Avatar} kind="guide"/><span>Guide · diamond</span></div>
+      </div>
+      <div class="kit-avrow kit-avrow--lg">
+        <div class="kit-avcell" style="--avatar-size:44px"><${Avatar} kind="human" initials="SJ"/></div>
+        <div class="kit-avcell" style="--avatar-size:44px"><${Avatar} kind="maker" initials="CO"/></div>
+        <div class="kit-avcell" style="--avatar-size:44px"><${Avatar} kind="checker" initials="CC"/></div>
+        <div class="kit-avcell" style="--avatar-size:44px"><${Avatar} kind="guide"/></div>
+      </div>
+      <div class="kit-note">Optical sizing: square is inset, circle ≈ full, diamond bumped to fill its rotated silhouette — all read as the same visual mass.</div>
+    <//>
+
+    <${KitSection} title="ColleagueCard · card density" cap="FIXTURES.CO — in a board-card frame">
+      <div class="kit-frame kit-frame--board">
+        <${ColleagueCard} agent=${FIXTURES.CO} density="card"/>
+      </div>
+    <//>
+
+    <${KitSection} title="ColleagueCard · line density" cap="FIXTURES.CO — same fixture, activity-row frame">
+      <div class="kit-frame kit-frame--row">
+        <${ColleagueCard} agent=${FIXTURES.CO} density="line"/>
+      </div>
+      <div class="kit-note">Same five fields (avatar+name · paired-checker · rework meter · L-badge · in-flight), same order as the card above — density is CSS only, one render function.</div>
+    <//>
+
+    <${KitSection} title="ColleagueCard · broken state" cap="FIXTURES.CO_SOLO — maker w/o checker · inflight:null">
+      <div class="kit-frame kit-frame--board">
+        <${ColleagueCard} agent=${FIXTURES.CO_SOLO} density="card"/>
+      </div>
+      <div class="kit-frame kit-frame--row">
+        <${ColleagueCard} agent=${FIXTURES.CO_SOLO} density="line"/>
+      </div>
+      <div class="kit-note">Missing checker renders a visible ⚠ flag; no run renders a visible absence — zero-silent-failure, never a blank gap.</div>
+    <//>
+
+    <${KitSection} title="Guide character — candidates judged (the 2b.1 deferred call)"
+                   cap="rubric in decisions-so-far.md · A kept, B + C deleted">
+      <div class="kit-cand-row">
+        <div class="kit-cand kit-cand--keep">
+          <div class="kit-cand-mark"><${Avatar} kind="guide"/></div>
+          <div class="kit-cand-id">A · diamond + mono wordmark</div>
+          <div class="kit-cand-v kit-cand-v--keep">✓ KEPT</div>
+        </div>
+        <div class="kit-cand kit-cand--rej">
+          <div class="kit-cand-mark"><span class="cand-seal">◈</span></div>
+          <div class="kit-cand-id">B · monogram seal</div>
+          <div class="kit-cand-v">rejected — reads decorative; muddies the avatar grammar at 16px</div>
+        </div>
+        <div class="kit-cand kit-cand--rej">
+          <div class="kit-cand-mark"><span class="cand-typo">GUIDE ▸</span></div>
+          <div class="kit-cand-id">C · typographic-only</div>
+          <div class="kit-cand-v">rejected — no glanceable mark; fails the label-free flash test</div>
+        </div>
+      </div>
+    <//>
+
+    <${KitSection} title="GuideMark + voice contexts" cap="chosen treatment A — chat header · nudge · receipt">
+      <div class="kit-frame">
+        <div class="gv-chat">
+          <div class="gv-chat-h"><${GuideMark} size=${22} wordmark=${true}/><span class="gv-chat-sub">add-rbac-to-checkout</span></div>
+          <div class="gv-chat-msg">Reclassifying CAST-412 as a debug loop — logging the decision.</div>
+        </div>
+      </div>
+      <div class="kit-frame">
+        <div class="gv-nudge">
+          <div class="gv-nudge-who"><${GuideMark} size=${16}/> Guide · next step</div>
+          <div class="gv-nudge-do">Review CAST-412’s PR</div>
+          <div class="gv-nudge-why">checker flagged R02 — unblocks 2 queued tasks</div>
+        </div>
+      </div>
+      <div class="kit-frame">
+        <div class="gv-receipt"><${LBadge} level="L2"/>
+          classification: feature → bug
+          <span class="gv-receipt-by">decided with <${GuideMark} size=${14}/> Guide</span></div>
+      </div>
+      <div class="kit-note">One mark, three voices: chat = left-rule + cream-deep tint · nudge = ◈ Guide attribution · receipt = "decided with ◈ Guide" byline. No new hue; survives 16px.</div>
+    <//>
+
+    <!-- 2b.2a additions — StageSpine (four shapes) + EvidenceBlock (E1–E5). -->
+    <${KitSpineSection}/>
+    <${KitEvidenceSection}/>
+
+    <!-- 2b.2b additions — Decision ladder + NudgeCard + EscalationRail + AutonomyDial. -->
+    <${KitDecisionSection}/>
+    <${KitJudgmentSection}/>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.2a — SHAPE & PROOF LAYER (StageSpine · EvidenceBlock). Both are PURE
+   (props)->vdom: StageSpine reads {spine} only, EvidenceBlock reads {kind,data}
+   only — never appState (Contract: kit isolation + Phase 3 reuse). NO component
+   here carries a view-transition-name (Contract 9). Lives inline (C3). Classes are
+   spine-* / ev-* prefixed (greppable). Error paths render VISIBLE fallbacks +
+   console.warn, never throw (zero-silent-failure, Phase 1 dispatcher posture).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── StageSpine (Contract 3 / pick 1B/2B + timebox + pipeline): ONE component, a
+   four-way `spine.shape` switch → four MATERIALLY-DIFFERENT silhouettes (bar / loop
+   band / single meter / node chain), not four colorings of one stepper. Each carries
+   the PLACEHOLDER watermark while placeholder:true. ── */
+function SpineSegments({ spine }) {                 // shape A — labeled segment BAR
+  return html`
+    <div class="spine-segbar">
+      ${spine.steps.map((s, i) => html`
+        <div class=${'spine-seg' + (i === spine.current ? ' spine-seg--now' : i < spine.current ? ' spine-seg--done' : '')}>
+          <span class="spine-n">${String(i + 1).padStart(2, '0')}</span>
+          <span class="spine-lbl">${s}</span>
+        </div>`)}
+    </div>`;
+}
+function SpineLoop({ spine }) {                      // shape B — staged LOOP BAND + iter badge
+  const iter = spine.iter || { current: 1, budget: 3 };
+  return html`
+    <div class="spine-loopband">
+      ${spine.steps.map((s, i) => html`
+        <span class=${'spine-loopstage' + (i === spine.current ? ' spine-loopstage--now' : '')}>
+          <span class="spine-n">${String(i + 1).padStart(2, '0')}</span>${s}
+        </span>
+        ${i < spine.steps.length - 1 ? html`<span class="spine-loopsep">→</span>` : null}`)}
+      <span class="spine-iter">↺ iter ${iter.current}/${iter.budget}</span>
+    </div>`;
+}
+function SpineTimebox({ spine }) {                   // shape C — single budget METER (lighter; no nodes)
+  const tb = spine.timebox || { budget: '3h', used: '1h 40m', pct: 50 };
+  const pct = Math.max(0, Math.min(100, tb.pct == null ? 50 : tb.pct));
+  return html`
+    <div class="spine-timebox">
+      <div class="spine-tb-head"><span class="spine-tb-glyph">⧗</span>timebox · spike budget</div>
+      <div class="spine-tb-track"><div class="spine-tb-fill" style=${'width:' + pct + '%'}></div></div>
+      <div class="spine-tb-legend"><span>${tb.budget} box</span><span>${tb.used} used</span></div>
+    </div>`;
+}
+function SpinePipeline({ spine }) {                  // shape D — data-stage NODE CHAIN
+  return html`
+    <div class="spine-pipeline">
+      ${spine.steps.map((s, i) => html`
+        <span class=${'spine-node' + (i === spine.current ? ' spine-node--now' : i < spine.current ? ' spine-node--done' : '')}>
+          <span class="spine-dot"></span><span class="spine-nodelbl">${s}</span>
+        </span>
+        ${i < spine.steps.length - 1 ? html`<span class="spine-flow">▸</span>` : null}`)}
+    </div>`;
+}
+const SPINE_SHAPES = { segments: SpineSegments, loop: SpineLoop, timebox: SpineTimebox, pipeline: SpinePipeline };
+function StageSpine({ spine }) {
+  if (!spine || !spine.shape) {                     // visible fallback, never a blank gap
+    console.warn('StageSpine: missing spine or spine.shape', spine);
+    return html`<div class="spine-root"><div class="spine-unknown">⚠ no spine shape</div></div>`;
+  }
+  const Shape = SPINE_SHAPES[spine.shape];
+  const ph = spine.placeholder ? html`<span class="spine-ph">placeholder</span>` : null;
+  if (!Shape) {
+    console.warn('StageSpine: unknown shape', spine.shape);
+    return html`<div class="spine-root">${ph}<div class="spine-unknown">⚠ unknown spine shape: ${spine.shape}</div></div>`;
+  }
+  return html`<div class="spine-root">${ph}${Shape({ spine })}</div>`;
+}
+
+/* ── EvidenceBlock (Contract 1 pick E1–E5 / Contract 4 data shapes): ONE component,
+   ONE `kind` switch, five sub-renderers sharing one visual vocabulary (.ev shell +
+   outcome-first .ev-head + mono machine values). EVERY block carries a confidence or
+   flag signal — NO bare green badge anywhere. Unknown kind → visible placeholder +
+   console.warn, NO throw. ── */
+function EvScreenshot({ label }) {                  // hand-drawn CSS/SVG thumb (C2: no image fetch)
+  return html`
+    <div class="ev-shot">
+      <svg viewBox="0 0 84 54" width="84" height="54" aria-hidden="true">
+        <rect class="ev-shot-bg" x="0" y="0" width="84" height="54"/>
+        <rect class="ev-shot-bar" x="0" y="0" width="84" height="10"/>
+        <rect class="ev-shot-ln" x="8" y="20" width="50" height="4" rx="1"/>
+        <rect class="ev-shot-ln" x="8" y="30" width="64" height="4" rx="1"/>
+        <rect class="ev-shot-ln" x="8" y="40" width="34" height="4" rx="1"/>
+      </svg>
+      <span class="ev-shot-cap">${label}</span>
+    </div>`;
+}
+function EvidenceE1({ data }) {                      // Acceptance Panel (5B)
+  const t = data.tests || {};
+  return html`
+    <div class="ev ev--e1">
+      <div class="ev-head"><span class="ev-outcome">Accepted — RBAC checkout</span><span class="ev-kind">E1 · acceptance</span></div>
+      <div class="ev-tiles">
+        <div class="ev-tile"><div class="ev-tile-n">${t.passed}</div><div class="ev-tile-k">passed</div></div>
+        <div class="ev-tile"><div class="ev-tile-n ev-tile-n--muted">${t.failed}</div><div class="ev-tile-k">failed</div></div>
+        <div class="ev-tile"><div class="ev-tile-n ev-tile-n--delta">${t.coverageDelta}</div><div class="ev-tile-k">coverage</div></div>
+      </div>
+      <div class="ev-shots">${(data.screenshots || []).map((s) => html`<${EvScreenshot} label=${s.label}/>`)}</div>
+      <div class="ev-checks">
+        ${(data.checks || []).map((c) => html`
+          <div class=${'ev-check' + (c.status === 'flagged' ? ' ev-check--flag' : '')}>
+            <span class="ev-check-code">${c.code}</span>
+            <span>${c.status === 'flagged' ? '⚠' : '✓'} ${c.label} · ${c.status}</span>
+          </div>`)}
+      </div>
+      ${data.checker ? html`
+        <div class="ev-attrib">
+          <div class="ev-attrib-lbl">checks raised by</div>
+          <${ColleagueCard} agent=${data.checker} density="line"/>
+        </div>` : null}
+      ${data.pr ? html`<div style="margin-top:11px"><a class="ev-link" href="#/goal/CAST-412">PR ${data.pr.id} — ${data.pr.label} ▸</a></div>` : null}
+    </div>`;
+}
+function EvidenceE2({ data }) {                      // Confirm/Refute Ledger
+  return html`
+    <div class="ev ev--e2">
+      <div class="ev-head"><span class="ev-outcome">Hypothesis ledger</span><span class="ev-kind">E2 · confirm / refute</span></div>
+      ${(data.hypotheses || []).map((h) => html`
+        <div class=${'ev-hyp ev-hyp--' + h.verdict}>
+          <div class="ev-hyp-top">
+            <span class="ev-hyp-stmt">${h.statement}</span>
+            <span class=${'ev-verdict ev-verdict--' + h.verdict}>${h.verdict}</span>
+          </div>
+          <div class="ev-hyp-flow">
+            <span>${h.prediction}</span><span class="ev-hyp-arrow">→</span><span>${h.observation}</span>
+          </div>
+        </div>`)}
+    </div>`;
+}
+function EvidenceE3({ data }) {                      // Red→Green Repro (same test name)
+  const b = data.before || {}, a = data.after || {};
+  return html`
+    <div class="ev ev--e3">
+      <div class="ev-head"><span class="ev-outcome">Reproduced, then fixed</span><span class="ev-kind">E3 · red → green</span></div>
+      <div class="ev-run-name">test <b>${data.test ? data.test.name : '—'}</b></div>
+      <div class="ev-repro">
+        <div class="ev-run ev-run--fail">
+          <div class="ev-run-h"><span>● FAIL · before</span><span>${b.status}</span></div>
+          <pre class="ev-run-body">${b.excerpt}</pre>
+        </div>
+        <div class="ev-run ev-run--pass">
+          <div class="ev-run-h"><span>● PASS · after</span><span>${a.status}</span></div>
+          <pre class="ev-run-body">${a.excerpt}</pre>
+        </div>
+      </div>
+    </div>`;
+}
+function EvidenceE4({ data }) {                      // Verdict Card
+  const sr = data.spike_ref;
+  return html`
+    <div class="ev ev--e4">
+      <div class="ev-head"><span class="ev-outcome">Verdict</span><span class="ev-kind">E4 · verdict</span></div>
+      <div class="ev-answer">${data.answer}</div>
+      <div class="ev-conf"><span class="ev-conf-glyph">${confGlyph(data.confidence)}</span>${data.confidence} confidence</div>
+      <ul class="ev-points">
+        ${(data.dataPoints || []).map((p) => html`<li class="ev-point">${p}</li>`)}
+      </ul>
+      ${sr ? html`
+        <div class="ev-spikeref">decided from
+          <a class="ev-link" href=${'#/goal/CAST-412'}>${sr.decisionId} · ${sr.label} ▸</a></div>` : null}
+    </div>`;
+}
+function EvBarChart({ headline }) {                  // hand-rolled inline SVG (NO chart library)
+  const bars = headline.bars || [];
+  const W = 340, H = 96, padX = 6, padBottom = 16, padTop = 8;
+  const n = Math.max(bars.length, 1);
+  const slot = (W - padX * 2) / n;
+  const bw = Math.max(slot - 10, 4);
+  const max = Math.max(...bars.map((b) => b.value), 1);
+  const plotH = H - padBottom - padTop;
+  return html`
+    <svg class="ev-svg" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label=${'report chart · ' + (headline.unit || '')}>
+      <line class="ev-axis" x1=${padX} y1=${H - padBottom} x2=${W - padX} y2=${H - padBottom}/>
+      ${bars.map((b, i) => {
+        const h = Math.round((b.value / max) * plotH);
+        const x = padX + i * slot + (slot - bw) / 2;
+        const y = H - padBottom - h;
+        return html`
+          <rect class=${'ev-bar' + (i === bars.length - 1 ? ' ev-bar--latest' : '')}
+                x=${x} y=${y} width=${bw} height=${h} rx="2"/>
+          <text x=${x + bw / 2} y=${H - 5} text-anchor="middle" font-size="8" fill="var(--ink-35)">${b.label}</text>`;
+      })}
+    </svg>`;
+}
+function EvidenceE5({ data }) {                      // Rendered Report + Provenance
+  const hl = data.headline || {}, pv = data.provenance || {}, ver = data.version || {};
+  return html`
+    <div class="ev ev--e5">
+      <div class="ev-head"><span class="ev-outcome">Execution volume${hl.unit ? ' · ' + hl.unit : ''}</span><span class="ev-kind">E5 · report</span></div>
+      <div class="ev-chart">
+        ${hl.kind === 'chart'
+          ? html`<${EvBarChart} headline=${hl}/>`
+          : html`<div class="ev-prov-q">${(hl.rows || []).join('\n')}</div>`}
+      </div>
+      <details class="ev-prov">
+        <summary>show provenance</summary>
+        <div class="ev-prov-body">
+          <div class="ev-prov-src">${(pv.sources || []).map((s) => html`<span class="ev-prov-chip">${s}</span>`)}</div>
+          <pre class="ev-prov-q">${pv.query}</pre>
+        </div>
+      </details>
+      <div class="ev-ver"><span class="ev-ver-dot"></span>Report v${ver.n} · ${ver.date}${ver.note ? ' · ' + ver.note : ''}</div>
+    </div>`;
+}
+const EVIDENCE_KINDS = { E1: EvidenceE1, E2: EvidenceE2, E3: EvidenceE3, E4: EvidenceE4, E5: EvidenceE5 };
+function EvidenceBlock({ kind, data }) {
+  const Sub = EVIDENCE_KINDS[kind];
+  if (!Sub) {                                       // visible placeholder + warn, never throw
+    console.warn('EvidenceBlock: unknown kind', kind);
+    return html`<div class="ev-unknown">⚠ unknown evidence kind: ${kind == null ? '(none)' : kind}</div>`;
+  }
+  return Sub({ data: data || {} });
+}
+
+/* ── #/kit gallery sections for 2b.2a (added to the 2b.1 harness via KitHarness).
+   Captions = fixture keys. Contract 9: no vt- anchors on any of these renders. ── */
+function KitSpineSection() {
+  const S = FIXTURES.SPINES;
+  const cells = [
+    ['segments', 'FIXTURES.SPINES.segments — labeled segment bar (feature)'],
+    ['loop',     'FIXTURES.SPINES.loop — staged loop band + ↺ iter (debug)'],
+    ['timebox',  'FIXTURES.SPINES.timebox — single budget meter (spike; lighter, no nodes)'],
+    ['pipeline', 'FIXTURES.SPINES.pipeline — data-stage node chain'],
+  ];
+  return html`
+    <${KitSection} title="StageSpine · four shapes" cap="one component, switched on spine.shape — four materially different silhouettes">
+      <div class="kit-spinegrid">
+        ${cells.map(([k, cap]) => html`
+          <div class="kit-spinecell">
+            <div class="kit-cap">${cap}</div>
+            <${StageSpine} spine=${S[k]}/>
+          </div>`)}
+        <div class="kit-spinecell">
+          <div class="kit-cap">unknown shape — visible fallback + console.warn (no throw)</div>
+          <${StageSpine} spine=${{ placeholder: true, shape: 'galaxy', steps: [], current: 0 }}/>
+        </div>
+      </div>
+      <div class="kit-note">Squint test: bar · loop band · single meter · node chain. Each placeholder carries the PLACEHOLDER watermark until Phase 2c lands real vocabulary (data edit, zero component change).</div>
+    <//>`;
+}
+function KitEvidenceSection() {
+  const E = FIXTURES.EVIDENCE;
+  const cells = [
+    ['E1', 'FIXTURES.EVIDENCE.E1 — stat tiles + screenshot strip + checker-compliance rows + PR'],
+    ['E2', 'FIXTURES.EVIDENCE.E2 — confirm/refute ledger (refuted rows stay visible, struck)'],
+    ['E3', 'FIXTURES.EVIDENCE.E3 — red→green repro, same test name'],
+    ['E4', 'FIXTURES.EVIDENCE.E4 — verdict card + H/M/L glyph + first-class spike_ref'],
+    ['E5', 'FIXTURES.EVIDENCE.E5 — hand-rolled inline-SVG chart + provenance + version chip'],
+  ];
+  return html`
+    <${KitSection} title="EvidenceBlock · E1–E5" cap="one component, per-kind sub-renderer — every block carries a confidence/flag signal, no bare green badge">
+      <div class="kit-evgrid">
+        ${cells.map(([k, cap]) => html`
+          <div class="kit-evcell">
+            <div class="kit-cap">${cap}</div>
+            <${EvidenceBlock} kind=${k} data=${E[k]}/>
+          </div>`)}
+        <div class="kit-evcell">
+          <div class="kit-cap">unknown kind (E9) — visible placeholder + console.warn (no throw)</div>
+          <${EvidenceBlock} kind="E9" data=${{}}/>
+        </div>
+      </div>
+    <//>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2b.2b — JUDGMENT LAYER (Decision ladder · NudgeCard · EscalationRail ·
+   AutonomyDial). All PURE (props)->vdom — they read PROPS ONLY, never appState
+   (kit isolation + Phase 3/5 reuse). The 6B callout's open/close is ephemeral
+   LOCAL UI state (a popover affordance), NOT app state — appState still flows only
+   through paint() (Phase 1 contract intact). NO view-transition-name here
+   (Contract 9). Classes: dec-* / nudge-* / rail-* / dial-*. Error paths render a
+   VISIBLE fallback + console.warn, never throw (zero-silent-failure, Phase 1 posture).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Decision ladder (Contract 1 pick 6A/6B/6C, Contract 3 atom): ONE component, a
+   `layer` prop → three projections of ONE atom. The DEC- id renders in every layer so an
+   ID-match across layers is verifiable. Fields are read VERBATIM from the contract-3 atom;
+   `diff` is a presentational distillation (render hint), never a contract field. ── */
+function hhmm(ts) {                                  // HH:MM from an ISO timestamp (display only)
+  const m = /T(\d{2}:\d{2})/.exec(ts || '');
+  return m ? m[1] : '--:--';
+}
+function DecisionPill({ atom }) {                    // 6A — inline pill
+  const sup = atom.status === 'superseded';
+  const awaiting = atom.status === 'awaiting_human';
+  return html`
+    <span class=${'dec-pill' + (sup ? ' dec-pill--superseded' : '') + (awaiting ? ' dec-pill--awaiting' : '')}>
+      <span class="dec-scale">⚖</span>
+      <span class="dec-diff">${atom.diff || atom.title}</span>
+      <${LBadge} level=${atom.reversibility}/>
+      ${awaiting ? html`<span class="dec-await-tag">awaiting</span>` : null}
+      <span class="dec-id">${atom.id}</span>
+    </span>`;
+}
+function DecisionCallout({ atom }) {                 // 6B — pill-as-button + CSS popover
+  const [open, setOpen] = useState(false);
+  useEffect(() => {                                  // escape-to-close (a11y)
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+  return html`
+    <span class="dec-callout">
+      <button class="dec-pill dec-pill--btn" aria-expanded=${open ? 'true' : 'false'}
+              aria-haspopup="dialog" onClick=${() => setOpen(!open)}>
+        <span class="dec-scale">⚖</span>
+        <span class="dec-diff">${atom.diff || atom.title}</span>
+        <${LBadge} level=${atom.reversibility}/>
+        <span class="dec-id">${atom.id}</span>
+      </button>
+      ${open ? html`
+        <div class="dec-pop" role="dialog" aria-label=${'decision ' + atom.id}>
+          <div class="dec-pop-row"><span class="dec-pop-k">why</span>${atom.rationale}</div>
+          <div class="dec-pop-row">
+            <span class="dec-pop-k">considered</span>
+            ${(atom.options_considered || []).map((o) => html`
+              <div class=${'dec-pop-opt' + (o.chosen ? ' dec-pop-opt--chosen' : '')}>
+                <span class="dec-pop-opt-mark">${o.chosen ? '✓' : '·'}</span>
+                <span>${o.option} — ${o.consequence}</span>
+              </div>`)}
+          </div>
+          <div class="dec-pop-row"><span class="dec-pop-k">revisit if</span>${atom.revisit_if}</div>
+          <div class="dec-pop-by">${atom.originating_agent} · ${atom.author_type} · ${hhmm(atom.timestamp)}</div>
+          <a class="dec-pop-link" href="#/kit">open full record →</a>
+        </div>` : null}
+    </span>`;
+}
+function DecisionRow({ atom }) {                     // 6C — diff-first trail row
+  const sup = atom.status === 'superseded';
+  return html`
+    <div class=${'dec-row' + (sup ? ' dec-row--superseded' : '')}>
+      <span class="dec-c-time">${hhmm(atom.timestamp)}</span>
+      <span class="dec-c-phase">${atom.phase}</span>
+      <span class="dec-c-lvl"><${LBadge} level=${atom.reversibility}/></span>
+      <span class="dec-c-title">
+        <span class="dec-c-diff">${atom.diff || ('decision: ' + atom.title)}</span>
+        <span class="dec-c-name">${atom.title} · <span class="dec-id">${atom.id}</span>${sup && atom.superseded_by
+          ? html` · <a class="dec-suplink" href="#/kit">superseded by ${atom.superseded_by} →</a>` : ''}</span>
+      </span>
+      <span class="dec-c-who">${atom.originating_agent}</span>
+    </div>`;
+}
+function Decision({ atom, layer = 'pill' }) {
+  if (!atom) { console.warn('Decision: missing atom'); return html`<span class="dec-unknown">⚠ no decision atom</span>`; }
+  if (layer === 'callout') return html`<${DecisionCallout} atom=${atom}/>`;
+  if (layer === 'row') return html`<${DecisionRow} atom=${atom}/>`;
+  return html`<${DecisionPill} atom=${atom}/>`;
+}
+
+/* ── NudgeCard (Contract 1 pick 3B / Contract 4 nudge shape): consumes appState.nudge
+   {who, do, why} VERBATIM. The do-line is the only visually-primary CTA in its context
+   (INK-filled — hue-neutral; raspberry stays reserved for the needs-you rail/dial), carrying
+   data-op="nudge:n2" (the op still cycles content — nudge() ignores the id). The why-line is
+   visually subordinate but ALWAYS present (3B's thesis: justify, don't just point). ◈ Guide
+   attribution via the single-source GuideMark. ── */
+function NudgeCard({ nudge }) {
+  if (!nudge) { console.warn('NudgeCard: missing nudge'); return html`<div class="nudge-card--empty">⚠ no nudge</div>`; }
+  return html`
+    <div class="nudge-card">
+      <div class="nudge-who"><${GuideMark} size=${16}/> ${nudge.who} · next step</div>
+      <button class="nudge-do" data-op="nudge:n2">${nudge.do}</button>
+      <div class="nudge-why">${nudge.why}</div>
+    </div>`;
+}
+
+/* ── EscalationRail (Contract 1 pick 7A / Contract 6): header (title + L3 badge + @you
+   route) · evidence pack (what I want / what I tried) · three RANK-WEIGHTED option <button>s
+   (A hero / B outline / C ghost), each with its consequence line + a data-op stub (real
+   wiring is Phase 3/5). NOTHING pre-selected — no option carries a selected/checked state;
+   rank guides, a real click decides (the owner's resolution of pb05 pitfall 2 vs the 7A
+   pick). DOM order A→B→C = keyboard focus order. ── */
+const RAIL_WEIGHT = ['hero', 'outline', 'ghost'];
+const RAIL_RANK = ['A', 'B', 'C'];
+function EscalationRail({ escalation }) {
+  if (!escalation) { console.warn('EscalationRail: missing escalation'); return html`<div class="rail-unknown">⚠ no escalation</div>`; }
+  const e = escalation;
+  return html`
+    <div class="rail">
+      <div class="rail-head">
+        <div class="rail-head-top">
+          <${LBadge} level="L3"/>
+          <span class="rail-title">${e.title}</span>
+        </div>
+        <div class="rail-route">routed to <b>${e.route || '@you'}</b> · expires ${e.expires || 'in 1h'} → falls back to @teammate</div>
+      </div>
+      <div class="rail-pack">
+        <div class="rail-pack-row"><span class="rail-pack-k">what I want</span><span class="rail-pack-v">${e.want}</span></div>
+        <div class="rail-pack-row"><span class="rail-pack-k">what I tried</span><span class="rail-pack-v">${e.tried}</span></div>
+      </div>
+      <div class="rail-opts">
+        ${(e.options || []).slice(0, 3).map((o, i) => html`
+          <button class=${'rail-opt rail-opt--' + RAIL_WEIGHT[i]} data-op=${'escalate:' + o.id}>
+            <span class="rail-opt-rank">${RAIL_RANK[i]}</span>
+            <span class="rail-opt-label">${o.label}${i === 0 ? html`<span class="rail-opt-tag">recommended</span>` : null}</span>
+            <span class="rail-opt-conseq">${o.consequence}</span>
+          </button>`)}
+      </div>
+      <div class="rail-policy">policy: ${e.policy || 'decisions/escalation-policy.md'}</div>
+    </div>`;
+}
+
+/* ── AutonomyDial (Contract 1 pick 8A / Contract 7): a 3-position segmented control
+   (Conservative · Balanced · Autonomous; Balanced is the default), a plain-language legend
+   (the legend IS the documentation), an L-threshold teaching legend (L1 silent · L2 digest ·
+   L3 stop — the L3 chip carries raspberry via the L-badge mapping), and the earned-trust
+   stat line from trust.{compliancePct, runs} (the SAME object shape the Phase-5 marketplace
+   résumé reads). STATIC: the active position is the `value` prop — Phase 5's live toggle is
+   then a pure data flip. ── */
+const DIAL_POS = ['Conservative', 'Balanced', 'Autonomous'];
+const DIAL_LEGEND = {
+  Conservative: 'agents ask more — even reversible-but-notable (L2) calls pause for your OK.',
+  Balanced:     'decide & record routine (L1), notify on notable (L2), stop to ask on irreversible (L3).',
+  Autonomous:   'handle L2 silently, self-decide some L3s for proven agents, record everything for review.',
+};
+function AutonomyDial({ value = 'Balanced', trust }) {
+  const t = trust || {};
+  return html`
+    <div class="dial">
+      <div class="dial-seg" role="radiogroup" aria-label="autonomy level">
+        ${DIAL_POS.map((p) => html`
+          <button class=${'dial-pos' + (p === value ? ' dial-pos--on' : '')}
+                  role="radio" aria-checked=${p === value ? 'true' : 'false'}>
+            ${p === value ? '● ' : ''}${p}
+          </button>`)}
+      </div>
+      <div class="dial-legend">
+        ${DIAL_POS.map((p) => html`
+          <div class=${'dial-leg' + (p === 'Balanced' ? ' dial-leg--default' : '')}>
+            <span class="dial-leg-k">${p}</span><span class="dial-leg-v">${DIAL_LEGEND[p]}</span>
+          </div>`)}
+      </div>
+      <div class="dial-llegend">
+        <span class="dial-lchip"><${LBadge} level="L1"/> silent chip</span>
+        <span class="dial-lchip"><${LBadge} level="L2"/> batched digest</span>
+        <span class="dial-lchip"><${LBadge} level="L3"/> stop to ask</span>
+      </div>
+      <div class="dial-trust"><span class="dial-trust-i">ⓘ</span>${t.compliancePct}% compliance across ${t.runs} runs</div>
+    </div>`;
+}
+
+/* ── #/kit gallery sections for 2b.2b (added to KitHarness). Captions = fixture keys.
+   Contract 9: no vt- anchors on any render here. The Decision ladder shows all three layers
+   from ONE atom (ID-match visible) + the superseded record (struck + linked) + the
+   awaiting_human pill (the error path). ── */
+function KitDecisionSection() {
+  const D = FIXTURES.DECISIONS;
+  return html`
+    <${KitSection} title="Decision ladder · one atom → three layers"
+                   cap="FIXTURES.DECISIONS.primary — 6A pill · 6B callout · 6C trail row, all rendering one DEC- id">
+      <div class="kit-dec-ladder">
+        <div class="kit-dec-cell">
+          <div class="kit-cap">6A · inline pill (drop on any influenced[] artifact)</div>
+          <${Decision} atom=${D.primary} layer="pill"/>
+        </div>
+        <div class="kit-dec-cell">
+          <div class="kit-cap">6B · callout (click the pill — popover, not a navigation; aria-expanded + Esc closes)</div>
+          <${Decision} atom=${D.primary} layer="callout"/>
+        </div>
+        <div class="kit-dec-cell">
+          <div class="kit-cap">6C · diff-first trail (the superseded record renders struck + linked)</div>
+          <div class="dec-trail">
+            <div class="dec-row dec-row--head">
+              <span>time</span><span>phase</span><span>⚖</span><span>decision</span><span>who</span>
+            </div>
+            <${Decision} atom=${D.primary} layer="row"/>
+            <${Decision} atom=${D.superseded} layer="row"/>
+          </div>
+        </div>
+        <div class="kit-dec-cell">
+          <div class="kit-cap">error path · status:'awaiting_human' — L3-color pill + non-animated awaiting tag (visible, not modal)</div>
+          <${Decision} atom=${D.awaiting} layer="pill"/>
+        </div>
+      </div>
+      <div class="kit-note">All three layers read ONE atom on the Contract-3 field names (verbatim); the DEC- id matches across layers. The 6C diff leads as the mono scan-line; the superseded record renders struck with a → superseded_by link.</div>
+    <//>`;
+}
+function KitJudgmentSection() {
+  return html`
+    <${KitSection} title="NudgeCard · 3B" cap="appState.nudge {who, do, why} — primary do-line CTA + always-present why-line + ◈ Guide">
+      <div class="kit-frame">
+        <${NudgeCard} nudge=${appState.nudge}/>
+      </div>
+      <div class="kit-note">The do-line is the only visually-primary CTA (ink-filled — hue-neutral; raspberry stays reserved for needs-you). The why-line is subordinate but always present. This same component replaces the goal-canvas nudge stub; data-op="nudge:n2" still cycles its content.</div>
+    <//>
+    <${KitSection} title="EscalationRail · 7A" cap="FIXTURES.ESCALATION — three rank-weighted options, NOTHING pre-selected, focus order A→B→C">
+      <${EscalationRail} escalation=${FIXTURES.ESCALATION}/>
+      <div class="kit-note">Rank is structural weight (A hero / B outline / C ghost) with a RECOMMENDED tag — but no option carries a selected/checked state (owner's resolution: weight guides, a real click on a real consequence decides). Options are buttons (keyboard-reachable, DOM order = focus order); each data-op is a Phase-3/5 stub.</div>
+    <//>
+    <${KitSection} title="AutonomyDial · 8A" cap="FIXTURES.AUTONOMY — three positions (Balanced default) + teaching legend + earned-trust stat (static)">
+      <${AutonomyDial} value=${FIXTURES.AUTONOMY.value} trust=${FIXTURES.AUTONOMY.trust}/>
+      <div class="kit-note">Static / prop-driven: the active position is the value prop, so Phase 5's live toggle is a pure data flip. The trust line reads the same {compliancePct, runs} object the Phase-5 marketplace résumé shows.</div>
+    <//>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   NERVOUS SYSTEM (1.2) — the typed-op dispatcher + the scenario engine.
+   Contract 3: the op vocabulary is a CLOSED 5-op set; NOTHING mutates the
+   canvas outside dispatch(). pin stays DISTINCT from promote (not aliased) —
+   the closed vocabulary is itself the contract being proven. The VISUAL morph
+   (view-transition-name tagging, contrasting spine shapes, watermark) is 1.3;
+   here morph only flips appState.family + pushes a receipt stub.
+   ════════════════════════════════════════════════════════════════════════ */
+
+// Two canned nudges the `nudge` op cycles between (proves the card re-renders from state).
+// [0] is the feature goal's nudge from ORG (carries the goal id + flagged rule — derived, never
+// typed); [1] is demo chrome with zero canonical tokens (the cycle target that proves re-render).
+const NUDGES = [
+  { ...FEATURE.nudge },
+  { who: 'Guide', do: 'Reproduce the auth timeout', why: 'attach the failing trace before hypothesizing' },
+];
+
+/* ── The five op functions (Step 1.2.2) — minimal-but-visible state mutations. ── */
+function morph(family, s) {                     // chat course-change reshapes the canvas
+  s.family = family;
+  // 2a.3: the receipt is DERIVED from the locked morph atom (level/label/time all spine-derived),
+  // keeping Phase 1's receipt keys {level,label,at} + the v1.1 decision_id. `at` slices the atom's
+  // ISO timestamp (17:52 — identical to the Phase 1 stub, so the morph swap stays invisible).
+  const a = MORPH_ATOM;
+  s.receipts.push({
+    level: a.reversibility,                     // 'L2'
+    label: a.title,                             // the decision's headline, from the spine
+    at: a.timestamp.slice(11, 16),              // 'HH:MM' (UTC) → '17:52'
+    rationale: a.rationale,
+    decision_id: a.id,                          // v1.1: receipts gain a decision_id
+  });
+}
+function nudge(_id, s) {                         // swap the dominant next step (cycle two canned nudges)
+  s.nudge = (s.nudge.do === NUDGES[0].do) ? { ...NUDGES[1] } : { ...NUDGES[0] };
+}
+function promote(artifactId, s) {               // chat artifact → durable pinned canvas object
+  s.pinned.push({ id: artifactId, kind: 'promoted',
+                  title: 'Acceptance criteria — RBAC checkout',
+                  provenance: 'from chat · Guide · 17:53' });
+  s.chat.messages.push({ from: 'system', text: 'Pinned ✓ — artifact promoted to the canvas.' });
+}
+function drillInto(target, s) {                  // WHAT-primary; HOW behind a toggle (stub panel)
+  s.drill = (s.drill === target) ? null : target;
+}
+function pin(artifactId, s) {                    // DISTINCT from promote — canvas-local stub object
+  // 2a.3: the flagged rule code derives from ORG (FLAGGED_RULE), never hand-typed.
+  s.pinned.push({ id: artifactId, kind: 'pinned',
+                  title: `Canvas note — ${FLAGGED_RULE} checker flag`,
+                  provenance: 'pinned on canvas · 17:54' });
+}
+
+/* ── The dispatcher (Step 1.2.1, ~30 lines vanilla). Every canvas change goes through here. ── */
+const OPS = { morph, nudge, promote, drillInto, pin };          // closed set (Contract 3)
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+function fade(apply) {                                          // fallback: apply, then a 180ms opacity ramp
+  apply();
+  const frame = document.getElementById('canvas-frame');
+  frame && frame.animate([{ opacity: 0.0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
+}
+
+function dispatch(opStr) {                                      // e.g. "morph:debug"
+  const [op, arg] = opStr.split(':');
+  if (!OPS[op]) { console.warn('unknown op:', opStr); return; }// guard — no throw mid-demo
+  const apply = () => { OPS[op](arg, appState); paint(); };
+  if (!document.startViewTransition || reduced.matches) return fade(apply);
+  document.startViewTransition(apply);                         // shared-element morph (visuals in 1.3)
+}
+
+// Exactly ONE delegated listener (survives re-renders; never bind per element).
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-op]');
+  if (el) dispatch(el.getAttribute('data-op'));
+});
+
+/* ── The scenario engine (Step 1.2.3, ~50 lines). An ARRAY WALKER, explicitly NOT
+   a state machine. Engine state lives ONLY in appState.chat.scriptIndex → reload resets. ── */
+function advance() {
+  const i = appState.chat.scriptIndex;
+  if (i >= script.length) return;
+  const step = script[i];
+  appState.chat.messages.push({ from: step.from || 'narration', text: step.narration, ops: step.ops });
+  appState.chat.scriptIndex = i + 1;
+  const apply = () => { step.patch && step.patch(appState); paint(); };
+  if (step.transition === 'morph' && document.startViewTransition && !reduced.matches) {
+    document.startViewTransition(apply);
+  } else if (step.transition === 'morph') {
+    fade(apply);
+  } else {
+    apply();
+  }
+}
+
+/* ── The Phase-1 demo script (Step 1.2.4, ~6 steps). Includes morph:debug AND its
+   reverse morph:feature (undo proof), then promote-the-receipt as step 6b. ── */
+// 2a.3: narration prose stays authored here, but every canonical token (the goal id, its title,
+// the flagged rule code) is INTERPOLATED from ORG — never hand-typed (the downstream-phase rule).
+const script = [
+  { from: 'guide', narration: `Opening ${FEATURE_ID} — “${FEATURE.title}”. Feature spine; you’re at Execution.` },
+  { from: 'guide', narration: `Heads up — the checker flagged ${FLAGGED_RULE} on the open PR.`,
+    ops: [{ label: 'Reclassify as bug', op: 'morph:debug' }],     // canned reply carries a data-op button
+    patch: (s) => nudge('n2', s) },
+  { from: 'you', narration: 'this is actually a bug, not a feature' },
+  { from: 'guide', narration: 'Got it — reclassifying as a debug loop and logging the decision.',
+    transition: 'morph', patch: (s) => morph('debug', s) },      // SC-003 stand-in
+  { from: 'guide', narration: 'Debug loop is now on iteration 2 of 3.',
+    patch: (s) => { s.spines.debug.iter = { current: 2, budget: 3 }; } },
+  { from: 'you', narration: 'wait — it IS a feature after all, revert that',
+    transition: 'morph', patch: (s) => morph('feature', s) },    // reverse morph — undo proof (same op)
+  { from: 'guide', narration: 'Reverted to the feature spine. Pinning the reclassification receipt.',
+    patch: (s) => promote('receipt-1', s) },                     // step 6b — the 6th visible op in-script
+];
+
+// expose for console verification (manual click-through, Constraint C1 — not a test).
+window.dispatch = dispatch;
+window.advance = advance;
+
+/* ════════════════════════════════════════════════════════════════════════
+   Render spine. Hash-keyed routes (#/area/id grammar), one App resolver, and a
+   single top-level SYNCHRONOUS paint(). CRITICAL (carried to 1.2/1.3): every
+   app-state update goes through paint(); NO component-local useState for app
+   state — synchronous render is what lets 1.2 wrap paint() inside
+   startViewTransition without snapshotting stale DOM.
+   ════════════════════════════════════════════════════════════════════════ */
+const routes = { '': Home, '#/goal': GoalCanvas, '#/board': BoardStub, '#/kit': KitHarness };
+
+function resolve(hash) {                       // key on first two '#/area' segments
+  const key = hash.split('/').slice(0, 2).join('/').replace(/^#$/, '');
+  return routes[key] || routes[''];
+}
+
+function App() {
+  const View = resolve(location.hash);
+  return html`<${AppShell}><${View}/><//>`;
+}
+
+function paint() {
+  appState.route = location.hash || '#/';
+  render(html`<${App}/>`, document.getElementById('app'));
+}
+
+// 2a.3 ROUTE GUARD: #/goal/<id> resolves ANY of the four goal ids in ORG.goals, syncing
+// appState.goal + appState.family to that goal so the canvas renders its family's spine.
+// An unknown goal id keeps the current goal (no crash). This runs ONLY on real navigation — NOT
+// on op-dispatch paints — so the morph (which flips family without a hashchange) is never undone.
+function syncGoalFromRoute(hash) {
+  const m = (hash || '').match(/^#\/goal\/([^/]+)/);
+  if (!m) return;
+  const g = appState.org.goals[m[1]];
+  if (!g) return;                              // unknown goal id → keep current goal (guard)
+  appState.goal = { id: m[1], title: g.title, crumb: appState.org.org.crumb };
+  appState.family = g.family;
+}
+function navigate() {
+  syncGoalFromRoute(location.hash);
+  paint();
+}
+
+addEventListener('hashchange', navigate);
+navigate();                                    // initial sync + paint
+</script>
+</body>
+</html>

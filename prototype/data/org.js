@@ -7,7 +7,7 @@ window.ORG = Object.freeze({
   "meta": {
     "version": "1.0",
     "seed": 42,
-    "frozen_at": null,
+    "frozen_at": "2026-06-11T18:00:00.000Z",
     "generated_by": "_build/generate-org.mjs",
     "owner_notes": "FROZEN after Phase 2a. Later phases may EXTEND with new keys at designated extension points but never mutate existing values. ONE standing exception: the stageModels region is 2c-owned and is rewritten once by 2c via this generator (which re-runs the invariant gate at that moment). This is the F4 single-source rule: org.js is generated, never hand-edited - edit the generator and regenerate."
   },
@@ -420,122 +420,182 @@ window.ORG = Object.freeze({
   },
   "stageModels": {
     "feature": {
-      "placeholder": true,
+      "placeholder": false,
       "shape": "segments",
+      "progression": "linear-reentrant",
       "steps": [
         {
           "id": "feat-01",
-          "label": "[2c] requirements",
-          "shortLabel": "[2c] feat-01",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Shape the Problem",
+          "does": "Define problem + appetite + a rough solution + named rabbit-holes; write it up as a pitch/brief before betting",
           "surface": "doc",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "the shaped problem is a written artifact reviewed before commitment",
+          "artifacts": [
+            "pitch/brief (appetite, rough solution, rabbit-holes)"
+          ],
+          "refs": [
+            "shape-up",
+            "linear-method",
+            "design-docs-google"
+          ],
           "evidence": null
         },
         {
           "id": "feat-02",
-          "label": "[2c] plan",
-          "shortLabel": "[2c] feat-02",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
-          "surface": "doc",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "label": "Commit & Scope",
+          "does": "Place a fixed-appetite bet on the pitch, then break the committed work into shippable issues",
+          "surface": "board",
+          "surfaceWhy": "the bet plus scoped issues live on a ticket board",
+          "artifacts": [
+            "committed scope / issue board"
+          ],
+          "refs": [
+            "shape-up",
+            "linear-method"
+          ],
           "evidence": null
         },
         {
           "id": "feat-03",
-          "label": "[2c] tickets",
-          "shortLabel": "[2c] feat-03",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
-          "surface": "board",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "label": "Design the Approach",
+          "shortLabel": "Design Approach",
+          "does": "Write a design doc / RFC capturing implementation strategy, alternatives, and trade-offs; resolve it in review threads",
+          "surface": "doc",
+          "surfaceWhy": "the design and its review are a document discussion, the org's decision memory",
+          "artifacts": [
+            "design doc (alternatives + trade-offs)",
+            "review thread"
+          ],
+          "refs": [
+            "design-docs-google",
+            "linear-method"
+          ],
           "evidence": null
         },
         {
           "id": "feat-04",
-          "label": "[2c] execution",
-          "shortLabel": "[2c] feat-04",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Build & Ship",
+          "does": "Build in vertical slices and ship continuously within the fixed timebox/cycle",
           "surface": "pr-thread",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "slices land as reviewed, merged PRs",
+          "artifacts": [
+            "shipped vertical slice / merged PR"
+          ],
+          "refs": [
+            "shape-up",
+            "linear-method"
+          ],
           "evidence": null
         },
         {
           "id": "feat-05",
-          "label": "[2c] review",
-          "shortLabel": "[2c] feat-05",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Show It's Done",
+          "does": "Demonstrate completion via the diff plus an acceptance-evidence bundle (screenshots / proof shots / test summary)",
           "surface": "pr-thread",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
-          "evidence": null
+          "surfaceWhy": "done is shown on the PR/report as evidence, not asserted",
+          "artifacts": [
+            "acceptance-evidence bundle (diff + screenshots + summary)"
+          ],
+          "refs": [
+            "linear-method",
+            "proofshot",
+            "devin-cu"
+          ],
+          "evidence": "E1"
         }
       ]
     },
     "debug": {
-      "placeholder": true,
+      "placeholder": false,
       "shape": "loop",
       "loop": {
-        "over": "hypotheses",
+        "over": [
+          "dbg-02",
+          "dbg-03",
+          "dbg-04"
+        ],
         "budget": 3
       },
       "steps": [
         {
           "id": "dbg-01",
-          "label": "[2c] reproduce",
-          "shortLabel": "[2c] dbg-01",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Reproduce Reliably",
+          "does": "Move from saw-it-a-few-times to an on-demand, consistent reproduction (special care for intermittents)",
           "surface": "ledger",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "the repro recipe is the first investigation-ledger entry",
+          "artifacts": [
+            "reliable reproduction (recorded repro steps)"
+          ],
+          "refs": [
+            "agans",
+            "julia-evans"
+          ],
           "evidence": null
         },
         {
           "id": "dbg-02",
-          "label": "[2c] hypothesize",
-          "shortLabel": "[2c] dbg-02",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Form a Hypothesis",
+          "does": "Invent a falsifiable hypothesis for the failure cause, consistent with the observations so far",
           "surface": "ledger",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "each candidate cause is logged in the case file",
+          "artifacts": [
+            "hypothesis entry (the accusation)"
+          ],
+          "refs": [
+            "zeller",
+            "uxmag-detective"
+          ],
           "evidence": null
         },
         {
           "id": "dbg-03",
-          "label": "[2c] experiment",
-          "shortLabel": "[2c] dbg-03",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Run an Experiment",
+          "does": "Quit thinking and look: change one thing / bisect, observe actual behavior with tools, get data",
           "surface": "ledger",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "the experiment and what it showed are logged",
+          "artifacts": [
+            "experiment result + trace/instrumentation"
+          ],
+          "refs": [
+            "agans",
+            "zeller"
+          ],
           "evidence": null
         },
         {
           "id": "dbg-04",
-          "label": "[2c] fix",
-          "shortLabel": "[2c] dbg-04",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Log Confirm/Refute",
+          "does": "Record prediction-vs-observed per hypothesis; mark confirmed/refuted; a refuted prediction spawns the next hypothesis",
+          "surface": "ledger",
+          "surfaceWhy": "the confirmed/refuted ledger is the loop's memory",
+          "artifacts": [
+            "confirm/refute evidence ledger"
+          ],
+          "refs": [
+            "hypothesizer",
+            "uxmag-detective"
+          ],
+          "evidence": "E2"
+        },
+        {
+          "id": "dbg-05",
+          "label": "Prove the Fix",
+          "does": "Prove the fix by making the failure recur, then disappear - a red-to-green repro (fails, then the same case passes)",
           "surface": "pr-thread",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
-          "evidence": null
+          "surfaceWhy": "the proof lands on the fix PR/report",
+          "artifacts": [
+            "red-to-green repro (failing then passing case)"
+          ],
+          "refs": [
+            "agans",
+            "undo-replay"
+          ],
+          "evidence": "E3"
         }
       ]
     },
     "spike": {
-      "placeholder": true,
+      "placeholder": false,
       "shape": "timebox",
       "timebox": {
         "budget": "3h"
@@ -543,97 +603,149 @@ window.ORG = Object.freeze({
       "steps": [
         {
           "id": "spk-01",
-          "label": "[2c] frame",
-          "shortLabel": "[2c] spk-01",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Frame the Question",
+          "does": "Identify the single riskiest unknown and pose it as one answerable technical question",
           "surface": "memo",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "the question opens the spike memo under its budget",
+          "artifacts": [
+            "risk-question memo"
+          ],
+          "refs": [
+            "xp-spike",
+            "mike-bowler"
+          ],
           "evidence": null
         },
         {
           "id": "spk-02",
-          "label": "[2c] probe",
-          "shortLabel": "[2c] spk-02",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Probe Options",
+          "does": "Build quick, throwaway probes to answer the question - quick-and-dirty, explicitly disposable",
           "surface": "memo",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "probe attempts are logged in the memo, code is dropped",
+          "artifacts": [
+            "probes-tried list (throwaway)"
+          ],
+          "refs": [
+            "xp-spike",
+            "mike-bowler"
+          ],
           "evidence": null
         },
         {
           "id": "spk-03",
-          "label": "[2c] measure",
-          "shortLabel": "[2c] spk-03",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Evaluate Findings",
+          "does": "Evaluate the probes; keep the learning, discard the code; at any point decide done-enough",
           "surface": "memo",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "findings accrue in the memo against the burning budget",
+          "artifacts": [
+            "findings notes"
+          ],
+          "refs": [
+            "xp-spike",
+            "agilemania-spike"
+          ],
           "evidence": null
         },
         {
           "id": "spk-04",
-          "label": "[2c] verdict",
-          "shortLabel": "[2c] spk-04",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Land the Verdict",
+          "does": "Write a one-line answer and link it to the downstream decision it informs (with a revisit-if trip-wire)",
           "surface": "memo",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
-          "evidence": null
+          "surfaceWhy": "the verdict closes the memo and points at its decision record",
+          "artifacts": [
+            "verdict card (spike_ref + revisit_if)"
+          ],
+          "refs": [
+            "mike-bowler",
+            "agilemania-spike",
+            "adr-nygard"
+          ],
+          "evidence": "E4"
         }
       ]
     },
     "data": {
-      "placeholder": true,
+      "placeholder": false,
       "shape": "pipeline",
       "steps": [
         {
           "id": "data-01",
-          "label": "[2c] extract",
-          "shortLabel": "[2c] data-01",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Import Sources",
+          "does": "Pull the sources (file / DB / API) that bear on the question into a working frame",
           "surface": "notebook",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "ingestion happens in the analysis notebook",
+          "artifacts": [
+            "loaded dataset"
+          ],
+          "refs": [
+            "r4ds",
+            "dbt-analyst"
+          ],
           "evidence": null
         },
         {
           "id": "data-02",
-          "label": "[2c] transform",
-          "shortLabel": "[2c] data-02",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Tidy & Validate",
+          "does": "Tidy to one-variable-per-column / one-observation-per-row, then sanity-check: are you telling me the truth? - cross-examine outliers before trusting",
           "surface": "notebook",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "cleaning and the sanity checks are notebook cells/charts",
+          "artifacts": [
+            "cleaned + validated frame (sanity notes)"
+          ],
+          "refs": [
+            "r4ds",
+            "data-sanity"
+          ],
           "evidence": null
         },
         {
           "id": "data-03",
-          "label": "[2c] analyze",
-          "shortLabel": "[2c] data-03",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
+          "label": "Transform / Wrangle",
+          "shortLabel": "Transform",
+          "does": "Narrow observations, create new variables, compute summary statistics",
           "surface": "notebook",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "surfaceWhy": "transforms are notebook cells",
+          "artifacts": [
+            "derived variables / summary tables"
+          ],
+          "refs": [
+            "r4ds",
+            "dbt-analyst"
+          ],
           "evidence": null
         },
         {
           "id": "data-04",
-          "label": "[2c] report",
-          "shortLabel": "[2c] data-04",
-          "does": "[2c] derived stage vocabulary lands in Phase 2c",
-          "surface": "memo",
-          "surfaceWhy": "[2c] surface rationale lands in Phase 2c",
-          "artifacts": [],
-          "refs": [],
+          "label": "Explore (Viz<->Model)",
+          "shortLabel": "Explore",
+          "does": "Iterate visualize and model many times to find the answer; disposable charts also catch problems early (visualize-to-validate)",
+          "surface": "notebook",
+          "surfaceWhy": "the explore loop is interactive charting in the notebook",
+          "artifacts": [
+            "exploratory charts + candidate models"
+          ],
+          "refs": [
+            "r4ds",
+            "looks-good-correll"
+          ],
           "evidence": null
+        },
+        {
+          "id": "data-05",
+          "label": "Publish + Provenance",
+          "shortLabel": "Publish",
+          "does": "Publish a clean narrative report (viz as the headline) distinct from the working notebook, with source/transform lineage exposed on demand",
+          "surface": "pr-thread",
+          "surfaceWhy": "the published report is the shareable deliverable",
+          "artifacts": [
+            "rendered report + provenance drill-in"
+          ],
+          "refs": [
+            "r4ds",
+            "hex-deepnote",
+            "atlan-provenance"
+          ],
+          "evidence": "E5"
         }
       ]
     }

@@ -93,7 +93,11 @@ const org = { name: CANON.org.name, crumb: CANON.org.crumb };
 const meta = {
   version: '1.0',
   seed: 42,
-  frozen_at: null, // 2a.3 sets this at freeze time
+  // 2a.3 FREEZE STAMP: a fixed constant on the demo timeline (t(540) = 2026-06-11T18:00:00.000Z,
+  // the end of the fictional one-day demo). Deterministic on purpose — never Date.now() — so the
+  // frozen spine re-generates byte-identically. After this stamp, org.js values are frozen (F4);
+  // later phases extend additively via the generator, the stageModels region being the sole 2c exception.
+  frozen_at: t(540),
   generated_by: '_build/generate-org.mjs',
   owner_notes: FREEZE_POLICY,
 };
@@ -184,69 +188,58 @@ function aggregateTrust(slugs) {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// stageModels — 2c-OWNED region. placeholder:true everywhere; watermarked labels; <family>-NN ids.
-// (2a ships the slot; 2c rewrites it once with derived vocabulary via this generator.)
-// ───────────────────────────────────────────────────────────────────────────
-// stageModels steps stay watermarked ('[2c]') and 2c-owned. NOTE: the literal word
-// 'placeholder' is intentionally kept OUT of does/surfaceWhy so that
-// `grep -c 'placeholder' org.js` resolves to exactly the four `placeholder:true` family
-// flags (the 2a.2 success criterion). 2c rewrites this vocabulary; 2a only ships the slot.
-function step(id, surface, label) {
-  return {
-    id,
-    label: `[2c] ${label}`,
-    shortLabel: `[2c] ${id}`,
-    does: '[2c] derived stage vocabulary lands in Phase 2c',
-    surface, // doc|board|pr-thread|ledger|notebook|memo
-    surfaceWhy: '[2c] surface rationale lands in Phase 2c',
-    artifacts: [],
-    refs: [],
-    evidence: null,
-  };
-}
-
+// stageModels — 2c-OWNED region. ENCODED by Phase 2c (sp4) from the canonical derived vocabulary
+// (docs/plan/product-revamp-diecast-stage-models.md §5). placeholder:false on all four families now;
+// rich per-step objects inlined as plain JSON (no functions) per the file:// classic-script contract.
+// (2a shipped the slot with placeholder:true watermarks; 2c rewrites it once — the one freeze
+// exception. The step() helper is retired: derived steps carry full per-step shape, inlined.)
+// NOTE: the literal word 'placeholder' is intentionally kept OUT of does/surfaceWhy so that
+// `grep -c 'placeholder' org.js` still resolves to exactly the four `placeholder` family flags.
 const stageModels = {
   feature: {
-    placeholder: true,
+    placeholder: false,
     shape: 'segments',
+    progression: 'linear-reentrant',
     steps: [
-      step('feat-01', 'doc', 'requirements'),
-      step('feat-02', 'doc', 'plan'),
-      step('feat-03', 'board', 'tickets'),
-      step('feat-04', 'pr-thread', 'execution'),
-      step('feat-05', 'pr-thread', 'review'),
+      { id: 'feat-01', label: 'Shape the Problem', does: 'Define problem + appetite + a rough solution + named rabbit-holes; write it up as a pitch/brief before betting', surface: 'doc', surfaceWhy: 'the shaped problem is a written artifact reviewed before commitment', artifacts: ['pitch/brief (appetite, rough solution, rabbit-holes)'], refs: ['shape-up', 'linear-method', 'design-docs-google'], evidence: null },
+      { id: 'feat-02', label: 'Commit & Scope', does: 'Place a fixed-appetite bet on the pitch, then break the committed work into shippable issues', surface: 'board', surfaceWhy: 'the bet plus scoped issues live on a ticket board', artifacts: ['committed scope / issue board'], refs: ['shape-up', 'linear-method'], evidence: null },
+      { id: 'feat-03', label: 'Design the Approach', shortLabel: 'Design Approach', does: 'Write a design doc / RFC capturing implementation strategy, alternatives, and trade-offs; resolve it in review threads', surface: 'doc', surfaceWhy: 'the design and its review are a document discussion, the org\'s decision memory', artifacts: ['design doc (alternatives + trade-offs)', 'review thread'], refs: ['design-docs-google', 'linear-method'], evidence: null },
+      { id: 'feat-04', label: 'Build & Ship', does: 'Build in vertical slices and ship continuously within the fixed timebox/cycle', surface: 'pr-thread', surfaceWhy: 'slices land as reviewed, merged PRs', artifacts: ['shipped vertical slice / merged PR'], refs: ['shape-up', 'linear-method'], evidence: null },
+      { id: 'feat-05', label: 'Show It\'s Done', does: 'Demonstrate completion via the diff plus an acceptance-evidence bundle (screenshots / proof shots / test summary)', surface: 'pr-thread', surfaceWhy: 'done is shown on the PR/report as evidence, not asserted', artifacts: ['acceptance-evidence bundle (diff + screenshots + summary)'], refs: ['linear-method', 'proofshot', 'devin-cu'], evidence: 'E1' },
     ],
   },
   debug: {
-    placeholder: true,
+    placeholder: false,
     shape: 'loop',
-    loop: { over: 'hypotheses', budget: 3 },
+    loop: { over: ['dbg-02', 'dbg-03', 'dbg-04'], budget: 3 },
     steps: [
-      step('dbg-01', 'ledger', 'reproduce'),
-      step('dbg-02', 'ledger', 'hypothesize'),
-      step('dbg-03', 'ledger', 'experiment'),
-      step('dbg-04', 'pr-thread', 'fix'),
+      { id: 'dbg-01', label: 'Reproduce Reliably', does: 'Move from saw-it-a-few-times to an on-demand, consistent reproduction (special care for intermittents)', surface: 'ledger', surfaceWhy: 'the repro recipe is the first investigation-ledger entry', artifacts: ['reliable reproduction (recorded repro steps)'], refs: ['agans', 'julia-evans'], evidence: null },
+      { id: 'dbg-02', label: 'Form a Hypothesis', does: 'Invent a falsifiable hypothesis for the failure cause, consistent with the observations so far', surface: 'ledger', surfaceWhy: 'each candidate cause is logged in the case file', artifacts: ['hypothesis entry (the accusation)'], refs: ['zeller', 'uxmag-detective'], evidence: null },
+      { id: 'dbg-03', label: 'Run an Experiment', does: 'Quit thinking and look: change one thing / bisect, observe actual behavior with tools, get data', surface: 'ledger', surfaceWhy: 'the experiment and what it showed are logged', artifacts: ['experiment result + trace/instrumentation'], refs: ['agans', 'zeller'], evidence: null },
+      { id: 'dbg-04', label: 'Log Confirm/Refute', does: 'Record prediction-vs-observed per hypothesis; mark confirmed/refuted; a refuted prediction spawns the next hypothesis', surface: 'ledger', surfaceWhy: 'the confirmed/refuted ledger is the loop\'s memory', artifacts: ['confirm/refute evidence ledger'], refs: ['hypothesizer', 'uxmag-detective'], evidence: 'E2' },
+      { id: 'dbg-05', label: 'Prove the Fix', does: 'Prove the fix by making the failure recur, then disappear - a red-to-green repro (fails, then the same case passes)', surface: 'pr-thread', surfaceWhy: 'the proof lands on the fix PR/report', artifacts: ['red-to-green repro (failing then passing case)'], refs: ['agans', 'undo-replay'], evidence: 'E3' },
     ],
   },
   spike: {
-    placeholder: true,
+    placeholder: false,
     shape: 'timebox',
     timebox: { budget: '3h' },
     steps: [
-      step('spk-01', 'memo', 'frame'),
-      step('spk-02', 'memo', 'probe'),
-      step('spk-03', 'memo', 'measure'),
-      step('spk-04', 'memo', 'verdict'),
+      { id: 'spk-01', label: 'Frame the Question', does: 'Identify the single riskiest unknown and pose it as one answerable technical question', surface: 'memo', surfaceWhy: 'the question opens the spike memo under its budget', artifacts: ['risk-question memo'], refs: ['xp-spike', 'mike-bowler'], evidence: null },
+      { id: 'spk-02', label: 'Probe Options', does: 'Build quick, throwaway probes to answer the question - quick-and-dirty, explicitly disposable', surface: 'memo', surfaceWhy: 'probe attempts are logged in the memo, code is dropped', artifacts: ['probes-tried list (throwaway)'], refs: ['xp-spike', 'mike-bowler'], evidence: null },
+      { id: 'spk-03', label: 'Evaluate Findings', does: 'Evaluate the probes; keep the learning, discard the code; at any point decide done-enough', surface: 'memo', surfaceWhy: 'findings accrue in the memo against the burning budget', artifacts: ['findings notes'], refs: ['xp-spike', 'agilemania-spike'], evidence: null },
+      { id: 'spk-04', label: 'Land the Verdict', does: 'Write a one-line answer and link it to the downstream decision it informs (with a revisit-if trip-wire)', surface: 'memo', surfaceWhy: 'the verdict closes the memo and points at its decision record', artifacts: ['verdict card (spike_ref + revisit_if)'], refs: ['mike-bowler', 'agilemania-spike', 'adr-nygard'], evidence: 'E4' },
     ],
   },
   data: {
-    placeholder: true,
+    placeholder: false,
     shape: 'pipeline',
     steps: [
-      step('data-01', 'notebook', 'extract'),
-      step('data-02', 'notebook', 'transform'),
-      step('data-03', 'notebook', 'analyze'),
-      step('data-04', 'memo', 'report'),
+      { id: 'data-01', label: 'Import Sources', does: 'Pull the sources (file / DB / API) that bear on the question into a working frame', surface: 'notebook', surfaceWhy: 'ingestion happens in the analysis notebook', artifacts: ['loaded dataset'], refs: ['r4ds', 'dbt-analyst'], evidence: null },
+      { id: 'data-02', label: 'Tidy & Validate', does: 'Tidy to one-variable-per-column / one-observation-per-row, then sanity-check: are you telling me the truth? - cross-examine outliers before trusting', surface: 'notebook', surfaceWhy: 'cleaning and the sanity checks are notebook cells/charts', artifacts: ['cleaned + validated frame (sanity notes)'], refs: ['r4ds', 'data-sanity'], evidence: null },
+      { id: 'data-03', label: 'Transform / Wrangle', shortLabel: 'Transform', does: 'Narrow observations, create new variables, compute summary statistics', surface: 'notebook', surfaceWhy: 'transforms are notebook cells', artifacts: ['derived variables / summary tables'], refs: ['r4ds', 'dbt-analyst'], evidence: null },
+      { id: 'data-04', label: 'Explore (Viz<->Model)', shortLabel: 'Explore', does: 'Iterate visualize and model many times to find the answer; disposable charts also catch problems early (visualize-to-validate)', surface: 'notebook', surfaceWhy: 'the explore loop is interactive charting in the notebook', artifacts: ['exploratory charts + candidate models'], refs: ['r4ds', 'looks-good-correll'], evidence: null },
+      { id: 'data-05', label: 'Publish + Provenance', shortLabel: 'Publish', does: 'Publish a clean narrative report (viz as the headline) distinct from the working notebook, with source/transform lineage exposed on demand', surface: 'pr-thread', surfaceWhy: 'the published report is the shareable deliverable', artifacts: ['rendered report + provenance drill-in'], refs: ['r4ds', 'hex-deepnote', 'atlan-provenance'], evidence: 'E5' },
     ],
   },
 };
@@ -972,10 +965,13 @@ function check(data) {
     }
   }
 
-  // Rule 8: all four stageModels families carry placeholder:true.
+  // Rule 8: all four stageModels families carry placeholder:false — Phase 2c (sp4) has ENCODED the
+  // derived vocabulary. (Pre-2c this rule asserted placeholder:true "until Phase 2c"; sp4 advanced it
+  // to its post-2c state when it flipped the flags. Still a hard invariant — the gate is not weakened,
+  // it now refuses to emit a half-encoded region that left any family on the placeholder watermark.)
   for (const fam of ['feature', 'debug', 'spike', 'data']) {
-    if (!data.stageModels[fam] || data.stageModels[fam].placeholder !== true) {
-      errors.push(`[stagemodels-placeholder] stageModels.${fam} must carry placeholder:true (2c-owned region) until Phase 2c`);
+    if (!data.stageModels[fam] || data.stageModels[fam].placeholder !== false) {
+      errors.push(`[stagemodels-placeholder] stageModels.${fam} must carry placeholder:false (2c-encoded region)`);
     }
   }
   const stepIdsByFamily = {};
