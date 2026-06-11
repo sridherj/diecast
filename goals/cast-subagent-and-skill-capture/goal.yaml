@@ -4,7 +4,7 @@
 #   external_project_dir = code/execution artifacts destination.
 slug: cast-subagent-and-skill-capture
 title: Cast Subagent and Skill Capture
-status: accepted
+status: inactive
 phase: requirements
 origin: manual
 in_focus: false

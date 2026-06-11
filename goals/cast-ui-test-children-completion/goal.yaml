@@ -4,7 +4,7 @@
 #   external_project_dir = code/execution artifacts destination.
 slug: cast-ui-test-children-completion
 title: Cast UI Test Children Completion
-status: accepted
+status: inactive
 phase: requirements
 origin: manual
 in_focus: false

@@ -8,7 +8,7 @@ import yaml
 
 from cast_server.config import DIECAST_ROOT
 
-KNOWN_MODELS = {"opus", "sonnet", "haiku"}
+KNOWN_MODELS = {"opus", "sonnet", "haiku", "fable"}
 VALID_ARTIFACT_DIRECTORIES = {None, "goal_dir", "external_project_dir"}
 
 

@@ -1,15 +1,3 @@
----
-name: cast-refine-requirements
-model: opus
-description: >
-  Interactive requirements refinement agent. Takes raw requirements.human.md and produces
-  structured refined_requirements.collab.md through a hybrid flow: single-pass draft with
-  confidence scoring, then targeted Socratic questions for gaps, then persist.
-  Trigger phrases: "refine requirements", "refine writeup", "improve requirements".
-memory: user
-effort: high
----
-
 # Diecast Requirements Refinement Agent
 
 > Cast to spec. No drift.

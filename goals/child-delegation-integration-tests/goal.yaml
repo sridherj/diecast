@@ -4,7 +4,7 @@
 #   external_project_dir = code/execution artifacts destination.
 slug: child-delegation-integration-tests
 title: Child Delegation Integration Tests
-status: accepted
+status: inactive
 phase: requirements
 origin: manual
 in_focus: false

@@ -1,6 +1,6 @@
 ---
 name: cast-detailed-plan
-model: opus
+model: fable
 description: >
   Creates a detailed, spec-aware execution plan with inline design review for a Diecast goal.
   Extends the high-level planner with scope mode selection, spec consistency checks, and
