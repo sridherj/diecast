@@ -427,3 +427,86 @@ The data spine is wired into the real Phase-1 app and **frozen**. Summary of the
   title/crumb/nudge/spine from the spine and the console is clean; (V2) `#/goal/CAST-431|452|461` each render the shell
   with their family's spine; (V3) the demo script walks end-to-end and the morph receipt reads `DEC-CAST-412-03`.
 - Plan review: skipped per run config (all-phase precedent).
+
+### Sub-phase 2b.3 — Aesthetic Lock (Signature Screen & Slop Gate) — DONE (2026-06-12, run_20260611_230342_b92fb0)
+
+**THE AESTHETIC IS LOCKED.** The signature `#/goal/CAST-412` canvas now composes **entirely from kit
+components** and passes both cast-preso slop-gate checkers (provisional, static source review — no browser this
+run). This de-risks SC-004 before Phase 3 mass-produces screens.
+
+- **Signature-screen composition — `GoalCanvas` reduced to a data slice + component calls (zero Phase-1 stub
+  markup remains):** guide-line → `GuideMark` (locked diamond, real narration) · spine → `StageSpine` (2b.2a) ·
+  nudge → `NudgeCard` (2b.2b) · In-flight work → a 3-row stream of **line-density (4B) `ColleagueCard`s**
+  (`FIXTURES.CO`/`.CC`/`.YOU`) · Stage artifacts → one **E1 `EvidenceBlock`** · receipt-trail → **6A `Decision`
+  pills** (each morph receipt's `{decision_id,label,level}` maps to the pill's `{id,diff,reversibility}`). The
+  bespoke `.work-item`/`.panel`/`.receipt` stub markup is gone; the only `.panel` left is the dev-/drill-gated
+  Phase-3 execution placeholder (not on the showable canvas).
+- **Guide treatment (the 2b deferred craft call) — LOCKED + reconciled to hue-free:** treatment **A (ink diamond
+  + mono wordmark)** from 2b.1 stands. 2b.3 removed the residual **checker-purple** Guide marks that contradicted
+  the "no new hue" lock — the chat-rail header now renders `GuideMark` (was a bare checker-tinted `◈`), guide chat
+  messages carry an **ink left-rule** (`.msg.guide .mtext`) with a hue-neutral `◈ Guide` byline (was
+  `color:--checker`), and the canvas guide-line renders `GuideMark`. The Guide's identity is now carried by **shape
+  (diamond) + structure (left-rule)**, never color — strengthening the label-free distinctness contract.
+- **Density-drift check (2nd surface, after 2b.1):** one **4C (card) `ColleagueCard`** dropped on `#/board`, drawn
+  from the **same `FIXTURES.CO` object** the canvas renders at 4B (line) density → no field drift (literally one
+  object, two `density` props).
+- **First-principles deviations from the gallery samples (recorded):** (1) the Part-2 `body` was a `1fr·1fr` grid
+  of stub panels → now a **single stacked column** (the E1 block needs full content width; two ~329px columns
+  couldn't hold a 460px block). (2) The receipt-trail renders the kit **`Decision` pill** rather than the retired
+  Phase-1 `.receipt` chip (the full 6A→6B→6C ladder shipped in 2b.2b). (3) Work-stream colleagues are sourced from
+  **`FIXTURES`** (the sanctioned 2b `#/kit` exception, C4) — the real per-goal renderer that reads
+  `ORG.goals[id].work_stream` is **Phase 3** (2a.3's own comment defers it there).
+- **Slop-gate verdicts (PROVISIONAL — static source review of the rendered component HTML/CSS, NOT a rendered
+  1440px screenshot; no browser in autonomous runs):**
+  - `/cast-preso-check-visual`: **`not-generic` PASS · `not-ai-aesthetic` PASS.** No rework required. One borderline
+    call-out (logged to `borderline-calls.md`): the Phase-1 chat `.opbtn` ghost-pill is the softest generic tell, but
+    stays within system tokens and is contextually appropriate — does not fail. (Cited: dot-grid editorial canvas,
+    ink-tinted shadows not blue-black, raspberry reserved to needs-you, hue-free Guide identity.)
+  - `/cast-preso-check-tone`: first pass **FLAGGED** 3 em-dashes in on-screen copy → reworked (Guide narration split
+    into two sentences; receipt-trail empty-state + drill-in stub switched to the UI's own `·` middot — no literal
+    `--`) → **re-run verdict CLEAN.** No GPT-isms / hedging / formulaic patterns.
+- **Token discipline (grep-clean):** **no raw hex outside `:root`** — 2b.3 removed the last two offenders (the dead
+  Phase-1 `.loop-stage.now{color:#fff}` swept with the orphaned spine-stub CSS; `.next-btn` → `var(--paper)`).
+  Raspberry remains confined to needs-you semantics (L3 badge, rail hero, dial L3 legend, error fallbacks).
+- **Phase-1 morph gate — static re-check PASS (no regression from the re-skin):** vt- anchors unchanged **5×1**;
+  `::view-transition-group(*)` 350ms register + reduced-motion guard intact; the receipt-trail/nudge/spine ZONE
+  WRAPPERS keep their anchors (only inner content swapped, Contract 9); closed 5-op set + `advance()` whole; demo
+  script walks end-to-end by code inspection (`node --check` of the extracted module: PASS).
+- **Concurrency note:** the Phase-2a `2a.3` drift-sweep landed in `index.html` mid-sub-phase (ORG-wired appState,
+  neutralized work-item stubs). 2b.3 composed against that post-2a.3 state; FIXTURES-sourced kit zones are the
+  sanctioned C4 `#/kit` exception, not re-introduced drift.
+- **Human-eyeball carry-forwards (browser unavailable — never block, per project posture):** (CF1) re-run BOTH slop
+  checkers on a real **1440px Chrome screenshot** to upgrade the provisional verdicts to rendered; (CF2) the Guide
+  **label-free flash test** on the rendered screen (PROVISIONAL pass on static grounds: diamond + left-rule +
+  `◈` byline read distinct from circle-human / square-agent without labels); (CF3) **runtime/ORG copy not assessed
+  by the tone pass** — `FEATURE.nudge.why` (`"…flagged R02 — unblocks…"`) and the Phase-1 chat-script narration
+  still contain em-dashes; they are 2a/Phase-1-owned data, so a dedicated copy pass (or 2a) should de-em-dash them.
+  The open 2b.1 (P1 Guide flash, P2 avatar optical balance) and 2b.2a/2b.2b visual-taste carry-forwards also remain.
+- Plan review: skipped per run config (C7, all-phase precedent).
+
+## Owner Prototype-Review Feedback (2026-06-12 — BINDS Phase 3)
+
+Owner reviewed the cumulative prototype (Phase 1 + 2a + 2b) and raised two issues. Both are
+routed to **Phase 3** (owner decision); do NOT hand-patch the frozen artifact out-of-band.
+
+- **PRF1 — Goal-canvas in-flight agents are unrelated to the goal (route to Phase 3).**
+  `GoalCanvas` currently renders three **2b kit FIXTURES** (`FIXTURES.CO/CC/YOU`) for the
+  "In flight · work" stream, so CAST-412 ("Add RBAC to checkout") shows generic colleagues
+  unrelated to the title. The real, RBAC-relevant per-goal work already exists in
+  `ORG.goals[id].work_stream` (ticket-shaped `{id,label,assignee,step,kind}`; CAST-412
+  assignees resolve to real `ORG.agents`: `entity-creation · api-contractor · migration-author
+  · crud-orchestrator`, plus `@you`). **Phase 3 action:** its planned per-goal work renderer
+  must read `ORG.goals[id].work_stream` (resolving each `assignee` against `ORG.agents`) and
+  replace the kit-fixture ColleagueCards. Owner explicitly chose "leave for Phase 3" over an
+  interim patch.
+
+- **PRF2 — ChatRail must be PER-GOAL, not global (contract amendment for Phase 3).**
+  Current Phase-1 contract made `appState.chat = { messages, scriptIndex }` a **single global**
+  object shared across goals. Owner directive: the right-side chat should be **per-goal only**
+  — each goal id carries its own conversation thread (and its own scenario position). **Phase 3
+  action:** key chat state by goal id (e.g. `appState.chat.byGoal[goalId] = {messages,
+  scriptIndex, scriptKey}` or equivalent), so switching goals shows that goal's thread, not a
+  shared one. This refines (does not rename) the Phase-1 `appState.chat` contract and composes
+  with Phase 3's planned additive `appState.chat.scriptKey`. The ChatRail header handle (today
+  derived from the routed goal title) stays goal-scoped by design — per-goal is the desired
+  end state, confirmed by owner.

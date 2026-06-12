@@ -920,7 +920,7 @@ function GoalCanvas() {
            Phase-1 "character design lands in Phase 2b" placeholder. -->
       <div class="guide-line">
         <${GuideMark} size=${16}/>
-        <span>The Guide is tracking this goal — it flagged ${FLAGGED_RULE} on the open PR and queued a review for you.</span>
+        <span>The Guide is tracking this goal. It flagged ${FLAGGED_RULE} on the open PR and queued a review for you.</span>
       </div>
 
       <!-- Stage spine — 2b.2a: swapped from the Phase 1 inline placeholder markup to the
@@ -941,18 +941,25 @@ function GoalCanvas() {
         <${NudgeCard} nudge=${appState.nudge}/>
       </div>
 
-      <!-- Part 2 · stage artifacts + work happening -->
+      <!-- Part 2 · work stream + stage artifacts — 2b.3 composition: every zone renders through
+           a kit component (zero Phase-1 stub markup remains). The In-flight work stream is three
+           LINE-density ColleagueCards drawn from FIXTURES (the 2b kit's fixture source, C4); the
+           real per-goal renderer that reads ORG.goals[id].work_stream is Phase 3. Stage artifacts
+           is ONE E1 EvidenceBlock (placeholder evidence content; real wiring is Phase 3). The same
+           FIXTURES.CO object is rendered at 4C density on #/board — same fixture, no field drift
+           (the density-drift check). -->
       <div class="body">
         <section>
-          <div class="sect-h"><span class="k">Stage</span> artifacts</div>
-          <div class="panel">Evidence tiles + screenshots — Phase 3.</div>
+          <div class="sect-h"><span class="k">In flight</span> work</div>
+          <div class="work-stream">
+            <${ColleagueCard} agent=${FIXTURES.CO} density="line"/>
+            <${ColleagueCard} agent=${FIXTURES.CC} density="line"/>
+            <${ColleagueCard} agent=${FIXTURES.YOU} density="line"/>
+          </div>
         </section>
         <section>
-          <div class="sect-h"><span class="k">In flight</span> work</div>
-          <!-- 2a.3: the Phase 1 hardcoded work-items carried canonical tokens (a goal id, an
-               agent slug, a PR id); neutralized to a shell stub here (drift sweep). The real
-               per-goal work-stream renderer (reads ORG.goals[id].work_stream) is Phase 3. -->
-          <div class="panel">Work-stream items — Phase 3.</div>
+          <div class="sect-h"><span class="k">Stage</span> artifacts</div>
+          <${EvidenceBlock} kind="E1" data=${FIXTURES.EVIDENCE.E1}/>
         </section>
       </div>
 
@@ -971,17 +978,20 @@ function GoalCanvas() {
       ${appState.drill === 'execution' ? html`
         <div class="drill-panel">
           <div class="sect-h"><span class="k">Execution</span> drill-in (stub)</div>
-          <div class="panel">run_node.html lifts here in Phase 3 — this labeled panel proves the drillInto toggle.</div>
+          <div class="panel">run_node.html lifts here in Phase 3 · this labeled panel proves the drillInto toggle.</div>
         </div>` : null}
 
-      <!-- receipt-trail: morph op pushes decision receipts here. -->
+      <!-- receipt-trail — 2b.3: each morph receipt renders through the kit Decision component at
+           the 6A pill layer (the receipt's {decision_id, label, level} map to the pill's {id,
+           diff, reversibility}). The .receipt-trail ZONE WRAPPER keeps its vt-receipt-trail morph
+           anchor (Contract 9 — anchor on the wrapper, never on the kit component); only the inner
+           content changes, so the Phase-1 morph contract holds. -->
       <div class="receipt-trail">
         ${appState.receipts.length === 0
-          ? html`receipt trail — decision receipts appear here.`
+          ? html`receipt trail · decision receipts appear here.`
           : appState.receipts.map((r) => html`
-              <div class="receipt">
-                <span class="rlevel">${r.level}</span>${r.label} · <span class="rat">${r.at}</span>
-              </div>`)}
+              <${Decision} layer="pill"
+                atom=${{ id: r.decision_id, diff: r.label, reversibility: r.level, status: r.status || 'recorded' }}/>`)}
       </div>
 
       <!-- DEV OP STRIP — GATED behind a #/dev hash suffix (1.3 handoff tidy). The showable
@@ -1012,10 +1022,16 @@ function Home() {
 }
 
 function BoardStub() {
+  // 2b.3 density-drift check: one 4C (card) ColleagueCard from the SAME FIXTURES.CO object the
+  // goal canvas renders at 4B (line) density — same fixture, no field drift. Real board = Phase 5.
   return html`
     <div class="stub-wrap">
       <h1>Board</h1>
-      <p>Workspace board placeholder — proves routing, nothing more.</p>
+      <p>Workspace board placeholder — proves routing + the density-drift check: one 4C card,
+        the same fixture the goal canvas renders at line density.</p>
+      <div class="board-frame">
+        <${ColleagueCard} agent=${FIXTURES.CO} density="card"/>
+      </div>
     </div>`;
 }
 
