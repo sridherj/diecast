@@ -561,6 +561,219 @@ const debugRoster = ['crud-orchestrator', 'crud-compliance-checker', 'test-cover
 const spikeRoster = ['spike-runner', 'api-contractor'];
 const dataRoster = ['decision-recorder', 'repo-cartographer'];
 
+// ───────────────────────────────────────────────────────────────────────────
+// execution / morph_view — Phase 3.1 ADDITIVE extension (contract #4 of the plan).
+// Authored here (never hand-edited into org.js). Consumed by 3.2 (drill-in: RunNode +
+// IterationPanel), 3.4 (the morph). FULL depth on CAST-412; THIN on CAST-431. The three
+// new invariants below (Rules 12/13/14) gate this data: every focus_run node's `agent`
+// resolves in agents; rework-tagged nodes count == iteration.rework.used; exactly one
+// focus_run per goal that has execution. NODE SHAPE (plain JSON, no functions):
+//   { id, agent, kind, status, label, rework, children[] }
+//     kind ∈ orchestrate|maker|checker|decision · status ∈ done|running|blocked|flagged
+//     rework: null | <int 1..budget> (a re-run after a checker flag; ↻ rework #n)
+// ───────────────────────────────────────────────────────────────────────────
+
+// CAST-412 (feature) — FULL: a 13-node focus_run tree (depth ≤3), crud-orchestrator +
+// crud-compliance-checker prominent, exactly ONE rework node (↻ rework #1) consistent with
+// iteration.rework {used:1, budget:3}. iteration.findings mirror the E1 checker rows
+// (M04 ✓ · S03 ✓ · R02 ⚠) so the drill-in and the acceptance panel never disagree.
+const featureExecution = {
+  runs: [
+    { id: 'run-412-a', agent: 'entity-creation', status: 'done', when: t(210), summary: 'Scaffolded the Role and Permission entities with the CRUD stack', rework_count: 0 },
+    { id: 'run-412-b', agent: 'api-contractor', status: 'done', when: t(245), summary: 'Generated the REST permissions handlers on the existing API surface', rework_count: 0 },
+    { id: 'run-412-c', agent: 'migration-author', status: 'blocked', when: t(300), summary: 'Authored the roles-schema migration — held at the L3 stop on CAST-417', rework_count: 1 },
+    { id: 'run-412-d', agent: 'crud-orchestrator', status: 'running', when: t(505), summary: 'Running the maker-checker loop on the permissions PR — R02 flagged for review', rework_count: 1 },
+  ],
+  focus_run: {
+    id: 'run-412-focus', agent: 'crud-orchestrator', kind: 'orchestrate', status: 'running',
+    label: 'Orchestrate the RBAC permissions build', rework: null,
+    children: [
+      { id: 'run-412-n2', agent: 'entity-creation', kind: 'maker', status: 'done', label: 'Scaffold Role + Permission entities (CRUD stack)', rework: null,
+        children: [
+          { id: 'run-412-n3', agent: 'crud-compliance-checker', kind: 'checker', status: 'done', label: `Compliance pass — M04 ${CANON.ruleCodes.M04} resolved`, rework: null, children: [] },
+        ] },
+      { id: 'run-412-n4', agent: 'api-contractor', kind: 'maker', status: 'done', label: 'Generate REST permissions handlers on the existing surface', rework: null,
+        children: [
+          { id: 'run-412-n5', agent: 'security-checker', kind: 'checker', status: 'done', label: 'Authz-boundary check on the permission endpoints', rework: null, children: [] },
+        ] },
+      { id: 'run-412-n6', agent: 'migration-author', kind: 'maker', status: 'blocked', label: 'Author the roles-schema migration (held at the L3 stop)', rework: null,
+        children: [
+          { id: 'run-412-n7', agent: 'crud-compliance-checker', kind: 'checker', status: 'flagged', label: `Flagged R02 — ${CANON.ruleCodes.R02} on role_permissions`, rework: null, children: [] },
+          { id: 'run-412-n8', agent: 'migration-author', kind: 'maker', status: 'done', label: '↻ rework #1 — add the FK index per the R02 flag', rework: 1, children: [] },
+          { id: 'run-412-n9', agent: 'crud-compliance-checker', kind: 'checker', status: 'done', label: `Re-review — S03 ${CANON.ruleCodes.S03} resolved`, rework: null, children: [] },
+          { id: 'run-412-n13', agent: 'repo-cartographer', kind: 'maker', status: 'done', label: 'Map every read of the legacy roles column before any drop', rework: null, children: [] },
+        ] },
+      { id: 'run-412-n10', agent: 'decision-recorder', kind: 'decision', status: 'done', label: 'Record DEC-CAST-412-06 — split FR-014 into routing + recording', rework: null, children: [] },
+      { id: 'run-412-n11', agent: 'crud-compliance-checker', kind: 'checker', status: 'flagged', label: 'Final PR review — R02 still flagged, routed to @you', rework: null, children: [] },
+      { id: 'run-412-n12', agent: 'test-coverage-checker', kind: 'checker', status: 'done', label: 'Coverage gate — +2.1% on the permissions path', rework: null, children: [] },
+    ],
+  },
+  iteration: {
+    maker: 'crud-orchestrator', checker: 'crud-compliance-checker',
+    findings: [
+      { code: 'M04', label: CANON.ruleCodes.M04, status: 'resolved', round: 1 },
+      { code: 'S03', label: CANON.ruleCodes.S03, status: 'resolved', round: 1 },
+      { code: 'R02', label: CANON.ruleCodes.R02, status: 'flagged', round: 2 },
+    ],
+    rework: { used: 1, budget: 3 },
+    exits: ['fix', 'retry', 'escalate'],
+    pr: { id: CANON.pr, label: CANON.feature.title, diff_stub: '+142 −18 · 7 files · role_permissions, permission_check.py' },
+  },
+};
+
+// CAST-412 morph_view — the post-reclassification DEBUG-shape state the 3.4 morph swaps into
+// (same goal, new shape). iter resets to 1/3 (the loop re-opens); the work stream weaves the
+// coupon-apply symptom + first hypotheses; E2-seed carries the opening (still-open) hypothesis.
+const featureMorphView = {
+  spine_state: { iter: { current: 1, budget: 3 } },
+  work_stream: [
+    { id: 'ws-412m-1', label: 'Symptom: checkout 500s when an unscoped token hits the permission check', assignee: 'crud-orchestrator', step: 'dbg-01', kind: 'symptom' },
+    { id: 'ws-412m-2', label: 'Hypothesis: the v4.2 RBAC migration left a null-role path in the shared middleware', assignee: 'crud-compliance-checker', step: 'dbg-02', kind: 'hypothesis' },
+    { id: 'ws-412m-3', label: 'Experiment: replay the failing request against the integration harness', assignee: 'test-coverage-checker', step: 'dbg-03', kind: 'experiment' },
+  ],
+  evidence: {
+    // E2-seed feeds the LOCKED EvidenceBlock E2 on the morphed canvas, so the hypothesis carries the
+    // same {statement, verdict, prediction, observation} contract as a real debug E2 (3.4 addition —
+    // `statement` was the one field 3.1's seed omitted; the morphed ledger needs it for the bold line).
+    // It is the SAME eventual root cause as CAST-431's H3, but still OPEN here (the loop just re-opened).
+    'E2-seed': {
+      hypotheses: [
+        { id: 'H1', statement: 'A null role from the v4.2 RBAC migration reaches the shared auth middleware and the permission check throws.', verdict: 'open', prediction: 'A null role reaches the shared auth middleware and throws', observation: 'trace replay in progress on the integration harness' },
+      ],
+    },
+  },
+};
+
+// CAST-431 (debug) — THIN: 2 runs, a shallow focus_run (root + one child), a minimal iteration
+// (no rework). Keeps the execution schema uniform so 3.2/3.3 read both goals the same way.
+const debugExecution = {
+  runs: [
+    { id: 'run-431-a', agent: 'crud-orchestrator', status: 'done', when: t(140), summary: 'Reproduced the coupon-apply 500 on the integration harness', rework_count: 0 },
+    { id: 'run-431-b', agent: 'test-coverage-checker', status: 'running', when: t(165), summary: 'Confirming H3 — a null role throws in the shared middleware', rework_count: 0 },
+  ],
+  focus_run: {
+    id: 'run-431-focus', agent: 'crud-orchestrator', kind: 'orchestrate', status: 'running',
+    label: 'Investigate the coupon-apply 500', rework: null,
+    children: [
+      { id: 'run-431-c1', agent: 'test-coverage-checker', kind: 'checker', status: 'done', label: 'Switch the repro from the unit harness to the integration harness', rework: null, children: [] },
+    ],
+  },
+  iteration: {
+    maker: 'crud-orchestrator', checker: 'crud-compliance-checker',
+    findings: [
+      { code: 'M04', label: CANON.ruleCodes.M04, status: 'resolved', round: 1 },
+    ],
+    rework: { used: 0, budget: 3 },
+    exits: ['fix', 'retry', 'escalate'],
+    pr: { id: 'PR #2356', label: CANON.debug.title, diff_stub: '+24 −6 · 2 files · null-role guard in the shared auth middleware' },
+  },
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+// Phase 4.1 ADDITIVE BATCH — the SINGLE generator-owned extension for BOTH Phase-4
+// goals (plan contract #5: 4.2/4.3 never touch this file). Three additive payloads,
+// gated by four new invariants in check(): (a) THIN execution on the spike + data goals
+// (run list ONLY, NO focus_run tree — Decision 10; thin mirrors 3.1's thin-CAST-431);
+// (b) the FR-017 `parity` block on the spike goal (terminal-tier text, consumed by 4.3);
+// (c) the reconciled-chart `resolved_view` on the data goal's E5 evidence (consumed by
+// 4.2's L3-resolution beat). The authored report v1/v2 semantics + the E5.series values
+// stay UNTOUCHED (freeze policy — the gate cross-checks resolved_view against E5.series).
+// Hardcoded canonical values only (faker NEVER supplies them) → byte-identical re-runs.
+// ───────────────────────────────────────────────────────────────────────────
+
+// (a) THIN execution — spike. 2 runs; agents resolve in spikeRoster. No focus_run tree.
+const spikeExecution = {
+  runs: [
+    { id: 'run-452-a', agent: 'spike-runner', status: 'done', when: t(250), summary: 'Probed the vendor SDK p95 under warm cache in a 2h box', rework_count: 0 },
+    { id: 'run-452-b', agent: 'spike-runner', status: 'running', when: t(300), summary: 'Re-probed p95 after the one-time 3h extension — landed at 180ms, borderline', rework_count: 0 },
+  ],
+};
+
+// (a) THIN execution — data. 2 runs; agents resolve in dataRoster. No focus_run tree.
+const dataExecution = {
+  runs: [
+    { id: 'run-461-a', agent: 'repo-cartographer', status: 'done', when: t(320), summary: 'Imported the finance DB and the billing export; aligned the Q2 date windows', rework_count: 0 },
+    { id: 'run-461-b', agent: 'decision-recorder', status: 'running', when: t(360), summary: 'Computed per-segment Q2 revenue from both sources — an 8% gap persists', rework_count: 0 },
+  ],
+};
+
+// (b) FR-017 parity — the spike's terminal-tier transcript. artifact_id resolves to the E4
+// verdict evidence (gate-enforced); the transcript is non-empty and names that artifact id
+// (gate-enforced) so the skill names + artifact ids can never drift from the spine.
+const spikeParity = {
+  command: 'cast spike run CAST-452 --probe vendor-sdk-p95 --budget 200ms',
+  artifact_id: 'E4-CAST-452',
+  transcript: [
+    '$ cast spike run CAST-452 --probe vendor-sdk-p95 --budget 200ms',
+    'spike-runner › framing: does the vendor checkout SDK fit the 200ms p95 budget?',
+    'spike-runner › probing p95 under warm cache · 3h box (extended once from 2h) …',
+    'spike-runner › run 1: 178ms · run 2: 181ms · run 3: 180ms',
+    'spike-runner › verdict: adds 180ms p95 — borderline (◐); inside the 200ms budget, tight',
+    'decision-recorder › wrote E4-CAST-452 · spike_ref → DEC-CAST-452-03',
+    '✓ artifact E4-CAST-452 ready · open it with: cast goal show CAST-452 --view verdict',
+  ],
+  caption: 'Same verdict, three ways in — the chat rail, the goal canvas, and the terminal all resolve to one artifact (E4-CAST-452). FR-017: three access tiers, one source of truth.',
+};
+
+// (c) reconciled-chart series — additive on CAST-461's E5 payload. Covers EXACTLY the two
+// disagreeing E5 sources (finance DB vs billing export; gate-enforced). Per-segment values
+// MIRROR the authored E5.series VERBATIM (the gate cross-checks them — no mutation, freeze
+// policy). This is the "show both with a reconciliation note" L3-resolution state 4.2
+// re-renders the headline chart into (Decision 5 — additive, not a re-read of report v1/v2).
+const dataResolvedView = {
+  series: [
+    { source: 'finance DB', total: 2595, segments: [
+      { segment: 'new', value: 412 }, { segment: 'returning', value: 905 },
+      { segment: 'reactivated', value: 188 }, { segment: 'enterprise', value: 1090 } ] },
+    { source: 'billing export', total: 2803, segments: [
+      { segment: 'new', value: 446 }, { segment: 'returning', value: 951 },
+      { segment: 'reactivated', value: 205 }, { segment: 'enterprise', value: 1201 } ] },
+  ],
+  reconciliation_note: 'Reconciled view — both sources shown side by side rather than picking one. The billing export runs 8% above the finance DB (2,803k vs 2,595k), a gap that holds across all four segments (largest on enterprise, +111k). Neither series is suppressed; the headline cites the finance DB as source-of-record with the billing gap footnoted.',
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+// 3.2 ADDITIVE: per-focus_run-node `skills[]` + `ctx{used,limit}` — the run_node
+// idiom (lifted into the prototype's RunNode) renders skill chips + a context-usage
+// bar per node. These fields did NOT exist on 3.1's nodes; per the DATA RULE they are
+// added ONLY here in the generator (never hand-edited into org.js), additively and
+// deterministically. No new gate rule is required (Rules 12/13/14 are unaffected — node
+// agents/rework/focus_run-count are unchanged); the ctx-tint BUCKET is derived in the
+// view (RunNode), so only the raw {used,limit} lives in data. Determinism: skills map by
+// agent slug; ctx from kind + a pure per-node-id seed (no Date/random) → byte-stable emit.
+// ───────────────────────────────────────────────────────────────────────────
+const SKILLS_BY_AGENT = {
+  'crud-orchestrator':       ['orchestrate', 'maker-checker'],
+  'entity-creation':         ['entity-creation', 'schema-lock'],
+  'api-contractor':          ['controller', 'api-contract'],
+  'migration-author':        ['migration', 'schema-lock'],
+  'crud-compliance-checker': ['mvcs-compliance', 'crud-compliance'],
+  'security-checker':        ['authz-boundary', 'security-review'],
+  'test-coverage-checker':   ['pytest', 'coverage-gate'],
+  'repo-cartographer':       ['code-explorer', 'impact-map'],
+  'decision-recorder':       ['decision-record'],
+};
+function seedInt(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+function ctxFor(node) {
+  const limit = 200000;
+  const baseByKind = { orchestrate: 0.60, maker: 0.42, checker: 0.30, decision: 0.24 };
+  let f = baseByKind[node.kind] ?? 0.35;
+  f += (seedInt(node.id) % 120) / 1000;                 // 0..0.119 deterministic jitter
+  if (node.status === 'blocked' || node.status === 'flagged') f += 0.12;  // trouble carries heavier context
+  if (node.rework != null) f += 0.06;
+  f = Math.min(f, 0.92);
+  return { used: Math.round(limit * f / 1000) * 1000, limit };
+}
+function enrichTree(node) {
+  if (!node || typeof node !== 'object') return node;
+  node.skills = SKILLS_BY_AGENT[node.agent] || [node.agent];
+  node.ctx = ctxFor(node);
+  for (const c of node.children ?? []) enrichTree(c);
+  return node;
+}
+enrichTree(featureExecution.focus_run);
+enrichTree(debugExecution.focus_run);
+
 const goals = {
   'CAST-412': {
     family: 'feature',
@@ -618,6 +831,8 @@ const goals = {
     },
     decisions: goalDecisionIds('CAST-412'),
     autonomy: { value: 'balanced', trust: aggregateTrust(featureRoster) },
+    execution: featureExecution,   // 3.1 additive — full drill-in tree (consumed by 3.2)
+    morph_view: featureMorphView,  // 3.1 additive — debug-shape state for the 3.4 morph
   },
   'CAST-431': {
     family: 'debug',
@@ -634,23 +849,52 @@ const goals = {
       { id: 'ws-431-3', label: 'Backfill the missing role rows from the v4.2 migration', assignee: 'migration-author', step: 'dbg-04', kind: 'ticket' },
     ],
     evidence: {
+      // E2/E3 shapes match 2b's LOCKED EvidenceBlock contracts VERBATIM (3.3 is their first consumer):
+      // E2 hypotheses carry {statement, verdict∈confirmed|refuted|open, prediction, observation};
+      // E3 is the red→green repro {test.name, before/after.{status,excerpt}}. The 2a authoring used a
+      // pre-contract {repro, red, green} / statement-less shape — corrected HERE in the generator (the
+      // sanctioned DATA RULE path), never forked in the component, never hand-edited into org.js.
       E2: {
         id: 'E2-CAST-431', kind: 'E2', confidence: '●',
         hypotheses: [
-          { id: 'H1', verdict: 'refuted', prediction: 'If a stale cached coupon serves the 500, disabling the cache stops it.', observation: 'With the cache off, the 500 still fires on coupon apply.' },
-          { id: 'H2', verdict: 'refuted', prediction: 'If the coupon validator rejects the code, the request 400s, not 500s.', observation: 'The validator returns a clean 400; the 500 comes later in the request.' },
-          { id: 'H3', verdict: 'confirmed', prediction: 'If a null role reaches the shared auth middleware, the permission check throws.', observation: 'On the integration harness, a null-role account throws in the shared middleware - that is the 500.' },
+          { id: 'H1', statement: 'A stale cached coupon is serving the 500.', verdict: 'refuted', prediction: 'If a stale cached coupon serves the 500, disabling the cache stops it.', observation: 'With the cache off, the 500 still fires on coupon apply.' },
+          { id: 'H2', statement: 'The coupon validator rejects the code and 500s.', verdict: 'refuted', prediction: 'If the coupon validator rejects the code, the request 400s, not 500s.', observation: 'The validator returns a clean 400; the 500 comes later in the request.' },
+          { id: 'H3', statement: 'A null role from the v4.2 RBAC migration reaches the shared auth middleware and the permission check throws.', verdict: 'confirmed', prediction: 'If a null role reaches the shared auth middleware, the permission check throws.', observation: 'On the integration harness, a null-role account throws in the shared middleware - that is the 500.' },
         ],
       },
       E3: {
         id: 'E3-CAST-431', kind: 'E3', confidence: '●',
-        repro: 'test_coupon_apply_null_role_500',
-        red: 'AuthMiddlewareError: role is null (HTTP 500) at apply_coupon',
-        green: 'test_coupon_apply_null_role_500 passed - returns HTTP 422 with a typed error',
+        test: { name: 'test_coupon_apply_null_role_500' },
+        before: { status: 'fail', excerpt: 'E   AuthMiddlewareError: role is null (HTTP 500)\n    apply_coupon.py:88 - null role reaches the shared auth middleware' },
+        after: { status: 'pass', excerpt: '1 passed in 0.19s\n    apply_coupon.py:88 - null role now returns a typed HTTP 422' },
       },
+    },
+    investigation: {
+      // 3.3 ADDITIVE: the iteration-history ledger (FR-007). One entry per debug pass; older passes are
+      // CLOSED (collapsed in the view, never deleted), exactly one is LIVE. Each pass lists the
+      // experiments an agent ran (assignee resolves in agents) and the hypotheses it weighed (ids into
+      // evidence.E2). The live pass hosts the E2 confirm/refute ledger as its hero (the loop's memory).
+      passes: [
+        {
+          n: 1, status: 'closed', hypotheses: ['H1', 'H2'],
+          summary: 'Cache and validator theories - both refuted; the 500 survives each.',
+          experiments: [
+            { id: 'exp-431-1a', label: 'Disabled the coupon cache and replayed the apply request', assignee: 'crud-orchestrator', verdict: 'refuted' },
+            { id: 'exp-431-1b', label: 'Traced the coupon validator path to find where the 500 is raised', assignee: 'test-coverage-checker', verdict: 'refuted' },
+          ],
+        },
+        {
+          n: 2, status: 'live', hypotheses: ['H3'],
+          summary: 'Null role in the shared auth middleware - confirmed on the integration harness.',
+          experiments: [
+            { id: 'exp-431-2a', label: 'Replayed on the integration harness against the real shared middleware', assignee: 'test-coverage-checker', verdict: 'confirmed' },
+          ],
+        },
+      ],
     },
     decisions: goalDecisionIds('CAST-431'),
     autonomy: { value: 'balanced', trust: aggregateTrust(debugRoster) },
+    execution: debugExecution,   // 3.1 additive — thin drill-in (consumed by 3.2/3.3)
   },
   'CAST-452': {
     family: 'spike',
@@ -681,6 +925,8 @@ const goals = {
     },
     decisions: goalDecisionIds('CAST-452'),
     autonomy: { value: 'balanced', trust: aggregateTrust(spikeRoster) },
+    execution: spikeExecution,   // 4.1 additive — THIN run list (no focus_run tree; Decision 10)
+    parity: spikeParity,         // 4.1 additive — FR-017 terminal-tier text (consumed by 4.3)
   },
   'CAST-461': {
     family: 'data',
@@ -712,9 +958,11 @@ const goals = {
         ],
         reconciliation_note: 'Finance DB totals Q2 at 2,595k; the billing export totals 2,803k - an 8% gap that holds across all four segments. The headline is pending the L3 source call.',
       },
+      resolved_view: dataResolvedView,   // 4.1 additive — reconciled L3-resolution state (consumed by 4.2; mirrors E5.series, gate-checked)
     },
     decisions: goalDecisionIds('CAST-461'),
     autonomy: { value: 'balanced', trust: aggregateTrust(dataRoster) },
+    execution: dataExecution,   // 4.1 additive — THIN run list (no focus_run tree; Decision 10)
   },
 };
 
@@ -1074,6 +1322,126 @@ function check(data) {
   const featureTrust = data.goals['CAST-412']?.autonomy?.trust ?? {};
   if (featureTrust.compliancePct !== CANON.dialTrustParsed.compliancePct || featureTrust.runs !== CANON.dialTrustParsed.runs) {
     errors.push(`[dial-trust] CAST-412 autonomy.trust {compliancePct:${featureTrust.compliancePct}, runs:${featureTrust.runs}} must equal the canonical dial-trust stat {compliancePct:${CANON.dialTrustParsed.compliancePct}, runs:${CANON.dialTrustParsed.runs}} ('${CANON.dialTrust}')`);
+  }
+
+  // ── Phase 3.1 additive invariants (Rules 12/13/14) — execution / focus_run integrity. ──
+  // These gate the new goals[id].execution data: a goal that carries execution must carry exactly
+  // one focus_run root, every node's agent (and every flat run's agent) must resolve in agents, and
+  // the count of rework-tagged tree nodes must equal iteration.rework.used (each in 1..budget).
+  const collectTreeNodes = (node, acc) => {
+    if (!node || typeof node !== 'object') return acc;
+    acc.push(node);
+    for (const c of node.children ?? []) collectTreeNodes(c, acc);
+    return acc;
+  };
+  for (const [gid, g] of Object.entries(data.goals)) {
+    const ex = g.execution;
+    if (!ex) continue;                                  // execution is OPTIONAL (Phase-3 + Phase-4 goals carry it)
+    // Rule 12 (flat runs) — applies to BOTH thin and full execution: every flat run's agent resolves
+    // in ORG.agents. This is the Phase-4 thin-execution invariant (run list only, no tree).
+    for (const r of ex.runs ?? []) {
+      if (!agentSlugs.has(r.agent)) errors.push(`[exec-run-agent] goal ${gid} run ${r.id} agent '${r.agent}' does not resolve to ORG.agents`);
+    }
+    // THIN execution (Phase 4 spike/data — Decision 10): run list ONLY, no focus_run tree, no
+    // iteration. The flat-run check above is the whole contract; skip the focus_run tree rules.
+    if (!('focus_run' in ex)) continue;
+    // Rule 14: a goal that DOES carry a focus_run must carry exactly one root node (object, not array).
+    if (!ex.focus_run || Array.isArray(ex.focus_run) || typeof ex.focus_run !== 'object') {
+      errors.push(`[focus-run] goal ${gid} execution.focus_run must be exactly one root node (object, not array)`);
+      continue;
+    }
+    const nodes = collectTreeNodes(ex.focus_run, []);
+    // Rule 12: every focus_run tree node's agent resolves in ORG.agents.
+    for (const n of nodes) {
+      if (!agentSlugs.has(n.agent)) errors.push(`[focus-run-agent] goal ${gid} focus_run node ${n.id} agent '${n.agent}' does not resolve to ORG.agents`);
+    }
+    // Rule 13: focus_run rework tags consistent with iteration.rework {used, budget}.
+    const reworkNodes = nodes.filter((n) => n.rework != null);
+    const used = ex.iteration?.rework?.used;
+    const budget = ex.iteration?.rework?.budget;
+    if (reworkNodes.length !== used) {
+      errors.push(`[focus-run-rework] goal ${gid} has ${reworkNodes.length} rework-tagged focus_run node(s) but iteration.rework.used = ${used}`);
+    }
+    for (const n of reworkNodes) {
+      if (typeof n.rework !== 'number' || n.rework < 1 || n.rework > budget) {
+        errors.push(`[focus-run-rework] goal ${gid} node ${n.id} rework tag '${n.rework}' must be an integer in 1..${budget}`);
+      }
+    }
+  }
+
+  // ── Phase 3.3 additive invariant (Rule 15) — debug investigation-ledger + E2/E3 shape integrity. ──
+  // Gates goals[id].investigation passes and the E2/E3 evidence the LOCKED EvidenceBlock consumes:
+  // exactly one live pass; every pass status is live|closed; every pass hypothesis id resolves to
+  // evidence.E2; every experiment assignee resolves; E2 hypotheses carry {statement, verdict ∈
+  // confirmed|refuted|open}; E3 carries the red→green {test.name, before/after.status} shape.
+  // (Drift cannot be authored: a mismatch with the component contract refuses to emit.)
+  for (const [gid, g] of Object.entries(data.goals)) {
+    const inv = g.investigation;
+    if (!inv) continue;                                   // investigation is OPTIONAL (debug flow only)
+    const e2 = g.evidence?.E2;
+    const hypIds = new Set((e2?.hypotheses ?? []).map((h) => h.id));
+    const passes = inv.passes ?? [];
+    const live = passes.filter((p) => p.status === 'live');
+    if (live.length !== 1) errors.push(`[investigation] goal ${gid} must have exactly one live pass, has ${live.length}`);
+    for (const p of passes) {
+      if (p.status !== 'live' && p.status !== 'closed') errors.push(`[investigation] goal ${gid} pass ${p.n} status '${p.status}' must be live|closed`);
+      for (const h of p.hypotheses ?? []) {
+        if (!hypIds.has(h)) errors.push(`[investigation] goal ${gid} pass ${p.n} hypothesis '${h}' does not resolve to evidence.E2`);
+      }
+      for (const exp of p.experiments ?? []) {
+        if (!assigneeOk(exp.assignee)) errors.push(`[investigation] goal ${gid} experiment ${exp.id} assignee '${exp.assignee}' does not resolve to a human/agent/guide`);
+      }
+    }
+    for (const h of e2?.hypotheses ?? []) {
+      if (typeof h.statement !== 'string' || !h.statement.trim()) errors.push(`[investigation] goal ${gid} E2 hypothesis ${h.id} must carry a non-empty statement`);
+      if (!['confirmed', 'refuted', 'open'].includes(h.verdict)) errors.push(`[investigation] goal ${gid} E2 hypothesis ${h.id} verdict '${h.verdict}' must be confirmed|refuted|open`);
+    }
+    const e3 = g.evidence?.E3;
+    if (e3) {
+      if (!e3.test?.name) errors.push(`[investigation] goal ${gid} E3 must carry test.name`);
+      if (e3.before?.status !== 'fail') errors.push(`[investigation] goal ${gid} E3 before.status must be 'fail'`);
+      if (e3.after?.status !== 'pass') errors.push(`[investigation] goal ${gid} E3 after.status must be 'pass'`);
+    }
+  }
+
+  // ── Phase 4.1 additive invariants (the single generator batch for both Phase-4 goals) — parity
+  // (FR-017) + resolved_view (the reconciled L3 view). Drift cannot be authored: a parity block that
+  // points at a non-E4 artifact, an empty/artifact-less transcript, a resolved_view that does not cover
+  // exactly the two disagreeing sources, or any per-segment value that mutates the authored E5.series
+  // refuses to emit. (The thin-execution.runs[].agent invariant is enforced in the Rule-12 block above.)
+  const RV_SOURCE_FIELD = { 'finance DB': 'finance', 'billing export': 'billing' };  // resolved_view source → E5.series field
+  for (const [gid, g] of Object.entries(data.goals)) {
+    // (b) parity: artifact_id resolves to an E4 verdict evidence object; transcript non-empty and names it.
+    if (g.parity) {
+      const p = g.parity;
+      const ev = evidenceById.get(p.artifact_id);
+      if (!ev || ev.kind !== 'E4') errors.push(`[parity-ref] goal ${gid} parity.artifact_id '${p.artifact_id}' must resolve to an E4 verdict evidence object`);
+      if (!Array.isArray(p.transcript) || p.transcript.length === 0) errors.push(`[parity-transcript] goal ${gid} parity.transcript must be a non-empty array`);
+      else if (!p.transcript.some((line) => typeof line === 'string' && line.includes(p.artifact_id))) errors.push(`[parity-transcript] goal ${gid} parity.transcript must contain a line naming the artifact '${p.artifact_id}'`);
+    }
+    // (c) resolved_view: series covers EXACTLY the two E5 sources; per-segment values mirror E5.series.
+    const rv = g.evidence?.resolved_view;
+    if (rv) {
+      const e5 = g.evidence?.E5 || {};
+      const e5Sources = new Set(e5.sources || []);
+      const rvSources = (rv.series || []).map((s) => s.source);
+      const rvSet = new Set(rvSources);
+      if (rvSources.length !== 2 || rvSet.size !== 2 || [...rvSet].some((s) => !e5Sources.has(s)) || [...e5Sources].some((s) => !rvSet.has(s))) {
+        errors.push(`[resolved-view-sources] goal ${gid} resolved_view.series must cover exactly the two E5 sources [${[...e5Sources].join(', ')}], got [${rvSources.join(', ')}]`);
+      } else {
+        const e5BySeg = {};
+        for (const row of e5.series || []) e5BySeg[row.segment] = row;
+        for (const s of rv.series) {
+          const field = RV_SOURCE_FIELD[s.source];
+          for (const seg of s.segments || []) {
+            const auth = e5BySeg[seg.segment];
+            if (!auth || (field && auth[field] !== seg.value)) {
+              errors.push(`[resolved-view-values] goal ${gid} resolved_view '${s.source}' segment '${seg.segment}' value ${seg.value} must mirror the authored E5.series value (${auth ? auth[field] : 'no such segment'})`);
+            }
+          }
+        }
+      }
+    }
   }
 
   return errors;

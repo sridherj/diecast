@@ -180,6 +180,14 @@ h1,h2,h3,h4{font-family:var(--mono);font-weight:500;margin:0;}
   font-family:var(--mono);font-size:11px;color:var(--ink-35);min-height:18px;
   display:flex;flex-direction:column;align-items:flex-start;gap:6px;
   view-transition-name:vt-receipt-trail;   /* 1.3 anchor (Contract 5) — trail glides; receipt pill crossfades in. */}
+/* ── 3.4: the evidence/work ZONE WRAPPER — the SIXTH morph anchor (vt-evidence-strip), Phase-1
+   RESERVED and claimed here. It wraps the .body second zone (the feature StageSurface+E1 strip
+   on CAST-412, the InvestigationLedger/E2 seed once morphed), so on the real hero morph the zone
+   GLIDES while the EvidenceBlock content (E1 ⇄ E2) crossfades inside it. UNIQUENESS (BINDING #8):
+   exactly ONE element carries this name per snapshot — it lives ONLY on the GoalCanvas zone wrapper,
+   never on an EvidenceBlock and never on #/kit (which renders bare components, no zone wrapper). ── */
+.evidence-zone{min-width:0;view-transition-name:vt-evidence-strip;}
+.evidence-zone > section{min-width:0;}
 
 /* ── Home + BoardStub. ── */
 .stub-wrap{padding:48px 8px;max-width:520px;}
@@ -709,6 +717,381 @@ h1,h2,h3,h4{font-family:var(--mono);font-weight:500;margin:0;}
 .kit-dec-ladder{display:flex;flex-direction:column;gap:20px;max-width:640px;}
 .kit-dec-cell{display:flex;flex-direction:column;gap:9px;align-items:flex-start;}
 .kit-dec-cell > .kit-cap{margin:0;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3.1 — FEATURE BACKBONE LAYER (StageSurface · work-happening stream · E1 raster
+   wiring · stage-navigator focus · needs-you L3 chip). Prefixes: surf-* (stage
+   surfaces, Contract: greppable) · work-* (the per-goal work stream, PRF1) ·
+   ny-* (the L3 needs-you header chip). Token-only colors. NO view-transition-name
+   here (anchors stay on shell zone wrappers). Error paths render VISIBLE fallbacks +
+   console.warn, never throw (zero-silent-failure, the established posture).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── StageSpine NAVIGATOR additions — a focused step gets an ink ring distinct from
+   the raspberry `current` fill; clickable steps are buttons (keyboard-reachable, DOM
+   order = focus order) carrying data-op="drillInto:<step-id>" (no sixth op). ── */
+button.spine-seg{font:inherit;cursor:pointer;}
+.spine-seg--nav{cursor:pointer;}
+.spine-seg--focus{outline:2px solid var(--ink);outline-offset:1px;}
+button.spine-loopstage{font:inherit;cursor:pointer;border:none;background:transparent;}
+.spine-loopstage--focus{outline:2px solid var(--ink);outline-offset:1px;border-radius:999px;}
+
+/* ── Work-happening stream (PRF1) — line-density run-status rows resolved from
+   ORG.goals[id].work_stream against ORG.agents. Reuses the Avatar primitive (kit
+   grammar) + a status pill; the @you manual item carries the needs-you accent only
+   when blocking. NOT the 2b kit FIXTURES. ── */
+.work-row{display:grid;grid-template-columns:auto 1fr;gap:6px 11px;align-items:center;
+  padding:9px 12px;border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);
+  background:var(--paper);}
+.work-row--needs{border-color:var(--rasp);background:var(--rasp-08);}
+.work-id{--avatar-size:22px;display:inline-flex;align-items:center;gap:7px;min-width:0;}
+.work-name{font-family:var(--mono);font-weight:600;font-size:12px;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.work-label{grid-column:1 / -1;font-size:12.5px;color:var(--ink-60);}
+.work-meta{display:flex;align-items:center;gap:9px;justify-self:end;}
+.work-step{font-family:var(--mono);font-size:10px;color:var(--ink-35);
+  border:1px solid var(--hairline-soft);border-radius:999px;padding:1px 8px;white-space:nowrap;}
+.work-status{font-family:var(--mono);font-size:10.5px;color:var(--ink-60);white-space:nowrap;}
+.work-status--running{color:var(--checker);}
+.work-status--blocked{color:var(--warn);}
+.work-status--needs{color:var(--rasp);font-weight:600;}
+.work-status--idle{color:var(--ink-35);}
+
+/* ── StageSurface (surf-*) — ONE component, one switch on step.surface → a familiar-tool
+   surface (doc · board · pr-thread · ledger · notebook · memo). Full-bleed-ish in the
+   stage-artifacts zone; a one-line surfaceWhy caption ties the surface to the step.
+   Unknown surface → visible surf-unknown + console.warn. ── */
+.surf{border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);
+  overflow:hidden;max-width:560px;}
+.surf-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:8px 14px;background:var(--cream-deep);border-bottom:1px solid var(--hairline);}
+.surf-kind{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-35);white-space:nowrap;}
+.surf-why{font-family:var(--mono);font-size:10px;color:var(--ink-60);text-align:right;}
+.surf-body{padding:14px 15px;}
+.surf-title{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--ink);
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.surf-vchip{font-family:var(--mono);font-size:9px;color:var(--ink-60);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 7px;}
+.surf-does{font-size:12px;color:var(--ink-60);margin:9px 0 12px;line-height:1.5;}
+.surf-skel{display:flex;flex-direction:column;gap:6px;margin:10px 0 13px;}
+.surf-skel i{height:7px;border-radius:2px;background:var(--hairline-soft);display:block;}
+.surf-arts{display:flex;flex-direction:column;gap:8px;}
+.surf-art{font-size:12.5px;color:var(--ink);}
+.surf-art-cap{color:var(--ink-60);font-size:12px;margin-top:2px;}
+.surf-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.surf-chip{font-family:var(--mono);font-size:10px;color:var(--ink-60);
+  border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);padding:2px 8px;background:var(--cream);}
+/* board / pr-thread / ledger / notebook / memo rows */
+.surf-rows{display:flex;flex-direction:column;}
+.surf-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline;
+  padding:9px 0;border-top:1px solid var(--hairline-soft);}
+.surf-row:first-child{border-top:none;}
+.surf-row-main{font-size:12.5px;color:var(--ink);min-width:0;}
+.surf-row-sub{font-size:11.5px;color:var(--ink-60);margin-top:2px;}
+.surf-row-meta{font-family:var(--mono);font-size:10px;color:var(--ink-35);white-space:nowrap;text-align:right;}
+.surf-pr-line{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+  color:var(--ink-60);padding:7px 0;border-top:1px solid var(--hairline-soft);}
+.surf-pr-line:first-child{border-top:none;}
+.surf-pr-av{--avatar-size:18px;}
+.surf-decisions{margin-top:13px;padding-top:12px;border-top:1px dashed var(--hairline-soft);
+  display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+.surf-dec-h{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-35);}
+.surf-unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);border:1px dashed var(--rasp);
+  border-radius:var(--radius-sm);padding:10px 12px;background:var(--rasp-08);margin:13px 15px;}
+
+/* ── E1 raster wiring — real <img> screenshot with an onerror swap to the 2b CSS/SVG
+   thumbnail (BINDING #2 + the error-path rule: a visible fallback, NEVER a broken-image
+   icon). The fallback SVG is hidden until the img errors (a class toggle on the wrapper). ── */
+.ev-shot--raster{width:100%;max-width:480px;}
+.ev-shot-img{display:block;width:100%;height:auto;border:1px solid var(--hairline);
+  border-radius:var(--radius-sm);background:var(--cream);}
+.ev-shot-fallback{display:none;}
+.ev-shot--broken .ev-shot-img{display:none;}
+.ev-shot--broken .ev-shot-fallback{display:block;border:1px solid var(--hairline);
+  border-radius:var(--radius-sm);}
+.ev-shot--broken .ev-shot-cap::after{content:' · image unavailable, showing thumbnail';color:var(--ink-35);}
+
+/* ── E1 compact evidence strip (the default-view summary of the acceptance panel). ── */
+.ev-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:560px;
+  border:1px solid var(--hairline);border-left:3px solid var(--ink);border-radius:var(--radius-md);
+  background:var(--paper);padding:11px 14px;font-size:12px;color:var(--ink-60);}
+.ev-strip-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-35);}
+.ev-strip-n{font-family:var(--mono);font-weight:600;color:var(--ink);}
+.ev-strip-flag{font-family:var(--mono);color:var(--rasp);font-weight:600;}
+.ev-strip-link{font-family:var(--mono);font-size:11px;color:var(--ink);margin-left:auto;
+  text-decoration:underline;text-decoration-color:var(--ink-35);text-underline-offset:2px;}
+
+/* ── Needs-you L3 chip (ny-*) — a persistent header-band chip; clicking opens the
+   EscalationRail INLINE at the WHAT level (no Execution-tab entry). Local-UI-state
+   popover, same posture as the 6B decision callout (not appState). ── */
+.ny-band{display:flex;flex-direction:column;gap:11px;margin:4px 0 2px;}
+.ny-chip{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;cursor:pointer;
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--rasp);
+  border:1px solid var(--rasp);background:var(--rasp-08);border-radius:999px;padding:4px 11px;}
+.ny-chip:hover{background:var(--rasp-15);}
+.ny-chip:focus-visible{outline:2px solid var(--maker);outline-offset:2px;}
+.ny-chip-t{color:var(--ink);font-weight:500;}
+.ny-rail{max-width:460px;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3.2 — EXECUTION DRILL-IN STYLES (exec-*). The HOW panel below the canvas
+   zones: a flat run list (level 1) → the focus run expands (level 2) to the
+   threaded dispatch tree (RunNode, the run_node.html idiom lift) + the
+   maker-checker IterationPanel. Token-only colors. Rollup tints: has-failure
+   (blocked/failed in subtree) rides --fail; has-warning (rework/flagged) rides
+   --warn — failure dominates, exactly as run_node.html. NO view-transition-name
+   here (the panel stays CLOSED during the morph; it never joins a snapshot).
+   ════════════════════════════════════════════════════════════════════════ */
+.exec-panel{margin-top:18px;border:1px solid var(--hairline);border-radius:var(--radius-md);
+  background:var(--cream);overflow:hidden;max-width:760px;}
+.exec-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:11px 15px;background:var(--cream-deep);border-bottom:1px solid var(--hairline);}
+.exec-head-k{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink);}
+.exec-head-sub{font-family:var(--mono);font-size:10.5px;color:var(--ink-60);}
+.exec-empty{font-family:var(--mono);font-size:12px;color:var(--rasp);padding:14px 15px;}
+
+/* ── flat run list (level 1) ── */
+.exec-runlist{display:flex;flex-direction:column;padding:6px 8px;}
+.exec-runrow{display:grid;grid-template-columns:auto auto auto 1fr auto;gap:10px;align-items:center;
+  padding:7px 8px;border-radius:var(--radius-sm);font-size:12px;color:var(--ink-60);}
+.exec-runrow:hover{background:var(--paper);}
+.exec-runrow-agent{font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--ink);}
+.exec-runrow-when{font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+.exec-runrow-sum{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.exec-runrow-rw{font-family:var(--mono);font-size:10px;color:var(--warn);white-space:nowrap;}
+
+/* ── status dots — distinct semantics: done=ok · running=maker(pulse) · blocked=warn · flagged=rasp ── */
+.exec-dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--ink-35);}
+.exec-dot--done{background:var(--ok);}
+.exec-dot--running{background:var(--maker);animation:exec-pulse 1.6s ease-in-out infinite;}
+.exec-dot--blocked{background:var(--warn);}
+.exec-dot--flagged{background:var(--rasp);}
+@keyframes exec-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+@media (prefers-reduced-motion: reduce){.exec-dot--running{animation:none;}}
+
+/* ── the focus-run disclosure (the ONLY row that opens a tree) ── */
+.exec-focusrow{display:grid;grid-template-columns:auto auto 1fr auto auto;gap:11px;align-items:center;width:100%;
+  font:inherit;text-align:left;cursor:pointer;border:none;border-top:1px solid var(--hairline-soft);
+  background:var(--paper);padding:10px 15px;color:var(--ink-60);}
+.exec-focusrow:hover{background:var(--cream);}
+.exec-focusrow:focus-visible{outline:2px solid var(--maker);outline-offset:-2px;}
+.exec-focus-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--maker);border:1px solid var(--maker);border-radius:999px;padding:1px 8px;}
+.exec-focus-agent{font-family:var(--mono);font-weight:600;font-size:12px;color:var(--ink);}
+.exec-focus-lbl{font-size:12px;color:var(--ink-60);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.exec-focus-meta{font-family:var(--mono);font-size:10px;color:var(--ink-35);white-space:nowrap;}
+.exec-caret{font-size:10px;color:var(--ink-35);}
+
+.exec-detail{padding:14px 15px 16px;border-top:1px solid var(--hairline-soft);background:var(--paper);}
+.exec-tree-h{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-35);margin-bottom:9px;}
+
+/* ── RunNode — threaded recursion + rollup rails (the run_node.html idiom) ── */
+.exec-group{border-radius:var(--radius-sm);}
+.exec-node{border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);background:var(--paper);
+  padding:8px 11px;}
+.exec-node.is-child{background:var(--cream);}
+.exec-node--alert{border-color:var(--hairline);}
+.exec-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.exec-av{display:inline-flex;}
+.exec-agent{font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--ink);}
+.exec-agent--unknown{color:var(--rasp);}
+.exec-kind{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-35);border:1px solid var(--hairline-soft);border-radius:999px;padding:0 7px;}
+.exec-rework{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--warn);
+  border:1px solid var(--warn);border-radius:999px;padding:0 7px;}
+.exec-stat{font-family:var(--mono);font-size:10px;color:var(--ink-35);margin-left:auto;}
+.exec-label{font-size:12px;color:var(--ink-60);margin:6px 0 0;line-height:1.45;}
+.exec-row2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.exec-skills{display:inline-flex;gap:5px;flex-wrap:wrap;}
+.exec-skill{font-family:var(--mono);font-size:9.5px;color:var(--ink-60);background:var(--cream-deep);
+  border-radius:var(--radius-sm);padding:1px 7px;}
+.exec-ctx{display:inline-flex;align-items:center;gap:6px;margin-left:auto;}
+.exec-ctx-track{width:84px;height:5px;border-radius:3px;background:var(--hairline-soft);overflow:hidden;}
+.exec-ctx-fill{display:block;height:100%;border-radius:3px;background:var(--maker);}
+.exec-ctx--mid .exec-ctx-fill{background:var(--warn);}
+.exec-ctx--hot .exec-ctx-fill{background:var(--fail);}
+.exec-ctx-lbl{font-family:var(--mono);font-size:9.5px;color:var(--ink-35);white-space:nowrap;}
+.exec-node--unknown{font-family:var(--mono);font-size:11px;color:var(--rasp);
+  border:1px dashed var(--rasp);border-radius:var(--radius-sm);padding:8px 11px;background:var(--rasp-08);}
+/* threaded rail — a left gutter whose hue mirrors the subtree rollup */
+.exec-thread{margin:6px 0 0 16px;padding-left:13px;border-left:2px solid var(--hairline);
+  display:flex;flex-direction:column;gap:7px;}
+.exec-group.has-warning > .exec-node{border-left:3px solid var(--warn);}
+.exec-group.has-failure > .exec-node{border-left:3px solid var(--fail);}
+.exec-thread.has-warning{border-left-color:var(--warn);}
+.exec-thread.has-failure{border-left-color:var(--fail);}
+.exec-group > .exec-node{margin-bottom:0;}
+.exec-thread > .exec-group{margin-top:0;}
+
+/* ── IterationPanel — maker/checker pair, findings, rework meter, named exits, PR diff ── */
+.exec-iter{margin-top:16px;border:1px solid var(--hairline);border-radius:var(--radius-md);
+  background:var(--cream);overflow:hidden;}
+.exec-iter-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 13px;background:var(--cream-deep);border-bottom:1px solid var(--hairline);}
+.exec-iter-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink);}
+.exec-iter--unknown{font-family:var(--mono);font-size:12px;color:var(--rasp);padding:12px 13px;}
+.exec-pair{display:flex;align-items:center;gap:10px;padding:12px 13px;flex-wrap:wrap;}
+.exec-pair-card{--avatar-size:20px;flex:1 1 240px;min-width:0;border:1px solid var(--hairline-soft);
+  border-radius:var(--radius-sm);background:var(--paper);padding:4px 8px;}
+.exec-pair-tie{font-family:var(--mono);font-size:16px;color:var(--ink-35);flex:none;}
+.exec-rwmeter{display:inline-flex;align-items:center;gap:5px;}
+.exec-rw-seg{width:16px;height:6px;border-radius:2px;background:var(--hairline);display:inline-block;}
+.exec-rw-seg--used{background:var(--warn);}
+.exec-rw-lbl{font-family:var(--mono);font-size:10px;color:var(--ink-60);margin-left:3px;}
+.exec-finds{display:flex;flex-direction:column;padding:0 13px;}
+.exec-find{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:baseline;
+  padding:8px 0;border-top:1px solid var(--hairline-soft);font-size:12px;color:var(--ink-60);}
+.exec-find-code{font-family:var(--mono);font-weight:600;font-size:11px;color:var(--ink);
+  background:var(--cream-deep);border-radius:var(--radius-sm);padding:1px 7px;}
+.exec-find--flag .exec-find-code{color:var(--rasp);background:var(--rasp-08);}
+.exec-find-round{font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+.exec-find-stat{font-family:var(--mono);font-size:10.5px;color:var(--ok);white-space:nowrap;}
+.exec-find-stat--flag{color:var(--rasp);font-weight:600;}
+.exec-exits{display:flex;gap:9px;flex-wrap:wrap;padding:13px;}
+.exec-exit{font-family:var(--mono);font-size:11px;color:var(--ink-60);cursor:pointer;
+  border:1px solid var(--hairline);border-radius:var(--radius-sm);background:var(--paper);padding:5px 12px;}
+.exec-exit:hover{background:var(--cream-deep);}
+.exec-exit:focus-visible{outline:2px solid var(--maker);outline-offset:1px;}
+.exec-exit--escalate{color:var(--rasp);border-color:var(--rasp);background:var(--rasp-08);}
+.exec-exit--escalate:hover{background:var(--rasp-15);}
+.exec-pr{margin:0 13px 14px;border:1px solid var(--hairline);border-radius:var(--radius-sm);
+  background:var(--paper);overflow:hidden;}
+.exec-pr-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:6px 11px;background:var(--cream-deep);border-bottom:1px solid var(--hairline);}
+.exec-pr-kind{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-35);}
+.exec-pr-why{font-family:var(--mono);font-size:10px;color:var(--ink-60);}
+.exec-pr-id{font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--ink);padding:9px 11px 0;}
+.exec-pr-diff{font-family:var(--mono);font-size:11px;color:var(--ink-60);margin:6px 0 0;
+  padding:6px 11px 11px;white-space:pre-wrap;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3.3 — DEBUG-LOOP CANVAS STYLES (dbg-*). The investigation-ledger work zone —
+   the ONE evidence/work-zone deviation from the feature grammar (every other
+   zone — header, work-stream frame, chips, exec tab, chat rail — is shared, SC-005).
+   Iteration history is first-class (FR-007): older passes COLLAPSE (<details>),
+   never delete; the live pass hosts the E2 EvidenceBlock as its hero. Token-only
+   colors. NO view-transition-name here (anchors stay on shell zone wrappers). The
+   loop-band iter-overflow guard (.spine-iter--over) reuses the semantic --fail red
+   (the same zero-silent-failure posture as ev-unknown / spine-unknown).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Loop-band iter-overflow guard — iter.current > budget renders --fail (data error,
+   never a silent clamp; SpineLoop also console.warns). Valid counters (n ≤ budget)
+   render byte-identically to before via the base .spine-iter. ── */
+.spine-iter--over{color:var(--fail);background:rgba(178,36,57,.12);}
+
+/* ── InvestigationLedger — the iteration-history spine of the debug work zone. ── */
+.dbg-ledger{display:flex;flex-direction:column;gap:12px;max-width:560px;}
+.dbg-pass{border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);overflow:hidden;}
+.dbg-pass--live{border-left:3px solid var(--checker);}
+.dbg-pass--closed{border-left:3px solid var(--hairline);}
+.dbg-pass-sum{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;list-style:none;
+  font-size:12.5px;color:var(--ink);}
+.dbg-pass-sum::-webkit-details-marker{display:none;}
+.dbg-pass-sum:focus-visible{outline:2px solid var(--maker);outline-offset:-2px;}
+.dbg-pass-badge{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--checker);
+  background:rgba(107,71,176,.1);border-radius:999px;padding:2px 10px;white-space:nowrap;}
+.dbg-pass-stat{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid;border-radius:999px;padding:1px 7px;white-space:nowrap;}
+.dbg-pass-stat--live{color:var(--checker);border-color:var(--checker);}
+.dbg-pass-stat--closed{color:var(--ink-35);border-color:var(--hairline);}
+.dbg-pass-summary{color:var(--ink-60);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.dbg-pass-caret{margin-left:auto;font-size:10px;color:var(--ink-35);flex:none;}
+.dbg-pass[open] .dbg-pass-caret{transform:rotate(90deg);}
+.dbg-pass-body{padding:4px 14px 14px;display:flex;flex-direction:column;gap:10px;
+  border-top:1px solid var(--hairline-soft);}
+.dbg-pass-e2{margin-top:4px;}
+.dbg-pass-collapsednote{font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+
+/* ── Experiment rows — label + verdict chip, with line-density ColleagueCard attribution. ── */
+.dbg-exp{border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);background:var(--cream);
+  padding:9px 11px;display:flex;flex-direction:column;gap:7px;}
+.dbg-exp-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.dbg-exp-label{font-size:12px;color:var(--ink);min-width:0;}
+.dbg-exp-verdict{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  border:1px solid;border-radius:999px;padding:1px 8px;white-space:nowrap;flex:none;}
+.dbg-exp-verdict--confirmed{color:var(--ok);border-color:var(--ok);}
+.dbg-exp-verdict--refuted{color:var(--fail);border-color:var(--fail);}
+.dbg-exp-verdict--open{color:var(--warn);border-color:var(--warn);}
+.dbg-exp-who{font-family:var(--mono);font-size:11px;color:var(--ink-35);}
+
+/* ── L1 decision pill on the investigation ledger. ── */
+.dbg-ledger-dec{margin-top:4px;padding-top:12px;border-top:1px dashed var(--hairline-soft);
+  display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   4.1 — SPIKE CANVAS STYLES. The lightest surface in the prototype: a timebox
+   METER + four sub-steps (the 2c FLAG: the meter is a wrapper, not the only
+   element), the SINGLE probes-tried card (the one work-zone deviation), the
+   fleshed-out `memo` StageSurface kind, and the spike_ref local-disclosure flash.
+   Classes stay under the existing spine-* / surf-* / ev-* prefixes — NO new prefix
+   in 4.1 (parity-* is 4.3's). Token-only colors. NO view-transition-name here (the
+   6×1 anchor set is unchanged). Error paths reuse the semantic --fail (zero-silent-
+   failure, the established posture).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Timebox meter: overrun guard + the L2 extension chip + the four sub-steps beneath
+   the budget meter. A spike spine still shows its steps — just materially lighter than a
+   feature segment bar (one thin meter + a small step cluster, never a stage backbone). ── */
+.spine-tb-fill--over{background:var(--fail);}            /* timebox_used > budget — data error, never a silent clamp */
+.spine-tb-ext{margin-top:3px;}
+.spine-tb-steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;}
+.spine-tb-step{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:var(--radius-sm);
+  border:1px solid var(--hairline-soft);font-size:11.5px;color:var(--ink-35);background:var(--paper);}
+.spine-tb-step .spine-n{font-size:9px;}
+.spine-tb-step--done{color:var(--ink-60);background:var(--cream-deep);border-color:var(--hairline-soft);}
+.spine-tb-step--now{border-color:var(--rasp);color:var(--ink);background:var(--rasp-08);}
+button.spine-tb-step{font:inherit;cursor:pointer;}
+.spine-tb-step--nav{cursor:pointer;}
+.spine-tb-step--focus{outline:2px solid var(--ink);outline-offset:1px;}
+
+/* ── Probes-tried card (surf-*) — the spike's ONE deviated work zone: a single card with
+   probe rows (line-density ColleagueCard attribution) + a measured-results strip. No work-
+   stream grid, no ticket stream — the lightness IS the design (a spike is not a mini-feature). ── */
+.surf-probes{border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--paper);
+  padding:13px 15px;max-width:460px;display:flex;flex-direction:column;gap:11px;}
+.surf-probes-h{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-35);}
+.surf-probe{display:flex;flex-direction:column;gap:7px;padding-bottom:11px;border-bottom:1px solid var(--hairline-soft);}
+.surf-probe:last-of-type{border-bottom:none;padding-bottom:0;}
+.surf-probe-label{font-size:12.5px;color:var(--ink);}
+.surf-probe-results{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;
+  border-top:1px dashed var(--hairline-soft);padding-top:10px;}
+.surf-probe-results-k{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-35);}
+.surf-probe-result{font-family:var(--mono);font-size:11px;color:var(--ink-60);}
+.surf-probe-result b{color:var(--ink);}
+
+/* ── Memo surface (surf-*) — the fleshed-out `memo` StageSurface kind: a one-pager findings
+   memo (dated mono header · probes summary · conclusion line · timebox stamp). Phase 3 shipped
+   the thin RowsSurface version; this is the full-bleed familiar-tool treatment (Phase 4 own). ── */
+.surf-memo{display:flex;flex-direction:column;gap:12px;}
+.surf-memo-dateline{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-35);
+  border-bottom:1px solid var(--hairline-soft);padding-bottom:8px;text-transform:uppercase;}
+.surf-memo-sec{display:flex;flex-direction:column;gap:6px;}
+.surf-memo-h{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-35);}
+.surf-memo-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+.surf-memo-li{font-size:12.5px;color:var(--ink-60);padding-left:14px;position:relative;}
+.surf-memo-li::before{content:'·';position:absolute;left:5px;color:var(--ink-35);font-weight:700;}
+.surf-memo-by{font-family:var(--mono);font-size:10.5px;color:var(--ink-35);}
+.surf-memo-concl{font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;}
+.surf-memo-stamp{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+  color:var(--ink-60);border:1px solid var(--hairline);border-radius:999px;background:var(--cream);
+  padding:4px 11px;align-self:flex-start;}
+
+/* ── spike_ref BIDIRECTIONAL local disclosure — the scroll-target highlight when the verdict's
+   spike_ref opens the L3 rail (and when the rail's back-link returns to the verdict card). Pure
+   affordance: NO op, NO appState (same posture as the 6B popover). Reduced-motion-safe. ── */
+.spk-flash{animation:spk-flash 1.4s ease-out;border-radius:var(--radius-md);}
+@keyframes spk-flash{0%{box-shadow:0 0 0 3px var(--rasp-15);}100%{box-shadow:0 0 0 3px transparent;}}
+@media (prefers-reduced-motion: reduce){.spk-flash{animation-duration:1ms;}}
 </style>
 </head>
 <body>
@@ -780,14 +1163,56 @@ function deriveSpine(family) {
   if (ss.iter) spine.iter = { ...ss.iter };
   if (sm.timebox) {
     const budgetMin = tbMinutes(sm.timebox.budget);
-    const usedMin = tbMinutes(ss.timebox_used);
+    const usedStr = ss.timebox_used || sm.timebox.used;
+    const usedMin = tbMinutes(usedStr);
+    // 4.1 error path (design review): used > budget is a DATA error — flag `over` so SpineTimebox
+    // renders the fill in --fail + console.warns (never a silent clamp); an unparseable duration
+    // string (parses to 0 but isn't literally a zero) renders raw + warns. Valid data → both false,
+    // so the meter renders byte-identically to before.
+    const over = budgetMin ? usedMin > budgetMin : false;
+    const unparseable = !!usedStr && usedMin === 0 && !/\b0\s*[hm]/.test(usedStr);
     spine.timebox = {
       budget: sm.timebox.budget,
-      used: ss.timebox_used || sm.timebox.used,
+      used: usedStr,
       pct: budgetMin ? Math.round((usedMin / budgetMin) * 100) : 0,
+      over,
+      unparseable,
     };
   }
   return spine;
+}
+
+/* ── 3.4 MORPH PROJECTION (the real hero morph). When the feature goal (CAST-412) is viewed in
+   the DEBUG shape, its post-reclassification state comes from goals[id].morph_view — NOT from the
+   real debug goal (CAST-431). These two pure helpers build that projection so GoalCanvas renders
+   the loop-band spine (iter 1/3) + the just-seeded investigation (the E2 seed) for the SAME goal,
+   keeping header/crumb/chat untouched. State is READ from morph_view (the goal's own data is never
+   rebuilt), so the scripted reverse restores the feature projection exactly (the undo proof). ── */
+function deriveMorphSpine(goal) {                            // the debug loop-band spine for a morphed feature goal
+  const sm = ORG.stageModels.debug;
+  const mv = goal.morph_view || {};
+  const steps = sm.steps.map((s) => s.shortLabel ?? s.label);
+  const iter = (mv.spine_state && mv.spine_state.iter) || { current: 1, budget: 3 };
+  // the loop's live position = the furthest step the seeded work stream reaches (dbg-03 here).
+  const wsSteps = (mv.work_stream || []).map((w) => w.step);
+  let current = 0;
+  sm.steps.forEach((s, i) => { if (wsSteps.includes(s.id)) current = i; });
+  return { placeholder: sm.placeholder, shape: sm.shape, steps, current, iter: { ...iter } };
+}
+function deriveMorphInvestigation(goal) {                    // a one-live-pass investigation from morph_view (reuses InvestigationLedger)
+  const mv = goal.morph_view || {};
+  const e2 = (mv.evidence && mv.evidence['E2-seed']) || { hypotheses: [] };
+  const experiments = (mv.work_stream || []).map((w) => ({
+    id: w.id, label: w.label, assignee: w.assignee, verdict: 'open',   // a fresh pass — nothing weighed yet
+  }));
+  return {
+    investigation: { passes: [{
+      n: 1, status: 'live',
+      summary: 'Reclassified from feature. First pass on the coupon-apply 500.',
+      experiments,
+    }] },
+    evidence: { E2: e2 },
+  };
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -813,8 +1238,15 @@ const appState = {
   nudge:   { ...FEATURE.nudge },     // the feature goal's nudge (who/do/why) — was the Phase 1 stub
   receipts: [],                      // decision receipts, pushed by morph op (now derived from an atom)
   pinned:  [],                       // canvas objects created by promote/pin ops (1.2)
-  drill:   null,                     // 'execution' | null — drillInto target (1.2)
-  chat:    { messages: [], scriptIndex: 0 },
+  drill:   null,                     // 'execution' | null — drillInto:execution target (1.2 / HOW; 3.2 fleshes it)
+  // 3.1: stage-navigator focus. null = "current step" (default WHAT view); a step id =
+  // the user-navigated step whose StageSurface renders. Set via drillInto:<step-id> (NO sixth op).
+  stageFocus: null,
+  // 3.1 / PRF2: chat is keyed PER-GOAL — appState.chat.byGoal[goalId] = {messages, scriptIndex,
+  // scriptKey}. Refines (does not rename) the Phase-1 `chat` contract: the keys live one level
+  // deeper, under the goal id, so switching goals shows that goal's own thread. chatFor(id) lazily
+  // seeds an entry (scriptKey = family). Reload rebuilds appState → resets cleanly.
+  chat:    { byGoal: {} },
 };
 // expose for console verification (manual click-through, Constraint C1 — not a test).
 window.appState = appState;
@@ -855,8 +1287,13 @@ function labelFor(from) {
 }
 
 function ChatRail() {
-  const msgs = appState.chat.messages;
-  const done = appState.chat.scriptIndex >= script.length;
+  // PRF2: the rail reads the PER-GOAL chat (chatFor(goal)). Switching goals shows that goal's own
+  // thread + scenario position; SCRIPTS[scriptKey] is the active script (only `feature` exists in 3.1).
+  const c = chatFor(appState.goal.id);
+  const scr = SCRIPTS[c.scriptKey] || [];
+  const msgs = c.messages;
+  const hasScript = scr.length > 0;
+  const done = c.scriptIndex >= scr.length;
   // 2b.3: the rail header speaks in the LOCKED Guide voice — the GuideMark (ink diamond +
   // mono wordmark), no checker hue. The handle derives from the routed goal title (no
   // hand-typed canonical token — the 2a.3 drift rule).
@@ -869,7 +1306,9 @@ function ChatRail() {
       </div>
       <div class="chat-log">
         ${msgs.length === 0
-          ? html`<div class="chat-empty">Click <b>Next ▸</b> to walk the scripted demo.</div>`
+          ? html`<div class="chat-empty">${hasScript
+              ? html`Click <b>Next ▸</b> to walk the scripted demo.`
+              : html`No scripted walkthrough for this goal yet.`}</div>`
           : msgs.map((m) => html`
               <div class=${'msg ' + (m.from || 'narration')}>
                 <div class="mfrom">${labelFor(m.from)}</div>
@@ -882,8 +1321,8 @@ function ChatRail() {
       </div>
       <!-- "Next ▸" is scenario-advance (NOT an op) — wired to advance() directly, kept
            visibly the same grammar as the data-op buttons it sits beside. -->
-      <button class="next-btn" onClick=${advance} disabled=${done}>
-        ${done ? 'Script complete · reload to replay' : 'Next ▸'}
+      <button class="next-btn" onClick=${advance} disabled=${!hasScript || done}>
+        ${!hasScript ? 'No script for this goal' : (done ? 'Script complete · reload to replay' : 'Next ▸')}
       </button>
       <div class="chat-inp">Steer, ask, or override the Guide… ⏎</div>
     </aside>`;
@@ -901,66 +1340,160 @@ function AppShell({ children }) {
 }
 
 function GoalCanvas() {
+  const goalId = appState.goal.id;
+  const goal = appState.org.goals[goalId];
   const fam = appState.family;
-  const spine = appState.spines[fam];
+  // 3.4: MORPHED = the goal is being viewed in a family that is NOT its own, with a morph_view to
+  // supply the new-shape state (the real hero morph: CAST-412, a feature goal, shown as debug). The
+  // spine + work + evidence then read morph_view, NOT the real debug goal (CAST-431). On the real
+  // debug goal (CAST-431) and on the feature default this is false → zero behavior change.
+  const morphed = fam === 'debug' && !!(goal && goal.family !== 'debug' && goal.morph_view);
+  const spine = morphed ? deriveMorphSpine(goal) : appState.spines[fam];
   const isDebug = fam === 'debug';
   const devMode = location.hash.includes('/dev');   // dev op-strip gated behind a #/dev suffix (1.3 handoff tidy)
+
+  // 3.1: the stage navigator + StageSurface read EVERYTHING from ORG.stageModels (labels/surfaces/
+  // artifacts) — nothing hardcoded. focusStep = the navigated step (appState.stageFocus) or, by
+  // default, the current step (goal.spine_state.current). The surface renders that step's artifacts.
+  const sm = appState.org.stageModels[fam] || { steps: [] };
+  const steps = sm.steps || [];
+  const currentStepId = (goal && goal.spine_state && goal.spine_state.current) || (steps[0] && steps[0].id);
+  const focusStepId = appState.stageFocus || currentStepId;
+  const focusStep = steps.find((s) => s.id === focusStepId) || steps[0];
+  const stepArtifacts = ((goal && goal.artifacts) || []).filter((a) => a.step === focusStepId);
+  // doc steps host the requirements/planning decision atoms in order (derived — no hardcoded ids/labels).
+  const docSteps = steps.filter((s) => s.surface === 'doc');
+  const DOC_PHASES = ['requirements', 'planning'];
+  const stepPhase = {};
+  docSteps.forEach((s, i) => { if (DOC_PHASES[i]) stepPhase[s.id] = DOC_PHASES[i]; });
+  const stepDecisions = (appState.org.decisions || []).filter(
+    (a) => a.goal_slug === goalId && stepPhase[focusStepId] && a.phase === stepPhase[focusStepId]);
+  // the goal's single L3 atom → the persistent needs-you chip + the EscalationRail.
+  const l3Atom = (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L3');
+  // 3.3: the goal's first L1 atom → the one L1 decision pill on the debug investigation ledger.
+  const l1Atom = (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L1');
+  // 3.3: the Guide narration is PER-GOAL (shared grammar, goal-correct content — same as the nudge /
+  // work-stream). The feature line is byte-identical to before (FLAGGED_RULE, no regression); the debug
+  // line narrates this goal's OWN loop signal (iteration + the confirmed hypothesis), derived from ORG.
+  const e2Confirmed = (isDebug && goal && goal.evidence && goal.evidence.E2)
+    ? (goal.evidence.E2.hypotheses || []).find((h) => h.verdict === 'confirmed') : null;
+  const iterState = (goal && goal.spine_state && goal.spine_state.iter)
+    || (morphed && goal.morph_view.spine_state && goal.morph_view.spine_state.iter) || null;
+  const guideLine = isDebug
+    ? `The Guide is tracking this debug loop${iterState ? ` — iteration ${iterState.current}/${iterState.budget}` : ''}${e2Confirmed ? `, ${e2Confirmed.id} confirmed; scoping the fix.` : '.'}`
+    : `The Guide is tracking this goal. It flagged ${FLAGGED_RULE} on the open PR and queued a review for you.`;
+  const e1 = goal && goal.evidence && goal.evidence.E1;
+  const nav = { ids: steps.map((s) => s.id), focus: appState.stageFocus };   // navigator: click → drillInto:<step-id>
+  // 3.4: morphed CAST-412 swaps the work-happening stream to the seeded investigation (symptom +
+  // first hypotheses from morph_view); the real feature/debug goals read their own work_stream.
+  const workStream = morphed ? (goal.morph_view.work_stream || []) : ((goal && goal.work_stream) || []);
+  // ── 4.1 SPIKE handles (all DERIVED from ORG — no hardcoded vocabulary). ──
+  const isSpike = fam === 'spike';
+  // L2 extension chip → rides the timebox meter (the "extended 2h→3h" atom, as a 6B callout).
+  const tbExtension = isSpike
+    ? (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L2')
+    : null;
+  // the goal's E4 verdict + its home step → the default-view E4 strip + the drillInto target.
+  const e4 = goal && goal.evidence && goal.evidence.E4;
+  const verdictStepId = (steps.find((s) => s.evidence === 'E4') || {}).id;
+  // the memo surface carries its owning L1 decision pill ("timeboxed to 2h; p95 only").
+  const memoL1 = (focusStep && focusStep.surface === 'memo')
+    ? (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L1')
+    : null;
+  // surface decisions: the doc-phase mapping (feature) OR the memo's owning L1 (spike).
+  const surfaceDecisions = (stepDecisions && stepDecisions.length) ? stepDecisions : (memoL1 ? [memoL1] : []);
+
   return html`
     <div class="goal-view">
       <div class="crumb">${appState.goal.crumb.replace(' / ', ' ')} <b>${appState.goal.id.toLowerCase()}</b></div>
 
-      <!-- Part 1 · goal anatomy (header / guide / spine / nudge) -->
+      <!-- Part 1 · goal anatomy (header / needs-you / guide / spine-navigator / nudge) -->
       <div class="goal-header">
         <span class="gtitle">${appState.goal.title}</span>
         <span class=${'fampill' + (isDebug ? ' debug' : '')}>${fam}</span>
       </div>
 
+      <!-- 3.1: the goal's single L3 atom surfaces as a persistent "⚠ needs you" chip in the header
+           band; clicking opens the EscalationRail INLINE at the WHAT level (US3 S3 — no Execution tab). -->
+      ${l3Atom ? html`<${NeedsYouChip} atom=${l3Atom}/>` : null}
+
       <!-- Guide narration — 2b.3: the locked Guide voice (GuideMark diamond, hue-free) +
-           real narration derived from ORG (FLAGGED_RULE, never hand-typed). Replaced the
-           Phase-1 "character design lands in Phase 2b" placeholder. -->
+           real narration derived from ORG (FLAGGED_RULE, never hand-typed). -->
       <div class="guide-line">
         <${GuideMark} size=${16}/>
-        <span>The Guide is tracking this goal. It flagged ${FLAGGED_RULE} on the open PR and queued a review for you.</span>
+        <span>${guideLine}</span>
       </div>
 
-      <!-- Stage spine — 2b.2a: swapped from the Phase 1 inline placeholder markup to the
-           StageSpine component (data UNCHANGED: appState.spines.<family>). The .spine-zone
-           wrapper + its (absent) anchor placement are kept BYTE-IDENTICAL — only the inner
-           content changes — so the morph contract holds: no vt-name here → the zone rides
-           the root crossfade, the feature segment bar dissolving into the debug loop band
-           ("same goal, new shape"). StageSpine renders its own PLACEHOLDER watermark. -->
+      <!-- Stage spine — 3.1: now a NAVIGATOR. The .spine-zone wrapper + its (absent) anchor
+           placement stay byte-identical (morph contract holds — no vt-name here → rides the root
+           crossfade). Clicking a step dispatches drillInto:<step-id> (NO sixth op) → appState.stageFocus,
+           and StageSurface (below) swaps to that step. Labels come from stageModels (no watermark now). -->
       <div class="spine-zone">
-        <${StageSpine} spine=${spine}/>
+        <${StageSpine} spine=${spine} nav=${nav} extension=${tbExtension}/>
       </div>
 
-      <!-- Nudge zone — 2b.2b: swapped from the Phase 1 inline stub to the NudgeCard (3B)
-           component. The .nudge ZONE WRAPPER keeps the vt-nudge-card anchor (Contract 9 —
-           anchor on the wrapper, NEVER on the kit component); only the inner content changes,
-           so the morph contract holds. data-op="nudge:n2" still cycles the card's content. -->
+      <!-- Nudge zone — NudgeCard (3B). The .nudge ZONE WRAPPER keeps the vt-nudge-card anchor. -->
       <div class="nudge">
         <${NudgeCard} nudge=${appState.nudge}/>
       </div>
 
-      <!-- Part 2 · work stream + stage artifacts — 2b.3 composition: every zone renders through
-           a kit component (zero Phase-1 stub markup remains). The In-flight work stream is three
-           LINE-density ColleagueCards drawn from FIXTURES (the 2b kit's fixture source, C4); the
-           real per-goal renderer that reads ORG.goals[id].work_stream is Phase 3. Stage artifacts
-           is ONE E1 EvidenceBlock (placeholder evidence content; real wiring is Phase 3). The same
-           FIXTURES.CO object is rendered at 4C density on #/board — same fixture, no field drift
-           (the density-drift check). -->
+      <!-- Part 2 · work-happening stream (PRF1) + stage artifacts (StageSurface). The work stream
+           renders from ORG.goals[id].work_stream, each assignee RESOLVED against ORG.agents (NOT the
+           2b kit FIXTURES — that is the defect PRF1 names). The stage-artifacts zone is the focused
+           step's familiar-tool surface; at the evidence-home step the full EvidenceBlock renders (E1
+           = real raster + onerror fallback), otherwise a compact E1 strip summarizes acceptance. -->
       <div class="body">
         <section>
-          <div class="sect-h"><span class="k">In flight</span> work</div>
-          <div class="work-stream">
-            <${ColleagueCard} agent=${FIXTURES.CO} density="line"/>
-            <${ColleagueCard} agent=${FIXTURES.CC} density="line"/>
-            <${ColleagueCard} agent=${FIXTURES.YOU} density="line"/>
-          </div>
+          ${isSpike
+            ? html`
+                <div class="sect-h"><span class="k">Probes</span> tried · ${workStream.length} on ${appState.goal.id.toLowerCase()} · throwaway by design</div>
+                <${ProbesCard} goal=${goal}/>`
+            : html`
+                <div class="sect-h"><span class="k">In flight</span> work · ${workStream.length} on ${appState.goal.id.toLowerCase()}</div>
+                <div class="work-stream">
+                  ${workStream.map((it) => html`<${WorkRow} item=${it} steps=${steps}/>`)}
+                </div>`}
         </section>
-        <section>
-          <div class="sect-h"><span class="k">Stage</span> artifacts</div>
-          <${EvidenceBlock} kind="E1" data=${FIXTURES.EVIDENCE.E1}/>
-        </section>
+        <!-- 3.4: the evidence/work ZONE WRAPPER carries the vt-evidence-strip morph anchor (the 6th
+             anchor, Phase-1 RESERVED). It is present in BOTH the feature default render and the morphed
+             render, so on the real hero morph it GLIDES while its EvidenceBlock content crossfades
+             (E1 strip ⇄ E2 seed). Exactly ONE element per snapshot carries the name (BINDING #8). The
+             inner zone has three states, in priority order:
+               • morphed CAST-412 → the just-seeded investigation from morph_view (the post-reclass shape);
+               • real debug default (CAST-431) → its own InvestigationLedger (3.3, FR-007 history);
+               • everything else → Stage artifacts (StageSurface + the focused step's evidence / E1 strip).
+             Only this evidence/work content deviates — header/spine/nudge/work-stream/exec/chat are
+             shared across families (SC-005). -->
+        <div class="evidence-zone">
+          ${morphed
+            ? html`
+                <section>
+                  <div class="sect-h"><span class="k">Investigation</span> ledger${spine.iter
+                    ? html` <span style="font-family:var(--mono);font-size:10px;color:var(--ink-35)">· ↺ iter ${spine.iter.current}/${spine.iter.budget} · reclassified, the loop’s memory starts here</span>`
+                    : null}</div>
+                  <${InvestigationLedger} goal=${deriveMorphInvestigation(goal)} l1Atom=${null}/>
+                </section>`
+            : (isDebug && !appState.stageFocus)
+              ? html`
+                  <section>
+                    <div class="sect-h"><span class="k">Investigation</span> ledger${spine.iter
+                      ? html` <span style="font-family:var(--mono);font-size:10px;color:var(--ink-35)">· ↺ iter ${spine.iter.current}/${spine.iter.budget} · the loop’s memory</span>`
+                      : null}</div>
+                    <${InvestigationLedger} goal=${goal} l1Atom=${l1Atom}/>
+                  </section>`
+              : html`
+                  <section>
+                    <div class="sect-h"><span class="k">Stage</span> artifacts${appState.stageFocus
+                      ? html` <span style="font-family:var(--mono);font-size:10px;color:var(--ink-35)">· viewing ${focusStep.shortLabel || focusStep.label} — click the current step to return</span>`
+                      : html` <span style="font-family:var(--mono);font-size:10px;color:var(--ink-35)">· current step</span>`}</div>
+                    <${StageSurface} step=${focusStep} goalArtifacts=${stepArtifacts} stepDecisions=${surfaceDecisions} goal=${goal}/>
+                    ${focusStep && focusStep.evidence
+                      ? html`<div style="margin-top:14px"><${EvidenceBlock} kind=${focusStep.evidence} data=${adaptEvidence(focusStep.evidence, goal)}/></div>`
+                      : (e1
+                          ? html`<div style="margin-top:14px"><${EvidenceStrip} e1=${e1}/></div>`
+                          : (e4 ? html`<div style="margin-top:14px"><${EvidenceStripE4} e4=${e4} verdictStepId=${verdictStepId}/></div>` : null))}
+                  </section>`}
+        </div>
       </div>
 
       <!-- Pinned objects — created by promote (chat artifact) / pin (canvas-local stub). -->
@@ -974,12 +1507,11 @@ function GoalCanvas() {
             </div>`)}
         </div>` : null}
 
-      <!-- Drill-in execution panel — toggled by drillInto:execution (real run_node.html lift = Phase 3). -->
-      ${appState.drill === 'execution' ? html`
-        <div class="drill-panel">
-          <div class="sect-h"><span class="k">Execution</span> drill-in (stub)</div>
-          <div class="panel">run_node.html lifts here in Phase 3 · this labeled panel proves the drillInto toggle.</div>
-        </div>` : null}
+      <!-- Drill-in execution panel — toggled by drillInto:execution (the existing 5-op op; NO sixth op).
+           3.2: the real run_node.html lift. ExecPanel renders ONLY while drill==='execution' (below the
+           canvas zones), so the dispatch tree DOM is absent from — never snapshotted by — the 3.4 morph
+           (the morph beat keeps drill cleared). The WHAT content above is untouched by the toggle. -->
+      ${appState.drill === 'execution' ? html`<${ExecPanel} goal=${goal}/>` : null}
 
       <!-- receipt-trail — 2b.3: each morph receipt renders through the kit Decision component at
            the 6A pill layer (the receipt's {decision_id, label, level} map to the pill's {id,
@@ -1422,36 +1954,92 @@ function KitHarness() {
    four-way `spine.shape` switch → four MATERIALLY-DIFFERENT silhouettes (bar / loop
    band / single meter / node chain), not four colorings of one stepper. Each carries
    the PLACEHOLDER watermark while placeholder:true. ── */
-function SpineSegments({ spine }) {                 // shape A — labeled segment BAR
+// 3.1: an optional `nav` prop ({ids:[stepId...], focus:<stepId|null>}) turns a spine into a
+// NAVIGATOR — each step becomes a <button data-op="drillInto:<step-id>"> (NO sixth op; the
+// dispatcher's drillInto branches on the arg) and the focused step gets an ink ring (spine-seg--focus)
+// distinct from the raspberry `current` fill. Without `nav` (e.g. #/kit) the steps render as inert
+// divs exactly as before — the kit harness is unchanged.
+function SpineSegments({ spine, nav }) {            // shape A — labeled segment BAR
+  const ids = (nav && nav.ids) || [];
+  const focus = nav && nav.focus;
   return html`
     <div class="spine-segbar">
-      ${spine.steps.map((s, i) => html`
-        <div class=${'spine-seg' + (i === spine.current ? ' spine-seg--now' : i < spine.current ? ' spine-seg--done' : '')}>
-          <span class="spine-n">${String(i + 1).padStart(2, '0')}</span>
-          <span class="spine-lbl">${s}</span>
-        </div>`)}
+      ${spine.steps.map((s, i) => {
+        const id = ids[i];
+        const navable = !!(nav && id);
+        const cls = 'spine-seg'
+          + (i === spine.current ? ' spine-seg--now' : i < spine.current ? ' spine-seg--done' : '')
+          + (focus != null && id === focus ? ' spine-seg--focus' : '')
+          + (navable ? ' spine-seg--nav' : '');
+        const inner = html`<span class="spine-n">${String(i + 1).padStart(2, '0')}</span><span class="spine-lbl">${s}</span>`;
+        return navable
+          ? html`<button class=${cls} data-op=${'drillInto:' + id} aria-pressed=${id === focus ? 'true' : 'false'}>${inner}</button>`
+          : html`<div class=${cls}>${inner}</div>`;
+      })}
     </div>`;
 }
-function SpineLoop({ spine }) {                      // shape B — staged LOOP BAND + iter badge
+function SpineLoop({ spine, nav }) {                 // shape B — staged LOOP BAND + iter badge
   const iter = spine.iter || { current: 1, budget: 3 };
+  // 3.3 error path: an iteration counter past its budget is a DATA error — render the badge in
+  // --fail + console.warn rather than clamping silently (zero-silent-failure). Valid counters
+  // (current ≤ budget, e.g. CAST-431's 2/3) render byte-identically to before.
+  const overBudget = iter.current > iter.budget;
+  if (overBudget) console.warn('SpineLoop: iteration counter past budget', iter);
+  const ids = (nav && nav.ids) || [];
+  const focus = nav && nav.focus;
   return html`
     <div class="spine-loopband">
-      ${spine.steps.map((s, i) => html`
-        <span class=${'spine-loopstage' + (i === spine.current ? ' spine-loopstage--now' : '')}>
-          <span class="spine-n">${String(i + 1).padStart(2, '0')}</span>${s}
-        </span>
-        ${i < spine.steps.length - 1 ? html`<span class="spine-loopsep">→</span>` : null}`)}
-      <span class="spine-iter">↺ iter ${iter.current}/${iter.budget}</span>
+      ${spine.steps.map((s, i) => {
+        const id = ids[i];
+        const navable = !!(nav && id);
+        const cls = 'spine-loopstage' + (i === spine.current ? ' spine-loopstage--now' : '')
+          + (focus != null && id === focus ? ' spine-loopstage--focus' : '');
+        const inner = html`<span class="spine-n">${String(i + 1).padStart(2, '0')}</span>${s}`;
+        const node = navable
+          ? html`<button class=${cls} data-op=${'drillInto:' + id} aria-pressed=${id === focus ? 'true' : 'false'}>${inner}</button>`
+          : html`<span class=${cls}>${inner}</span>`;
+        return html`${node}${i < spine.steps.length - 1 ? html`<span class="spine-loopsep">→</span>` : null}`;
+      })}
+      <span class=${'spine-iter' + (overBudget ? ' spine-iter--over' : '')}>↺ iter ${iter.current}/${iter.budget}</span>
     </div>`;
 }
-function SpineTimebox({ spine }) {                   // shape C — single budget METER (lighter; no nodes)
+// 4.1: SpineTimebox is the spike spine. It now (a) renders the four sub-steps BENEATH the meter
+// (the 2c FLAG — the meter is a wrapper, not the only element), navigable via drillInto:<step-id>
+// (NO sixth op — the `nav` prop threads through exactly like SpineSegments/SpineLoop); (b) renders the
+// L2 extension chip on the meter (the optional `extension` atom → a 6B Decision callout); and (c)
+// guards the overrun/unparseable data-error paths in --fail + console.warn (never a silent clamp).
+// Without `nav`/`extension` (e.g. #/kit's FIXTURES.SPINES.timebox), it renders the bare meter exactly
+// as before — the kit harness is unchanged.
+function SpineTimebox({ spine, nav, extension }) {  // shape C — single budget METER + sub-steps (lighter than a backbone)
   const tb = spine.timebox || { budget: '3h', used: '1h 40m', pct: 50 };
-  const pct = Math.max(0, Math.min(100, tb.pct == null ? 50 : tb.pct));
+  const over = !!tb.over;
+  if (over) console.warn('SpineTimebox: timebox_used exceeds budget', tb);
+  if (tb.unparseable) console.warn('SpineTimebox: unparseable timebox_used string', tb.used);
+  const pct = over ? 100 : Math.max(0, Math.min(100, tb.pct == null ? 50 : tb.pct));
+  const ids = (nav && nav.ids) || [];
+  const focus = nav && nav.focus;
+  const steps = spine.steps || [];
   return html`
     <div class="spine-timebox">
       <div class="spine-tb-head"><span class="spine-tb-glyph">⧗</span>timebox · spike budget</div>
-      <div class="spine-tb-track"><div class="spine-tb-fill" style=${'width:' + pct + '%'}></div></div>
-      <div class="spine-tb-legend"><span>${tb.budget} box</span><span>${tb.used} used</span></div>
+      <div class="spine-tb-track"><div class=${'spine-tb-fill' + (over ? ' spine-tb-fill--over' : '')} style=${'width:' + pct + '%'}></div></div>
+      <div class="spine-tb-legend"><span>${tb.budget} box</span><span>${tb.unparseable ? tb.used : tb.used + ' used'}${over ? ' · over budget' : ''}</span></div>
+      ${extension ? html`<div class="spine-tb-ext"><${Decision} atom=${extension} layer="callout"/></div>` : null}
+      ${steps.length ? html`
+        <div class="spine-tb-steps">
+          ${steps.map((s, i) => {
+            const id = ids[i];
+            const navable = !!(nav && id);
+            const cls = 'spine-tb-step'
+              + (i === spine.current ? ' spine-tb-step--now' : i < spine.current ? ' spine-tb-step--done' : '')
+              + (focus != null && id === focus ? ' spine-tb-step--focus' : '')
+              + (navable ? ' spine-tb-step--nav' : '');
+            const inner = html`<span class="spine-n">${String(i + 1).padStart(2, '0')}</span><span>${s}</span>`;
+            return navable
+              ? html`<button class=${cls} data-op=${'drillInto:' + id} aria-pressed=${id === focus ? 'true' : 'false'}>${inner}</button>`
+              : html`<span class=${cls}>${inner}</span>`;
+          })}
+        </div>` : null}
     </div>`;
 }
 function SpinePipeline({ spine }) {                  // shape D — data-stage NODE CHAIN
@@ -1465,7 +2053,7 @@ function SpinePipeline({ spine }) {                  // shape D — data-stage N
     </div>`;
 }
 const SPINE_SHAPES = { segments: SpineSegments, loop: SpineLoop, timebox: SpineTimebox, pipeline: SpinePipeline };
-function StageSpine({ spine }) {
+function StageSpine({ spine, nav, extension }) {     // 3.1: `nav` threads through; 4.1: `extension` → the spike L2 chip
   if (!spine || !spine.shape) {                     // visible fallback, never a blank gap
     console.warn('StageSpine: missing spine or spine.shape', spine);
     return html`<div class="spine-root"><div class="spine-unknown">⚠ no spine shape</div></div>`;
@@ -1476,7 +2064,7 @@ function StageSpine({ spine }) {
     console.warn('StageSpine: unknown shape', spine.shape);
     return html`<div class="spine-root">${ph}<div class="spine-unknown">⚠ unknown spine shape: ${spine.shape}</div></div>`;
   }
-  return html`<div class="spine-root">${ph}${Shape({ spine })}</div>`;
+  return html`<div class="spine-root">${ph}${Shape({ spine, nav, extension })}</div>`;
 }
 
 /* ── EvidenceBlock (Contract 1 pick E1–E5 / Contract 4 data shapes): ONE component,
@@ -1497,8 +2085,34 @@ function EvScreenshot({ label }) {                  // hand-drawn CSS/SVG thumb 
       <span class="ev-shot-cap">${label}</span>
     </div>`;
 }
-function EvidenceE1({ data }) {                      // Acceptance Panel (5B)
+// 3.1: a REAL raster screenshot with an onerror swap to the 2b CSS/SVG thumbnail (BINDING #2 +
+// the error-path rule). The fallback SVG ships inline, hidden, and is revealed by toggling a class
+// on the wrapper when the <img> errors — a visible fallback, NEVER a broken-image icon. file://-legal
+// (relative <img>, no fetch). Shots WITHOUT a `ref` (the #/kit FIXTURES path) render the CSS/SVG thumb
+// directly, so the kit harness is byte-for-byte unchanged.
+function EvShot({ shot }) {
+  if (!shot.ref) return html`<${EvScreenshot} label=${shot.label || shot.caption || 'shot'}/>`;
+  const cap = shot.caption || shot.label || '';
+  const onErr = (e) => { const w = e.currentTarget.closest('.ev-shot'); if (w) w.classList.add('ev-shot--broken'); };
+  return html`
+    <div class="ev-shot ev-shot--raster">
+      <img class="ev-shot-img" src=${shot.ref} alt=${shot.alt || cap} onError=${onErr}/>
+      <svg class="ev-shot-fallback" viewBox="0 0 84 54" width="84" height="54" aria-hidden="true">
+        <rect class="ev-shot-bg" x="0" y="0" width="84" height="54"/>
+        <rect class="ev-shot-bar" x="0" y="0" width="84" height="10"/>
+        <rect class="ev-shot-ln" x="8" y="20" width="50" height="4" rx="1"/>
+        <rect class="ev-shot-ln" x="8" y="30" width="64" height="4" rx="1"/>
+        <rect class="ev-shot-ln" x="8" y="40" width="34" height="4" rx="1"/>
+      </svg>
+      ${cap ? html`<span class="ev-shot-cap">${cap}</span>` : null}
+    </div>`;
+}
+function EvidenceE1({ data }) {                      // Acceptance Panel (5B) — normalizes BOTH the
+  // FIXTURES shape (kit: {tests, screenshots:[{label}], checks, pr:{id,label}, checker}) AND the ORG
+  // shape (goal canvas, via adaptE1: {tests, shots:[{ref,alt,caption}], checks, pr:{id,label}, checkerSlug}).
   const t = data.tests || {};
+  const shots = data.shots || (data.screenshots || []);   // ORG `shots` (raster) | FIXTURES `screenshots` (label)
+  const pr = data.pr || null;
   return html`
     <div class="ev ev--e1">
       <div class="ev-head"><span class="ev-outcome">Accepted — RBAC checkout</span><span class="ev-kind">E1 · acceptance</span></div>
@@ -1507,7 +2121,7 @@ function EvidenceE1({ data }) {                      // Acceptance Panel (5B)
         <div class="ev-tile"><div class="ev-tile-n ev-tile-n--muted">${t.failed}</div><div class="ev-tile-k">failed</div></div>
         <div class="ev-tile"><div class="ev-tile-n ev-tile-n--delta">${t.coverageDelta}</div><div class="ev-tile-k">coverage</div></div>
       </div>
-      <div class="ev-shots">${(data.screenshots || []).map((s) => html`<${EvScreenshot} label=${s.label}/>`)}</div>
+      <div class="ev-shots">${shots.map((s) => html`<${EvShot} shot=${s}/>`)}</div>
       <div class="ev-checks">
         ${(data.checks || []).map((c) => html`
           <div class=${'ev-check' + (c.status === 'flagged' ? ' ev-check--flag' : '')}>
@@ -1515,12 +2129,41 @@ function EvidenceE1({ data }) {                      // Acceptance Panel (5B)
             <span>${c.status === 'flagged' ? '⚠' : '✓'} ${c.label} · ${c.status}</span>
           </div>`)}
       </div>
-      ${data.checker ? html`
-        <div class="ev-attrib">
-          <div class="ev-attrib-lbl">checks raised by</div>
-          <${ColleagueCard} agent=${data.checker} density="line"/>
-        </div>` : null}
-      ${data.pr ? html`<div style="margin-top:11px"><a class="ev-link" href="#/goal/CAST-412">PR ${data.pr.id} — ${data.pr.label} ▸</a></div>` : null}
+      ${data.checker
+        ? html`<div class="ev-attrib"><div class="ev-attrib-lbl">checks raised by</div>
+            <${ColleagueCard} agent=${data.checker} density="line"/></div>`
+        : (data.checkerSlug ? html`<div class="ev-attrib"><div class="ev-attrib-lbl">checks raised by</div>
+            <span class="surf-pr-line"><span class="surf-pr-av"><${Avatar} kind="checker" initials=${initialsOf(data.checkerSlug)}/></span>${data.checkerSlug}</span></div>` : null)}
+      ${pr ? html`<div style="margin-top:11px"><a class="ev-link" href=${'#/goal/' + FEATURE_ID}>PR ${pr.id} — ${pr.label} ▸</a></div>` : null}
+    </div>`;
+}
+// 3.1: compact default-view summary of the acceptance panel (the evidence strip) — reads the ORG E1
+// (test_summary, coverage_delta, the flagged checker row, the PR). Outcome-first; the flagged rule
+// shows in raspberry (never a bare green seal). Links to the E1 home step's full panel is implicit
+// (the spine navigator).
+function EvidenceStrip({ e1 }) {
+  if (!e1) return null;
+  const flagged = (e1.checker_rows || []).find((r) => r.state === 'flagged');
+  return html`
+    <div class="ev-strip">
+      <span class="ev-strip-k">E1 · acceptance</span>
+      <span><span class="ev-strip-n">${e1.test_summary}</span> · cov <span class="ev-strip-n">${e1.coverage_delta}</span></span>
+      ${flagged ? html`<span class="ev-strip-flag">⚠ ${flagged.code} ${flagged.label}</span>` : null}
+      <span class="ev-strip-link">${e1.pr} ▸ · open the acceptance step for the full panel</span>
+    </div>`;
+}
+// 4.1: the spike's default-view evidence summary (the E4 verdict strip) — outcome-first, never a
+// bare pass state: the one-line verdict + the ◐ confidence glyph (a glyph, never a percentage) +
+// the borderline p95-vs-budget figure (in raspberry). The right link is drillInto:<verdict-step>
+// (the existing 5-op step nav — NO sixth op) → the full E4 card at its home step.
+function EvidenceStripE4({ e4, verdictStepId }) {
+  if (!e4) return null;
+  return html`
+    <div class="ev-strip">
+      <span class="ev-strip-k">E4 · verdict</span>
+      <span><span class="ev-conf-glyph">${e4.confidence}</span> <span class="ev-strip-n">${e4.verdict}</span></span>
+      ${(e4.p95_ms != null) ? html`<span class="ev-strip-flag">${e4.p95_ms}ms vs ${e4.budget_ms}ms budget</span>` : null}
+      ${verdictStepId ? html`<span class="ev-strip-link" data-op=${'drillInto:' + verdictStepId} role="button">open the verdict step ▸</span>` : null}
     </div>`;
 }
 function EvidenceE2({ data }) {                      // Confirm/Refute Ledger
@@ -1558,18 +2201,29 @@ function EvidenceE3({ data }) {                      // Red→Green Repro (same 
     </div>`;
 }
 function EvidenceE4({ data }) {                      // Verdict Card
+  // Two spike_ref shapes: the ORG path (adaptE4 → {atomId, evId}) drives the 4.1 BIDIRECTIONAL
+  // LOCAL DISCLOSURE (data-disclose-l3 opens the header L3 rail + scroll/highlight — NOT an op,
+  // NOT a route); the #/kit FIXTURES path ({decisionId, label}) keeps its original goal link so
+  // the harness is unchanged. `data.evId` ids the card so the rail's back-link can scroll to it.
   const sr = data.spike_ref;
+  const ref = sr
+    ? (sr.atomId
+        ? html`<div class="ev-spikeref">decided into
+            <button class="ev-link" type="button" data-disclose-l3="1">${sr.atomId} · the go/no-go ▸</button></div>`
+        : html`<div class="ev-spikeref">decided from
+            <a class="ev-link" href=${'#/goal/CAST-412'}>${sr.decisionId} · ${sr.label} ▸</a></div>`)
+    : null;
+  const budgetLine = data.budget_ms != null
+    ? html` · <span class="ev-strip-n">${data.p95_ms}ms</span> p95 vs ${data.budget_ms}ms budget` : null;
   return html`
-    <div class="ev ev--e4">
+    <div class="ev ev--e4" id=${data.evId || null}>
       <div class="ev-head"><span class="ev-outcome">Verdict</span><span class="ev-kind">E4 · verdict</span></div>
       <div class="ev-answer">${data.answer}</div>
-      <div class="ev-conf"><span class="ev-conf-glyph">${confGlyph(data.confidence)}</span>${data.confidence} confidence</div>
+      <div class="ev-conf"><span class="ev-conf-glyph">${confGlyph(data.confidence)}</span>${data.confidence} confidence${budgetLine}</div>
       <ul class="ev-points">
         ${(data.dataPoints || []).map((p) => html`<li class="ev-point">${p}</li>`)}
       </ul>
-      ${sr ? html`
-        <div class="ev-spikeref">decided from
-          <a class="ev-link" href=${'#/goal/CAST-412'}>${sr.decisionId} · ${sr.label} ▸</a></div>` : null}
+      ${ref}
     </div>`;
 }
 function EvBarChart({ headline }) {                  // hand-rolled inline SVG (NO chart library)
@@ -1800,6 +2454,9 @@ function EscalationRail({ escalation }) {
       <div class="rail-pack">
         <div class="rail-pack-row"><span class="rail-pack-k">what I want</span><span class="rail-pack-v">${e.want}</span></div>
         <div class="rail-pack-row"><span class="rail-pack-k">what I tried</span><span class="rail-pack-v">${e.tried}</span></div>
+        ${e.spikeRef ? html`
+          <div class="rail-pack-row"><span class="rail-pack-k">spike_ref</span><span class="rail-pack-v">
+            decided from <button class="ev-link" type="button" data-disclose-e4=${e.spikeRef}>${e.spikeRef} · the verdict card ▸</button></span></div>` : null}
       </div>
       <div class="rail-opts">
         ${(e.options || []).slice(0, 3).map((o, i) => html`
@@ -1907,6 +2564,576 @@ function KitJudgmentSection() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   3.1 — FEATURE BACKBONE COMPONENTS. All PURE (props)->vdom (no appState reads except
+   the NeedsYouChip's ephemeral LOCAL useState popover, same posture as the 6B callout).
+   StageSurface (surf-*) renders the focused step's familiar-tool surface; WorkRow renders
+   the per-goal work stream resolved against ORG.agents (PRF1); the evidence adapters map
+   the ORG E1 shape onto EvidenceBlock + wire the real raster. NO view-transition-name here.
+   ════════════════════════════════════════════════════════════════════════ */
+
+// ── assignee → identity resolvers (PRF1). initials from a slug; resolve against ORG. ──
+function initialsOf(slug) {
+  if (!slug) return '?';
+  if (slug.charAt(0) === '@') {                          // '@you' → the human's initials (e.g. SJ)
+    const h = (ORG.humans || []).find((x) => x.slug === slug);
+    return h ? h.initials : slug.replace('@', '').slice(0, 2).toUpperCase();
+  }
+  const parts = slug.split('-').filter(Boolean);         // 'crud-orchestrator' → 'CO'
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return slug.slice(0, 2).toUpperCase();
+}
+function resolveAssignee(slug) {
+  const a = (ORG.agents || {})[slug];
+  if (a) return { slug, name: slug, kind: a.kind, state: a.state, human: false };
+  const h = (ORG.humans || []).find((x) => x.slug === slug);
+  if (h) return { slug, name: slug, kind: 'human', state: 'idle', human: true };
+  if (ORG.guide && ORG.guide.slug === slug) return { slug, name: slug, kind: 'guide', state: 'working', human: false };
+  console.warn('resolveAssignee: unresolved assignee', slug);   // visible-not-silent
+  return { slug, name: slug, kind: 'maker', state: 'idle', human: false, unresolved: true };
+}
+
+// ── WorkRow (PRF1) — one run-status row per work_stream item, the assignee resolved against
+//    ORG.agents (Avatar kind from the agent's kind). The @you MANUAL item carries the needs-you
+//    accent ONLY when blocking. Replaces the 2b kit FIXTURES in this zone. ──
+const WORK_STATUS = {
+  running: { cls: 'running', glyph: '▸', label: 'running' },
+  working: { cls: 'running', glyph: '▸', label: 'running' },
+  idle:    { cls: 'idle', glyph: '○', label: 'queued' },
+  benched: { cls: 'idle', glyph: '○', label: 'benched' },
+  blocked: { cls: 'blocked', glyph: '⚠', label: 'blocked' },
+  'checker-flagged': { cls: 'blocked', glyph: '⚠', label: 'flagged' },
+};
+function WorkRow({ item, steps }) {
+  const who = resolveAssignee(item.assignee);
+  const needs = who.human && item.kind === 'manual';     // pending human action = needs-you
+  const st = needs
+    ? { cls: 'needs', glyph: '⚠', label: 'needs you' }
+    : (WORK_STATUS[who.state] || { cls: 'idle', glyph: '○', label: who.state || 'idle' });
+  const step = (steps || []).find((s) => s.id === item.step);
+  const stepLbl = step ? (step.shortLabel || step.label) : item.step;
+  return html`
+    <div class=${'work-row' + (needs ? ' work-row--needs' : '')} data-agent=${who.slug}>
+      <span class="work-id">
+        <${Avatar} kind=${who.kind} initials=${initialsOf(who.slug)}/>
+        <span class="work-name">${who.name}</span>
+      </span>
+      <span class="work-meta">
+        <span class="work-step">${stepLbl}</span>
+        <span class=${'work-status work-status--' + st.cls}>${st.glyph} ${st.label}</span>
+      </span>
+      <span class="work-label">${item.label}</span>
+    </div>`;
+}
+
+// ── StageSurface (surf-*) — ONE component switched on step.surface → a familiar-tool surface.
+//    Labels/surfaceWhy/artifacts all come from the stageModels step (never hardcoded). Unknown
+//    surface → visible surf-unknown + console.warn (zero-silent-failure). ──
+const SURFACE_META = { doc: 'document', board: 'ticket board', 'pr-thread': 'review thread',
+  ledger: 'investigation ledger', notebook: 'analysis notebook', memo: 'spike memo' };
+function SurfFrame({ step, children }) {
+  return html`
+    <div class=${'surf surf--' + step.surface}>
+      <div class="surf-bar">
+        <span class="surf-kind">${SURFACE_META[step.surface] || step.surface}</span>
+        <span class="surf-why">${step.surfaceWhy}</span>
+      </div>
+      <div class="surf-body">${children}</div>
+    </div>`;
+}
+function DocSurface({ step, goalArtifacts, stepDecisions }) {
+  const art = (goalArtifacts || [])[0];
+  return html`
+    <div class="surf-title">${step.label}${art && art.version ? html`<span class="surf-vchip">${art.version}</span>` : null}</div>
+    <div class="surf-does">${step.does}</div>
+    <div class="surf-skel"><i style="width:96%"></i><i style="width:88%"></i><i style="width:68%"></i></div>
+    <div class="surf-arts">
+      ${(goalArtifacts || []).map((a) => html`<div class="surf-art"><span class="surf-row-meta">${a.type}</span><div class="surf-art-cap">${a.caption}</div></div>`)}
+    </div>
+    <div class="surf-chips">${(step.artifacts || []).map((x) => html`<span class="surf-chip">${x}</span>`)}</div>
+    ${(stepDecisions && stepDecisions.length) ? html`
+      <div class="surf-decisions">
+        <div class="surf-dec-h">decisions on this artifact</div>
+        ${stepDecisions.map((a) => html`<${Decision} atom=${a} layer=${a.status === 'superseded' ? 'pill' : 'callout'}/>`)}
+      </div>` : null}`;
+}
+function RowsSurface({ step, goalArtifacts }) {
+  const arts = goalArtifacts || [];
+  const rows = arts.length
+    ? arts.map((a) => ({ main: a.type, sub: a.caption, meta: a.version || '' }))
+    : (step.artifacts || []).map((x) => ({ main: x, sub: '', meta: '' }));
+  return html`
+    <div class="surf-title">${step.label}</div>
+    <div class="surf-does">${step.does}</div>
+    <div class="surf-rows">
+      ${rows.map((r) => html`
+        <div class="surf-row">
+          <span class="surf-row-main">${r.main}${r.sub ? html`<div class="surf-row-sub">${r.sub}</div>` : null}</span>
+          <span class="surf-row-meta">${r.meta}</span>
+        </div>`)}
+    </div>`;
+}
+function PrThreadSurface({ step, goalArtifacts }) {
+  const arts = goalArtifacts || [];
+  const rows = arts.length ? arts : (step.artifacts || []).map((x) => ({ type: x, caption: '' }));
+  return html`
+    <div class="surf-title">${step.label}</div>
+    <div class="surf-does">${step.does}</div>
+    <div class="surf-rows">
+      ${rows.map((a) => html`
+        <div class="surf-row"><span class="surf-row-main">${a.type}${a.caption ? html`<div class="surf-row-sub">${a.caption}</div>` : null}</span>
+          <span class="surf-row-meta">${a.version || ''}</span></div>`)}
+    </div>
+    <div class="surf-pr-line"><span class="surf-pr-av"><${Avatar} kind="checker" initials="CC"/></span>reviewed — checker thread on the merged PR</div>`;
+}
+// 4.1: `memo` now flesh-out → MemoSurface (the one-pager findings memo); the thin RowsSurface
+// version Phase 3 shipped is retired for this kind. `notebook` stays thin (4.2 fleshes it out).
+const SURFACE_BODY = { doc: DocSurface, board: RowsSurface, 'pr-thread': PrThreadSurface,
+  ledger: RowsSurface, notebook: RowsSurface, memo: MemoSurface };
+function StageSurface({ step, goalArtifacts, stepDecisions, goal }) {   // 4.1: `goal` threads to bodies that need spine data (MemoSurface)
+  if (!step || !step.surface) {
+    console.warn('StageSurface: missing step/surface', step);
+    return html`<div class="surf-unknown">⚠ no stage surface</div>`;
+  }
+  const Body = SURFACE_BODY[step.surface];
+  if (!Body) {
+    console.warn('StageSurface: unknown surface kind', step.surface);
+    return html`<div class="surf surf--unknown">
+      <div class="surf-bar"><span class="surf-kind">unknown surface</span><span class="surf-why">${step.surfaceWhy || ''}</span></div>
+      <div class="surf-unknown">⚠ unknown surface: ${step.surface == null ? '(none)' : step.surface}</div></div>`;
+  }
+  return html`<${SurfFrame} step=${step}><${Body} step=${step} goalArtifacts=${goalArtifacts} stepDecisions=${stepDecisions} goal=${goal}/><//>`;
+}
+
+// ── MemoSurface (surf-memo-*) — the fleshed-out `memo` kind (Step 4.1.3). A one-pager findings
+//    memo rendered full-bleed inside the SurfFrame (which supplies the surf-kind tag + the
+//    surfaceWhy caption): a dated mono header, the probes-tried summary (from the goal's work
+//    stream), the conclusion line (from the E4 verdict caption), and the timebox stamp (used/budget,
+//    both DERIVED from ORG — no hardcoded vocabulary). The owning L1 decision pill (passed as
+//    stepDecisions) rides the memo as a 6B callout. PURE (props)->vdom; reads the frozen ORG only. ──
+function MemoSurface({ step, goalArtifacts, stepDecisions, goal }) {
+  const g = goal || {};
+  const gid = Object.keys((ORG && ORG.goals) || {}).find((k) => ORG.goals[k] === g) || '';
+  const sm = (ORG.stageModels && ORG.stageModels[g.family]) || {};
+  const budget = (sm.timebox && sm.timebox.budget) || '';
+  const used = (g.spine_state && g.spine_state.timebox_used) || '';
+  const date = ((ORG.meta && ORG.meta.frozen_at) || '').slice(0, 10);
+  const probes = g.work_stream || [];
+  const e4 = (g.evidence && g.evidence.E4) || {};
+  return html`
+    <div class="surf-memo">
+      <div class="surf-memo-dateline">${gid.toLowerCase()} · spike memo · ${date}</div>
+      <div class="surf-title">${step.label}</div>
+      <div class="surf-does">${step.does}</div>
+      ${probes.length ? html`
+        <div class="surf-memo-sec">
+          <div class="surf-memo-h">Probes tried</div>
+          <ul class="surf-memo-list">
+            ${probes.map((p) => html`<li class="surf-memo-li">${p.label}<span class="surf-memo-by"> · ${p.assignee}</span></li>`)}
+          </ul>
+        </div>` : null}
+      ${(e4.caption || e4.verdict) ? html`
+        <div class="surf-memo-sec">
+          <div class="surf-memo-h">Conclusion</div>
+          <div class="surf-memo-concl">${e4.caption || e4.verdict}</div>
+        </div>` : null}
+      ${(used || budget) ? html`<div class="surf-memo-stamp">⧗ ${used} of ${budget} box used${e4.verdict ? ' · verdict: ' + e4.verdict : ''}</div>` : null}
+      ${(stepDecisions && stepDecisions.length) ? html`
+        <div class="surf-decisions">
+          <div class="surf-dec-h">decision on this memo</div>
+          ${stepDecisions.map((a) => html`<${Decision} atom=${a} layer="callout"/>`)}
+        </div>` : null}
+    </div>`;
+}
+
+// ── ProbesCard (surf-probes-*) — the spike's single deviated WORK zone (Step 4.1.2). One card,
+//    a probe row per work_stream item (line-density ColleagueCard attribution via the 3.2
+//    execAgentCard adapter), plus a measured-results strip from the E4 data points. Deliberately
+//    light — the lightness IS the design (a spike must never read as a mini-feature). PURE props. ──
+function ProbesCard({ goal }) {
+  const probes = (goal && goal.work_stream) || [];
+  const e4 = (goal && goal.evidence && goal.evidence.E4) || {};
+  const pts = e4.data_points || [];
+  return html`
+    <div class="surf-probes">
+      <div class="surf-probes-h">Probes tried · throwaway · ${probes.length}</div>
+      ${probes.map((p) => {
+        const card = execAgentCard(p.assignee);
+        return html`
+          <div class="surf-probe">
+            <div class="surf-probe-label">${p.label}</div>
+            ${card
+              ? html`<${ColleagueCard} agent=${card} density="line"/>`
+              : html`<span class="surf-memo-by">ran by ${p.assignee}</span>`}
+          </div>`;
+      })}
+      ${pts.length ? html`
+        <div class="surf-probe-results">
+          <span class="surf-probe-results-k">measured</span>
+          ${pts.map((d) => html`<span class="surf-probe-result">${d.label}: <b>${d.ms}ms</b></span>`)}
+        </div>` : null}
+    </div>`;
+}
+
+// ── NeedsYouChip (L3) — a persistent header chip; clicking opens the EscalationRail INLINE at the
+//    WHAT level (no Execution-tab entry, US3 S3). atomToEscalation maps an L3 ADR atom → the rail's
+//    props (3 ranked options, NOTHING pre-selected). Local useState popover (not appState). ──
+function atomToEscalation(atom) {
+  const ticket = (atom.influenced || []).find((x) => /^CAST-/.test(x));
+  return {
+    title: atom.title, route: '@you', expires: 'in 1h',
+    want: atom.what_i_want, tried: atom.what_i_tried,
+    options: (atom.options_considered || []).slice(0, 3).map((o, i) => ({ id: String.fromCharCode(97 + i), label: o.label, consequence: o.consequence })),
+    policy: 'decisions/escalation-policy.md', ticket,
+    // 4.1: the spike L3 carries spike_ref → the E4 verdict. The rail renders a BACK-LINK (the second
+    // direction of the bidirectional nav); absent on every non-spike L3, so no regression.
+    spikeRef: atom.spike_ref || null,
+  };
+}
+function NeedsYouChip({ atom }) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {                                       // escape-to-close (a11y; mirrors the 6B callout)
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+  const esc = atomToEscalation(atom);
+  return html`
+    <div class="ny-band">
+      <button class="ny-chip" aria-expanded=${open ? 'true' : 'false'} aria-haspopup="dialog" onClick=${() => setOpen(!open)}>
+        ⚠ needs you<span class="ny-chip-t">· ${esc.ticket || atom.id}</span>
+      </button>
+      ${open ? html`<div class="ny-rail" role="dialog" aria-label=${'escalation ' + atom.id}><${EscalationRail} escalation=${esc}/></div>` : null}
+    </div>`;
+}
+
+// ── Evidence adapters — map the ORG goal-evidence shape onto EvidenceBlock props. E1 is fully
+//    adapted (real raster shots + checker attribution from execution.iteration.checker); E2–E5 pass
+//    the ORG object through (3.3 / 3.4 / Phase 4 own their polish). ──
+function adaptE1(goal) {
+  const e = (goal.evidence && goal.evidence.E1) || {};
+  const m = /(\d+)\s*passed\s*\/\s*(\d+)\s*failed/i.exec(e.test_summary || '');
+  return {
+    tests: { passed: m ? +m[1] : null, failed: m ? +m[2] : null, coverageDelta: e.coverage_delta },
+    shots: e.shots || [],
+    checks: (e.checker_rows || []).map((r) => ({ code: r.code, label: r.label, status: r.state })),
+    pr: { id: (e.pr || '').replace(/^PR\s*/i, '') || e.pr, label: goal.title },
+    checkerSlug: (goal.execution && goal.execution.iteration && goal.execution.iteration.checker) || null,
+  };
+}
+// 4.1: adapt the ORG E4 shape ({verdict, confidence:'◐', budget_ms, p95_ms, atom_ref, caption,
+// data_points:[{label,ms}]}) onto EvidenceE4's props. confidence is a GLYPH in ORG (◐); the
+// component runs it back through confGlyph, so map the glyph → the H/M/L key it expects (◐→M).
+// spike_ref becomes {atomId, evId} → the bidirectional local-disclosure link (no route, no op).
+const GLYPH_TO_CONF = { '●': 'H', '◐': 'M', '○': 'L' };
+function adaptE4(goal) {
+  const e = (goal.evidence && goal.evidence.E4) || {};
+  return {
+    answer: e.verdict,
+    confidence: GLYPH_TO_CONF[e.confidence] || 'M',
+    budget_ms: e.budget_ms, p95_ms: e.p95_ms,
+    dataPoints: (e.data_points || []).map((p) => `${p.label}: ${p.ms}ms`),
+    evId: e.id,
+    spike_ref: e.atom_ref ? { atomId: e.atom_ref, evId: e.id } : null,
+  };
+}
+function adaptEvidence(kind, goal) {
+  if (kind === 'E1') return adaptE1(goal);
+  if (kind === 'E4') return adaptE4(goal);
+  return (goal.evidence && goal.evidence[kind]) || {};
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3.2 — EXECUTION DRILL-IN COMPONENTS (exec-*). RunNode + IterationPanel are
+   BOTH PURE (props)->vdom — they read PROPS + the frozen ORG.agents global (for
+   avatar hue / maker-checker resolution, same posture as 3.1's WorkRow/RunNode
+   avatars), NEVER appState — so Phase 5a reuses IterationPanel on the ticket view
+   without rework. RunNode is the recursive run_node.html VISUAL idiom lift (rail-
+   threaded recursion · has-failure/has-warning rollup · ↻ rework #N · ctx tint ·
+   status dots · skill chips). It is mounted at EXACTLY ONE external call-site
+   (ExecPanel) — the span tree exists nowhere else (trace-creep guard); the only
+   other `<${RunNode}` is the component's own recursion. ExecPanel keeps the focus
+   run's expand state in a LOCAL useState (ephemeral UI, same posture as the 6B
+   callout / NeedsYouChip popover) — NOT appState; the panel's OPEN/CLOSED is
+   appState.drill, and it renders ONLY while drill==='execution', so it is absent
+   from (never snapshotted by) the 3.4 morph. NO view-transition-name here.
+   ════════════════════════════════════════════════════════════════════════ */
+
+// ── status semantics (distinct red --fail rollup vs raspberry needs-you) ──
+const EXEC_STATUS = {
+  done:    { cls: 'done',    lbl: 'done' },
+  running: { cls: 'running', lbl: 'running' },
+  blocked: { cls: 'blocked', lbl: 'blocked' },
+  flagged: { cls: 'flagged', lbl: 'flagged' },
+};
+// run_node.html rollup: failure dominates warning. `blocked` (a hard L3 stop) rolls up as failure;
+// `flagged` / rework roll up as warning. Pure recursion over the node subtree.
+function execRollup(node) {
+  let fail = node.status === 'blocked' || node.status === 'failed' || node.status === 'stuck';
+  let warn = node.rework != null || node.status === 'flagged';
+  for (const c of node.children || []) { const r = execRollup(c); fail = fail || r.fail; warn = warn || r.warn; }
+  return { fail, warn };
+}
+function execRollClass(node) {
+  const { fail, warn } = execRollup(node);
+  return fail ? ' has-failure' : warn ? ' has-warning' : '';
+}
+function ctxTint(ctx) {                                   // ctx-tint BUCKET derived in the view (data carries raw used/limit)
+  if (!ctx || !ctx.limit) return 'calm';
+  const p = ctx.used / ctx.limit;
+  return p >= 0.70 ? 'hot' : p >= 0.45 ? 'mid' : 'calm';
+}
+function countNodes(n) { let c = 1; for (const k of n.children || []) c += countNodes(k); return c; }
+
+// ── RunNode({node, depth}) — recursive, pure. Guard: an unknown agent slug (can't happen given the
+//    3.1 generator invariant, but guarded anyway) renders the slug raw + a `?` avatar, never throws. ──
+function RunNode({ node, depth = 0 }) {
+  if (!node || typeof node !== 'object') {                // visible fallback, never throw mid-demo
+    console.warn('RunNode: missing node');
+    return html`<div class="exec-node exec-node--unknown">⚠ missing run node</div>`;
+  }
+  const st = EXEC_STATUS[node.status] || { cls: 'unknown', lbl: node.status || '?' };
+  const agent = (ORG.agents || {})[node.agent];
+  const unknownAgent = !agent;
+  if (unknownAgent) console.warn('RunNode: unresolved agent', node.agent);   // visible-not-silent
+  const avatarKind = agent ? agent.kind : 'maker';        // resolved agent kind drives the maker/checker hue
+  const ctx = node.ctx;
+  const pct = (ctx && ctx.limit) ? Math.round(ctx.used / ctx.limit * 100) : null;
+  const skills = node.skills || [];
+  return html`
+    <div class=${'exec-group' + execRollClass(node)}>
+      <div class=${'exec-node' + (depth > 0 ? ' is-child' : '') + ((st.cls === 'blocked' || st.cls === 'flagged') ? ' exec-node--alert' : '')} data-run-id=${node.id}>
+        <div class="exec-row1">
+          <span class=${'exec-dot exec-dot--' + st.cls}></span>
+          <span class="exec-av" style="--avatar-size:18px">
+            ${unknownAgent
+              ? html`<${Avatar} kind="maker" glyph="?"/>`
+              : html`<${Avatar} kind=${avatarKind} initials=${initialsOf(node.agent)}/>`}
+          </span>
+          <span class=${'exec-agent' + (unknownAgent ? ' exec-agent--unknown' : '')}>${node.agent}</span>
+          <span class="exec-kind">${node.kind}</span>
+          ${node.rework != null ? html`<span class="exec-rework">↻ rework #${node.rework}</span>` : null}
+          <span class="exec-stat">${st.lbl}</span>
+        </div>
+        <div class="exec-label">${node.label}</div>
+        <div class="exec-row2">
+          ${skills.length ? html`<span class="exec-skills">${skills.map((s) => html`<span class="exec-skill">${s}</span>`)}</span>` : null}
+          ${pct != null ? html`
+            <span class=${'exec-ctx exec-ctx--' + ctxTint(ctx)} title=${'context ' + pct + '%'}>
+              <span class="exec-ctx-track"><span class="exec-ctx-fill" style=${'width:' + pct + '%'}></span></span>
+              <span class="exec-ctx-lbl">ctx ${pct}%</span>
+            </span>` : null}
+        </div>
+      </div>
+      ${(node.children && node.children.length) ? html`
+        <div class=${'exec-thread' + execRollClass(node)}>
+          ${node.children.map((c) => html`<${RunNode} node=${c} depth=${depth + 1}/>`)}
+        </div>` : null}
+    </div>`;
+}
+
+// ── IterationPanel({iteration}) — maker/checker ColleagueCard line-density pair (bracket tie),
+//    finding rows (code · label · round · status), 3-segment rework meter, named exits. PURE: the
+//    maker/checker slugs resolve against the frozen ORG.agents global (no appState). Reused by 5a. ──
+function FindingRow({ f }) {
+  const flagged = f.status === 'flagged';
+  return html`
+    <div class=${'exec-find' + (flagged ? ' exec-find--flag' : '')}>
+      <span class="exec-find-code">${f.code}</span>
+      <span class="exec-find-lbl">${f.label}</span>
+      <span class="exec-find-round">round ${f.round}</span>
+      <span class=${'exec-find-stat' + (flagged ? ' exec-find-stat--flag' : '')}>${flagged ? '⚠ flagged' : '✓ ' + f.status}</span>
+    </div>`;
+}
+function ExecReworkMeter({ rework }) {                     // 3-segment meter from iteration.rework
+  const used = rework ? rework.used : 0, budget = rework ? rework.budget : 0;
+  const segs = [];
+  for (let i = 0; i < budget; i++) segs.push(html`<i class=${'exec-rw-seg' + (i < used ? ' exec-rw-seg--used' : '')}></i>`);
+  return html`<span class="exec-rwmeter">${segs}<span class="exec-rw-lbl">rework ${used}/${budget}</span></span>`;
+}
+const EXEC_EXIT_META = {                                  // named exits — visually complete, INERT (no data-op → dispatcher never fires; no onClick → no console error)
+  fix:      { glyph: '✎', hint: 'apply the checker fix and re-review' },
+  retry:    { glyph: '↻', hint: 're-run the maker-checker loop' },
+  escalate: { glyph: '⚠', hint: 'route the call to @you' },   // raspberry — same needs-you semantics as the L3 chip's rail
+};
+// adapt an ORG.agents record onto the kit ColleagueCard's agent shape (the kit was authored for the
+// FIXTURES shape: id = 2-letter avatar initials, inflight = {label}). Keeps the line-density lockup
+// rendering correctly (avatar initials, paired tie, rework meter, autonomy badge, inflight pill).
+function execAgentCard(slug) {
+  const a = (ORG.agents || {})[slug];
+  if (!a) return null;
+  const inflight = (a.inflight && typeof a.inflight === 'object') ? a.inflight
+    : (a.inflight ? { label: a.state === 'running' ? 'run in flight' : a.inflight + ' in flight' } : null);
+  return { id: initialsOf(slug), slug, kind: a.kind, pairedWith: a.pairedWith,
+           rework: a.rework, autonomy: a.autonomy, stats: a.stats, inflight };
+}
+function IterationPanel({ iteration }) {
+  if (!iteration) {
+    console.warn('IterationPanel: missing iteration');
+    return html`<div class="exec-iter exec-iter--unknown">⚠ no iteration data</div>`;
+  }
+  const makerA = execAgentCard(iteration.maker);
+  const checkerA = execAgentCard(iteration.checker);
+  const pr = iteration.pr || {};
+  return html`
+    <div class="exec-iter">
+      <div class="exec-iter-head">
+        <span class="exec-iter-k">maker · checker loop</span>
+        <${ExecReworkMeter} rework=${iteration.rework}/>
+      </div>
+      <div class="exec-pair">
+        <div class="exec-pair-card">
+          ${makerA ? html`<${ColleagueCard} agent=${makerA} density="line"/>` : html`<span class="exec-agent--unknown">? ${iteration.maker}</span>`}
+        </div>
+        <span class="exec-pair-tie" aria-hidden="true">⌐</span>
+        <div class="exec-pair-card">
+          ${checkerA ? html`<${ColleagueCard} agent=${checkerA} density="line"/>` : html`<span class="exec-agent--unknown">? ${iteration.checker}</span>`}
+        </div>
+      </div>
+      <div class="exec-finds">
+        ${(iteration.findings || []).map((f) => html`<${FindingRow} f=${f}/>`)}
+      </div>
+      <div class="exec-exits">
+        ${(iteration.exits || []).map((x) => {
+          const m = EXEC_EXIT_META[x] || { glyph: '·', hint: '' };
+          return html`<button type="button" class=${'exec-exit' + (x === 'escalate' ? ' exec-exit--escalate' : '')} title=${m.hint}>${m.glyph} ${x}</button>`;
+        })}
+      </div>
+      ${pr.diff_stub ? html`
+        <div class="exec-pr">
+          <div class="exec-pr-bar">
+            <span class="exec-pr-kind">review thread</span>
+            <span class="exec-pr-why">the diff lives here — the canvas carries only the PR link</span>
+          </div>
+          <div class="exec-pr-id">${pr.id} — ${pr.label}</div>
+          <pre class="exec-pr-diff">${pr.diff_stub}</pre>
+        </div>` : null}
+    </div>`;
+}
+
+// ── ExecPanel({goal}) — the Execution-tab shell (rendered ONLY while appState.drill==='execution',
+//    below the canvas zones). Level 1 = the flat run list; the focus run is the ONE row that expands
+//    (level 2) to the dispatch tree (the single RunNode mount-point) + the IterationPanel. ──
+function ExecPanel({ goal }) {
+  const ex = goal && goal.execution;
+  const [open, setOpen] = useState(true);                 // focus run expanded by default (the drill beat opens the tab → tree shows; collapsible to level 1)
+  if (!ex) {
+    console.warn('ExecPanel: goal has no execution', goal && goal.id);
+    return html`<div class="exec-panel"><div class="exec-empty">⚠ no execution data for this goal</div></div>`;
+  }
+  const focus = ex.focus_run;
+  const n = focus ? countNodes(focus) : 0;
+  return html`
+    <div class="exec-panel">
+      <div class="exec-head">
+        <span class="exec-head-k">Execution · HOW</span>
+        <span class="exec-head-sub">${(ex.runs || []).length} runs · the span tree + maker-checker loop behind the WHAT</span>
+      </div>
+      <div class="exec-runlist">
+        ${(ex.runs || []).map((r) => {
+          const st = EXEC_STATUS[r.status] || { cls: 'unknown', lbl: r.status };
+          return html`
+            <div class="exec-runrow" data-run-id=${r.id}>
+              <span class=${'exec-dot exec-dot--' + st.cls}></span>
+              <span class="exec-runrow-agent">${r.agent}</span>
+              <span class="exec-runrow-when">${(r.when || '').slice(11, 16)}</span>
+              <span class="exec-runrow-sum">${r.summary}</span>
+              <span class="exec-runrow-rw">${r.rework_count ? '↻ ' + r.rework_count : ''}</span>
+            </div>`;
+        })}
+      </div>
+      ${focus ? html`
+        <button type="button" class=${'exec-focusrow' + (open ? ' exec-focusrow--open' : '')} aria-expanded=${open ? 'true' : 'false'} onClick=${() => setOpen(!open)}>
+          <span class="exec-focus-k">focus run</span>
+          <span class="exec-focus-agent">${focus.agent}</span>
+          <span class="exec-focus-lbl">${focus.label}</span>
+          <span class="exec-focus-meta">${n} sub-agents</span>
+          <span class="exec-caret">${open ? '▾' : '▸'}</span>
+        </button>` : null}
+      ${(focus && open) ? html`
+        <div class="exec-detail">
+          <div class="exec-tree-h">dispatch tree · ${n} sub-agents</div>
+          <div class="exec-tree">
+            <${RunNode} node=${focus} depth=${0}/>
+          </div>
+          <${IterationPanel} iteration=${ex.iteration}/>
+        </div>` : null}
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3.3 — DEBUG-LOOP CANVAS COMPONENTS (dbg-*). The investigation ledger is the
+   ONE evidence/work-zone deviation from the feature grammar (SC-005: every other
+   zone is shared). InvestigationLedger + ExperimentRow are PURE (props)->vdom —
+   they read PROPS + the frozen ORG (resolveAssignee / execAgentCard against
+   ORG.agents, same posture as 3.1's WorkRow and 3.2's RunNode), NEVER appState.
+   Iteration history is first-class (FR-007): older passes COLLAPSE via <details>,
+   never delete; the LIVE pass hosts the LOCKED E2 EvidenceBlock as its hero (the
+   refuted hypotheses render struck-but-visible — never forked here). NO
+   view-transition-name (anchors stay on shell zone wrappers).
+   ════════════════════════════════════════════════════════════════════════ */
+
+const VERDICT_MARK = { confirmed: '✓', refuted: '✕', open: '○' };
+// ── ExperimentRow — one experiment an agent ran in a pass: label + verdict chip, with the
+//    assignee rendered as a line-density ColleagueCard (resolved against ORG.agents via the 3.2
+//    execAgentCard adapter). Unresolved assignee → visible slug fallback, never a blank gap. ──
+function ExperimentRow({ exp }) {
+  const card = execAgentCard(exp.assignee);
+  const v = exp.verdict || 'open';
+  return html`
+    <div class=${'dbg-exp dbg-exp--' + v}>
+      <div class="dbg-exp-head">
+        <span class="dbg-exp-label">${exp.label}</span>
+        <span class=${'dbg-exp-verdict dbg-exp-verdict--' + v}>${VERDICT_MARK[v] || '○'} ${v}</span>
+      </div>
+      ${card
+        ? html`<${ColleagueCard} agent=${card} density="line"/>`
+        : html`<span class="dbg-exp-who">ran by ${exp.assignee}</span>`}
+    </div>`;
+}
+// ── InvestigationPass — one iteration pass. <details>: the live pass is open; closed passes
+//    collapse by default (FR-007 — collapsed, NEVER deleted). The live pass hosts the E2 ledger
+//    as its hero (all hypotheses, refuted ones struck-but-visible via the LOCKED EvidenceBlock). ──
+function InvestigationPass({ pass, e2 }) {
+  const live = pass.status === 'live';
+  return html`
+    <details class=${'dbg-pass dbg-pass--' + pass.status} open=${live}>
+      <summary class="dbg-pass-sum">
+        <span class="dbg-pass-badge">↺ pass ${pass.n}</span>
+        <span class=${'dbg-pass-stat dbg-pass-stat--' + pass.status}>${live ? 'live' : 'closed'}</span>
+        <span class="dbg-pass-summary">${pass.summary}</span>
+        <span class="dbg-pass-caret">▸</span>
+      </summary>
+      <div class="dbg-pass-body">
+        ${(pass.experiments || []).map((exp) => html`<${ExperimentRow} exp=${exp}/>`)}
+        ${live
+          ? html`<div class="dbg-pass-e2"><${EvidenceBlock} kind="E2" data=${e2}/></div>`
+          : html`<div class="dbg-pass-collapsednote">${(pass.hypotheses || []).length} hypotheses weighed · kept in the ledger (collapsed, not deleted)</div>`}
+      </div>
+    </details>`;
+}
+// ── InvestigationLedger — the debug work zone: the iteration passes (history first-class) + an L1
+//    decision pill on the investigation. PURE: reads goal.investigation + goal.evidence.E2 + the L1
+//    atom (props). Visible fallback if the passes are missing (zero-silent-failure). ──
+function InvestigationLedger({ goal, l1Atom }) {
+  const inv = goal && goal.investigation;
+  const e2 = (goal && goal.evidence && goal.evidence.E2) || {};
+  if (!inv || !(inv.passes || []).length) {
+    console.warn('InvestigationLedger: missing investigation passes', goal && goal.id);
+    return html`<div class="surf-unknown">⚠ no investigation ledger for this goal</div>`;
+  }
+  return html`
+    <div class="dbg-ledger">
+      ${inv.passes.map((p) => html`<${InvestigationPass} pass=${p} e2=${e2}/>`)}
+      ${l1Atom ? html`
+        <div class="dbg-ledger-dec">
+          <div class="surf-dec-h">decision on this investigation</div>
+          <${Decision} atom=${l1Atom} layer="pill"/>
+        </div>` : null}
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    NERVOUS SYSTEM (1.2) — the typed-op dispatcher + the scenario engine.
    Contract 3: the op vocabulary is a CLOSED 5-op set; NOTHING mutates the
    canvas outside dispatch(). pin stays DISTINCT from promote (not aliased) —
@@ -1926,17 +3153,28 @@ const NUDGES = [
 /* ── The five op functions (Step 1.2.2) — minimal-but-visible state mutations. ── */
 function morph(family, s) {                     // chat course-change reshapes the canvas
   s.family = family;
-  // 2a.3: the receipt is DERIVED from the locked morph atom (level/label/time all spine-derived),
-  // keeping Phase 1's receipt keys {level,label,at} + the v1.1 decision_id. `at` slices the atom's
-  // ISO timestamp (17:52 — identical to the Phase 1 stub, so the morph swap stays invisible).
+  // 3.4: morph is MORPH-SAFE — it always clears the HOW drill-in so the exec tree DOM never
+  // participates in the view-transition snapshot (the close-beat guard, enforced at the op too).
+  s.drill = null;
+  // 3.4: the receipt drops ONLY on the FORWARD morph (away from the goal's real family — the
+  // "classify as bug" reclassification); the scripted REVERSE (back to the goal's own family)
+  // emits NO second receipt (Decision 9 — reversibility is shown by the canvas returning, not by a
+  // new atom; one atom DEC-CAST-412-03, one receipt). Idempotent: never double-push the same atom.
+  const goal = s.org.goals[s.goal.id];
+  const intrinsic = goal && goal.family;
   const a = MORPH_ATOM;
-  s.receipts.push({
-    level: a.reversibility,                     // 'L2'
-    label: a.title,                             // the decision's headline, from the spine
-    at: a.timestamp.slice(11, 16),              // 'HH:MM' (UTC) → '17:52'
-    rationale: a.rationale,
-    decision_id: a.id,                          // v1.1: receipts gain a decision_id
-  });
+  const already = s.receipts.some((r) => r.decision_id === a.id);
+  if (family !== intrinsic && !already) {
+    // The receipt is DERIVED from the locked morph atom (level/label/time all spine-derived),
+    // keeping Phase 1's receipt keys {level,label,at} + the v1.1 decision_id.
+    s.receipts.push({
+      level: a.reversibility,                   // 'L2'
+      label: a.title,                           // the decision's headline, from the spine
+      at: a.timestamp.slice(11, 16),            // 'HH:MM' (UTC) → '17:52'
+      rationale: a.rationale,
+      decision_id: a.id,                        // v1.1: receipts gain a decision_id
+    });
+  }
 }
 function nudge(_id, s) {                         // swap the dominant next step (cycle two canned nudges)
   s.nudge = (s.nudge.do === NUDGES[0].do) ? { ...NUDGES[1] } : { ...NUDGES[0] };
@@ -1945,10 +3183,19 @@ function promote(artifactId, s) {               // chat artifact → durable pin
   s.pinned.push({ id: artifactId, kind: 'promoted',
                   title: 'Acceptance criteria — RBAC checkout',
                   provenance: 'from chat · Guide · 17:53' });
-  s.chat.messages.push({ from: 'system', text: 'Pinned ✓ — artifact promoted to the canvas.' });
+  chatFor(s.goal.id).messages.push({ from: 'system', text: 'Pinned ✓ — artifact promoted to the canvas.' });  // PRF2: per-goal chat
 }
-function drillInto(target, s) {                  // WHAT-primary; HOW behind a toggle (stub panel)
-  s.drill = (s.drill === target) ? null : target;
+// drillInto is REUSED for BOTH targets (closed 5-op set — NO sixth op for stage navigation; see the
+// OPS table comment). The argument grammar branches:
+//   • arg === 'execution' → toggle the HOW drill-in panel (the run_node.html lift; 3.2 fleshes it).
+//   • arg === '<step-id>' → set appState.stageFocus (3.1 stage navigator). Re-clicking the focused
+//     step, OR clicking the current step while at default, returns to the default view (stageFocus=null).
+function drillInto(target, s) {
+  if (target === 'execution') { s.drill = (s.drill === 'execution') ? null : 'execution'; return; }
+  const g = s.org.goals[s.goal.id];
+  const current = g && g.spine_state && g.spine_state.current;
+  if (s.stageFocus === target || (s.stageFocus == null && target === current)) { s.stageFocus = null; return; }
+  s.stageFocus = target;
 }
 function pin(artifactId, s) {                    // DISTINCT from promote — canvas-local stub object
   // 2a.3: the flagged rule code derives from ORG (FLAGGED_RULE), never hand-typed.
@@ -1958,6 +3205,9 @@ function pin(artifactId, s) {                    // DISTINCT from promote — ca
 }
 
 /* ── The dispatcher (Step 1.2.1, ~30 lines vanilla). Every canvas change goes through here. ── */
+// Closed 5-op set (Contract 3) — stays closed. Stage navigation is NOT a sixth op: it REUSES
+// `drillInto` with a step-id argument (drillInto:'<step-id>' → stageFocus), while drillInto:'execution'
+// remains the HOW drill-in. The arg-grammar branch lives in drillInto() above.
 const OPS = { morph, nudge, promote, drillInto, pin };          // closed set (Contract 3)
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -1981,14 +3231,54 @@ document.addEventListener('click', (e) => {
   if (el) dispatch(el.getAttribute('data-op'));
 });
 
-/* ── The scenario engine (Step 1.2.3, ~50 lines). An ARRAY WALKER, explicitly NOT
-   a state machine. Engine state lives ONLY in appState.chat.scriptIndex → reload resets. ── */
+/* ── 4.1: spike_ref BIDIRECTIONAL LOCAL DISCLOSURE (Decision 11) — NOT a sixth op. The closed 5-op
+   set stands; this is the existing chip→callout mechanism + scroll/highlight, on its own delegated
+   listener (the elements carry data-disclose-*, never data-op, so dispatch() ignores them). One
+   direction: the verdict's spike_ref [data-disclose-l3] opens the header L3 rail by CLICKING the
+   existing NeedsYouChip (the literal chip→callout affordance), then scroll/highlights it. The other:
+   the rail's back-link [data-disclose-e4="<evId>"] scroll/highlights the E4 verdict card. Pure DOM
+   affordance — no appState, same posture as the 6B popover. ── */
+function spkFlash(el) {
+  if (!el) return;
+  el.classList.add('spk-flash');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => el.classList.remove('spk-flash'), 1400);
+}
+document.addEventListener('click', (e) => {
+  const toL3 = e.target.closest('[data-disclose-l3]');
+  if (toL3) {
+    const chip = document.querySelector('.ny-chip');
+    if (chip && chip.getAttribute('aria-expanded') !== 'true') chip.click();   // open via the established chip mechanism
+    setTimeout(() => spkFlash(document.querySelector('.ny-rail .rail')), 60);    // after the rail's re-render
+    return;
+  }
+  const toE4 = e.target.closest('[data-disclose-e4]');
+  if (toE4) { spkFlash(document.getElementById(toE4.getAttribute('data-disclose-e4'))); return; }
+});
+
+/* ── Per-goal chat (PRF2). chatFor(id) lazily seeds {messages, scriptIndex, scriptKey:<family>};
+   activeScript() resolves SCRIPTS[scriptKey]. Switching goals shows that goal's own thread + its
+   scenario position; reload rebuilds appState → resets cleanly. ── */
+function chatFor(goalId) {
+  const by = appState.chat.byGoal;
+  if (!by[goalId]) {
+    const fam = (appState.org.goals[goalId] || {}).family;
+    by[goalId] = { messages: [], scriptIndex: 0, scriptKey: fam };
+  }
+  return by[goalId];
+}
+
+/* ── The scenario engine (Step 1.2.3). An ARRAY WALKER, explicitly NOT a state machine. Engine
+   state lives ONLY in the PER-GOAL chat (chatFor(goal).scriptIndex) → reload resets, and each
+   goal keeps its own position (PRF2). ── */
 function advance() {
-  const i = appState.chat.scriptIndex;
-  if (i >= script.length) return;
-  const step = script[i];
-  appState.chat.messages.push({ from: step.from || 'narration', text: step.narration, ops: step.ops });
-  appState.chat.scriptIndex = i + 1;
+  const c = chatFor(appState.goal.id);
+  const scr = SCRIPTS[c.scriptKey] || [];
+  const i = c.scriptIndex;
+  if (i >= scr.length) return;
+  const step = scr[i];
+  c.messages.push({ from: step.from || 'narration', text: step.narration, ops: step.ops });
+  c.scriptIndex = i + 1;
   const apply = () => { step.patch && step.patch(appState); paint(); };
   if (step.transition === 'morph' && document.startViewTransition && !reduced.matches) {
     document.startViewTransition(apply);
@@ -1999,29 +3289,149 @@ function advance() {
   }
 }
 
-/* ── The Phase-1 demo script (Step 1.2.4, ~6 steps). Includes morph:debug AND its
-   reverse morph:feature (undo proof), then promote-the-receipt as step 6b. ── */
-// 2a.3: narration prose stays authored here, but every canonical token (the goal id, its title,
-// the flagged rule code) is INTERPOLATED from ORG — never hand-typed (the downstream-phase rule).
-const script = [
-  { from: 'guide', narration: `Opening ${FEATURE_ID} — “${FEATURE.title}”. Feature spine; you’re at Execution.` },
-  { from: 'guide', narration: `Heads up — the checker flagged ${FLAGGED_RULE} on the open PR.`,
-    ops: [{ label: 'Reclassify as bug', op: 'morph:debug' }],     // canned reply carries a data-op button
-    patch: (s) => nudge('n2', s) },
-  { from: 'you', narration: 'this is actually a bug, not a feature' },
-  { from: 'guide', narration: 'Got it — reclassifying as a debug loop and logging the decision.',
-    transition: 'morph', patch: (s) => morph('debug', s) },      // SC-003 stand-in
-  { from: 'guide', narration: 'Debug loop is now on iteration 2 of 3.',
-    patch: (s) => { s.spines.debug.iter = { current: 2, budget: 3 }; } },
-  { from: 'you', narration: 'wait — it IS a feature after all, revert that',
-    transition: 'morph', patch: (s) => morph('feature', s) },    // reverse morph — undo proof (same op)
-  { from: 'guide', narration: 'Reverted to the feature spine. Pinning the reclassification receipt.',
-    patch: (s) => promote('receipt-1', s) },                     // step 6b — the 6th visible op in-script
-];
+/* ── SCRIPTS — per-family scenario scripts (3.1 introduces SCRIPTS.feature; 3.3 adds .debug, 3.4
+   adds the real morph beat). The feature flow (~7 beats): open → Guide why-line nudge → spine-
+   navigator beat (focus the design step) → promote a real artifact → evidence beat (focus the E1
+   home step) → the L3 needs-you beat → close. Narration INTERPOLATES canonical tokens + step labels
+   from ORG (FEATURE_ID, FLAGGED_RULE, the PR + test summary, step labels, the L3 ticket) — NEVER
+   retyped, so the drift grep stays clean (no stage-label string literal appears in this file). ── */
+const FEAT_SM = ORG.stageModels.feature;
+const featDocSteps = FEAT_SM.steps.filter((s) => s.surface === 'doc');
+const featDesignStep = featDocSteps[1] || {};                          // 2nd doc step (the design/RFC step)
+const featDoneStep = FEAT_SM.steps.find((s) => s.evidence === 'E1') || {};   // E1 home = the acceptance step
+const featCurrentStep = FEAT_SM.steps.find((s) => s.id === FEATURE.spine_state.current) || {};
+const FEAT_E1 = (FEATURE.evidence && FEATURE.evidence.E1) || {};
+const FEAT_L3 = ORG.decisions.find((a) => a.goal_slug === FEATURE_ID && a.reversibility === 'L3') || {};
+const FEAT_L3_TICKET = (FEAT_L3.influenced || []).find((x) => /^CAST-/.test(x)) || FEAT_L3.id;
+// 3.2: the drill beat's narration interpolates the execution shape from ORG (run count, rework meter,
+// the flagged finding code) — never retyped, so the drift grep stays clean.
+const FEAT_EXEC = FEATURE.execution || {};
+const FEAT_EXEC_RUNS = (FEAT_EXEC.runs || []).length;
+const FEAT_EXEC_RW = (FEAT_EXEC.iteration && FEAT_EXEC.iteration.rework) || {};
+const FEAT_EXEC_FLAG = ((FEAT_EXEC.iteration && FEAT_EXEC.iteration.findings) || []).find((f) => f.status === 'flagged') || {};
+// 3.4: the real hero morph handles — DERIVED from morph_view + the locked atom (no hand-typed token,
+// so the drift grep stays clean: the iter and the root cause are interpolated, never literal strings).
+const FEAT_MORPH_ITER = (FEATURE.morph_view && FEATURE.morph_view.spine_state && FEATURE.morph_view.spine_state.iter) || { current: 1, budget: 3 };
+const FEAT_MORPH_ROOTCAUSE = ((MORPH_ATOM.rationale || '').match(/v[\d.]+ RBAC migration/) || ['the RBAC migration'])[0];
+// ── 3.3: debug-flow scenario handles — every token DERIVED from ORG (no hardcoded stage label /
+//    canonical literal appears in SCRIPTS.debug, so the drift grep stays clean). ──
+const DEBUG_ID = goalIdByFamily.debug;
+const DEBUG = ORG.goals[DEBUG_ID];
+const DBG_SM = ORG.stageModels.debug;
+const DBG_CURRENT_STEP = DBG_SM.steps.find((s) => s.id === (DEBUG.spine_state && DEBUG.spine_state.current)) || {};
+const DBG_EXP_STEP = DBG_SM.steps.find((s) => s.id === ((DBG_SM.loop && DBG_SM.loop.over) || [])[1]) || {};   // the experiment step in the loop (dbg-03)
+const DBG_E2_STEP = DBG_SM.steps.find((s) => s.evidence === 'E2') || {};   // E2 home (dbg-04)
+const DBG_E3_STEP = DBG_SM.steps.find((s) => s.evidence === 'E3') || {};   // E3 home (dbg-05)
+const DBG_ITER = (DEBUG.spine_state && DEBUG.spine_state.iter) || { current: 1, budget: 3 };
+const DBG_E2 = (DEBUG.evidence && DEBUG.evidence.E2) || {};
+const DBG_H3 = (DBG_E2.hypotheses || []).find((h) => h.verdict === 'confirmed') || {};
+const DBG_E3 = (DEBUG.evidence && DEBUG.evidence.E3) || {};
+const DBG_PASSES = (DEBUG.investigation && DEBUG.investigation.passes) || [];
+const DBG_PASS_CLOSED = DBG_PASSES.find((p) => p.status === 'closed') || {};
+const DBG_PASS_LIVE = DBG_PASSES.find((p) => p.status === 'live') || {};
+const DBG_L3 = ORG.decisions.find((a) => a.goal_slug === DEBUG_ID && a.reversibility === 'L3') || {};
+const DBG_EXEC_RUNS = ((DEBUG.execution && DEBUG.execution.runs) || []).length;
+// the root-cause weave (v4.2 RBAC migration) — EXTRACTED from the L3 atom's rationale, never retyped.
+const DBG_ROOTCAUSE = ((DBG_L3.rationale || '').match(/v[\d.]+ RBAC migration/) || ['the RBAC migration'])[0];
+// ── 4.1: SPIKE-flow scenario handles — every token DERIVED from ORG (no hardcoded stage label /
+//    canonical literal appears in SCRIPTS.spike, so the drift grep stays clean). ──
+const SPIKE_ID = goalIdByFamily.spike;
+const SPIKE = ORG.goals[SPIKE_ID];
+const SPK_SM = ORG.stageModels.spike;
+const SPK_CURRENT_STEP = SPK_SM.steps.find((s) => s.id === (SPIKE.spine_state && SPIKE.spine_state.current)) || {};
+const SPK_PROBE_STEP = SPK_SM.steps.find((s) => s.id === ((SPIKE.work_stream || [])[0] || {}).step) || {};   // the step a probe sits on
+const SPK_VERDICT_STEP = SPK_SM.steps.find((s) => s.evidence === 'E4') || {};   // E4 home (spk-04)
+const SPK_TB = SPK_SM.timebox || {};
+const SPK_USED = (SPIKE.spine_state && SPIKE.spine_state.timebox_used) || '';
+const SPK_E4 = (SPIKE.evidence && SPIKE.evidence.E4) || {};
+const SPK_L2 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L2') || {};   // the 2h→3h extension
+const SPK_L3 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L3') || {};   // the go/no-go hard stop
+const SCRIPTS = {
+  feature: [
+    { from: 'guide', narration: `Opening ${FEATURE_ID} — “${FEATURE.title}”. Feature backbone; you’re at ${featCurrentStep.shortLabel || featCurrentStep.label}.` },
+    { from: 'guide', narration: `Heads up — the checker flagged ${FLAGGED_RULE} on ${FEAT_E1.pr}. I queued the review for you.`,
+      patch: (s) => nudge('n2', s) },
+    { from: 'you', narration: 'walk me through the stages' },
+    { from: 'guide', narration: `“${featDesignStep.label}” is where the design doc and its review thread live — opening it.`,
+      patch: (s) => { s.stageFocus = featDesignStep.id; } },        // spine-navigator beat (proves drillInto:<step-id>)
+    { from: 'guide', narration: 'Pinning the acceptance criteria so it rides the canvas.',
+      patch: (s) => promote('accept-1', s) },                       // promote a real artifact
+    { from: 'guide', narration: `Acceptance evidence sits on “${featDoneStep.label}” — ${FEAT_E1.test_summary}, ${FEAT_E1.pr}, ${FLAGGED_RULE} still flagged.`,
+      patch: (s) => { s.stageFocus = featDoneStep.id; } },          // evidence beat (focus the E1 home → real raster)
+    { from: 'guide', narration: `Here’s the HOW behind it — ${FEAT_EXEC_RUNS} runs; expand the focus run for the dispatch tree and the maker-checker loop (${FEAT_EXEC_FLAG.code} still flagged, ${FEAT_EXEC_RW.used}/${FEAT_EXEC_RW.budget} rework).`,
+      patch: (s) => { s.drill = 'execution'; } },                   // drill beat — opens the Execution tab; the focus run expands by default (tree + loop show)
+    { from: 'guide', narration: 'Collapsing the HOW view to look at the goal again.',
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },     // 3.4: clean default + exec panel CLOSED → the morph never snapshots the tree DOM (morph-safe close beat)
+    // ── 3.4 THE REAL HERO MORPH (SC-003) — the scripted USER line is the only trigger; it reshapes
+    //    the feature canvas into the debug-family shape on the SAME goal (CAST-412), drops the receipt
+    //    from the locked atom, and is undoable by the next scripted beat. transition:'morph' routes
+    //    advance() through startViewTransition (350ms, the locked tokens) / the reduced-motion fade. ──
+    { from: 'you', narration: `Wait. The repro bisects to ${FEAT_MORPH_ROOTCAUSE}. This is actually a bug, not a feature.`,
+      patch: (s) => morph('debug', s), transition: 'morph' },       // FORWARD morph → debug shape; drops the DEC receipt (once)
+    { from: 'guide', narration: `Reclassified, same goal ${FEATURE_ID}, new shape. The segment bar gives way to the debug loop at iteration ${FEAT_MORPH_ITER.current}/${FEAT_MORPH_ITER.budget}, the work stream reseeds to the symptom and first hypotheses, and the call lands on the receipt trail.` },
+    { from: 'you', narration: 'Keep the feature view for now. I’ll work the bug from here.',
+      patch: (s) => morph('feature', s), transition: 'morph' },     // REVERSE morph → feature; NO second receipt (Decision 9); stageFocus/pinned/chat intact
+    { from: 'guide', narration: `Back in the feature view, nothing lost. One hard stop still needs you: the roles-column drop on ${FEAT_L3_TICKET}. Open “⚠ needs you” to decide.` },  // L3 beat AFTER the reverse (the flow ends in the feature world, where the ticket lives)
+    { from: 'guide', narration: `That’s ${FEATURE_ID}: the feature backbone, the bug reclassification, and the open call. End to end.`,
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },     // close — defensive reset (panel CLOSED at rest)
+  ],
+  // 3.3: the DEBUG flow (~9 beats) — keyed per-goal on route entry (scriptKey='debug', set by
+  // syncGoalFromRoute per PRF2). open → nudge → investigation walk → confirm/refute ledger (E2 home)
+  // → red→green (E3 home) → the L3 hard stop → the THIN exec-tab beat → close. Every token is
+  // interpolated from ORG (step labels, the confirmed hypothesis, the repro test, the L3 title, the
+  // pass summaries, the run count, the v4.2 root cause) — never retyped, so the drift grep stays clean.
+  debug: [
+    { from: 'guide', narration: `Opening ${DEBUG_ID} — “${DEBUG.title}”. Debug loop, iteration ${DBG_ITER.current}/${DBG_ITER.budget}; you’re at ${DBG_CURRENT_STEP.shortLabel || DBG_CURRENT_STEP.label}.`,
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },
+    { from: 'guide', narration: `Next from the Guide: ${DEBUG.nudge.do} — ${DEBUG.nudge.why}.` },
+    { from: 'you', narration: 'walk me through the investigation' },
+    { from: 'guide', narration: `Two passes on the ledger. Pass ${DBG_PASS_CLOSED.n}: ${DBG_PASS_CLOSED.summary} Pass ${DBG_PASS_LIVE.n} is live — ${DBG_PASS_LIVE.summary}`,
+      patch: (s) => { s.stageFocus = DBG_EXP_STEP.id; } },          // navigator beat → the experiment step (proves drillInto:<step-id> on the loop band)
+    { from: 'guide', narration: `The confirm/refute ledger lands on “${DBG_E2_STEP.label}”: the refuted hypotheses stay struck-but-on-file, ${DBG_H3.id} confirmed — ${DBG_H3.statement}`,
+      patch: (s) => { s.stageFocus = DBG_E2_STEP.id; } },           // E2 home → the confirm/refute ledger
+    { from: 'guide', narration: `Proof on “${DBG_E3_STEP.label}”: ${DBG_E3.test ? DBG_E3.test.name : 'the repro'} goes red, then the same case passes green.`,
+      patch: (s) => { s.stageFocus = DBG_E3_STEP.id; } },           // E3 home → red→green repro
+    { from: 'guide', narration: `One hard stop: ${DBG_L3.title}. It traces to ${DBG_ROOTCAUSE}. Open “⚠ needs you” to scope it.`,
+      patch: (s) => { s.stageFocus = null; } },                     // back to the investigation default (the L3 chip lives in the header)
+    { from: 'guide', narration: `Here’s the HOW — ${DBG_EXEC_RUNS} runs; this flow gets the thin run list, no deep dispatch tree.`,
+      patch: (s) => { s.drill = 'execution'; } },                   // thin exec-tab beat — the shared grammar is visibly shared (the same Execution tab as the feature flow)
+    { from: 'guide', narration: 'That’s the debug loop, end to end.',
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },     // close — reset stage focus + exec panel (panel CLOSED at rest)
+  ],
+  // 4.1: the SPIKE flow — the lightest script in the prototype. Beat order (the plan's spec):
+  // open → Guide nudge → probe beat → timebox/L2-extension beat → verdict (E4) beat →
+  // [PARITY BEAT SLOT, reserved + filled by 4.3] → L3 stop → close. Keyed per-goal on route entry
+  // (scriptKey='spike', set by syncGoalFromRoute per PRF2). Every token is interpolated from ORG
+  // (step labels, the timebox used/budget, the L2 extension diff, the E4 verdict + p95/budget, the
+  // L3 title) — never retyped, so the drift grep stays clean. The L3 stays an UNRESOLVED stop
+  // (Decision 4 / Phase-3 #10): the script narrates it and points at the chip; it never resolves it.
+  spike: [
+    { from: 'guide', narration: `Opening ${SPIKE_ID} — “${SPIKE.title}”. Spike timebox, ${SPK_USED} of the ${SPK_TB.budget} box; you’re at ${SPK_CURRENT_STEP.shortLabel || SPK_CURRENT_STEP.label}.`,
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },
+    { from: 'guide', narration: `Next from the Guide: ${SPIKE.nudge.do} — ${SPIKE.nudge.why}.` },
+    { from: 'you', narration: 'walk me through the spike' },
+    { from: 'guide', narration: `spike-runner timeboxed the probes on “${SPK_PROBE_STEP.label}” — quick, throwaway, p95 only under warm cache. The card keeps the attempts, the code gets dropped.`,
+      patch: (s) => { s.stageFocus = SPK_PROBE_STEP.id; } },         // probe beat → the memo at the probe step (proves drillInto:<step-id> on the timebox meter)
+    { from: 'guide', narration: `The box wouldn’t settle at 2h, so ${SPK_L2.diff} — one allowed extension. The chip rides the meter; click it for the rationale and the revisit-if.`,
+      patch: (s) => { s.stageFocus = null; } },                     // timebox / L2-extension beat → back to the meter (the extension chip lives on it)
+    { from: 'guide', narration: `The verdict lands on “${SPK_VERDICT_STEP.label}”: ${SPK_E4.verdict} — ${SPK_E4.confidence} confidence, ${SPK_E4.p95_ms}ms p95 against the ${SPK_E4.budget_ms}ms budget. It’s spike_ref-linked to the go/no-go; click the link to jump straight to it.`,
+      patch: (s) => { s.stageFocus = SPK_VERDICT_STEP.id; } },       // verdict (E4) beat → the full verdict card at its home step
+    // ── [PARITY BEAT SLOT — reserved for sub-phase 4.3] ──────────────────────────────────────────
+    //    4.3 INSERTS its FR-017 three-access-tiers parity beat HERE (after the verdict beat, before
+    //    the L3 stop — Decision 8). It is script-patch-driven (an additive appState.parityOpen flag,
+    //    NO sixth op — Decision 9). 4.1 leaves the slot explicit and does NOT author the beat.
+    // ─────────────────────────────────────────────────────────────────────────────────────────────
+    { from: 'guide', narration: `One hard stop, and it’s yours: ${SPK_L3.title} Three options, nothing pre-selected — the spike shows the call, it doesn’t make it. Open “⚠ needs you” to decide.`,
+      patch: (s) => { s.stageFocus = null; } },                     // L3 stop beat → the chip lives in the header; the rail stays an inert, unresolved stop
+    { from: 'guide', narration: `That’s ${SPIKE_ID}: a ${SPK_TB.budget} box, one borderline number, and a call that needs you. End to end.`,
+      patch: (s) => { s.stageFocus = null; s.drill = null; } },     // close — defensive reset
+  ],
+};
 
 // expose for console verification (manual click-through, Constraint C1 — not a test).
 window.dispatch = dispatch;
 window.advance = advance;
+window.chatFor = chatFor;
 
 /* ════════════════════════════════════════════════════════════════════════
    Render spine. Hash-keyed routes (#/area/id grammar), one App resolver, and a
@@ -2056,8 +3466,16 @@ function syncGoalFromRoute(hash) {
   if (!m) return;
   const g = appState.org.goals[m[1]];
   if (!g) return;                              // unknown goal id → keep current goal (guard)
+  if (m[1] !== appState.goal.id) appState.stageFocus = null;   // 3.1: a NEW goal resets stage focus (its step ids differ)
   appState.goal = { id: m[1], title: g.title, crumb: appState.org.org.crumb };
   appState.family = g.family;
+  // 3.3: the nudge is PER-GOAL — render the routed goal's own nudge object (the debug nudge for
+  // CAST-431, the feature nudge for CAST-412). On CAST-412 entry this is byte-identical to boot
+  // (= FEATURE.nudge = NUDGES[0]), so the feature canvas + its nudge-op cycle are un-regressed.
+  // The morph (3.4) flips family WITHOUT a hashchange, so this never fires on a morph — the morph
+  // owns its own nudge state on CAST-412.
+  if (g.nudge) appState.nudge = { ...g.nudge };
+  chatFor(m[1]).scriptKey = g.family;          // PRF2: scriptKey set per-goal on route entry, by family
 }
 function navigate() {
   syncGoalFromRoute(location.hash);

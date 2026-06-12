@@ -900,6 +900,348 @@ window.ORG = Object.freeze({
           "compliancePct": 99.4,
           "runs": 312
         }
+      },
+      "execution": {
+        "runs": [
+          {
+            "id": "run-412-a",
+            "agent": "entity-creation",
+            "status": "done",
+            "when": "2026-06-11T12:30:00.000Z",
+            "summary": "Scaffolded the Role and Permission entities with the CRUD stack",
+            "rework_count": 0
+          },
+          {
+            "id": "run-412-b",
+            "agent": "api-contractor",
+            "status": "done",
+            "when": "2026-06-11T13:05:00.000Z",
+            "summary": "Generated the REST permissions handlers on the existing API surface",
+            "rework_count": 0
+          },
+          {
+            "id": "run-412-c",
+            "agent": "migration-author",
+            "status": "blocked",
+            "when": "2026-06-11T14:00:00.000Z",
+            "summary": "Authored the roles-schema migration — held at the L3 stop on CAST-417",
+            "rework_count": 1
+          },
+          {
+            "id": "run-412-d",
+            "agent": "crud-orchestrator",
+            "status": "running",
+            "when": "2026-06-11T17:25:00.000Z",
+            "summary": "Running the maker-checker loop on the permissions PR — R02 flagged for review",
+            "rework_count": 1
+          }
+        ],
+        "focus_run": {
+          "id": "run-412-focus",
+          "agent": "crud-orchestrator",
+          "kind": "orchestrate",
+          "status": "running",
+          "label": "Orchestrate the RBAC permissions build",
+          "rework": null,
+          "children": [
+            {
+              "id": "run-412-n2",
+              "agent": "entity-creation",
+              "kind": "maker",
+              "status": "done",
+              "label": "Scaffold Role + Permission entities (CRUD stack)",
+              "rework": null,
+              "children": [
+                {
+                  "id": "run-412-n3",
+                  "agent": "crud-compliance-checker",
+                  "kind": "checker",
+                  "status": "done",
+                  "label": "Compliance pass — M04 convention drift resolved",
+                  "rework": null,
+                  "children": [],
+                  "skills": [
+                    "mvcs-compliance",
+                    "crud-compliance"
+                  ],
+                  "ctx": {
+                    "used": 77000,
+                    "limit": 200000
+                  }
+                }
+              ],
+              "skills": [
+                "entity-creation",
+                "schema-lock"
+              ],
+              "ctx": {
+                "used": 101000,
+                "limit": 200000
+              }
+            },
+            {
+              "id": "run-412-n4",
+              "agent": "api-contractor",
+              "kind": "maker",
+              "status": "done",
+              "label": "Generate REST permissions handlers on the existing surface",
+              "rework": null,
+              "children": [
+                {
+                  "id": "run-412-n5",
+                  "agent": "security-checker",
+                  "kind": "checker",
+                  "status": "done",
+                  "label": "Authz-boundary check on the permission endpoints",
+                  "rework": null,
+                  "children": [],
+                  "skills": [
+                    "authz-boundary",
+                    "security-review"
+                  ],
+                  "ctx": {
+                    "used": 78000,
+                    "limit": 200000
+                  }
+                }
+              ],
+              "skills": [
+                "controller",
+                "api-contract"
+              ],
+              "ctx": {
+                "used": 102000,
+                "limit": 200000
+              }
+            },
+            {
+              "id": "run-412-n6",
+              "agent": "migration-author",
+              "kind": "maker",
+              "status": "blocked",
+              "label": "Author the roles-schema migration (held at the L3 stop)",
+              "rework": null,
+              "children": [
+                {
+                  "id": "run-412-n7",
+                  "agent": "crud-compliance-checker",
+                  "kind": "checker",
+                  "status": "flagged",
+                  "label": "Flagged R02 — missing index on FK on role_permissions",
+                  "rework": null,
+                  "children": [],
+                  "skills": [
+                    "mvcs-compliance",
+                    "crud-compliance"
+                  ],
+                  "ctx": {
+                    "used": 102000,
+                    "limit": 200000
+                  }
+                },
+                {
+                  "id": "run-412-n8",
+                  "agent": "migration-author",
+                  "kind": "maker",
+                  "status": "done",
+                  "label": "↻ rework #1 — add the FK index per the R02 flag",
+                  "rework": 1,
+                  "children": [],
+                  "skills": [
+                    "migration",
+                    "schema-lock"
+                  ],
+                  "ctx": {
+                    "used": 114000,
+                    "limit": 200000
+                  }
+                },
+                {
+                  "id": "run-412-n9",
+                  "agent": "crud-compliance-checker",
+                  "kind": "checker",
+                  "status": "done",
+                  "label": "Re-review — S03 typing too permissive resolved",
+                  "rework": null,
+                  "children": [],
+                  "skills": [
+                    "mvcs-compliance",
+                    "crud-compliance"
+                  ],
+                  "ctx": {
+                    "used": 79000,
+                    "limit": 200000
+                  }
+                },
+                {
+                  "id": "run-412-n13",
+                  "agent": "repo-cartographer",
+                  "kind": "maker",
+                  "status": "done",
+                  "label": "Map every read of the legacy roles column before any drop",
+                  "rework": null,
+                  "children": [],
+                  "skills": [
+                    "code-explorer",
+                    "impact-map"
+                  ],
+                  "ctx": {
+                    "used": 106000,
+                    "limit": 200000
+                  }
+                }
+              ],
+              "skills": [
+                "migration",
+                "schema-lock"
+              ],
+              "ctx": {
+                "used": 126000,
+                "limit": 200000
+              }
+            },
+            {
+              "id": "run-412-n10",
+              "agent": "decision-recorder",
+              "kind": "decision",
+              "status": "done",
+              "label": "Record DEC-CAST-412-06 — split FR-014 into routing + recording",
+              "rework": null,
+              "children": [],
+              "skills": [
+                "decision-record"
+              ],
+              "ctx": {
+                "used": 69000,
+                "limit": 200000
+              }
+            },
+            {
+              "id": "run-412-n11",
+              "agent": "crud-compliance-checker",
+              "kind": "checker",
+              "status": "flagged",
+              "label": "Final PR review — R02 still flagged, routed to @you",
+              "rework": null,
+              "children": [],
+              "skills": [
+                "mvcs-compliance",
+                "crud-compliance"
+              ],
+              "ctx": {
+                "used": 106000,
+                "limit": 200000
+              }
+            },
+            {
+              "id": "run-412-n12",
+              "agent": "test-coverage-checker",
+              "kind": "checker",
+              "status": "done",
+              "label": "Coverage gate — +2.1% on the permissions path",
+              "rework": null,
+              "children": [],
+              "skills": [
+                "pytest",
+                "coverage-gate"
+              ],
+              "ctx": {
+                "used": 82000,
+                "limit": 200000
+              }
+            }
+          ],
+          "skills": [
+            "orchestrate",
+            "maker-checker"
+          ],
+          "ctx": {
+            "used": 124000,
+            "limit": 200000
+          }
+        },
+        "iteration": {
+          "maker": "crud-orchestrator",
+          "checker": "crud-compliance-checker",
+          "findings": [
+            {
+              "code": "M04",
+              "label": "convention drift",
+              "status": "resolved",
+              "round": 1
+            },
+            {
+              "code": "S03",
+              "label": "typing too permissive",
+              "status": "resolved",
+              "round": 1
+            },
+            {
+              "code": "R02",
+              "label": "missing index on FK",
+              "status": "flagged",
+              "round": 2
+            }
+          ],
+          "rework": {
+            "used": 1,
+            "budget": 3
+          },
+          "exits": [
+            "fix",
+            "retry",
+            "escalate"
+          ],
+          "pr": {
+            "id": "PR #2341",
+            "label": "Add RBAC to checkout",
+            "diff_stub": "+142 −18 · 7 files · role_permissions, permission_check.py"
+          }
+        }
+      },
+      "morph_view": {
+        "spine_state": {
+          "iter": {
+            "current": 1,
+            "budget": 3
+          }
+        },
+        "work_stream": [
+          {
+            "id": "ws-412m-1",
+            "label": "Symptom: checkout 500s when an unscoped token hits the permission check",
+            "assignee": "crud-orchestrator",
+            "step": "dbg-01",
+            "kind": "symptom"
+          },
+          {
+            "id": "ws-412m-2",
+            "label": "Hypothesis: the v4.2 RBAC migration left a null-role path in the shared middleware",
+            "assignee": "crud-compliance-checker",
+            "step": "dbg-02",
+            "kind": "hypothesis"
+          },
+          {
+            "id": "ws-412m-3",
+            "label": "Experiment: replay the failing request against the integration harness",
+            "assignee": "test-coverage-checker",
+            "step": "dbg-03",
+            "kind": "experiment"
+          }
+        ],
+        "evidence": {
+          "E2-seed": {
+            "hypotheses": [
+              {
+                "id": "H1",
+                "statement": "A null role from the v4.2 RBAC migration reaches the shared auth middleware and the permission check throws.",
+                "verdict": "open",
+                "prediction": "A null role reaches the shared auth middleware and throws",
+                "observation": "trace replay in progress on the integration harness"
+              }
+            ]
+          }
+        }
       }
     },
     "CAST-431": {
@@ -963,18 +1305,21 @@ window.ORG = Object.freeze({
           "hypotheses": [
             {
               "id": "H1",
+              "statement": "A stale cached coupon is serving the 500.",
               "verdict": "refuted",
               "prediction": "If a stale cached coupon serves the 500, disabling the cache stops it.",
               "observation": "With the cache off, the 500 still fires on coupon apply."
             },
             {
               "id": "H2",
+              "statement": "The coupon validator rejects the code and 500s.",
               "verdict": "refuted",
               "prediction": "If the coupon validator rejects the code, the request 400s, not 500s.",
               "observation": "The validator returns a clean 400; the 500 comes later in the request."
             },
             {
               "id": "H3",
+              "statement": "A null role from the v4.2 RBAC migration reaches the shared auth middleware and the permission check throws.",
               "verdict": "confirmed",
               "prediction": "If a null role reaches the shared auth middleware, the permission check throws.",
               "observation": "On the integration harness, a null-role account throws in the shared middleware - that is the 500."
@@ -985,10 +1330,61 @@ window.ORG = Object.freeze({
           "id": "E3-CAST-431",
           "kind": "E3",
           "confidence": "●",
-          "repro": "test_coupon_apply_null_role_500",
-          "red": "AuthMiddlewareError: role is null (HTTP 500) at apply_coupon",
-          "green": "test_coupon_apply_null_role_500 passed - returns HTTP 422 with a typed error"
+          "test": {
+            "name": "test_coupon_apply_null_role_500"
+          },
+          "before": {
+            "status": "fail",
+            "excerpt": "E   AuthMiddlewareError: role is null (HTTP 500)\n    apply_coupon.py:88 - null role reaches the shared auth middleware"
+          },
+          "after": {
+            "status": "pass",
+            "excerpt": "1 passed in 0.19s\n    apply_coupon.py:88 - null role now returns a typed HTTP 422"
+          }
         }
+      },
+      "investigation": {
+        "passes": [
+          {
+            "n": 1,
+            "status": "closed",
+            "hypotheses": [
+              "H1",
+              "H2"
+            ],
+            "summary": "Cache and validator theories - both refuted; the 500 survives each.",
+            "experiments": [
+              {
+                "id": "exp-431-1a",
+                "label": "Disabled the coupon cache and replayed the apply request",
+                "assignee": "crud-orchestrator",
+                "verdict": "refuted"
+              },
+              {
+                "id": "exp-431-1b",
+                "label": "Traced the coupon validator path to find where the 500 is raised",
+                "assignee": "test-coverage-checker",
+                "verdict": "refuted"
+              }
+            ]
+          },
+          {
+            "n": 2,
+            "status": "live",
+            "hypotheses": [
+              "H3"
+            ],
+            "summary": "Null role in the shared auth middleware - confirmed on the integration harness.",
+            "experiments": [
+              {
+                "id": "exp-431-2a",
+                "label": "Replayed on the integration harness against the real shared middleware",
+                "assignee": "test-coverage-checker",
+                "verdict": "confirmed"
+              }
+            ]
+          }
+        ]
       },
       "decisions": [
         "DEC-CAST-431-01",
@@ -1002,6 +1398,87 @@ window.ORG = Object.freeze({
         "trust": {
           "compliancePct": 99.6,
           "runs": 1185
+        }
+      },
+      "execution": {
+        "runs": [
+          {
+            "id": "run-431-a",
+            "agent": "crud-orchestrator",
+            "status": "done",
+            "when": "2026-06-11T11:20:00.000Z",
+            "summary": "Reproduced the coupon-apply 500 on the integration harness",
+            "rework_count": 0
+          },
+          {
+            "id": "run-431-b",
+            "agent": "test-coverage-checker",
+            "status": "running",
+            "when": "2026-06-11T11:45:00.000Z",
+            "summary": "Confirming H3 — a null role throws in the shared middleware",
+            "rework_count": 0
+          }
+        ],
+        "focus_run": {
+          "id": "run-431-focus",
+          "agent": "crud-orchestrator",
+          "kind": "orchestrate",
+          "status": "running",
+          "label": "Investigate the coupon-apply 500",
+          "rework": null,
+          "children": [
+            {
+              "id": "run-431-c1",
+              "agent": "test-coverage-checker",
+              "kind": "checker",
+              "status": "done",
+              "label": "Switch the repro from the unit harness to the integration harness",
+              "rework": null,
+              "children": [],
+              "skills": [
+                "pytest",
+                "coverage-gate"
+              ],
+              "ctx": {
+                "used": 75000,
+                "limit": 200000
+              }
+            }
+          ],
+          "skills": [
+            "orchestrate",
+            "maker-checker"
+          ],
+          "ctx": {
+            "used": 122000,
+            "limit": 200000
+          }
+        },
+        "iteration": {
+          "maker": "crud-orchestrator",
+          "checker": "crud-compliance-checker",
+          "findings": [
+            {
+              "code": "M04",
+              "label": "convention drift",
+              "status": "resolved",
+              "round": 1
+            }
+          ],
+          "rework": {
+            "used": 0,
+            "budget": 3
+          },
+          "exits": [
+            "fix",
+            "retry",
+            "escalate"
+          ],
+          "pr": {
+            "id": "PR #2356",
+            "label": "Checkout 500s on coupon apply",
+            "diff_stub": "+24 −6 · 2 files · null-role guard in the shared auth middleware"
+          }
         }
       }
     },
@@ -1086,6 +1563,40 @@ window.ORG = Object.freeze({
           "compliancePct": 98.8,
           "runs": 160
         }
+      },
+      "execution": {
+        "runs": [
+          {
+            "id": "run-452-a",
+            "agent": "spike-runner",
+            "status": "done",
+            "when": "2026-06-11T13:10:00.000Z",
+            "summary": "Probed the vendor SDK p95 under warm cache in a 2h box",
+            "rework_count": 0
+          },
+          {
+            "id": "run-452-b",
+            "agent": "spike-runner",
+            "status": "running",
+            "when": "2026-06-11T14:00:00.000Z",
+            "summary": "Re-probed p95 after the one-time 3h extension — landed at 180ms, borderline",
+            "rework_count": 0
+          }
+        ]
+      },
+      "parity": {
+        "command": "cast spike run CAST-452 --probe vendor-sdk-p95 --budget 200ms",
+        "artifact_id": "E4-CAST-452",
+        "transcript": [
+          "$ cast spike run CAST-452 --probe vendor-sdk-p95 --budget 200ms",
+          "spike-runner › framing: does the vendor checkout SDK fit the 200ms p95 budget?",
+          "spike-runner › probing p95 under warm cache · 3h box (extended once from 2h) …",
+          "spike-runner › run 1: 178ms · run 2: 181ms · run 3: 180ms",
+          "spike-runner › verdict: adds 180ms p95 — borderline (◐); inside the 200ms budget, tight",
+          "decision-recorder › wrote E4-CAST-452 · spike_ref → DEC-CAST-452-03",
+          "✓ artifact E4-CAST-452 ready · open it with: cast goal show CAST-452 --view verdict"
+        ],
+        "caption": "Same verdict, three ways in — the chat rail, the goal canvas, and the terminal all resolve to one artifact (E4-CAST-452). FR-017: three access tiers, one source of truth."
       }
     },
     "CAST-461": {
@@ -1171,6 +1682,55 @@ window.ORG = Object.freeze({
             }
           ],
           "reconciliation_note": "Finance DB totals Q2 at 2,595k; the billing export totals 2,803k - an 8% gap that holds across all four segments. The headline is pending the L3 source call."
+        },
+        "resolved_view": {
+          "series": [
+            {
+              "source": "finance DB",
+              "total": 2595,
+              "segments": [
+                {
+                  "segment": "new",
+                  "value": 412
+                },
+                {
+                  "segment": "returning",
+                  "value": 905
+                },
+                {
+                  "segment": "reactivated",
+                  "value": 188
+                },
+                {
+                  "segment": "enterprise",
+                  "value": 1090
+                }
+              ]
+            },
+            {
+              "source": "billing export",
+              "total": 2803,
+              "segments": [
+                {
+                  "segment": "new",
+                  "value": 446
+                },
+                {
+                  "segment": "returning",
+                  "value": 951
+                },
+                {
+                  "segment": "reactivated",
+                  "value": 205
+                },
+                {
+                  "segment": "enterprise",
+                  "value": 1201
+                }
+              ]
+            }
+          ],
+          "reconciliation_note": "Reconciled view — both sources shown side by side rather than picking one. The billing export runs 8% above the finance DB (2,803k vs 2,595k), a gap that holds across all four segments (largest on enterprise, +111k). Neither series is suppressed; the headline cites the finance DB as source-of-record with the billing gap footnoted."
         }
       },
       "decisions": [
@@ -1186,6 +1746,26 @@ window.ORG = Object.freeze({
           "compliancePct": 99.2,
           "runs": 166
         }
+      },
+      "execution": {
+        "runs": [
+          {
+            "id": "run-461-a",
+            "agent": "repo-cartographer",
+            "status": "done",
+            "when": "2026-06-11T14:20:00.000Z",
+            "summary": "Imported the finance DB and the billing export; aligned the Q2 date windows",
+            "rework_count": 0
+          },
+          {
+            "id": "run-461-b",
+            "agent": "decision-recorder",
+            "status": "running",
+            "when": "2026-06-11T15:00:00.000Z",
+            "summary": "Computed per-segment Q2 revenue from both sources — an 8% gap persists",
+            "rework_count": 0
+          }
+        ]
       }
     }
   },
