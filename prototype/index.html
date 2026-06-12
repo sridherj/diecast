@@ -1092,6 +1092,97 @@ button.spine-tb-step{font:inherit;cursor:pointer;}
 .spk-flash{animation:spk-flash 1.4s ease-out;border-radius:var(--radius-md);}
 @keyframes spk-flash{0%{box-shadow:0 0 0 3px var(--rasp-15);}100%{box-shadow:0 0 0 3px transparent;}}
 @media (prefers-reduced-motion: reduce){.spk-flash{animation-duration:1ms;}}
+
+/* ════════════════════════════════════════════════════════════════════════
+   4.2 — DATA-ANALYSIS CANVAS STYLES. The pipeline node-chain becomes a
+   NAVIGATOR (clickable data-stage nodes via drillInto:<step-id>), the `notebook`
+   StageSurface kind is fleshed out (the import step → a data-source LIST with the
+   cross-source disagreement in --warn; analysis steps → native <details> cells),
+   and the E5 branch becomes the real report: a grouped inline-SVG chart (muted ink
+   = source-of-record, raspberry = the disagreeing series — EXISTING tokens only, no
+   minted color), a data table, provenance-on-demand, and version chips. Classes stay
+   under the existing spine-* / surf-* / ev-* prefixes (no new prefix in 4.2 — parity-*
+   is 4.3's). Token-only colors. NO view-transition-name here (the 6×1 anchor set is
+   unchanged). Error paths reuse --warn/--rasp + console.warn (zero-silent-failure).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Pipeline NAVIGATOR — each data-stage node becomes a drillInto:<step-id> button
+   (NO sixth op); the focused node gets an ink ring distinct from the raspberry current dot. ── */
+button.spine-node{font:inherit;cursor:pointer;border:none;background:transparent;}
+.spine-node--nav{cursor:pointer;}
+.spine-node--focus{outline:2px solid var(--ink);outline-offset:2px;border-radius:var(--radius-sm);}
+.spine-node--focus .spine-dot{border-color:var(--ink);}
+
+/* ── Data-source list (surf-src*) — the import step's source rows: name · kind · freshness ·
+   headline total; the cross-source disagreement rides a --warn strip (flagged, not buried). ── */
+.surf-srclist{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.surf-src{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding:9px 0;border-top:1px solid var(--hairline-soft);}
+.surf-src:first-child{border-top:none;}
+.surf-src-name{font-size:12.5px;color:var(--ink);display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.surf-src-kind{font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-35);border:1px solid var(--hairline-soft);border-radius:999px;padding:1px 7px;}
+.surf-src-meta{display:flex;align-items:baseline;gap:11px;white-space:nowrap;}
+.surf-src-fresh{font-family:var(--mono);font-size:10px;color:var(--ink-35);}
+.surf-src-fig{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);}
+.surf-src-warn{display:flex;gap:8px;margin-top:10px;padding:9px 11px;font-size:12px;line-height:1.45;
+  color:var(--ink-60);border:1px solid var(--warn);border-left:3px solid var(--warn);
+  border-radius:var(--radius-sm);background:rgba(181,130,26,.07);}
+.surf-src-warn b{color:var(--warn);font-family:var(--mono);}
+
+/* ── Notebook cells (surf-nb*) — native <details> per cell (file://-safe, no JS dep): a mono
+   query/transform stub + a per-cell status chip, collapsed-by-default-but-expandable (FR-007). ── */
+.surf-nb{display:flex;flex-direction:column;gap:11px;}
+.surf-nb-h{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-35);}
+.surf-nb-cells{display:flex;flex-direction:column;gap:8px;}
+.surf-nb-cell{border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);background:var(--cream);overflow:hidden;}
+.surf-nb-sum{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
+  padding:8px 11px;list-style:none;font-size:12.5px;color:var(--ink);}
+.surf-nb-sum::-webkit-details-marker{display:none;}
+.surf-nb-sum::before{content:'▸';font-family:var(--mono);font-size:10px;color:var(--ink-35);margin-right:2px;}
+.surf-nb-cell[open] > .surf-nb-sum::before{content:'▾';}
+.surf-nb-cap{flex:1;min-width:0;}
+.surf-nb-st{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  border-radius:999px;padding:1px 8px;white-space:nowrap;}
+.surf-nb-st--ran{color:var(--ink-60);border:1px solid var(--hairline);}
+.surf-nb-st--l1{color:var(--ink-35);border:1px solid var(--hairline);}
+.surf-nb-st--l2{color:var(--warn);border:1px solid var(--warn);}
+.surf-nb-code{font-family:var(--mono);font-size:10.5px;line-height:1.5;white-space:pre-wrap;margin:0;
+  padding:10px 12px;border-top:1px solid var(--hairline-soft);background:var(--paper);color:var(--ink-60);}
+.surf-nb-note{font-size:11px;color:var(--ink-35);padding:8px 12px;border-top:1px solid var(--hairline-soft);}
+
+/* ── E5 report extras (ev-*) — grouped chart legend, the data table, the flag/note lines, the
+   version chips, and the no-data placeholder. The disagreeing series rides raspberry (--rasp), the
+   source-of-record rides muted ink (--ink-35) — EXISTING tokens, no minted color. ── */
+.ev-svg .ev-bar--ink{fill:var(--ink-35);}
+.ev-svg .ev-bar--alt{fill:var(--rasp);}
+.ev-svg .ev-ylab,.ev-svg .ev-xlab{font-family:var(--mono);font-size:8px;fill:var(--ink-35);}
+.ev-flag{display:flex;gap:7px;font-family:var(--mono);font-size:11px;color:var(--warn);
+  border:1px solid var(--warn);border-radius:var(--radius-sm);background:rgba(181,130,26,.07);
+  padding:6px 10px;margin:2px 0 11px;}
+.ev-legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 11px;font-family:var(--mono);font-size:10.5px;color:var(--ink-60);}
+.ev-leg{display:inline-flex;align-items:center;gap:6px;}
+.ev-leg-sw{width:10px;height:10px;border-radius:2px;flex:none;}
+.ev-leg--ink .ev-leg-sw{background:var(--ink-35);}
+.ev-leg--alt .ev-leg-sw{background:var(--rasp);}
+.ev-tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin:2px 0 11px;}
+.ev-tbl th,.ev-tbl td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--hairline-soft);
+  font-family:var(--mono);color:var(--ink-60);}
+.ev-tbl th:first-child,.ev-tbl td:first-child{text-align:left;color:var(--ink);}
+.ev-tbl th{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-35);font-weight:600;}
+.ev-tbl .ev-td-alt{color:var(--rasp);}
+.ev-tbl-foot td{font-weight:600;color:var(--ink);border-top:1px solid var(--hairline);border-bottom:none;}
+.ev-note{font-size:11.5px;line-height:1.5;color:var(--ink-60);
+  border-left:2px solid var(--hairline);padding:2px 0 2px 11px;margin:0 0 11px;}
+.ev-nodata{font-family:var(--mono);font-size:11.5px;color:var(--warn);border:1px dashed var(--warn);
+  border-radius:var(--radius-sm);padding:11px 13px;background:rgba(181,130,26,.07);margin:2px 0 11px;}
+.ev-nodata-k{color:var(--ink-35);}
+.ev-vers{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px;}
+.ev-vers .ev-ver{margin-top:0;}
+.ev-ver--on{border-color:var(--ink-35);color:var(--ink);}
+.ev-ver--on .ev-ver-dot{background:var(--ok);}
+.ev-ver--pending{border-style:dashed;color:var(--ink-35);}
+.ev-ver--pending .ev-ver-dot{background:var(--ink-35);}
 </style>
 </head>
 <body>
@@ -1242,6 +1333,11 @@ const appState = {
   // 3.1: stage-navigator focus. null = "current step" (default WHAT view); a step id =
   // the user-navigated step whose StageSurface renders. Set via drillInto:<step-id> (NO sixth op).
   stageFocus: null,
+  // 4.2: the data L3 PRESENTATION OVERLAY (the one script-wired resolution in the prototype). false =
+  // the unresolved at-rest E5 (◐-flagged, source-of-record only); true = the resolved_view re-render
+  // (both series + reconciliation note). Additive flag — never renames a key; ORG is NOT mutated by the
+  // resolution, and reload rebuilds appState → false → the unresolved state. (Mirrors 4.3's parityOpen.)
+  dataResolved: false,
   // 3.1 / PRF2: chat is keyed PER-GOAL — appState.chat.byGoal[goalId] = {messages, scriptIndex,
   // scriptKey}. Refines (does not rename) the Phase-1 `chat` contract: the keys live one level
   // deeper, under the goal id, so switching goals shows that goal's own thread. chatFor(id) lazily
@@ -1400,8 +1496,22 @@ function GoalCanvas() {
   const memoL1 = (focusStep && focusStep.surface === 'memo')
     ? (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L1')
     : null;
-  // surface decisions: the doc-phase mapping (feature) OR the memo's owning L1 (spike).
-  const surfaceDecisions = (stepDecisions && stepDecisions.length) ? stepDecisions : (memoL1 ? [memoL1] : []);
+  // ── 4.2 DATA handles (all DERIVED from ORG — no hardcoded vocabulary). ──
+  const isData = fam === 'data';
+  // the data notebook hosts the goal's recorded analysis decisions: the first L1 (e.g. the null-row
+  // exclusion) + the first L2 (e.g. median-over-mean) render as Decision callouts on the notebook. The
+  // L3 source call stays on the header needs-you chip, never here (one hard stop per flow). Ids DERIVED.
+  const notebookDecisions = (isData && focusStep && focusStep.surface === 'notebook')
+    ? [
+        (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L1'),
+        (appState.org.decisions || []).find((a) => a.goal_slug === goalId && a.reversibility === 'L2'),
+      ].filter(Boolean)
+    : null;
+  // surface decisions: the doc-phase mapping (feature) OR the memo's owning L1 (spike) OR the
+  // notebook's L1+L2 analysis decisions (data).
+  const surfaceDecisions = (stepDecisions && stepDecisions.length) ? stepDecisions
+    : (notebookDecisions && notebookDecisions.length) ? notebookDecisions
+    : (memoL1 ? [memoL1] : []);
 
   return html`
     <div class="goal-view">
@@ -1488,7 +1598,7 @@ function GoalCanvas() {
                       : html` <span style="font-family:var(--mono);font-size:10px;color:var(--ink-35)">· current step</span>`}</div>
                     <${StageSurface} step=${focusStep} goalArtifacts=${stepArtifacts} stepDecisions=${surfaceDecisions} goal=${goal}/>
                     ${focusStep && focusStep.evidence
-                      ? html`<div style="margin-top:14px"><${EvidenceBlock} kind=${focusStep.evidence} data=${adaptEvidence(focusStep.evidence, goal)}/></div>`
+                      ? html`<div style="margin-top:14px"><${EvidenceBlock} kind=${focusStep.evidence} data=${adaptEvidence(focusStep.evidence, goal, { resolved: appState.dataResolved })}/></div>`
                       : (e1
                           ? html`<div style="margin-top:14px"><${EvidenceStrip} e1=${e1}/></div>`
                           : (e4 ? html`<div style="margin-top:14px"><${EvidenceStripE4} e4=${e4} verdictStepId=${verdictStepId}/></div>` : null))}
@@ -1657,15 +1767,9 @@ FIXTURES.EVIDENCE = {
     ],
     spike_ref: { decisionId: 'DEC-118', label: 'spike: RBAC enforcement layer' },
   },
-  E5: {
-    headline: { kind: 'chart', unit: 'runs / week', bars: [
-      { label: 'wk1', value: 18 }, { label: 'wk2', value: 31 }, { label: 'wk3', value: 27 },
-      { label: 'wk4', value: 44 }, { label: 'wk5', value: 52 },
-    ] },
-    provenance: { sources: ['runs.db', 'ci-exports/2026-06'],
-                  query: 'SELECT week, count(*) FROM exec\nGROUP BY week ORDER BY week' },
-    version: { n: 2, date: '2026-06-11', note: 're-run on fresh data' },
-  },
+  // 4.2: E5 is no longer a static fixture — it is ORG-derived (adaptE5), so #/kit renders BOTH states
+  // (at-rest ◐-flagged vs resolved_view) from the real data goal. The renderer is the single source of
+  // truth for the chart idiom; a baked fixture would be a second, drift-prone definition of the series.
 };
 
 /* ── 2b.2b judgment fixtures. DECISIONS: field names are Contract-3 (playbook 05) VERBATIM
@@ -2042,14 +2146,29 @@ function SpineTimebox({ spine, nav, extension }) {  // shape C — single budget
         </div>` : null}
     </div>`;
 }
-function SpinePipeline({ spine }) {                  // shape D — data-stage NODE CHAIN
+// 4.2: SpinePipeline is now a NAVIGATOR too — each data-stage node becomes a
+// <button data-op="drillInto:<step-id>"> (NO sixth op; `nav` threads through exactly like
+// SpineSegments/SpineLoop/SpineTimebox), the focused node gets an ink ring distinct from the
+// raspberry `current` dot. Without `nav` (e.g. #/kit's FIXTURES.SPINES.pipeline) the nodes render
+// as inert spans exactly as before — the kit harness is unchanged.
+function SpinePipeline({ spine, nav }) {             // shape D — data-stage NODE CHAIN
+  const ids = (nav && nav.ids) || [];
+  const focus = nav && nav.focus;
   return html`
     <div class="spine-pipeline">
-      ${spine.steps.map((s, i) => html`
-        <span class=${'spine-node' + (i === spine.current ? ' spine-node--now' : i < spine.current ? ' spine-node--done' : '')}>
-          <span class="spine-dot"></span><span class="spine-nodelbl">${s}</span>
-        </span>
-        ${i < spine.steps.length - 1 ? html`<span class="spine-flow">▸</span>` : null}`)}
+      ${spine.steps.map((s, i) => {
+        const id = ids[i];
+        const navable = !!(nav && id);
+        const cls = 'spine-node'
+          + (i === spine.current ? ' spine-node--now' : i < spine.current ? ' spine-node--done' : '')
+          + (focus != null && id === focus ? ' spine-node--focus' : '')
+          + (navable ? ' spine-node--nav' : '');
+        const inner = html`<span class="spine-dot"></span><span class="spine-nodelbl">${s}</span>`;
+        const node = navable
+          ? html`<button class=${cls} data-op=${'drillInto:' + id} aria-pressed=${id === focus ? 'true' : 'false'}>${inner}</button>`
+          : html`<span class=${cls}>${inner}</span>`;
+        return html`${node}${i < spine.steps.length - 1 ? html`<span class="spine-flow">▸</span>` : null}`;
+      })}
     </div>`;
 }
 const SPINE_SHAPES = { segments: SpineSegments, loop: SpineLoop, timebox: SpineTimebox, pipeline: SpinePipeline };
@@ -2226,46 +2345,132 @@ function EvidenceE4({ data }) {                      // Verdict Card
       ${ref}
     </div>`;
 }
-function EvBarChart({ headline }) {                  // hand-rolled inline SVG (NO chart library)
-  const bars = headline.bars || [];
-  const W = 340, H = 96, padX = 6, padBottom = 16, padTop = 8;
-  const n = Math.max(bars.length, 1);
-  const slot = (W - padX * 2) / n;
-  const bw = Math.max(slot - 10, 4);
-  const max = Math.max(...bars.map((b) => b.value), 1);
-  const plotH = H - padBottom - padTop;
+// 4.2: EvBarChart is the prototype's ONE real chart — a hand-authored GROUPED inline-SVG bar chart
+// (NO chart library, NO raster). It accepts a normalized `chart` = {categories:[seg], series:[{source,
+// accent:'ink'|'alt', points:[{label,value}]}], unit}; one series renders single bars (at-rest source-
+// of-record), two series render side-by-side groups (resolved both-sources view). Muted ink (--ink-35)
+// for the source-of-record series, raspberry (--rasp) for the disagreeing series — EXISTING tokens,
+// no minted color. Every number is a pure function of the passed series (ZERO series literals in this
+// markup); real <text> axis + category labels; <title>/<desc> carry the a11y description.
+function EvBarChart({ chart }) {
+  const cats = chart.categories || [];
+  const series = (chart.series || []).filter((s) => s && (s.points || []).length);
+  const unit = chart.unit || '';
+  const W = 360, H = 152, padL = 40, padR = 8, padTop = 10, padBottom = 26;
+  const nCat = Math.max(cats.length, 1);
+  const nSer = Math.max(series.length, 1);
+  const plotW = W - padL - padR;
+  const plotH = H - padTop - padBottom;
+  const groupW = plotW / nCat;
+  const barGap = 3;
+  const bw = Math.max((groupW - barGap * (nSer + 1)) / nSer, 3);
+  const max = Math.max(...series.flatMap((s) => (s.points || []).map((p) => p.value)), 1);
+  const yOf = (v) => padTop + plotH - (v / max) * plotH;
+  const desc = series.map((s) => `${s.source}: ` + (s.points || []).map((p) => `${p.label} ${p.value}${unit}`).join(', ')).join('; ');
   return html`
-    <svg class="ev-svg" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label=${'report chart · ' + (headline.unit || '')}>
-      <line class="ev-axis" x1=${padX} y1=${H - padBottom} x2=${W - padX} y2=${H - padBottom}/>
-      ${bars.map((b, i) => {
-        const h = Math.round((b.value / max) * plotH);
-        const x = padX + i * slot + (slot - bw) / 2;
-        const y = H - padBottom - h;
+    <svg class="ev-svg" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label=${'grouped bar chart of revenue by segment' + (unit ? ', ' + unit : '')}>
+      <title>${chart.title || 'Revenue by segment'}${unit ? ' (' + unit + ')' : ''}</title>
+      <desc>${desc}</desc>
+      <line class="ev-axis" x1=${padL} y1=${padTop} x2=${padL} y2=${padTop + plotH}/>
+      <line class="ev-axis" x1=${padL} y1=${padTop + plotH} x2=${W - padR} y2=${padTop + plotH}/>
+      <text class="ev-ylab" x=${padL - 5} y=${padTop + 4} text-anchor="end">${max}${unit}</text>
+      <text class="ev-ylab" x=${padL - 5} y=${padTop + plotH} text-anchor="end">0</text>
+      ${cats.map((cat, ci) => {
+        const gx = padL + ci * groupW;
         return html`
-          <rect class=${'ev-bar' + (i === bars.length - 1 ? ' ev-bar--latest' : '')}
-                x=${x} y=${y} width=${bw} height=${h} rx="2"/>
-          <text x=${x + bw / 2} y=${H - 5} text-anchor="middle" font-size="8" fill="var(--ink-35)">${b.label}</text>`;
+          ${series.map((s, si) => {
+            const p = (s.points || [])[ci] || { value: 0 };
+            const bx = gx + barGap + si * (bw + barGap);
+            const by = yOf(p.value);
+            const bh = padTop + plotH - by;
+            return html`
+              <rect class=${'ev-bar ev-bar--' + (s.accent || 'ink')} x=${bx} y=${by} width=${bw} height=${bh} rx="1.5">
+                <title>${s.source} · ${cat}: ${p.value}${unit}</title>
+              </rect>`;
+          })}
+          <text class="ev-xlab" x=${gx + groupW / 2} y=${padTop + plotH + 13} text-anchor="middle">${cat}</text>`;
       })}
     </svg>`;
 }
+// 4.2: the data table beneath the chart. Resolved (≥2 series) → segment · sourceA · sourceB · Δ +
+// a totals foot; at-rest (1 series) → segment · source-of-record + a derived total. All figures are
+// pulled from the passed series (ZERO literals).
+function EvTable({ chart, unit, resolved }) {
+  const cats = chart.categories || [];
+  const series = chart.series || [];
+  const u = unit || '';
+  if (resolved && series.length >= 2) {
+    const a = series[0], b = series[1];
+    return html`
+      <table class="ev-tbl">
+        <thead><tr><th>segment</th><th>${a.source}</th><th>${b.source}</th><th>Δ</th></tr></thead>
+        <tbody>
+          ${cats.map((c, i) => {
+            const av = (a.points[i] || {}).value || 0, bv = (b.points[i] || {}).value || 0;
+            const d = bv - av;
+            return html`<tr><td>${c}</td><td>${av}${u}</td><td class="ev-td-alt">${bv}${u}</td><td>${(d >= 0 ? '+' : '') + d}${u}</td></tr>`;
+          })}
+          ${(a.total != null && b.total != null) ? html`
+            <tr class="ev-tbl-foot"><td>total</td><td>${a.total}${u}</td><td class="ev-td-alt">${b.total}${u}</td><td>${(b.total - a.total >= 0 ? '+' : '') + (b.total - a.total)}${u}</td></tr>` : null}
+        </tbody>
+      </table>`;
+  }
+  const s = series[0] || { points: [] };
+  const total = (s.points || []).reduce((t, p) => t + (p.value || 0), 0);
+  return html`
+    <table class="ev-tbl">
+      <thead><tr><th>segment</th><th>${s.source}</th></tr></thead>
+      <tbody>
+        ${cats.map((c, i) => html`<tr><td>${c}</td><td>${(s.points[i] || {}).value || 0}${u}</td></tr>`)}
+        <tr class="ev-tbl-foot"><td>total</td><td>${total}${u}</td></tr>
+      </tbody>
+    </table>`;
+}
+// 4.2: EvidenceE5 is the fleshed-out report — ONE renderer, TWO states (adaptE5 builds at-rest vs
+// resolved_view). It carries a confidence glyph + flag pre-resolution (never a bare confident chart
+// while the L3 is open), the inline-SVG chart, a legend (when two series), the data table, the
+// reconciliation note, provenance-on-demand (collapsed), and the version chips (v1 always accessible —
+// FR-007). Empty series → a visible no-data placeholder + console.warn (never a blank panel / a throw).
 function EvidenceE5({ data }) {                      // Rendered Report + Provenance
-  const hl = data.headline || {}, pv = data.provenance || {}, ver = data.version || {};
+  const ch = data.chart || {};
+  const series = (ch.series || []).filter((s) => s && (s.points || []).length);
+  const hasData = series.length > 0;
+  const unit = data.unit || '';
+  if (!hasData) console.warn('EvidenceE5: empty series — rendering no-data placeholder', data.title);
   return html`
     <div class="ev ev--e5">
-      <div class="ev-head"><span class="ev-outcome">Execution volume${hl.unit ? ' · ' + hl.unit : ''}</span><span class="ev-kind">E5 · report</span></div>
-      <div class="ev-chart">
-        ${hl.kind === 'chart'
-          ? html`<${EvBarChart} headline=${hl}/>`
-          : html`<div class="ev-prov-q">${(hl.rows || []).join('\n')}</div>`}
+      <div class="ev-head">
+        <span class="ev-outcome">${data.title || 'Report'}${unit ? ' · ' + unit : ''}</span>
+        <span class="ev-kind">E5 · report</span>
       </div>
+      <div class="ev-conf">
+        <span class="ev-conf-glyph">${data.confidence || '◐'}</span>
+        ${data.resolved ? 'reconciled — both sources shown' : 'headline pending the source call'}
+      </div>
+      ${data.flag ? html`<div class="ev-flag">⚠ ${data.flag}</div>` : null}
+      ${hasData
+        ? html`
+            <div class="ev-chart"><${EvBarChart} chart=${{ ...ch, series }}/></div>
+            ${series.length > 1 ? html`
+              <div class="ev-legend">
+                ${series.map((s) => html`<span class=${'ev-leg ev-leg--' + (s.accent || 'ink')}><span class="ev-leg-sw"></span>${s.source}${s.total != null ? ' · ' + s.total + unit : ''}</span>`)}
+              </div>` : null}
+            <${EvTable} chart=${{ ...ch, series }} unit=${unit} resolved=${data.resolved}/>`
+        : html`<div class="ev-nodata">no series to chart — the source data didn’t load. <span class="ev-nodata-k">check provenance below.</span></div>`}
+      ${data.note ? html`<div class="ev-note">${data.note}</div>` : null}
       <details class="ev-prov">
-        <summary>show provenance</summary>
+        <summary>show the query / source lineage</summary>
         <div class="ev-prov-body">
-          <div class="ev-prov-src">${(pv.sources || []).map((s) => html`<span class="ev-prov-chip">${s}</span>`)}</div>
-          <pre class="ev-prov-q">${pv.query}</pre>
+          <div class="ev-prov-src">${(data.sources || []).map((s) => html`<span class="ev-prov-chip">${s}</span>`)}</div>
+          <pre class="ev-prov-q">${data.query}</pre>
         </div>
       </details>
-      <div class="ev-ver"><span class="ev-ver-dot"></span>Report v${ver.n} · ${ver.date}${ver.note ? ' · ' + ver.note : ''}</div>
+      <div class="ev-vers">
+        ${(data.versions || []).map((v) => html`
+          <span class=${'ev-ver' + (v.active ? ' ev-ver--on' : '') + (v.accessible ? '' : ' ev-ver--pending')}>
+            <span class="ev-ver-dot"></span>Report ${v.label}${v.note ? ' · ' + v.note : ''}
+          </span>`)}
+      </div>
     </div>`;
 }
 const EVIDENCE_KINDS = { E1: EvidenceE1, E2: EvidenceE2, E3: EvidenceE3, E4: EvidenceE4, E5: EvidenceE5 };
@@ -2311,8 +2516,10 @@ function KitEvidenceSection() {
     ['E2', 'FIXTURES.EVIDENCE.E2 — confirm/refute ledger (refuted rows stay visible, struck)'],
     ['E3', 'FIXTURES.EVIDENCE.E3 — red→green repro, same test name'],
     ['E4', 'FIXTURES.EVIDENCE.E4 — verdict card + H/M/L glyph + first-class spike_ref'],
-    ['E5', 'FIXTURES.EVIDENCE.E5 — hand-rolled inline-SVG chart + provenance + version chip'],
   ];
+  // 4.2: E5 is ORG-derived (adaptE5) — render BOTH states here so the "one renderer, two states"
+  // contract is verifiable in #/kit. The data goal id DERIVES from family (no canonical literal).
+  const dataGoal = ORG.goals[goalIdByFamily.data];
   return html`
     <${KitSection} title="EvidenceBlock · E1–E5" cap="one component, per-kind sub-renderer — every block carries a confidence/flag signal, no bare green badge">
       <div class="kit-evgrid">
@@ -2321,6 +2528,18 @@ function KitEvidenceSection() {
             <div class="kit-cap">${cap}</div>
             <${EvidenceBlock} kind=${k} data=${E[k]}/>
           </div>`)}
+        <div class="kit-evcell">
+          <div class="kit-cap">E5 · at-rest — adaptE5(dataGoal, false): ◐-flagged, source-of-record only (one renderer, state 1)</div>
+          <${EvidenceBlock} kind="E5" data=${adaptE5(dataGoal, false)}/>
+        </div>
+        <div class="kit-evcell">
+          <div class="kit-cap">E5 · resolved_view — adaptE5(dataGoal, true): both series + reconciliation note (one renderer, state 2)</div>
+          <${EvidenceBlock} kind="E5" data=${adaptE5(dataGoal, true)}/>
+        </div>
+        <div class="kit-evcell">
+          <div class="kit-cap">E5 · empty series — visible no-data placeholder + console.warn (error path)</div>
+          <${EvidenceBlock} kind="E5" data=${{ title: 'Report', unit: '', chart: { categories: [], series: [] }, versions: [] }}/>
+        </div>
         <div class="kit-evcell">
           <div class="kit-cap">unknown kind (E9) — visible placeholder + console.warn (no throw)</div>
           <${EvidenceBlock} kind="E9" data=${{}}/>
@@ -2685,10 +2904,107 @@ function PrThreadSurface({ step, goalArtifacts }) {
     </div>
     <div class="surf-pr-line"><span class="surf-pr-av"><${Avatar} kind="checker" initials="CC"/></span>reviewed — checker thread on the merged PR</div>`;
 }
-// 4.1: `memo` now flesh-out → MemoSurface (the one-pager findings memo); the thin RowsSurface
-// version Phase 3 shipped is retired for this kind. `notebook` stays thin (4.2 fleshes it out).
+// ── DataSourceList (surf-src-*) — Step 4.2.3. The import step's source rows {name · kind · freshness
+//    · headline total}, rendered as board-like rows (NOT a new component class), with the cross-source
+//    disagreement on a --warn strip (flagged, not buried). Per-source total + the gap DERIVE from the
+//    ORG E5 payload (sum of each source's column; the `gap` string) — never typed; kind is inferred
+//    from the source name; freshness reads the import run's date from execution.runs. PURE props. ──
+function dataSourceRows(goal) {
+  const e5 = (goal.evidence && goal.evidence.E5) || {};
+  const sources = e5.sources || [];
+  const series = e5.series || [];
+  const keys = ['finance', 'billing'];                    // the at-rest series' per-source columns
+  const quarter = (goal.title.match(/Q[1-4]/) || [''])[0];
+  const imported = ((goal.execution && goal.execution.runs) || []).find((r) => /import/i.test(r.summary || ''));
+  const fresh = imported ? (imported.when || '').slice(0, 10) : '';
+  return sources.map((name, i) => {
+    const total = series.reduce((t, r) => t + (r[keys[i]] || 0), 0);
+    const kind = /\bdb\b|database/i.test(name) ? 'database' : /export|file|csv|sheet/i.test(name) ? 'flat export' : 'source';
+    return { name, kind, fresh, total, unit: e5.unit || '', quarter };
+  });
+}
+function DataSourceList({ goal }) {
+  const rows = dataSourceRows(goal);
+  const e5 = (goal.evidence && goal.evidence.E5) || {};
+  const gap = e5.gap;
+  return html`
+    <div class="surf-srclist">
+      ${rows.map((r) => html`
+        <div class="surf-src">
+          <span class="surf-src-name">${r.name}<span class="surf-src-kind">${r.kind}</span></span>
+          <span class="surf-src-meta">
+            ${r.fresh ? html`<span class="surf-src-fresh">imported ${r.fresh}</span>` : null}
+            <span class="surf-src-fig">${r.total}${r.unit}${r.quarter ? ' · ' + r.quarter : ''}</span>
+          </span>
+        </div>`)}
+      ${(rows.length >= 2 && gap) ? html`
+        <div class="surf-src-warn">⚠ the two sources disagree by <b>${gap}</b> — ${rows[0].name} vs ${rows[1].name}; reconciling them is the flow’s one open call.</div>` : null}
+    </div>`;
+}
+// ── NotebookSurface (surf-nb-*) — Step 4.2.2, the fleshed-out `notebook` StageSurface kind. The
+//    IMPORT step (the data stage model's first step) renders the data-source LIST; every other
+//    notebook step renders COLLAPSIBLE analysis cells (native <details> — file://-safe, no JS dep):
+//    a per-step lead working cell + one cell per work_stream item, each a mono query/transform stub +
+//    a status chip, collapsed-by-default-but-expandable (FR-007 no-hidden-state). Recorded analysis
+//    decisions (L1/L2) ride below as Decision callouts (stepDecisions). Everything DERIVES from the
+//    frozen ORG (step.does/surfaceWhy, source names, work_stream labels, the quarter) — zero figures. ──
+function notebookCells(step, goal) {
+  const sources = ((goal.evidence && goal.evidence.E5) || {}).sources || [];
+  const quarter = (goal.title.match(/Q[1-4]/) || ['the quarter'])[0];
+  const fromTbls = sources.map(srcTable).join(', ') || 'sources';
+  const lead = {
+    cap: `${step.shortLabel || step.label} — working cell`,
+    st: 'ran', stCls: 'ran',
+    code: `# ${step.does}\ndf = load(${sources.map((s) => `'${srcTable(s)}'`).join(', ') || "'sources'"})\ndf = df[df.quarter == '${quarter}']`,
+    note: step.surfaceWhy || '',
+  };
+  const ws = (goal.work_stream || []).map((w) => ({
+    cap: w.label,
+    st: 'ran', stCls: 'ran',
+    code: `-- ${w.label}\nSELECT segment, SUM(amount) AS revenue\nFROM ${fromTbls}\nWHERE quarter = '${quarter}'\nGROUP BY segment;`,
+    note: '',
+  }));
+  return [lead].concat(ws);
+}
+function NotebookSurface({ step, stepDecisions, goal }) {
+  const g = goal || {};
+  const sm = (ORG.stageModels && ORG.stageModels[g.family]) || {};
+  const importId = ((sm.steps || [])[0] || {}).id;       // the pipeline's first step = Import Sources
+  const isImport = step.id === importId;
+  const cells = notebookCells(step, g);
+  return html`
+    <div class="surf-nb">
+      <div class="surf-title">${step.label}</div>
+      <div class="surf-does">${step.does}</div>
+      ${isImport
+        ? html`
+            <div class="surf-nb-h">sources loaded</div>
+            <${DataSourceList} goal=${g}/>`
+        : html`
+            <div class="surf-nb-h">cells · collapsed by default, expand to read — nothing hidden (FR-007)</div>
+            <div class="surf-nb-cells">
+              ${cells.map((c) => html`
+                <details class="surf-nb-cell">
+                  <summary class="surf-nb-sum">
+                    <span class="surf-nb-cap">${c.cap}</span>
+                    <span class=${'surf-nb-st surf-nb-st--' + c.stCls}>${c.st}</span>
+                  </summary>
+                  <pre class="surf-nb-code">${c.code}</pre>
+                  ${c.note ? html`<div class="surf-nb-note">${c.note}</div>` : null}
+                </details>`)}
+            </div>`}
+      ${(stepDecisions && stepDecisions.length) ? html`
+        <div class="surf-decisions">
+          <div class="surf-dec-h">decisions in this notebook</div>
+          ${stepDecisions.map((a) => html`<${Decision} atom=${a} layer="callout"/>`)}
+        </div>` : null}
+    </div>`;
+}
+// 4.1: `memo` flesh-out → MemoSurface (the one-pager findings memo); the thin RowsSurface version
+// Phase 3 shipped is retired for that kind. 4.2: `notebook` flesh-out → NotebookSurface (source list
+// on import, native <details> cells on analysis). board/ledger keep the thin RowsSurface.
 const SURFACE_BODY = { doc: DocSurface, board: RowsSurface, 'pr-thread': PrThreadSurface,
-  ledger: RowsSurface, notebook: RowsSurface, memo: MemoSurface };
+  ledger: RowsSurface, notebook: NotebookSurface, memo: MemoSurface };
 function StageSurface({ step, goalArtifacts, stepDecisions, goal }) {   // 4.1: `goal` threads to bodies that need spine data (MemoSurface)
   if (!step || !step.surface) {
     console.warn('StageSurface: missing step/surface', step);
@@ -2837,9 +3153,65 @@ function adaptE4(goal) {
     spike_ref: e.atom_ref ? { atomId: e.atom_ref, evId: e.id } : null,
   };
 }
-function adaptEvidence(kind, goal) {
+// 4.2: a generic SQL-ish lineage stub for the E5 provenance disclosure + the notebook cells. Built
+// from the ORG source names (sluggified into table-ish names) + the quarter parsed from the title —
+// it carries ZERO revenue figures and never hand-types a source name, so the drift grep stays clean.
+function srcTable(name) { return (name || 'source').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
+function dataQuery(sources, quarter) {
+  return (sources || []).map((s) =>
+    `-- ${s}\nSELECT segment, SUM(amount) AS revenue\nFROM ${srcTable(s)}\nWHERE quarter = '${quarter}'\nGROUP BY segment;`
+  ).join('\n\n');
+}
+// 4.2: adaptE5 builds the E5 report props from the FROZEN ORG, in one of two states. The chart series
+// is a PURE FUNCTION of the ORG payload — at-rest plots ONLY the source-of-record (the first source's
+// column) with the disagreement flagged (◐ + gap); resolved plots BOTH sources from evidence.resolved_view
+// (source-of-record muted-ink, the disagreeing source raspberry). v1 is ALWAYS present + accessible
+// (FR-007 — never deleted). No series value, source name, or the gap figure is typed here; all DERIVE.
+function adaptE5(goal, resolved) {
+  const e = (goal.evidence && goal.evidence.E5) || {};
+  const rv = (goal.evidence && goal.evidence.resolved_view) || {};
+  const unit = e.unit || '';
+  const sources = e.sources || [];
+  const segs = (e.series || []).map((r) => r.segment);
+  const quarter = (goal.title.match(/Q[1-4]/) || ['the quarter'])[0];
+  const query = dataQuery(sources, quarter);
+  if (resolved && (rv.series || []).length) {
+    const series = rv.series.map((src, i) => ({
+      source: src.source,
+      accent: i === 0 ? 'ink' : 'alt',        // source-of-record muted-ink · disagreeing source raspberry
+      total: src.total,
+      points: (src.segments || []).map((p) => ({ label: p.segment, value: p.value })),
+    }));
+    return {
+      title: goal.title, unit, resolved: true, confidence: '●', flag: null,
+      note: rv.reconciliation_note,
+      chart: { categories: series[0] ? series[0].points.map((p) => p.label) : segs, series, unit, title: 'Revenue by segment' },
+      sources, query,
+      versions: [
+        { n: 1, label: 'v1', active: false, accessible: true, note: 'draft · pre-reconciliation, kept on file' },
+        { n: 2, label: 'v2', active: true, accessible: true, note: 're-run on fresh data · reconciled' },
+      ],
+    };
+  }
+  // at-rest: source-of-record only (first source column on the at-rest series), disagreement flagged.
+  const sor = sources[0] || 'source-of-record';
+  const points = (e.series || []).map((r) => ({ label: r.segment, value: r.finance }));
+  return {
+    title: goal.title, unit, resolved: false, confidence: e.confidence || '◐',
+    flag: e.gap ? `${sources[1] || 'the second source'} disagrees by ${e.gap} — source call pending` : null,
+    note: e.reconciliation_note,
+    chart: { categories: segs, series: [{ source: sor, accent: 'ink', points }], unit, title: 'Revenue by segment' },
+    sources, query,
+    versions: [
+      { n: 1, label: 'v1', active: true, accessible: true, note: 'draft · headline pending the source call' },
+      { n: 2, label: 'v2', active: false, accessible: false, note: 'pending the L3 source call' },
+    ],
+  };
+}
+function adaptEvidence(kind, goal, opts) {
   if (kind === 'E1') return adaptE1(goal);
   if (kind === 'E4') return adaptE4(goal);
+  if (kind === 'E5') return adaptE5(goal, !!(opts && opts.resolved));
   return (goal.evidence && goal.evidence[kind]) || {};
 }
 
@@ -3203,6 +3575,27 @@ function pin(artifactId, s) {                    // DISTINCT from promote — ca
                   title: `Canvas note — ${FLAGGED_RULE} checker flag`,
                   provenance: 'pinned on canvas · 17:54' });
 }
+// 4.2: resolveDataSource is the ONE script-wired L3 resolution in the prototype (Decision 4/6). It is
+// NOT a sixth op and NOT an OPS-table entry — it is a SCRIPT PATCH (the same posture 4.3's parity reveal
+// uses): it flips the additive presentation flag (appState.dataResolved) so the E5 headline re-renders
+// to resolved_view, and pushes EXACTLY ONE receipt carrying the L3 atom's decision_id. ORG is NOT mutated
+// (the atom keeps chosen:false on every option — the 2a gate invariant is untouched); reload rebuilds
+// appState → dataResolved:false → the unresolved state. Idempotent: never double-push the same atom.
+function resolveDataSource(s) {
+  s.dataResolved = true;
+  const a = (s.org.decisions || []).find((d) => d.goal_slug === s.goal.id && d.reversibility === 'L3');
+  if (!a) { console.warn('resolveDataSource: no L3 atom for', s.goal.id); return; }
+  if (s.receipts.some((r) => r.decision_id === a.id)) return;
+  // the user's pick = "show both with a reconciliation note" (the rank-2 option) — DERIVED, not typed.
+  const opt = (a.options_considered || []).find((o) => /both|reconcil/i.test(o.label || '')) || (a.options_considered || [])[1] || {};
+  s.receipts.push({
+    level: a.reversibility,                  // 'L3'
+    label: opt.label || a.title,             // the chosen option, as the receipt headline
+    at: (a.timestamp || '').slice(11, 16),   // 'HH:MM' (UTC)
+    rationale: a.rationale,
+    decision_id: a.id,                       // the L3 atom id on the receipt (FR-016 trail)
+  });
+}
 
 /* ── The dispatcher (Step 1.2.1, ~30 lines vanilla). Every canvas change goes through here. ── */
 // Closed 5-op set (Contract 3) — stays closed. Stage navigation is NOT a sixth op: it REUSES
@@ -3346,6 +3739,19 @@ const SPK_USED = (SPIKE.spine_state && SPIKE.spine_state.timebox_used) || '';
 const SPK_E4 = (SPIKE.evidence && SPIKE.evidence.E4) || {};
 const SPK_L2 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L2') || {};   // the 2h→3h extension
 const SPK_L3 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L3') || {};   // the go/no-go hard stop
+// ── 4.2: DATA-flow scenario handles — every token DERIVED from ORG (no series value / source name /
+//    the gap figure / stage label literal appears in SCRIPTS.data, so the drift grep stays clean). ──
+const DATA_ID = goalIdByFamily.data;
+const DATA = ORG.goals[DATA_ID];
+const DAT_SM = ORG.stageModels.data;
+const DAT_CURRENT_STEP = DAT_SM.steps.find((s) => s.id === (DATA.spine_state && DATA.spine_state.current)) || {};   // data-03
+const DAT_SOURCES_STEP = DAT_SM.steps[0] || {};                                  // data-01 Import Sources
+const DAT_PUBLISH_STEP = DAT_SM.steps.find((s) => s.evidence === 'E5') || {};     // E5 home (data-05)
+const DAT_E5 = (DATA.evidence && DATA.evidence.E5) || {};
+const DAT_SOURCES = DAT_E5.sources || [];
+const DAT_GAP = DAT_E5.gap || '';
+const DAT_L3 = ORG.decisions.find((a) => a.goal_slug === DATA_ID && a.reversibility === 'L3') || {};   // the source disagreement
+const DAT_L3_PICK = (DAT_L3.options_considered || []).find((o) => /both|reconcil/i.test(o.label || '')) || (DAT_L3.options_considered || [])[1] || {};
 const SCRIPTS = {
   feature: [
     { from: 'guide', narration: `Opening ${FEATURE_ID} — “${FEATURE.title}”. Feature backbone; you’re at ${featCurrentStep.shortLabel || featCurrentStep.label}.` },
@@ -3425,6 +3831,30 @@ const SCRIPTS = {
       patch: (s) => { s.stageFocus = null; } },                     // L3 stop beat → the chip lives in the header; the rail stays an inert, unresolved stop
     { from: 'guide', narration: `That’s ${SPIKE_ID}: a ${SPK_TB.budget} box, one borderline number, and a call that needs you. End to end.`,
       patch: (s) => { s.stageFocus = null; s.drill = null; } },     // close — defensive reset
+  ],
+  // 4.2: the DATA flow (~8 beats) — keyed per-goal on route entry (scriptKey='data', set by
+  // syncGoalFromRoute per PRF2). Beat order (the plan's spec): open → Guide nudge → sources beat
+  // (the disagreement surfaced) → analysis/notebook beat → L3 stop → resolution beat (the chart
+  // re-render) → close on the reconciled report. Every token interpolates from ORG (step labels, the
+  // two source names, the gap, the L3 title/id) — never retyped, so the drift grep stays clean. This
+  // flow hosts the prototype's ONE script-wired L3 RESOLUTION: the resolution beat is framed as the
+  // USER's reply (from:'you'), calls resolveDataSource (overlay + one receipt, ORG unmutated), and the
+  // E5 headline re-renders to resolved_view. Reload rebuilds appState → dataResolved:false → resets.
+  data: [
+    { from: 'guide', narration: `Opening ${DATA_ID} — “${DATA.title}”. Data pipeline; you’re at ${DAT_CURRENT_STEP.shortLabel || DAT_CURRENT_STEP.label}.`,
+      patch: (s) => { s.stageFocus = null; s.drill = null; s.dataResolved = false; } },
+    { from: 'guide', narration: `Next from the Guide: ${DATA.nudge.do} — ${DATA.nudge.why}.` },
+    { from: 'you', narration: 'walk me through the analysis' },
+    { from: 'guide', narration: `Two sources land on “${DAT_SOURCES_STEP.label}”: ${DAT_SOURCES[0]} and ${DAT_SOURCES[1]}. They disagree by ${DAT_GAP} — flagged on the source list, not buried.`,
+      patch: (s) => { s.stageFocus = DAT_SOURCES_STEP.id; } },         // sources beat → the data-source list (the disagreement in --warn)
+    { from: 'guide', narration: `The notebook keeps the working cells on “${DAT_CURRENT_STEP.shortLabel || DAT_CURRENT_STEP.label}” — per-segment revenue from both sources, refunds and null-region rows excluded; expand any cell to read the query, nothing hidden.`,
+      patch: (s) => { s.stageFocus = DAT_CURRENT_STEP.id; } },         // analysis/notebook beat → the collapsible cells + the L1/L2 decision callouts
+    { from: 'guide', narration: `The report lands on “${DAT_PUBLISH_STEP.label}”, but the headline is one hard stop short: ${DAT_L3.title} Three options, nothing pre-selected — the pipeline shows the call, it doesn’t make it. Open “⚠ needs you” to see them.`,
+      patch: (s) => { s.stageFocus = DAT_PUBLISH_STEP.id; } },         // L3 stop beat → focus the E5 home; the chart sits ◐-flagged, the rail is the inert stop
+    { from: 'you', narration: `${DAT_L3_PICK.label || 'Show both with a reconciliation note'} — don’t pick one source and hide the gap.`,
+      patch: (s) => { resolveDataSource(s); s.stageFocus = DAT_PUBLISH_STEP.id; } },   // THE resolution beat (your reply) → overlay + one receipt; the chart re-renders to resolved_view
+    { from: 'guide', narration: `Done — the headline re-renders to both series, the ${DAT_GAP} gap noted on the chart, and the call rides the receipt trail as ${DAT_L3.id}. That’s ${DATA_ID}: a question, two sources, and your reconciliation. End to end.`,
+      patch: (s) => { s.stageFocus = DAT_PUBLISH_STEP.id; } },         // close — on the reconciled report
   ],
 };
 
