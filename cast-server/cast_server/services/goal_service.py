@@ -195,11 +195,13 @@ def update_phase(slug: str, target_phase: str,
 
 def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
                         goals_dir: Path = None) -> Path | None:
-    """Create/update .cast symlink in external project pointing to runtime goal dir.
+    """Create/update the per-goal .cast symlink pointing to the runtime goal dir.
 
-    Runtime tracking files stay in the central ``goals_dir / goal_slug``
-    directory even when user-facing artifacts are routed to
-    ``<ext_dir>/docs/goal/<slug>``.
+    ``.cast`` is a *directory* of per-goal symlinks so that multiple goals can
+    share one external project dir: ``<ext_dir>/.cast/<slug>`` ->
+    ``goals_dir/<slug>``. Runtime tracking files stay in the central
+    ``goals_dir / goal_slug`` directory even when user-facing artifacts are
+    routed to ``<ext_dir>/docs/goal/<slug>``.
 
     Returns the symlink path, or None if external_project_dir is invalid.
     """
@@ -209,7 +211,17 @@ def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
         logger.warning("External project dir does not exist: %s", ext_path)
         return None
 
-    symlink_path = ext_path / ".cast"
+    cast_root = ext_path / ".cast"
+    # Migration: legacy layout had .cast as a single symlink to one goal dir.
+    # Convert it to a directory so per-goal symlinks can live underneath.
+    if cast_root.is_symlink():
+        cast_root.unlink()
+    if cast_root.exists() and not cast_root.is_dir():
+        logger.warning(".cast exists as a real file in %s, skipping", ext_path)
+        return None
+    cast_root.mkdir(parents=True, exist_ok=True)
+
+    symlink_path = cast_root / goal_slug
     target = (goals_dir / goal_slug).resolve()
 
     if symlink_path.is_symlink():
@@ -217,7 +229,8 @@ def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
             return symlink_path  # already correct
         symlink_path.unlink()  # points elsewhere, recreate
     elif symlink_path.exists():
-        logger.warning(".cast exists as a real file/dir in %s, skipping", ext_path)
+        logger.warning(".cast/%s exists as a real file/dir in %s, skipping",
+                       goal_slug, ext_path)
         return None
 
     symlink_path.symlink_to(target)
@@ -236,13 +249,29 @@ def ensure_cast_symlink(goal_slug: str, external_project_dir: str,
     return symlink_path
 
 
-def remove_cast_symlink(external_project_dir: str) -> None:
-    """Remove .cast symlink from external project dir (only if it's a symlink)."""
+def remove_cast_symlink(external_project_dir: str, goal_slug: str) -> None:
+    """Remove a goal's per-goal .cast symlink from the external project dir.
+
+    Only removes ``<ext_dir>/.cast/<slug>`` (if it's a symlink), leaving any
+    sibling goals' symlinks intact. Cleans up the ``.cast`` directory only when
+    it becomes empty.
+    """
     ext_path = Path(external_project_dir).expanduser()
-    symlink_path = ext_path / ".cast"
+    cast_root = ext_path / ".cast"
+
+    # Legacy layout: .cast itself is the symlink for this goal.
+    if cast_root.is_symlink():
+        cast_root.unlink()
+        logger.info("Removed legacy .cast symlink from %s", ext_path)
+        return
+
+    symlink_path = cast_root / goal_slug
     if symlink_path.is_symlink():
         symlink_path.unlink()
-        logger.info("Removed .cast symlink from %s", ext_path)
+        logger.info("Removed .cast/%s symlink from %s", goal_slug, ext_path)
+    # Remove the .cast dir only if no other goals' symlinks remain.
+    if cast_root.is_dir() and not any(cast_root.iterdir()):
+        cast_root.rmdir()
 
 
 def update_config(slug: str, gstack_dir: str | None = None,
@@ -313,11 +342,11 @@ def update_config(slug: str, gstack_dir: str | None = None,
     new_ext_dir = updates.get("external_project_dir", old_ext_dir)
     if external_project_dir is not None:
         if old_ext_dir and old_ext_dir != new_ext_dir:
-            remove_cast_symlink(old_ext_dir)
+            remove_cast_symlink(old_ext_dir, slug)
         if new_ext_dir:
             ensure_cast_symlink(slug, new_ext_dir, goals_dir)
         elif old_ext_dir:
-            remove_cast_symlink(old_ext_dir)
+            remove_cast_symlink(old_ext_dir, slug)
 
     return get_goal(slug, db_path)
 
@@ -402,6 +431,15 @@ def _write_goal_yaml(goal_dir: Path, data: dict):
         yaml_data["gstack_dir"] = data["gstack_dir"]
     if data.get("external_project_dir"):
         yaml_data["external_project_dir"] = data["external_project_dir"]
+
+    # Include workflow routing fields when set (Phase 3b) so a full re-render
+    # of an already-routed goal preserves the recorder's stamp.
+    if data.get("workflow_family"):
+        yaml_data["workflow_family"] = data["workflow_family"]
+    if data.get("routing_handle"):
+        yaml_data["routing_handle"] = data["routing_handle"]
+    if data.get("routed_at"):
+        yaml_data["routed_at"] = data["routed_at"]
 
     with open(goal_dir / "goal.yaml", "w") as f:
         f.write("# AUTO-GENERATED: Read-only render of DB state. Do not edit directly.\n")

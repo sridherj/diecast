@@ -207,10 +207,10 @@ class TestCastSymlinkTargetsRuntimeDir:
             db_path=db_path,
         )
 
-        symlink = ext_dir / ".cast"
-        assert symlink.is_symlink(), ".cast symlink should exist"
+        symlink = ext_dir / ".cast" / "my-goal"
+        assert symlink.is_symlink(), ".cast/<slug> symlink should exist"
         assert symlink.resolve() == goal_dir.resolve(), (
-            f".cast should point to {goal_dir}, got {symlink.resolve()}"
+            f".cast/<slug> should point to {goal_dir}, got {symlink.resolve()}"
         )
 
     def test_cast_symlink_without_routing_targets_goals_dir(self, tmp_path):
@@ -224,7 +224,7 @@ class TestCastSymlinkTargetsRuntimeDir:
         result = ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
 
         assert result is not None
-        symlink = ext_dir / ".cast"
+        symlink = ext_dir / ".cast" / "my-goal"
         assert symlink.is_symlink()
         assert symlink.resolve() == goal_dir.resolve()
 
@@ -248,10 +248,63 @@ class TestCastSymlinkTargetsRuntimeDir:
         # Re-call — should be idempotent, still pointing at central goals_dir
         ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
 
-        symlink = ext_dir / ".cast"
+        symlink = ext_dir / ".cast" / "my-goal"
         assert symlink.resolve() == goal_dir.resolve(), (
-            "Runtime .cast should stay pointed at goals_dir/<slug>"
+            "Runtime .cast/<slug> should stay pointed at goals_dir/<slug>"
         )
+
+    def test_two_goals_share_one_external_dir_without_collision(self, tmp_path):
+        """Two goals on the same external project dir each get their own
+        .cast/<slug> symlink, and creating/dispatching the second must not
+        disturb the first's symlink."""
+        from cast_server.services.goal_service import (
+            create_goal, ensure_cast_symlink,
+        )
+
+        db_path, goals_dir, goal_a_dir = _init_db_and_create_goal(
+            tmp_path, slug="goal-a", title="Goal A"
+        )
+        create_goal("Goal B", goals_dir=goals_dir, db_path=db_path)
+        goal_b_dir = goals_dir / "goal-b"
+
+        ext_dir = tmp_path / "shared-repo"
+        ext_dir.mkdir()
+
+        ensure_cast_symlink("goal-a", str(ext_dir), goals_dir)
+        ensure_cast_symlink("goal-b", str(ext_dir), goals_dir)
+
+        link_a = ext_dir / ".cast" / "goal-a"
+        link_b = ext_dir / ".cast" / "goal-b"
+        assert link_a.is_symlink() and link_b.is_symlink()
+        assert link_a.resolve() == goal_a_dir.resolve()
+        assert link_b.resolve() == goal_b_dir.resolve()
+
+        # Re-dispatching goal-b must leave goal-a's symlink intact (the original bug).
+        ensure_cast_symlink("goal-b", str(ext_dir), goals_dir)
+        assert link_a.is_symlink(), "goal-a's symlink must survive goal-b dispatch"
+        assert link_a.resolve() == goal_a_dir.resolve()
+
+    def test_legacy_cast_symlink_is_migrated_to_directory(self, tmp_path):
+        """A legacy bare .cast *symlink* should be converted to a .cast/
+        directory holding the per-goal symlink on next ensure_cast_symlink."""
+        from cast_server.services.goal_service import ensure_cast_symlink
+
+        db_path, goals_dir, goal_dir = _init_db_and_create_goal(tmp_path)
+        ext_dir = tmp_path / "ext-project"
+        ext_dir.mkdir()
+
+        # Simulate the legacy layout: .cast is a single symlink to the goal dir.
+        legacy = ext_dir / ".cast"
+        legacy.symlink_to(goal_dir.resolve())
+        assert legacy.is_symlink()
+
+        ensure_cast_symlink("my-goal", str(ext_dir), goals_dir)
+
+        cast_root = ext_dir / ".cast"
+        assert cast_root.is_dir(), ".cast should be migrated to a directory"
+        symlink = cast_root / "my-goal"
+        assert symlink.is_symlink()
+        assert symlink.resolve() == goal_dir.resolve()
 
 
 class TestRoutedGoalWritePaths:

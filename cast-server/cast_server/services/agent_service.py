@@ -2047,7 +2047,7 @@ async def invoke_agent(agent_name: str, goal_slug: str | None = None,
         _ext_path = Path(_invoke_ext_proj).expanduser()
         if _ext_path.exists():
             _invoke_working_dir = str(_ext_path)
-            _invoke_tracking_dir = str(_ext_path / ".cast")
+            _invoke_tracking_dir = str(_ext_path / ".cast" / effective_slug)
     directories_json = json.dumps({
         "tracking_dir": _invoke_tracking_dir,
         "artifact_dir": _invoke_working_dir,
@@ -2168,7 +2168,7 @@ async def _launch_agent(run_id: str, db_path=None) -> None:
             raise MissingExternalProjectDirError(goal_slug, external_project_dir)
         working_dir = str(expanded_ext)
         goal_service.ensure_cast_symlink(goal_slug, external_project_dir)
-        cast_goal_dir = str(expanded_ext / ".cast")
+        cast_goal_dir = str(expanded_ext / ".cast" / goal_slug)
         context_dir = str(_resolve_user_artifact_dir(goal_slug, db_path=db_path))
 
         # Determine phase-aware output directory
