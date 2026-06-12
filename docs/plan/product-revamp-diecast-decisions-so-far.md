@@ -510,3 +510,112 @@ routed to **Phase 3** (owner decision); do NOT hand-patch the frozen artifact ou
   with Phase 3's planned additive `appState.chat.scriptKey`. The ChatRail header handle (today
   derived from the routed goal title) stays goal-scoped by design — per-goal is the desired
   end state, confirmed by owner.
+
+## Phase 3 — Decision Summary (sub-phase 3.4 close: the Real Hero Morph & Flow Stitch, SC-003)
+
+Phase 3 is COMPLETE. The two most-contrasting workflow families are clickable end-to-end from the
+frozen org spine, and the real "this is actually a bug, not a feature" morph lands between them —
+SC-003 proven for real, SC-005's feature-vs-debug contrast obvious at a glance.
+
+- **3.1** feature backbone (stage-navigator canvas, PRF1 work_stream from ORG.agents, PRF2 per-goal
+  chat, E1 raster); **3.2** execution drill-in (RunNode/IterationPanel/ExecPanel, morph-safe close);
+  **3.3** debug-loop canvas (InvestigationLedger, E2 ledger, E3 red→green). All Done + verified.
+- **3.4 — the real morph (this close):**
+  - **Sixth anchor claimed:** `vt-evidence-strip` lives on the `.evidence-zone` wrapper (the `.body`
+    second zone), present in BOTH the feature and morphed renders, so it GLIDES while its EvidenceBlock
+    content crossfades (E1 strip ⇄ E2 seed). Uniqueness holds: exactly one element carries the name per
+    snapshot; `#/kit` renders bare components and never the zone wrapper. Anchor set is now **6×1**.
+  - **Morph data path:** the morph stays on CAST-412 (header/crumb/chat/nudge persist — same goal, new
+    shape). When the feature goal is viewed in the debug family, the spine + work stream + evidence read
+    `goals['CAST-412'].morph_view` (loop band, iter 1/3, the coupon-apply symptom + first hypotheses,
+    the E2 seed) — NOT the real debug goal. Two pure helpers (`deriveMorphSpine`, `deriveMorphInvestigation`)
+    build the projection; the real debug goal (CAST-431) and the feature default are unchanged.
+  - **Undo = one atom, one receipt (Decision 9):** the forward morph drops the receipt derived from
+    `DEC-CAST-412-03` (once, idempotent); the scripted reverse emits NO second receipt and restores the
+    feature canvas exactly (stageFocus, pinned, chat intact). `morph()` also force-clears `drill` so the
+    exec tree DOM never joins a morph snapshot (morph-safe).
+  - **Flow stitch:** `SCRIPTS.feature` now runs open → navigator → promote → evidence → HOW → collapse →
+    **morph → reverse → L3 → close**, all via `advance()` + the locked `startViewTransition` path
+    (`--morph-duration:350ms`, `--ease-morph`; reduced-motion → 180ms fade). The L3 beat sits AFTER the
+    reverse (the flow ends in the feature world, where CAST-417 lives). Reload resets. PRF2 holds across
+    the morph. The morph fires ONLY from the scripted user line (never unprompted).
+  - **Data:** the only ORG change was an additive `statement` on `morph_view.evidence.E2-seed.hypotheses[0]`
+    (via `generate-org.mjs`; gate green, F4: that single line is the only diff) so the LOCKED EvidenceBlock
+    E2 renders cleanly on the morphed canvas. No `org.js` hand-edit. No Phase-1 placeholder morph / spine
+    data remained to delete (superseded by spine reads in 3.1; placeholder vocabulary lives only in the
+    `#/kit` FIXTURES, the sanctioned C4 exception).
+- **Verification (static / no-tests, full-autonomy no-browser gate):** `node --check` PASS; C2 (no
+  fetch/local imports) PASS; vt- anchors 6×1; `.evidence-zone` mounted at exactly one call-site, absent
+  from `#/kit`; drift grep clean (every canonical-token hit is in `data/org.js` or comments or the
+  `#/kit`/FIXTURES allowlist — zero new hardcoded tokens in rendered strings); 21/21 pure-logic morph
+  assertions pass (forward = 1 receipt + idempotent, reverse = 0 second receipt, morph spine = loop/iter
+  1/3, morph investigation = 1 live pass / 3 resolved experiments / E2 seed with statement).
+- **Morph gate (Phase-1 5-item re-run, real DOM):** (1) anchors glide — PASS-PROVISIONAL (6 persistent
+  anchors, `::view-transition-group(*)` 350ms register; eyeball CF); (2) no flash/jump — PASS-PROVISIONAL
+  (synchronous paint inside startViewTransition; exec panel closed; light E2 content; eyeball CF); (3)
+  runs from `file://` — **PASS** (static, hard); (4) ~350ms revealed layout, not spectacle —
+  PASS-PROVISIONAL (locked tokens, reused path; eyeball CF); (5) reduced-motion — PASS-PROVISIONAL (fade
+  branch + CSS guard verified in code; eyeball CF). No panel-swap contingency was needed (real-DOM
+  View-Transition path retained); had jank appeared the pre-approved keyed CSS panel-swap was on standby.
+- **Slop gate (4 surfaces: feature · debug · drill-in open · morphed):** external checkers
+  (`/cast-preso-check-visual`, `/cast-preso-check-tone`) are NOT in this runner's allowlist → best-effort
+  STATIC self-assessment per full-autonomy. not-generic / not-ai-aesthetic: PASS-PROVISIONAL on all four
+  (the morphed surface reuses the aesthetic-locked InvestigationLedger + E2 block + tokens). Tone: the NEW
+  morph narration is em-dash-free and GPT-ism-free; the surrounding 3.1/3.3 narration retains em-dashes
+  (CF3) — a single de-em-dash copy pass across all narration is the standing carry-forward.
+- **Human-eyeball carry-forwards (browser unavailable — never block):** re-run both slop checkers on a real
+  1440px Chrome screenshot of the 4 surfaces to upgrade provisional → rendered; eyeball the morph for
+  glide-vs-crossfade, no-flash, ~350ms feel, and the reduced-motion fade; CF3 de-em-dash copy pass.
+
+## Phase 4 — Decision Summary (sub-phase 4.4 close: Four-Family Stitch, Slop Gate & Drift Sweep)
+
+Phase 4 is COMPLETE. The two remaining workflow families are clickable end-to-end from the frozen org
+spine, closing **SC-001 (all four families walkable from disk)** and **SC-005 (four-spine glance
+contrast)**. `SCRIPTS = {feature, debug, spike, data}` is complete and CLOSED (Reconciliation F2).
+
+- **4.1** spike canvas (timebox meter + 4 substeps + L2-extension chip, `memo` surface, E4 verdict with
+  bidirectional `spike_ref`) + the single generator batch for BOTH goals (thin `execution`×2, `parity`,
+  `resolved_view`); **4.2** data canvas (pipeline navigator, `notebook` native-`<details>` cells, E5
+  inline-`<svg>` report, the one script-wired L3 resolution); **4.3** FR-017 three-access-tiers parity
+  moment (ink-dark terminal + light memo + chat rail, same E4 card both panes). All Done + verified.
+- **4.4 — stitch + gates + drift (this close), verified on a LIVE browser (`http://127.0.0.1:8799`):**
+  - **Stitch:** `scriptKey` is set per-goal by family on every route (`syncGoalFromRoute`): CAST-412→feature,
+    CAST-431→debug, CAST-452→spike, CAST-461→data — confirmed in ORG and at runtime. No scaffolding flags
+    remained. **Phase-3 morph demo untouched:** walked CAST-412 start-to-finish live — feature → forward
+    morph → debug → reverse morph → feature, family correctly restored, console clean. vt- anchors **6×1**
+    (static grep + the morph round-trip exercises them; parity layout adds zero, per 4.3).
+  - **Live four-script walk (SC-001):** all four routes walked beat-by-beat via `advance()`, **console clean
+    (zero errors/warnings) throughout.** Spike parity beat: split mounts, both `.ev--e4` cards carry the
+    identical id `E4-CAST-452`, terminal + memo + chat = three tiers, clean single-beat exit. Data L3 beat:
+    `dataResolved` flips, the E5 headline re-renders to `resolved_view` (grouped inline-`<svg>`, muted-ink
+    finance-DB vs raspberry billing-export, table + Δ + reconciliation note), one receipt carries
+    `DEC-CAST-461-03`, ORG unmutated (options stay `chosen:false`, reload resets). E5 is inline `<svg>`,
+    never `<img>`. **L3 budget audit:** exactly one rendered needs-you chip per flow (4/4), one L3 atom per
+    goal in ORG — no stray chips.
+  - **Extended drift grep** (`CAST-452 · CAST-461 · 180ms · 200ms · 1h40m · 8% · finance DB · billing
+    export`) across `prototype/`: every token hit is in `data/org.js` / `data/_build/`. The only `index.html`
+    hits are non-data: `180ms` = the reduced-motion / `parity-fade` CSS duration (coincidental numeric
+    match, not the verdict figure); `1h40m` = a `tbMinutes` parser-format comment; `8%` = a substring of
+    skeleton-bar widths (`88%`/`68%`). CLEAN — no stray literal to move; generator untouched.
+  - **Slop gate (live screenshots; external `/cast-preso-check-visual` + `/cast-preso-check-tone` NOT in
+    this runner's allowlist → rigorous self-assessment against the REAL rendered surfaces):** visual
+    not-generic / not-ai-aesthetic **PASS** on all four (spike canvas, data canvas, parity moment, E5
+    reconciled) — locked tokens, consistent kit, real domain data, distinctive layouts. Tone (FR-018)
+    **PASS with CF3** — no GPT-isms / hedging / formulaic patterns; the verdict + L3-title data use hyphens;
+    em-dashes survive in narration + 3 new data strings (`parity.caption`, `parity.transcript[4]`,
+    `resolved_view.reconciliation_note`) → folded into the **CF3 standing carry-forward** (one unified
+    de-em-dash pass; piecemeal edits to the frozen `org.js` rejected — out of 4.4 stitch scope and voice-
+    inconsistent).
+  - **Ink-dark parity terminal (Decision 7):** the slop gate AFFIRMED it as the sanctioned, contained
+    identity exception (reads as deliberate, not generic-AI) — NO paper-light fallback was needed.
+  - **Observation (non-blocking):** the spike needs-you chip reads "CAST-412" because the spike L3
+    (`DEC-CAST-452-03`) carries authored `influenced: ["CAST-412"]` and `NeedsYouChip` renders the first
+    influenced ticket. Authored-data semantics (the vendor-SDK call influences the checkout feature), within
+    the L3 budget, not a drift literal → left as-is (org.js is frozen; not 4.4's to rewrite).
+  - **Phase-5 courtesy:** no Phase-5 banner sections present in `index.html` yet → zero collision; Phase 4
+    owns its two goal canvases + the parity section + the 4.1 generator batch only.
+- **Carry-forwards (non-blocking):** CF3 unified de-em-dash copy pass across ALL narration + the 3 Phase-4
+  data strings; a human eyeball on the parity reveal motion (`parity-fade 180ms`, ≤200ms reduced-motion
+  guard verified in CSS) and the 4-up glance composite (live-verified that the four spine shapes —
+  segment bar / loop band + ↺ / timebox meter / pipeline DAG — are distinct; the committed composite PNG
+  was deferred per owner direction, the plan's sanctioned "verified or carry-forward" path).
