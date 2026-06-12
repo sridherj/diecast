@@ -61,11 +61,13 @@ def _get_tmux() -> TmuxSessionManager:
         _tmux = TmuxSessionManager()
     return _tmux
 
-# Pricing per 1M tokens in USD
+# Pricing per 1M tokens in USD. cache_write is the 5-minute-write rate (1.25x base
+# input); cache_read is 0.1x base input. Source: https://platform.claude.com/docs/en/about-claude/pricing
+# Keyed by substring of the model string (opus 4.5-4.8, sonnet 4.x, haiku 4.5).
 _MODEL_PRICING = {
-    "opus": {"input": 15.0, "output": 75.0, "cache_write": 18.75, "cache_read": 1.50},
+    "opus": {"input": 5.0, "output": 25.0, "cache_write": 6.25, "cache_read": 0.50},
     "sonnet": {"input": 3.0, "output": 15.0, "cache_write": 3.75, "cache_read": 0.30},
-    "haiku": {"input": 0.80, "output": 4.0, "cache_write": 1.0, "cache_read": 0.08},
+    "haiku": {"input": 1.0, "output": 5.0, "cache_write": 1.25, "cache_read": 0.10},
 }
 
 
