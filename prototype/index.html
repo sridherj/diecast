@@ -1183,6 +1183,51 @@ button.spine-node{font:inherit;cursor:pointer;border:none;background:transparent
 .ev-ver--on .ev-ver-dot{background:var(--ok);}
 .ev-ver--pending{border-style:dashed;color:var(--ink-35);}
 .ev-ver--pending .ev-ver-dot{background:var(--ink-35);}
+
+/* ════════════════════════════════════════════════════════════════════════
+   4.3 — FR-017 THREE-ACCESS-TIERS PARITY PANE (parity-* — the new prefix this
+   sub-phase owns). Script-patch-driven (appState.parityOpen) — NOT an op. The
+   canvas area splits to two panes: an INK-DARK terminal pane (left) + the normal
+   light canvas/memo pane (right); the persistent chat rail (AppShell) is the third
+   tier. The dark terminal is the prototype's ONE sanctioned identity exception
+   (Decision 7) — it DEPICTS the terminal tier, so it reads dark/mono with a minimal
+   title bar, never Diecast chrome. The SAME verdict card lands in BOTH panes
+   (resolved via parity.artifact_id). NO view-transition-name anywhere here (the
+   6×1 anchor set is unchanged — BINDING #8); the reveal is a slide that becomes a
+   fade under reduced-motion (no op, no startViewTransition — pure mount animation).
+   ════════════════════════════════════════════════════════════════════════ */
+.parity-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;
+  animation:parity-in var(--morph-duration) var(--ease-morph);}
+@keyframes parity-in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media (prefers-reduced-motion: reduce){
+  .parity-split{animation:parity-fade 180ms ease-out;}
+  @keyframes parity-fade{from{opacity:0;}to{opacity:1;}}
+}
+/* ── Terminal tier (ink-dark, mono) — the contained identity exception. ── */
+.parity-term{background:var(--ink);border:1px solid var(--ink);border-radius:var(--radius-md);
+  overflow:hidden;display:flex;flex-direction:column;}
+.parity-term-bar{display:flex;align-items:center;gap:7px;padding:7px 11px;
+  background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);}
+.parity-term-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18);flex:none;}
+.parity-term-title{margin-left:6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-35);}
+.parity-term-body{padding:13px 14px;display:flex;flex-direction:column;gap:3px;}
+.parity-line{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--cream);
+  white-space:pre-wrap;word-break:break-word;}
+.parity-line--cmd{color:var(--paper);font-weight:600;}
+.parity-line--ok{color:#5FD08A;}                    /* a brighter --ok for legibility on ink */
+.parity-landing{margin-top:11px;padding-top:11px;border-top:1px dashed rgba(255,255,255,.14);
+  display:flex;flex-direction:column;gap:7px;}
+.parity-landing-k{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-35);}
+/* ── Canvas tier (the normal light world — the SAME verdict card lands here). ── */
+.parity-canvas{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--radius-md);
+  padding:14px;display:flex;flex-direction:column;}
+.parity-pane-k{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-35);margin-bottom:9px;}
+/* ── One-substrate caption (spans both panes; names the three tiers). ── */
+.parity-cap{margin-top:13px;font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--ink-60);
+  border-left:2px solid var(--rasp);padding:3px 0 3px 12px;}
 </style>
 </head>
 <body>
@@ -1338,6 +1383,12 @@ const appState = {
   // (both series + reconciliation note). Additive flag — never renames a key; ORG is NOT mutated by the
   // resolution, and reload rebuilds appState → false → the unresolved state. (Mirrors 4.3's parityOpen.)
   dataResolved: false,
+  // 4.3: the FR-017 three-access-tiers parity reveal (the spike flow's scripted beat). false = the
+  // normal spike canvas; true = the side-by-side split (ink-dark terminal pane left, canvas/memo
+  // right, chat rail alongside — three tiers, one substrate). Additive flag, toggled ONLY by
+  // SCRIPTS.spike's patches — NOT a sixth op, NOT a drillInto target (the closed 5-op set stands).
+  // ORG is never mutated; reload rebuilds appState → false → the normal canvas. (Mirrors dataResolved.)
+  parityOpen: false,
   // 3.1 / PRF2: chat is keyed PER-GOAL — appState.chat.byGoal[goalId] = {messages, scriptIndex,
   // scriptKey}. Refines (does not rename) the Phase-1 `chat` contract: the keys live one level
   // deeper, under the goal id, so switching goals shows that goal's own thread. chatFor(id) lazily
@@ -1575,7 +1626,14 @@ function GoalCanvas() {
              Only this evidence/work content deviates — header/spine/nudge/work-stream/exec/chat are
              shared across families (SC-005). -->
         <div class="evidence-zone">
-          ${morphed
+          ${isSpike && appState.parityOpen
+            ? html`
+                <section>
+                  <div class="sect-h"><span class="k">Parity</span> · FR-017 — three access tiers, one artifact</div>
+                  <${SpikeParity} goal=${goal} goalId=${goalId} step=${focusStep}
+                    goalArtifacts=${stepArtifacts} stepDecisions=${surfaceDecisions}/>
+                </section>`
+            : morphed
             ? html`
                 <section>
                   <div class="sect-h"><span class="k">Investigation</span> ledger${spine.iter
@@ -2344,6 +2402,60 @@ function EvidenceE4({ data }) {                      // Verdict Card
       </ul>
       ${ref}
     </div>`;
+}
+
+// 4.3: resolve the verdict artifact via parity.artifact_id — the drift guard that makes "the SAME
+// card in both panes" honest: both panes feed this ONE node. The 4.1 generator gate already asserts
+// parity.artifact_id === the E4 node id; this re-checks at render (console.warn, never a throw mid-demo)
+// so a future data drift surfaces loudly instead of silently rendering two different cards.
+function resolveParityVerdict(goal) {
+  const p = (goal && goal.parity) || {};
+  const e4 = (goal && goal.evidence && goal.evidence.E4) || {};
+  if (!p.artifact_id || e4.id !== p.artifact_id) {
+    console.warn('parity: artifact_id does not resolve to the E4 verdict node', p.artifact_id, '≠', e4.id);
+  }
+  return adaptE4(goal);          // one node → identical props → pixel-equal cards in both panes
+}
+
+// 4.3: the FR-017 THREE-ACCESS-TIERS parity pane (parity-* prefix). Rendered ONLY while
+// appState.parityOpen (a script-patch flag — NOT a sixth op, NOT a drillInto target). Left = the
+// ink-dark terminal tier, rendered ENTIRELY from goal.parity (command + transcript + the artifact
+// line — nothing typed in markup); the verdict artifact then LANDS in the terminal as the same
+// EvidenceE4 card. Right = the normal light canvas/memo tier (the SAME StageSurface + the SAME
+// EvidenceE4 card). The third tier is the persistent chat rail (AppShell) — present, not re-mocked
+// (Decision 12). The one-substrate caption comes from parity.caption. NO vt- name here (BINDING #8).
+function SpikeParity({ goal, goalId, step, goalArtifacts, stepDecisions }) {
+  const p = (goal && goal.parity) || {};
+  const lines = p.transcript || [];
+  const verdict = resolveParityVerdict(goal);
+  const lineClass = (l) => 'parity-line'
+    + (l.startsWith('$') ? ' parity-line--cmd' : '')
+    + (l.startsWith('✓') ? ' parity-line--ok' : '');
+  return html`
+    <div class="parity-split" role="group" aria-label="FR-017 — three access tiers resolving to one artifact">
+      <!-- TERMINAL tier — ink-dark identity exception (depicts the terminal, not Diecast chrome). -->
+      <div class="parity-term">
+        <div class="parity-term-bar">
+          <span class="parity-term-dot"></span><span class="parity-term-dot"></span><span class="parity-term-dot"></span>
+          <span class="parity-term-title">terminal · cast</span>
+        </div>
+        <div class="parity-term-body">
+          ${lines.map((l) => html`<div class=${lineClass(l)}>${l}</div>`)}
+          <!-- the artifact LANDS in the terminal — the same verdict card, pixel-equal with the canvas. -->
+          <div class="parity-landing">
+            <div class="parity-landing-k">▸ artifact ${p.artifact_id} · open</div>
+            <${EvidenceE4} data=${verdict}/>
+          </div>
+        </div>
+      </div>
+      <!-- CANVAS tier — the normal light world: the memo surface + the SAME verdict card. -->
+      <div class="parity-canvas">
+        <div class="parity-pane-k">canvas · ${(goalId || '').toLowerCase()} · defaults</div>
+        <${StageSurface} step=${step} goalArtifacts=${goalArtifacts} stepDecisions=${stepDecisions} goal=${goal}/>
+        <div style="margin-top:14px"><${EvidenceE4} data=${verdict}/></div>
+      </div>
+    </div>
+    ${p.caption ? html`<div class="parity-cap">${p.caption}</div>` : null}`;
 }
 // 4.2: EvBarChart is the prototype's ONE real chart — a hand-authored GROUPED inline-SVG bar chart
 // (NO chart library, NO raster). It accepts a normalized `chart` = {categories:[seg], series:[{source,
@@ -3739,6 +3851,7 @@ const SPK_USED = (SPIKE.spine_state && SPIKE.spine_state.timebox_used) || '';
 const SPK_E4 = (SPIKE.evidence && SPIKE.evidence.E4) || {};
 const SPK_L2 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L2') || {};   // the 2h→3h extension
 const SPK_L3 = ORG.decisions.find((a) => a.goal_slug === SPIKE_ID && a.reversibility === 'L3') || {};   // the go/no-go hard stop
+const SPK_PARITY = SPIKE.parity || {};                                                                    // 4.3: FR-017 parity block (command + artifact_id, interpolated into the beat — never retyped)
 // ── 4.2: DATA-flow scenario handles — every token DERIVED from ORG (no series value / source name /
 //    the gap figure / stage label literal appears in SCRIPTS.data, so the drift grep stays clean). ──
 const DATA_ID = goalIdByFamily.data;
@@ -3813,7 +3926,7 @@ const SCRIPTS = {
   // (Decision 4 / Phase-3 #10): the script narrates it and points at the chip; it never resolves it.
   spike: [
     { from: 'guide', narration: `Opening ${SPIKE_ID} — “${SPIKE.title}”. Spike timebox, ${SPK_USED} of the ${SPK_TB.budget} box; you’re at ${SPK_CURRENT_STEP.shortLabel || SPK_CURRENT_STEP.label}.`,
-      patch: (s) => { s.stageFocus = null; s.drill = null; } },
+      patch: (s) => { s.stageFocus = null; s.drill = null; s.parityOpen = false; } },
     { from: 'guide', narration: `Next from the Guide: ${SPIKE.nudge.do} — ${SPIKE.nudge.why}.` },
     { from: 'you', narration: 'walk me through the spike' },
     { from: 'guide', narration: `spike-runner timeboxed the probes on “${SPK_PROBE_STEP.label}” — quick, throwaway, p95 only under warm cache. The card keeps the attempts, the code gets dropped.`,
@@ -3822,15 +3935,21 @@ const SCRIPTS = {
       patch: (s) => { s.stageFocus = null; } },                     // timebox / L2-extension beat → back to the meter (the extension chip lives on it)
     { from: 'guide', narration: `The verdict lands on “${SPK_VERDICT_STEP.label}”: ${SPK_E4.verdict} — ${SPK_E4.confidence} confidence, ${SPK_E4.p95_ms}ms p95 against the ${SPK_E4.budget_ms}ms budget. It’s spike_ref-linked to the go/no-go; click the link to jump straight to it.`,
       patch: (s) => { s.stageFocus = SPK_VERDICT_STEP.id; } },       // verdict (E4) beat → the full verdict card at its home step
-    // ── [PARITY BEAT SLOT — reserved for sub-phase 4.3] ──────────────────────────────────────────
-    //    4.3 INSERTS its FR-017 three-access-tiers parity beat HERE (after the verdict beat, before
-    //    the L3 stop — Decision 8). It is script-patch-driven (an additive appState.parityOpen flag,
-    //    NO sixth op — Decision 9). 4.1 leaves the slot explicit and does NOT author the beat.
+    // ── [PARITY BEAT — sub-phase 4.3, FR-017 three-access-tiers] ─────────────────────────────────
+    //    The reveal beat: a script PATCH flips the additive appState.parityOpen flag (NO sixth op,
+    //    NO new drillInto target — Decision 9). The canvas area splits to two panes (ink-dark terminal
+    //    left, the SAME verdict card landing in both; the canvas/memo right), with the persistent chat
+    //    rail as the third tier. Every word here interpolates from ORG (the skill command + the
+    //    artifact id from goals[SPIKE_ID].parity) — nothing retyped, so the drift grep stays clean.
+    //    Sits AFTER the verdict beat (stageFocus is still the verdict step → the canvas pane shows the
+    //    same E4 card), BEFORE the L3 stop (Decision 8). The NEXT beat (L3) clears parityOpen → exit.
+    { from: 'guide', narration: `Same verdict, three ways in. The terminal ran “${SPK_PARITY.command}” and the goal canvas ran it on defaults — both resolved to one artifact, ${SPK_PARITY.artifact_id}, and the chat rail’s right here too. Three access tiers, one source of truth.`,
+      patch: (s) => { s.parityOpen = true; } },                     // reveal patch → the split mounts (slide; fade under reduced-motion)
     // ─────────────────────────────────────────────────────────────────────────────────────────────
     { from: 'guide', narration: `One hard stop, and it’s yours: ${SPK_L3.title} Three options, nothing pre-selected — the spike shows the call, it doesn’t make it. Open “⚠ needs you” to decide.`,
-      patch: (s) => { s.stageFocus = null; } },                     // L3 stop beat → the chip lives in the header; the rail stays an inert, unresolved stop
+      patch: (s) => { s.stageFocus = null; s.parityOpen = false; } },  // L3 stop beat → EXIT the parity split (canvas restored, receipts intact); the chip lives in the header; the rail stays an inert, unresolved stop
     { from: 'guide', narration: `That’s ${SPIKE_ID}: a ${SPK_TB.budget} box, one borderline number, and a call that needs you. End to end.`,
-      patch: (s) => { s.stageFocus = null; s.drill = null; } },     // close — defensive reset
+      patch: (s) => { s.stageFocus = null; s.drill = null; s.parityOpen = false; } },     // close — defensive reset
   ],
   // 4.2: the DATA flow (~8 beats) — keyed per-goal on route entry (scriptKey='data', set by
   // syncGoalFromRoute per PRF2). Beat order (the plan's spec): open → Guide nudge → sources beat
