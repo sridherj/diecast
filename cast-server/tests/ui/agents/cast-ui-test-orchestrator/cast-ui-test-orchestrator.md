@@ -3,7 +3,7 @@ name: cast-ui-test-orchestrator
 model: opus
 description: >
   Diecast UI e2e test orchestrator. Dispatches the dashboard child first to
-  create the shared test goal, then fans out to 6 per-screen children in
+  create the shared test goal, then fans out to 7 per-screen children in
   parallel, polls each to terminal status (600s per-child cap), and aggregates
   per-child results into a single contract-v2 output JSON file.
 tags:
@@ -41,7 +41,7 @@ detail it needs.
   "agent_name": "cast-ui-test-orchestrator",
   "task_title": "UI e2e: orchestrate per-screen children",
   "status": "completed | partial | failed",
-  "summary": "Dispatched 7 children. <C> completed, <F> failed, <S> skipped. See artifact for per-child detail.",
+  "summary": "Dispatched 8 children. <C> completed, <F> failed, <S> skipped. See artifact for per-child detail.",
   "artifacts": [
     {
       "path": "orchestrator-children.json",
@@ -69,7 +69,8 @@ The artifact (`<goal_dir>/orchestrator-children.json`) carries the per-child map
     "cast-ui-test-scratchpad":  {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"},
     "cast-ui-test-goal-detail": {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"},
     "cast-ui-test-focus":       {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"},
-    "cast-ui-test-about":       {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"}
+    "cast-ui-test-about":       {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"},
+    "cast-ui-test-requirements-render": {"run_id": "...", "status": "completed", "output_path": ".agent-<run_id>.output.json"}
   },
   "summary": {"total": 7, "completed": 7, "failed": 0, "skipped": 0}
 }
@@ -97,6 +98,7 @@ phase_2_parallel:
   - cast-ui-test-goal-detail
   - cast-ui-test-focus
   - cast-ui-test-about
+  - cast-ui-test-requirements-render   # Phase-4 render-page comment flows (sp7)
 ```
 
 To re-order or extend the suite, edit this list — single source of truth for dispatch
@@ -118,12 +120,12 @@ order.
    terminal status within 600s, abort the fan-out, mark every other child `skipped`, and
    write top-level `status: partial`.
 
-3. **Phase 2 — fan-out (parallel).** Trigger the 6 phase-2 children in parallel, each
+3. **Phase 2 — fan-out (parallel).** Trigger the 7 phase-2 children in parallel, each
    with the same `delegation_context` (so `goal_slug` propagates). Poll each
    independently. Per-child cap: 600s. If a child times out or errors, record it as
    `failed` with the error/timeout reason and continue rather than blocking on it.
 
-   No throttle: 6 Chromium instances in parallel is intentional (Decision #13 in the
+   No throttle: 7 Chromium instances in parallel is intentional (Decision #13 in the
    shared context).
 
 4. **Phase 3 — aggregate.** For each child:

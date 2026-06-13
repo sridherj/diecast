@@ -122,3 +122,149 @@
     within the L3 budget (exactly one chip), and not a drift literal. Decision: leave as-is — `org.js` is
     frozen and this is 2a/4.1-owned authored data, not 4.4's to rewrite in a stitch phase. Recorded as a
     non-blocking observation for a later content pass to confirm/relabel if desired.
+15. **Two avatars deliberately do NOT open a résumé — a reasoned exception to the 5.4 "every avatar opens
+    `#/agent/:slug`" audit rule (board cards + hiring-report candidates).** The cross-link audit's headline
+    test is "an avatar that goes nowhere is a tool icon." Applying the real test — *is the click inert?* —
+    yields two grounded exceptions. **(a) Board cards:** the whole `BoardCard` is an `<a href="#/ticket/:id">`
+    (a board card opening its ticket is universal board UX and the card's primary affordance); the embedded
+    `ColleagueCard` is an assignee *preview*, and a nested `<a>` for the avatar is illegal HTML. The
+    maker/checker résumé is one hop in via the now-linked ticket header. **(b) Hiring-report candidates:** the
+    six candidate slugs (rbac-architect, access-control-builder, …) are **prospective candidates absent from
+    `ORG.agents`** — they have no résumé yet (you haven't hired them); the expand-eval (radar + pros/cons +
+    produced-work) IS their dossier, and a `#/agent/<candidate>` link would resolve to the muted not-found
+    strip. Decision: link only the truly-inert avatars (ticket header + IterationPanel, FIXED this pass);
+    leave board-card and candidate avatars as the card-level / expand-level affordance they already carry.
+    Rejected alternatives: restructuring the board card so the avatar is a separate résumé link (changes the
+    card's whole click target — "new design," regression-risky, and shrinks the big ticket-open target);
+    linking candidate avatars to `#/agent/<slug>` (manufactures dead not-found links for agents that don't
+    exist). Non-blocking; the colleague thesis is satisfied — every avatar that names a *hired* colleague
+    opens that colleague's résumé.
+
+16. **driver.css ships from jsdelivr, not the esm.sh origin the driver.js *module* is pinned to (sub-phase
+    6.1).** BINDING #2 mandates a new driver.css CDN `<link>` but does not name an origin. The driver.js
+    *module* is import-map-pinned to `esm.sh/driver.js@1.3.1`; the natural instinct is one origin for both.
+    Decision: take the stylesheet from `cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css` instead.
+    Reasoning: esm.sh is an ESM *transform* CDN (it rewrites/serves JS modules); jsdelivr is a raw-static
+    file CDN purpose-built for assets like `.css`, and serves the stock `dist/driver.css` with correct
+    `Content-Type` reliably across `file://` loads. The version is still exact-pinned (`@1.3.1`, identical
+    to the module), so a CDN bump cannot desync the CSS from the JS — the "exact-pinned" intent of the
+    import-map comment is preserved. The cost is a second CDN origin in the dev file, which is already the
+    norm (Google Fonts uses `googleapis` + `gstatic`), and "CDN stays CDN" (BINDING #2) is unaffected — the
+    6.3a inliner leaves all CDN links untouched. Rejected alternative: `esm.sh/driver.js@1.3.1/dist/driver.css`
+    (works, but routing a raw stylesheet through an ESM-transform CDN is the more fragile path, and a
+    transform-layer change is a demo-time risk the stock-asset CDN avoids). The heavy `tour-*` token override
+    block makes Diecast styling independent of the base sheet regardless; the base sheet only carries popover
+    positioning/arrow geometry. Non-blocking; re-verify `file://` legality of the link post-inline in 6.3a.
+
+17. **The two raw hexes were MIGRATED to tokens, not kept under the "parity pane = sanctioned identity exception"
+    license (sub-phase 6.2).** The 6.2 density checklist says "grep for hex literals outside `:root` → migrate to
+    tokens," and the success criterion reads "Zero hex outside `:root` (the Phase-4 parity pane the one sanctioned
+    identity exception)." That parenthetical is readable two ways: (a) the parity pane is licensed to keep raw hex,
+    so leave `.parity-line--ok{color:#5FD08A}` (and the tour next-button `#fff`) as-is; or (b) the pane keeps its
+    dark *identity* but still expresses it through tokens, so the literal "zero hex outside `:root`" must hold.
+    Decision: reading (b). Added `--ok-on-ink:#5FD08A` to `:root` and pointed `.parity-line--ok` at it; pointed the
+    `tour-pop` next-button at the existing `--paper` (`#FFFFFF`). The file now carries **zero hex *values* outside
+    `:root`** (the only surviving `#…` substrings are the canonical `PR #2341` datum and a `was raw #5FD08A`
+    code-comment). Reasoning: the "sanctioned exception" the prior phases granted the parity pane is its *ink-dark
+    palette* (it depicts a terminal, so it reads dark/mono) — every one of its colors already resolves through
+    tokens (`--ink`/`--cream`/`--paper`); the lone `#5FD08A` was an un-tokenized straggler, not a deliberate
+    identity choice, and the rgba(255,255,255,…) overlays it sits beside are the translucent-overlay idiom (same
+    family as `--rasp-08`), not hex. Migrating costs one additive `:root` token (the established "extend, never
+    rename" move) and makes the literal gate criterion true rather than asterisked. Rejected alternative: invoke
+    the parenthetical to keep the raw hex — technically defensible but leaves an asterisk on a project-terminal
+    "zero hex" claim for no real benefit, and a future reader greps a stray hex and re-litigates it. Non-blocking;
+    the parity pane renders byte-identically (same color, now named).
+
+18. **The 21-capture slop gate was resolved STATIC PASS-PROVISIONAL (no browser, checkers unreachable), and the
+    Phase-1 watermark was retired at the source — including the hidden `#/kit` demos (sub-phase 6.2).** Two coupled
+    calls. **(a) Gate resolution:** sub-phase 6.2 step 6.2.2 instructs delegating `/cast-preso-check-visual` +
+    `/cast-preso-check-tone` over all 21 captures. This autonomous runner has **no live browser** (the
+    Claude-in-Chrome extension is not connected) **and** neither checker agent is in its `allowed_delegations`
+    (`[cast-review-code]` only). Per the no-browser posture (borderline-calls #7; Phase 2b–5 precedent) and the
+    delegation's explicit directive, the checkers were **NOT dispatched** and the 21 captures resolve as **static
+    self-assessment, PASS-PROVISIONAL**, pending a human eyeball — **non-blocking**, never stops the critical path.
+    The static evidence that backs the provisional pass: every surface is a projection of `ORG` through one
+    `render(appState)` and each was already gated ≥once in its origin phase (2b–5); 6.2 is a *regression re-run*,
+    and the only render-affecting deltas this phase are the three token migrations + the watermark removal, all of
+    which strictly *reduce* slop. The rendered-pixel squint (generic/AI-aesthetic, popover legibility, badge/chart
+    glance) is the recorded carry-forward for a later live pass. **(b) Watermark scope:** the directive "retire the
+    Phase-1 watermark" was executed by removing the `.spine-ph` badge render from `StageSpine` (+ deleting the dead
+    CSS), which retires it *everywhere* — including the `#/kit` shape demos, the only place it still rendered (real
+    routes are all `placeholder:false`). `#/kit` is **not** one of the 21 gated captures and ships hidden in the
+    dist, so a narrow reading would leave its watermark as harmless pedagogy. Decision: retire at source anyway —
+    the watermark's reason-to-exist was "until Phase 2c lands real vocabulary," 2c has landed, so the kit note was
+    actively stale; a single clean retirement beats a special-case that a `#/kit` viewer (the hidden route still
+    opens) would read as residue. Rejected alternative: keep the watermark on `#/kit` and only assert "absent on
+    real routes" — leaves a live "PLACEHOLDER" badge on a shipped (if hidden) surface and a stale comment, for no
+    benefit. Non-blocking; the `placeholder` data field is left on spine objects (all `false`, inert) to avoid
+    churning the derive/morph-spine path.
+
+## Phase 6.3a — Distributable: inline + drift + #/kit retire (run_20260612_093951_5bfa73)
+
+19. **The FR-017 parity raster is an ORPHAN and is deliberately NOT inlined; only the E1 raster is
+    base64'd (sub-phase 6.3a).** The 6.3a plan says "replace each `<img src="assets/…">` with a base64
+    data-URI (E1 + FR-017 parity rasters)," implying two rasters get inlined. Decision: inline **only**
+    `assets/e1-acceptance.png`. Reasoning: the FR-017 three-access-tiers parity moment renders as an
+    **inline HTML/CSS fake-terminal** (`.parity-term*`, the ink-dark pane — Phase 4.3), not as an
+    `<img>`; `assets/fr017-parity-three-tiers.png` is referenced **nowhere** in `index.html` or `org.js`
+    (it is a leftover gate screenshot). The only live raster reference in the whole prototype is the E1
+    acceptance shot, whose path lives in the inlined ORG data (`shots[].ref`). The inliner therefore
+    scans for **referenced** `assets/…` paths and inlines each (refusing if the file is missing) — it
+    does NOT walk `assets/` and embed every file, so the orphan 232 KB parity PNG is correctly left out
+    (inlining it would bloat the dist with bytes nothing loads). Rejected alternative: base64 the parity
+    PNG too "because the plan lists it" — pure waste; it is never fetched. The dist still satisfies the
+    network-tab criterion (no `assets/` request) because the parity pane was always markup, never a
+    raster. Non-blocking; the orphan file is left on disk (harmless; a future cleanup may delete it).
+
+20. **The `#/kit` "awaiting_human" decision demo synthesizes only the STATUS field over a real ORG L3
+    atom — ORG carries no awaiting atom, and that is resolved kit-side, not by an ORG generator batch
+    (sub-phase 6.3a).** Retiring the `#/kit` FIXTURES exception means every kit demo reads `window.ORG`.
+    Four of the five decision/judgment demos map 1:1 onto real `ORG.decisions` atoms (primary =
+    `DEC-CAST-412-03` feature→bug; the superseded record = `DEC-CAST-412-01 → -02`; escalation +
+    the held-L3 base = `DEC-CAST-412-04` via `atomToEscalation`). But the kit's **error-path demo** —
+    the `status:'awaiting_human'` pill (a component STATE the harness must show) — has no ORG source:
+    `ORG.decisions` contains no `awaiting_human` atom (the real product expresses an open L3 as the
+    NeedsYouChip + EscalationRail off an `accepted` L3 atom, not an `awaiting_human` decision record).
+    Decision: derive the demo from the real held L3 atom and override **only the demonstrated status**:
+    `{ ...FEAT_L3, status: 'awaiting_human' }`. Reasoning: this reads ALL canonical content (id, title,
+    diff, agent, reversibility) from ORG — zero retyped literal — and synthesizes only the render-STATE
+    being demonstrated, exactly mirroring the sibling broken-state card (`{ ...CO, pairedWith:null,
+    state:'blocked' }`). The shared-context note anticipated this ("if `org.js` genuinely lacks a value
+    the kit needs … that is a flag, not a hand-edit; resolve via the generator only, and note it") —
+    here the missing thing is a transient UI **status**, not a data value, so a generator batch to mint
+    a fake `awaiting_human` ADR would pollute the frozen decision ledger with a non-real record for a
+    hidden harness. Rejected alternatives: (a) add an `awaiting_human` atom via the generator —
+    over-reach (ORG batch the phase forbids, plus a bogus decision in the real trail); (b) drop the
+    awaiting demo — loses the zero-silent-failure error-path coverage the kit exists to prove. The
+    boundary of "the retired exception": the FIXTURES **data block** is gone and every canonical
+    literal now derives from ORG; the kit's **illustrative voice/digest captions** (GuideMark chat/
+    nudge/receipt examples, DigestNotice rows) remain authored presentation chrome — the same category
+    as the Phase-6 chooser/tour copy (BINDING #3), verified ORG-CONSISTENT (CAST-412, R02, feature→bug,
+    REST, crud-orchestrator all match ORG), not a re-introduced drift exception. Non-blocking.
+
+21. **The project-terminal gate (6.4) passes the whole project on STATIC PASS-PROVISIONAL evidence, with
+    the SC-002 fresh-viewer test deferred as the single open human action item rather than blocking the
+    phase (sub-phase 6.4).** This is the terminal node of the critical path and THE project gate, and it
+    ran with no live browser (the Claude-in-Chrome extension is not connected in autonomous runner
+    sessions — the inherited Phase 1/2a/2b/3/4/5 posture). The judgment call: declare Phase 6 complete and
+    the prototype "showable" on the strength of static evidence alone (`node --check` of both the inlined
+    dist ES module AND the inlined classic `org.js` block — both CLEAN; a 39-anchor `data-tour` audit
+    proving every one of the 11 tour-referenced anchor names resolves to a present DOM attribute with zero
+    orphans after 6.2's density fixes; route-resolution, op-vocabulary, decision-atom, and autonomy-stop
+    greps over the dist), treating the actual rendered click-through / tour-popover / morph-motion pixels as
+    **PASS-PROVISIONAL with a single consolidated non-blocking human-eyeball carry-forward**, and treating
+    **SC-002 (a fresh viewer states what the product does in ~3 minutes)** as a STAGED human action — hand
+    the owner the dist path + the 3-minute path — rather than something this autonomous run can verify or
+    fake. Reasoning: this is the exact precedent set at every prior gate (#7 established no-browser visual
+    gates as static-verdict + carry-forward, never blocking; #18 applied it to the 6.2 21-capture slop
+    sweep) — the terminal gate is not the place to invent a stricter rule that the run physically cannot
+    satisfy, and Decision 14 + the plan's Verification section both pre-designate SC-002 as the one human
+    action item, by definition outside an autonomous run. The Key Risk note further specifies that a future
+    SC-002 miss feeds the v2 map's rankings rather than retroactively failing this phase. Rejected
+    alternatives: (a) block the phase as "incomplete" pending a human browser pass — contradicts the
+    owner-approved full-autonomy + no-browser posture and would strand a content-final, statically-clean
+    dist indefinitely; (b) fake a fresh-viewer verdict to close SC-002 — explicitly forbidden by the plan
+    ("do not attempt to fake a fresh-viewer verdict"). The boundary: nothing was marked PASS that static
+    evidence could not support; every pixel-dependent claim is logged as a carry-forward, and the one
+    genuinely human-only criterion (SC-002) is surfaced as `human_action_needed`. Non-blocking; project
+    terminal.

@@ -1,0 +1,20 @@
+{
+  "trial": 2,
+  "extractable": true,
+  "prior_units_total": 10,
+  "expected_unchanged": 8,
+  "text_byte_identical": 7,
+  "raw_byte_identical": 7,
+  "text_identity_rate": 0.875,
+  "raw_identity_rate": 0.875,
+  "divergence_whitespace_only": 0,
+  "divergence_reworded": 1,
+  "added_modified_rendered": true,
+  "removed_block_dropped": true,
+  "nonsurvivors": [
+    {
+      "kind": "reworded",
+      "text_excerpt": "Out of scope Deliberately left for later One sibling defect in the same file is explicitly deferred, not forgotten \u2014 named only so a fixer working in goal_card."
+    }
+  ]
+}

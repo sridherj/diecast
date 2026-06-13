@@ -1,0 +1,15 @@
+{
+  "trial": 3,
+  "extractable": true,
+  "prior_units_total": 3,
+  "expected_unchanged": 1,
+  "text_byte_identical": 1,
+  "raw_byte_identical": 1,
+  "text_identity_rate": 1.0,
+  "raw_identity_rate": 1.0,
+  "divergence_whitespace_only": 0,
+  "divergence_reworded": 0,
+  "added_modified_rendered": true,
+  "removed_block_dropped": true,
+  "nonsurvivors": []
+}

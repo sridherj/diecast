@@ -1,0 +1,85 @@
+<!doctype html>
+<!--
+  sp4a-3 gap-amnesty fixture (owner edit, revision d).
+
+  This page is BOTH structurally valid AND well-communicated: a Goal Card leads with a one-sentence
+  job statement and the in/out scope, and every canonical unit (US1 / FR-001 / SC-001) is carried
+  verbatim above the fold. The single difference from a clean render is that ONE piece of WHAT — a
+  quantified business outcome the *source itself does not state* — is shown honestly as a `.rr-gap`
+  marker: a question plus the fixed status vocabulary, NOT silently omitted and NOT invented.
+
+  The amnesty clause: a `.rr-gap` marker is honest communication of a SOURCE gap, not a
+  comprehension failure of the RENDER. The checker must therefore NOT fail this page for a "missing
+  outcome" — the render did its job (it surfaced the gap); the gap is the author's to fill upstream
+  (the Phase-5 gap contract). Failing it here would make the quality loop fight that contract.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nightly Report Export — Requirements</title>
+<style>
+  :root{--ink:#1a1f2b;--muted:#5b6472;--gap:#8a5a00;--gap-bg:#fff7e6}
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);margin:0;padding:0;line-height:1.5}
+  .goal-card{background:#0f1f3d;color:#fff;padding:28px 32px}
+  .goal-card .pill{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+    background:#2b6cff;border-radius:999px;padding:3px 10px}
+  .goal-card h1{font-size:1.5rem;margin:12px 0 6px}
+  .goal-card .job{font-size:1.05rem;margin:0 0 14px;max-width:46rem}
+  .scope{display:flex;gap:32px;font-size:.9rem}
+  .scope ul{margin:4px 0 0;padding-left:18px}
+  main{max-width:46rem;margin:0 auto;padding:24px 32px}
+  h2{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 8px}
+  .rr-unit{margin:0 0 14px}
+  .rr-unit h3{font-size:1rem;margin:0 0 4px}
+  .anchor{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.78rem}
+  .rr-gap{background:var(--gap-bg);border-left:3px solid var(--gap);color:var(--gap);
+    padding:10px 14px;border-radius:4px;font-size:.92rem}
+  .rr-gap .status{font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.05em}
+</style>
+</head>
+<body data-goal-slug="demo-goal">
+
+<header class="goal-card">
+  <span class="pill">New Initiative</span>
+  <h1>Dependable nightly report export</h1>
+  <p class="job">Ship a recurring nightly export so downstream data lands on time, every night,
+     within a tight, observable window.</p>
+  <div class="scope">
+    <div><strong>In scope</strong>
+      <ul><li>A recurring nightly export cadence</li><li>A bounded completion window</li></ul></div>
+    <div><strong>Out of scope</strong>
+      <ul><li>On-demand / ad-hoc exports</li><li>Downstream consumer changes</li></ul></div>
+  </div>
+</header>
+
+<main class="rr-document">
+
+<h2>Delivery story</h2>
+<section class="rr-unit">
+  <h3>Recurring export cadence <span class="anchor">US1</span></h3>
+  <p>As a user I want a recurring cadence for a report export.</p>
+  <p>Acceptance: the export runs nightly.</p>
+</section>
+
+<h2>What it must do</h2>
+<section class="rr-unit">
+  <h3>Nightly export <span class="anchor">FR-001</span></h3>
+  <p>The system must export nightly.</p>
+</section>
+
+<h2>How we will know</h2>
+<section class="rr-unit">
+  <h3>Completion window <span class="anchor">SC-001</span></h3>
+  <p>Exports complete within ten minutes.</p>
+</section>
+
+<h2>Known gap</h2>
+<div class="rr-gap" role="note">
+  <span class="status">Status: needs author input</span>
+  <p>What is the business outcome a late export costs us (e.g. an SLA, a downstream deadline)?
+     The source does not yet state the quantified outcome this cadence protects.</p>
+</div>
+
+</main>
+</body>
+</html>

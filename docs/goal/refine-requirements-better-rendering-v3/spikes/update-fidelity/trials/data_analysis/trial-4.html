@@ -1,0 +1,197 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 1b04657b506a97a3618033381d84bfb7ac8bcb8ff260ca4793b2eb6177293ae2 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does the dispatcher silently stop launching children?</title>
+<style>
+  :root{
+    --ink:#16161d; --paper:#faf9f7; --card:#ffffff; --muted:#5c5c6b;
+    --line:#e7e3db; --alarm:#c2410c; --alarm-bg:#fdf1ea; --data:#0f766e;
+    --data-bg:#ecf6f4; --open:#b45309; --deferred:#475569;
+    --shadow:0 1px 2px rgba(20,20,29,.04),0 8px 24px rgba(20,20,29,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:400 17px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 28px}
+  .kicker{
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    font-weight:700; color:var(--muted);
+  }
+  /* ---- Hero (above the fold) ---- */
+  .hero{padding:54px 0 30px; border-bottom:1px solid var(--line)}
+  .hero .kicker{color:var(--alarm)}
+  .hero h1{
+    font-size:40px; line-height:1.12; letter-spacing:-.02em;
+    margin:14px 0 0; font-weight:800; max-width:18ch;
+  }
+  .verdict{
+    display:inline-flex; align-items:center; gap:9px; margin-top:22px;
+    background:var(--ink); color:#fff; padding:9px 16px; border-radius:999px;
+    font-weight:700; font-size:15px; letter-spacing:.01em;
+  }
+  .verdict .dot{width:9px;height:9px;border-radius:50%;background:var(--alarm)}
+  .lede{color:var(--muted); font-size:18px; max-width:62ch; margin:18px 0 0}
+  .stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:30px 0 6px;
+  }
+  .stat{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 18px; box-shadow:var(--shadow);
+  }
+  .stat .num{font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1}
+  .stat .num .vs{color:var(--muted); font-weight:600; font-size:20px; margin:0 6px}
+  .stat .lab{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.4}
+  .stat.api .num{color:var(--data)}
+  .stat.lat .num{color:var(--ink)}
+  .stat.log .num{color:var(--alarm)}
+  /* ---- Sections ---- */
+  section.block{padding:42px 0; border-bottom:1px solid var(--line)}
+  h2.shead{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 4px; font-weight:700}
+  .otitle{font-size:26px; font-weight:800; letter-spacing:-.015em; margin:0 0 18px; max-width:24ch}
+  /* job statement callout */
+  .job{
+    background:var(--card); border:1px solid var(--line); border-left:4px solid var(--alarm);
+    border-radius:12px; padding:22px 24px; box-shadow:var(--shadow);
+    font-size:20px; line-height:1.5; font-weight:600;
+  }
+  .frame{color:#33333f; font-size:17.5px; max-width:66ch; margin:20px 0 0}
+  /* findings */
+  .findings{display:flex; flex-direction:column; gap:16px; margin-top:6px}
+  .finding{
+    display:grid; grid-template-columns:auto 1fr; gap:18px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .finding .n{
+    font-size:13px; font-weight:800; color:var(--alarm); letter-spacing:.06em;
+    border:1.5px solid var(--alarm-bg); background:var(--alarm-bg);
+    border-radius:8px; padding:6px 10px; height:max-content; white-space:nowrap;
+  }
+  .finding.dataapi .n{color:var(--data); background:var(--data-bg); border-color:var(--data-bg)}
+  .finding p{margin:0; font-size:16.5px; line-height:1.58}
+  /* open questions */
+  .threads{display:flex; flex-direction:column; gap:16px}
+  .thread{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .badge{
+    display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.1em;
+    text-transform:uppercase; padding:4px 10px; border-radius:6px; margin-bottom:11px;
+  }
+  .badge.open{color:#fff; background:var(--open)}
+  .badge.deferred{color:#fff; background:var(--deferred)}
+  .thread p{margin:0; font-size:17px; line-height:1.55}
+  footer{padding:30px 0 60px; color:var(--muted); font-size:12.5px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em}
+  @media (max-width:620px){
+    .hero h1{font-size:31px}
+    .stats{grid-template-columns:1fr}
+    .finding{grid-template-columns:1fr; gap:12px}
+    .otitle{font-size:22px}
+  }
+</style>
+</head>
+<body data-goal-slug="family-data-analysis">
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="kicker">Data Analysis · run-state investigation</div>
+      <h1>Why does the dispatcher silently stop launching children?</h1>
+      <div class="verdict"><span class="dot"></span>Slot-saturated, not stuck</div>
+      <p class="lede">Children pile up <code>pending</code> and never launch — yet the dispatcher logs nothing and HTTP latency stays flat. This is an investigation: the deliverable is a measured finding and a diagnosis, and the patch is a separate follow-up.</p>
+      <div class="stats">
+        <div class="stat api">
+          <div class="num">1<span class="vs">vs</span>7</div>
+          <div class="lab">running per the status API vs. the count the database actually holds</div>
+        </div>
+        <div class="stat lat">
+          <div class="num">~16ms</div>
+          <div class="lab">flat HTTP latency — proof the event loop is alive, not hung</div>
+        </div>
+        <div class="stat log">
+          <div class="num">0</div>
+          <div class="lab"><code>Launched</code> log lines across several 10-second dispatcher cycles</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="shead">What we're trying to find out</h2>
+      <p class="otitle">The question is the deliverable — not a fix.</p>
+      <div class="job">
+        <p>Explain, from the run-state data, why the cast-server dispatcher enqueues children as pending but never launches them — with no errors in the log — and quantify the gap between what the status API reports and what the database actually holds.</p>
+      </div>
+      <p class="frame">The symptom is alarming and quiet at once: children pile up pending, the dispatcher loop logs nothing, and HTTP latency stays flat and healthy. A hung event loop would stall HTTP too, so the flat latency is itself a clue. The analysis reads the agent_runs table directly rather than trusting the GET /api/agents/runs?status=running view, because the two disagree — and the size of that disagreement is the whole finding. The question is not "is the loop dead?" but "how many slots does the database think are occupied, and by what?"</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="shead">What the data shows</h2>
+      <p class="otitle">The dispatcher is slot-saturated — it launches nothing because it has nowhere to launch.</p>
+      <div class="findings">
+
+        <div class="finding">
+          <div class="n">Finding 01 · the predicate</div>
+          <p>The launch predicate is slot-bounded. _dispatcher_loop only launches when COUNT(status='running') &lt; MAX_CONCURRENT_AGENTS (default 7, CAST_MAX_CONCURRENT_AGENTS). When the count is already 7, the loop launches nothing and logs nothing — there is no error because nothing failed.</p>
+        </div>
+
+        <div class="finding">
+          <div class="n">Finding 02 · the occupants</div>
+          <p>The occupants are zombies, not workers. Abandoned interactive Claude sessions idling at a new task? / selection-menu prompt keep status='running' forever: the monitor sees a live tmux session and no terminal-output contract, so it never marks them terminal. On server restart, recover_stale_runs resumes them as running, re-saturating the slots.</p>
+        </div>
+
+        <div class="finding dataapi">
+          <div class="n">Finding 03 · the API lies</div>
+          <p>The status API under-reports. A live capture showed the API returning 1 running while the database held 7. Counting straight from the DB —  SELECT COUNT(*) FROM agent_runs WHERE status='running' at ~/.cast/diecast.db — is the only trustworthy figure.</p>
+        </div>
+
+        <div class="finding">
+          <div class="n">Finding 04 · the reaper</div>
+          <p>The reaper never fires on idle panes. The monitor's terminal-output contract has no idle-timeout branch, so a session parked at a selection menu is indistinguishable from one mid-task and is never reaped.</p>
+        </div>
+
+        <div class="finding">
+          <div class="n">Finding 05 · the signature</div>
+          <p>The signature is diagnostic. Flat ~16ms HTTP latency, zero Launched log lines across several 10-second dispatcher cycles, and free slots on paper together mean saturation, not a stuck loop.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="shead">Still unanswered</h2>
+      <p class="otitle">One open fork — left to a human, deliberately.</p>
+      <div class="threads">
+
+        <div class="thread">
+          <span class="badge open">Open</span>
+          <p>Should the monitor reap interactive sessions idle past a threshold automatically, or is operator-driven cancellation the safer default given the risk of killing an actively-working pane?</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">Investigation · family-data-analysis · linked file: cast-server/cast_server/services/agent_service.py · spec maturity: draft (v0.1.0)</div>
+  </footer>
+
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/requirements_comments.js" defer></script>
+</body>
+</html>

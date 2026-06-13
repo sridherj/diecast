@@ -1,0 +1,7 @@
+{
+  "passed": false,
+  "violations": [
+    "FR-001 is not anchored to a container carrying its text (per-block correspondence / FR-003 failed).",
+    "SC-001 is not anchored to a container carrying its text (per-block correspondence / FR-003 failed)."
+  ]
+}

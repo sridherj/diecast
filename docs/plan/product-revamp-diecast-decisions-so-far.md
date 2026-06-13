@@ -619,3 +619,115 @@ contrast)**. `SCRIPTS = {feature, debug, spike, data}` is complete and CLOSED (R
   guard verified in CSS) and the 4-up glance composite (live-verified that the four spine shapes —
   segment bar / loop band + ↺ / timebox meter / pipeline DAG — are distinct; the committed composite PNG
   was deferred per owner direction, the plan's sanctioned "verified or carry-forward" path).
+
+## Phase 5 — Decision Summary (sub-phase 5.4 close: Stitch, Cross-Links, Slop Gate & Drift Sweep)
+
+Phase 5 is COMPLETE. The two colleague theses — **"humans + agents on one board"** and **"Hire.
+Don't install."** — plus the **US7 requirements-doc loop** are clickable end-to-end from the frozen
+org spine. All ten Phase-5 routes resolve to real renderers; the four-frame board arc reads as one
+story; the hiring funnel clicks assessment → federation → stack-ranked report → hire → onboard; the
+autonomy dial visibly promotes an L2 into an L3-style stop. `SCRIPTS = {feature, debug, spike, data,
+hiring}` (the four-**family** set stays CLOSED per Reconciliation F2; `hiring` is a demo-arc key).
+
+- **5.0** shared rails (ONE generator batch: `requirements_doc`, `agents[].monitoring`, `org.skills`,
+  `dial_demo`; ten route stubs; four additive appState keys; `DigestNotice`); **5a** board arc + decision
+  trail + autonomy-dial wiring + L2 digest; **5b** hiring wizard + marketplace + agent ops + Layer-2
+  (the widest sub-stream + greenfield concentration); **5c** the US7 requirements-doc loop. All Done +
+  verified.
+- **5.4 — stitch + cross-links + gates + drift (this close), static-verified (no live browser this run):**
+  - **Cross-link audit:** the colleague thesis says every agent avatar opens its résumé. Found + fixed the
+    only two **inert** avatars — the `#/ticket` header maker/checker lockup and the `IterationPanel`
+    maker/checker `ColleagueCard`s (the ticket activity log, shared with the goal-canvas exec drill-in) —
+    both now wrap in `<a href="#/agent/:slug">` and resolve to real agents. Every other avatar already
+    lands (marketplace cards, résumé paired-checker + ops tabs, hire-step-4 checker). The board card →
+    `#/ticket/:id` (the card's primary affordance; résumé is one hop in via the now-linked ticket header —
+    nested `<a>` is illegal) and the hiring-report candidate avatars (**prospective candidates absent from
+    `ORG.agents`** — the expand-eval IS their dossier, so a `#/agent/<candidate>` link would be a dead
+    not-found) are **deliberate, data-grounded non-links, not defects.** Loop-back closes (board badge →
+    CAST-417 frame → "escalated to me" → human-filtered board); ticket PR link, onboarding dial link,
+    reqs↔canvas entry, marketplace "Hire for a capability →" all present; trail↔decision↔ticket-chip IDs
+    match by construction (all from `ORG.decisions`).
+  - **Extended drift grep** (`CAST-417 · PR 2341 · 99.4 · 312 · 6 candidates · 12 contracts · 8-agent
+    chain · the 5 dimension names · Priya Kannan · cast-export-csv`): CLEAN — every canonical string
+    originates from `org.js`; all literal hits are `#/kit` `FIXTURES` (the one sanctioned exception),
+    comments, or ORG-query predicates (`CAST-417` as a data-value match anchoring `ESC_ATOM`, consistent
+    with `FEATURE_ID` which is itself ORG-derived). **One fix:** the `cast-export-csv` hardcoded fallback
+    in `SkillsNew` (`demo` already reads from `ORG.org.skills`) neutralized to a generic placeholder so no
+    canonical string is duplicated outside `org.js`.
+  - **Slop gate (six surfaces; external `/cast-preso-check-visual` + `/cast-preso-check-tone` delegated
+    with the full-autonomy + no-browser static directive propagated verbatim):** **Visual — 5 PASS + 1
+    code-fixable soft-flag** (the `EscalationRail` three ranked options read too symmetric; FIXED in code —
+    the ghost option gets tighter padding + a smaller rank circle so hero>outline>ghost reads as a real
+    weight ladder, reinforcing the existing 7A ranking, no new design). **Tone — all six "probably
+    human"** (zero GPT-isms / hedging / formulaic cadence); the only systemic residue is em-dashes, folded
+    into the **standing de-em-dash carry-forward** (the same CF as Phase 4's CF3 — one deferred unified
+    pass, non-blocking, owner-approved; piecemeal edits to the frozen `org.js` rejected).
+  - **Script + state sanity:** `SCRIPTS.hiring` (steps 1→5) and the wizard Next/Back (`setHireStep`,
+    clamps at 5) drive the SAME `appState.hiring.step` → synced by construction; NO persistence → dial /
+    filters / disclosures reset on reload; a `/tmp` logic harness (never committed) confirmed ORG
+    byte-identical after simulating every handler. vt- anchors **6×1** (no duplicate-anchor regression from
+    the ten routes). Dead `RouteStub`/`STUB_META`/`BoardStub` removed (every route resolves to a real
+    view; `.stub-*`/`.board-frame` CSS left in place, harmless — Phase 6 strips kit chrome).
+  - **`node --check` clean** on the extracted module; **closed 5-op set intact** (no sixth op anywhere);
+    **`org.js` NEVER touched** (`git diff` still the exact 5.0 batch: 537 ins / 2 del); **NO TESTS.**
+- **Carry-forwards (non-blocking, human eyeball — no live browser this run):** the standing unified
+  de-em-dash copy pass (now also covering the six Phase-5 surfaces' narration/microcopy); and 5
+  pixel-dependent visual carry-forwards — rework-meter proportions (ticket); dashed-vs-solid rail-border
+  contrast (escalation); RadarChart 8px label legibility (report); Sparkline + RadarChart readability
+  (résumé); `reqs-node--anchored` inset-shadow on cream-deep (reqs). Plus the high-level Phase-5 arc as
+  one continuous click-through (board → ticket → decision → escalation → loop-back; hire funnel both ways;
+  dial L2→L3 promotion with reload-reset) for a human glance pass.
+
+## Phase 6 — Close Note (sub-phase 6.4 — the project gate; PROJECT TERMINAL)
+
+**Phase 6 is complete and the project gate passes on the distributable.** The showability sign-off ran
+the full checklist against the DIST file `prototype/dist/diecast-prototype.html` (653 KB, header-marked
+GENERATED, idempotent per 6.3a) under the project-wide no-browser autonomous posture: every machine-checkable
+item is confirmed by static evidence (`node --check` of both the inlined ES module and the inlined classic
+`org.js` block — both CLEAN; grep/tour-anchor audits; a throwaway `/tmp` logic pass, never committed), and
+every rendered-pixel item is **STATIC PASS-PROVISIONAL with a non-blocking human-eyeball carry-forward**
+(borderline precedent #7/#18, now applied at the terminal node — see new borderline #21). **Per-criterion
+verdicts** (SC labels per the v2 map's success-criteria cross-reference, lines 222-228): **SC-001 (every
+flow walkable from disk) — PASS (static):** all 16 routes resolve in the dist module (the four goal canvases
+`#/goal/CAST-412|431|452|461` driven by `ORG.goals`, all four ids present in the inlined org data; the `#/`
+chooser; the ten Phase-5 standalone areas; the hidden `#/kit`); the five scenario cards wire `chat.scriptKey`
++ reset `scriptIndex` via plain handlers (no sixth op); rendered click-through carried forward. **SC-002
+(fresh viewer states what the product does in ~3 min) — STAGED, the single open human action item** (Decision
+14; see staging below). **SC-003 (fluidity/morph) — PASS, inherited closed in Phase 3** (`advance()` present
+×5; not re-litigated here). **SC-004 (showable without apology) — PASS-PROVISIONAL on record:** the 6.2
+21-capture slop gate resolved STATIC PASS-PROVISIONAL (visual/tone checkers out of this runner's allowlist;
+non-blocking human-eyeball carry-forward) and the 6.3a final drift sweep is CLEAN at **zero sanctioned grep
+exceptions** (the `#/kit` exception retired). **SC-005 (feature-vs-debug contrast obvious) — PASS (static
+spot-check):** the StageSpine asymmetry holds (script beat counts 5/5/4/5, three distinct family shapes per
+the Phase-4 note); the four canvas families render distinctly; glance-contrast carried forward to the human
+pass. **SC-006 (surface->buildable-goal map exhaustive) — PASS:** `docs/plan/product-revamp-diecast-v2-surface-goal-map.md`
+exists (6.3b), all 16 routes + 4 cross-cutting mechanics mapped, 30 buildable v2 goal slugs. **SC-007
+(in-context decision record per flow + the autonomy-gated stop) — PASS (static):** the inlined org carries 21
+`DEC-CAST-*` decision atoms across the four goals (each flow surfaces >=1 via the `vt-receipt-trail` /
+decisions render, 51 refs); the autonomy-gated hard stop is present (`awaiting_human` ×5, "hard stop" ×13,
+the L3 NeedsYou/EscalationRail off the held `DEC-CAST-412-04`), and the L3 budget stays one hard stop per
+flow. **Post-fix tour audit — PASS:** all 39 `data-tour` anchors survive 6.2's density fixes; every one of the
+11 anchor names referenced by the five `TOURS` (keyed identically to `SCRIPTS`) resolves to a present DOM
+attribute — **no orphans**; tours never call `advance()`; `prefers-reduced-motion` guard present.
+**SC-002 staging (the one open human action item):** hand the owner the dist path
+`prototype/dist/diecast-prototype.html` (double-click from disk; only the locked CDN libs + Google Fonts
+fetch — 0 live `fetch()` in code, the 2 whole-file `fetch(` strings are pre-existing dev comments) and the
+suggested **3-minute path: chooser -> "Follow a feature" tour -> the morph beat -> the board**; the owner
+shows it to 1-2 fresh peers and records whether they can state what the product does within ~3 minutes. Per
+the Key Risk, if a peer cannot, that outcome feeds the v2 map's rankings rather than retroactively failing
+this phase. **CF3 (unified de-em-dash pass) — carried, resolved-or-folded:** all new Phase 6 copy (chooser
+blurbs, 30 tour-stop descriptions, 41 demo talking points) was authored em-dash-free per FR-018 from the
+start (6.1/6.2 confirmed); the older prior-phase narration + the three Phase-4 data strings + Phase-5
+microcopy remain on the standing single deferred unified pass (non-blocking, owner-approved; piecemeal edits
+to the frozen `org.js` stay rejected). **Consolidated human-eyeball carry-forward (the single non-blocking
+pass for a later live-browser session):** the dist double-clicked from disk through all five scenarios +
+morph + tours + demo overlay + reduced-motion, console-clean, network-tab confirming only CDNs+fonts (6.3a);
+the 21-capture rendered slop-gate squint (6.2); tour-popover Diecast-vs-stock styling (6.1 capture #2); the
+`s`-toggle overlay highlight tracking chat advance; and the pixel carry-forwards rolled up from 6.1-6.3a and
+Phase 5 (chooser glance/legibility, chart/badge legibility, motion feel, the post-swap `#/kit` autonomy
+badge). **Next step for the owner (recorded, not executed here):** a manual `/cast-plan-review` pass (Phase 6
+plan Decision 16 — plan review was SKIPPED per the owner-approved run config; this is the deferred manual
+checkpoint), plus running the SC-002 fresh-viewer showing. **No gate item failed**, so no fix was applied and
+`inline.mjs` was not re-run; the dist as generated by 6.3a stands. Phase 6 ships CODE (the chooser, five
+tours, demo overlay, the inliner + dist) + two docs (the SC-006 map; this close note). **This is the project
+terminal node — the vision prototype is showable.**

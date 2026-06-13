@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# bin/cast-classify-gate — the "code decides" gate enforcement point.
+#
+# Reads the classifier subagent's raw JSON on stdin, validates it into a
+# Classification (coercing every off-schema field onto the RANDOM_IDEA floor),
+# applies the confidence gate, and emits the validated classification plus the
+# gate decision on stdout. This makes "gate in code, not the model" (FR-004) a
+# deterministic, unit-testable artifact that agents *invoke* — never a prompt
+# instruction the model self-gates against.
+#
+# DELIBERATE IMPORT POLICY (Decision D5): this bin imports
+# `cast_server.requirements_render.families` ON PURPOSE — it is part of the
+# classify orchestration, so it carries NO thresholds or coercion logic of its
+# own; all of that lives in families.py. This is the OPPOSITE policy from
+# `bin/cast-spec-checker`, which is a portable stdlib linter that must run
+# where `cast-server` is NOT importable and therefore mirrors its own copy of
+# the required-sections mapping. Do NOT "unify" the two bins — the divergence
+# is intentional.
+#
+# Contract:
+#   Stdin  : the classifier's raw JSON object
+#            {family, confidence, reasoning, uncertainty_factors, alt_family, modifiers}
+#   Stdout : {"classification": {...validated, incl. coercions...},
+#             "action": "auto" | "confirm" | "choose",
+#             "options": [ {family, label, selected}, ... ]}
+#   Exit   : 0 on any *parseable* stdin (off-schema input still yields a valid
+#            random_idea result via validate_classification — never crash);
+#            2 on unreadable / un-parseable stdin (treated as data only — never
+#            evaluated; security note).
+#
+# Usage:
+#   echo '{"family":"bug_fix","confidence":0.95}' | bin/cast-classify-gate
+
+import json
+import sys
+from dataclasses import asdict
+from pathlib import Path
+
+# Resolve the repo root and add cast-server/ to sys.path so the families module
+# is importable without requiring an installed package (mirrors bin/cast-doctor).
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_DIR = _SCRIPT_DIR.parent
+_CAST_SERVER_DIR = _REPO_DIR / "cast-server"
+if str(_CAST_SERVER_DIR) not in sys.path:
+    sys.path.insert(0, str(_CAST_SERVER_DIR))
+
+from cast_server.requirements_render.families import (  # noqa: E402
+    WorkFamily,
+    gate,
+    validate_classification,
+)
+
+# The escape hatch always lands on the RANDOM_IDEA floor (Decision D2).
+_ESCAPE_HATCH_LABEL = "just notes / not sure yet"
+
+
+def _option(family: WorkFamily, *, label: str | None = None, selected: bool = False) -> dict:
+    """Build a single chooser option."""
+    return {"family": family.value, "label": label or family.value, "selected": selected}
+
+
+def _build_options(classification, action: str) -> list[dict]:
+    """Build the gate's chooser options, deduped by family (first wins).
+
+    - auto    → no decision needed, no options.
+    - confirm → the model's single pick, pre-selected (the user confirms it).
+    - choose  → the model's pick (pre-filled), the alt_family, and the
+                escape hatch ("just notes / not sure yet" → random_idea).
+    """
+    if action == "auto":
+        return []
+
+    candidates: list[dict] = [_option(classification.family, selected=True)]
+    if action == "choose":
+        candidates.append(_option(classification.alt_family))
+        candidates.append(_option(WorkFamily.RANDOM_IDEA, label=_ESCAPE_HATCH_LABEL))
+
+    # Dedupe by family value, preserving order and the first occurrence's fields.
+    seen: set[str] = set()
+    options: list[dict] = []
+    for option in candidates:
+        if option["family"] in seen:
+            continue
+        seen.add(option["family"])
+        options.append(option)
+    return options
+
+
+def _classification_to_dict(classification) -> dict:
+    """Serialize a Classification dataclass to JSON-friendly primitives."""
+    data = asdict(classification)
+    data["family"] = classification.family.value
+    data["alt_family"] = classification.alt_family.value
+    data["uncertainty_factors"] = list(classification.uncertainty_factors)
+    data["coercions"] = list(classification.coercions)
+    data["modifiers"] = {
+        "irreversible": classification.modifiers.irreversible,
+        "unknown_cause": classification.modifiers.unknown_cause,
+    }
+    return data
+
+
+def main() -> int:
+    raw_text = sys.stdin.read()
+    try:
+        raw = json.loads(raw_text)
+    except (json.JSONDecodeError, ValueError):
+        # Treat stdin as data only — never evaluate un-parseable content.
+        print("error: stdin is not valid JSON", file=sys.stderr)
+        return 2
+
+    classification = validate_classification(raw if isinstance(raw, dict) else {})
+    action = gate(classification.confidence)
+
+    output = {
+        "classification": _classification_to_dict(classification),
+        "action": action,
+        "options": _build_options(classification, action),
+    }
+    json.dump(output, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

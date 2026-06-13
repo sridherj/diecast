@@ -88,7 +88,18 @@ const humans = [
 
 const guide = { id: 'g-guide', slug: 'cast-guide', kind: 'guide', name: 'the Guide' };
 
-const org = { name: CANON.org.name, crumb: CANON.org.crumb };
+// org.skills — Phase 5.0 ADDITIVE (Decision 9): NESTED under the frozen `org` key because the 11
+// top-level ORG keys are frozen. 3 company-wide skills + the pre-staged demo skill `cast-export-csv`
+// (private). Hardcoded/deterministic (NEVER faker) → the faker call sequence is untouched and every
+// pre-existing section regenerates byte-identical (F4). Slugs are lowercase cast-* (gate-enforced).
+const orgSkills = [
+  { slug: 'cast-rbac-audit', title: 'RBAC Endpoint Audit', visibility: 'company', owner: 'security-checker', created: t(120), blurb: 'Audits every endpoint that reads a permission table for a matching authz-boundary check.' },
+  { slug: 'cast-permission-matrix', title: 'Permission Matrix', visibility: 'company', owner: 'api-contractor', created: t(150), blurb: 'Renders the role→permission matrix for a checkout surface from the REST permissions API.' },
+  { slug: 'cast-coverage-gate', title: 'Coverage Gate', visibility: 'company', owner: 'test-coverage-checker', created: t(90), blurb: 'Fails a PR whose branch coverage on a changed path drops below the 90% gate.' },
+  { slug: 'cast-export-csv', title: 'Export Board to CSV', visibility: 'private', owner: '@you', created: t(500), blurb: 'Pre-staged demo skill — exports the current board view to CSV. Not yet published org-wide.' },
+];
+
+const org = { name: CANON.org.name, crumb: CANON.org.crumb, skills: orgSkills };
 
 const meta = {
   version: '1.0',
@@ -275,6 +286,10 @@ function atom(o) {
     base.what_i_want = o.what_i_want ?? '[2a.2] what I want';
     base.what_i_tried = o.what_i_tried ?? '[2a.2] what I tried';
   }
+  // Phase 5.0 ADDITIVE: the dial-demo marker — additive key on exactly one CAST-412 L2 atom (the
+  // atom the autonomy dial visibly promotes into a scripted stop-and-confirm). Gate-enforced: exactly
+  // one dial_demo atom org-wide and it is L2.
+  if (o.dial_demo === true) base.dial_demo = true;
   return base;
 }
 
@@ -362,6 +377,7 @@ const decisions = [
     revisit_if: 'If routing and recording end up sharing enough state that one ticket is simpler.',
     originating_agent: 'decision-recorder', timestamp: t(185),
     diff: 'FR-014 → FR-014a, FR-014b',
+    dial_demo: true,   // Phase 5.0 — the one L2 atom the autonomy dial promotes (scripted, ORG unmutated)
   }),
 
   // ── CAST-431 debug (5 atoms; L3 = -03 shared-auth-middleware fix scope) ──
@@ -774,6 +790,96 @@ function enrichTree(node) {
 enrichTree(featureExecution.focus_run);
 enrichTree(debugExecution.focus_run);
 
+// ───────────────────────────────────────────────────────────────────────────
+// Phase 5.0 ADDITIVE: agents[].monitoring — the "operate agents like services" ops payload (US8
+// agent-ops tab; the 5b Sparkline reads `trend`). HARDCODED/DETERMINISTIC via seedInt — NEVER faker,
+// NEVER Date — so the faker call sequence stays untouched and every pre-existing section regenerates
+// byte-identical (F4). SINGLE-SOURCE CREDIBILITY: monitoring NEVER restates the marketplace headline
+// (99.9% / 505 runs) — that stays derived from agent.stats; `trend` is a separate compliance series.
+// Depth: FULL on crud-orchestrator (the canonical exemplar, 4 recent runs), THIN elsewhere (2 runs).
+// Gate (Phase-5 invariant): every agent already carries ≥1 version (the authored changelog above).
+// ───────────────────────────────────────────────────────────────────────────
+const MON_FULL_AGENT = 'crud-orchestrator';
+const MON_RUN_STATUS = ['done', 'done', 'running', 'flagged', 'done'];
+function monTrend(slug, base) {
+  // 12-point compliance trend (floats), a gentle rise toward the agent's current compliancePct.
+  return Array.from({ length: 12 }, (_, i) => {
+    const wob = ((seedInt(slug + ':' + i) % 13) - 6) / 10;          // deterministic -0.6..+0.6
+    const v = base - (11 - i) * 0.05 + wob;
+    return Math.round(Math.min(v, 100) * 10) / 10;
+  });
+}
+function monRecentRuns(slug, full) {
+  const n = full ? 4 : 2;
+  return Array.from({ length: n }, (_, i) => ({
+    id: `${slug}-run-${(seedInt(slug + 'r' + i) % 9000) + 1000}`,
+    when: t(360 + (seedInt(slug + 'w' + i) % 170)),               // 360..529 — within the demo day (≤540)
+    status: MON_RUN_STATUS[(seedInt(slug + 's' + i) + i) % MON_RUN_STATUS.length],
+  }));
+}
+for (const [slug, a] of Object.entries(agents)) {
+  const full = slug === MON_FULL_AGENT;
+  a.monitoring = {
+    trend: monTrend(slug, a.stats.compliancePct),
+    cost_p50_usd: Math.round((0.04 + (seedInt(slug + 'c') % 38) / 100) * 100) / 100,    // 0.04..0.41
+    latency_p50_s: Math.round((1.1 + (seedInt(slug + 'l') % 33) / 10) * 10) / 10,        // 1.1..4.3
+    recent_runs: monRecentRuns(slug, full),
+  };
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Phase 5.0 ADDITIVE: goals['CAST-412'].requirements_doc — the US7 substrate (5c renders it). Content
+// is derived from the CAST-412 RBAC story and stays consistent with the frozen `us7` thin annotation
+// on art-reqs-412 (one PM comment from @priya on the FR-014 split; v1→v2 delta; planning write-back).
+// Hardcoded (NEVER faker). Gate-enforced: element ids unique; every comment/delta/writeback anchor
+// resolves to an element; EXACTLY ONE comment author has role 'pm'. decision_refs point at the real
+// atoms (the GraphQL→REST superseded pair, the FR-014 split L2, the shared-middleware L1, the L3 stop).
+const featureRequirementsDoc = {
+  classification: 'feature',
+  version: 'v2',
+  version_history: [
+    { v: 'v1', date: t(60) },
+    { v: 'v2', date: t(190), summary: 'Split FR-014 into routing + recording; settled the permissions endpoint on REST.' },
+  ],
+  elements: [
+    { id: 'req-01', level: 1, kind: 'intent',
+      text: 'Add role-based access control to checkout so only permitted roles can complete a purchase.',
+      children: ['req-02', 'req-03', 'req-06'], decision_refs: [] },
+    { id: 'req-02', level: 2, kind: 'story',
+      text: 'As the checkout service, resolve the caller\'s role and permitted actions before authorizing a purchase.',
+      children: ['req-04', 'req-05'], decision_refs: ['DEC-CAST-412-05'] },
+    { id: 'req-03', level: 2, kind: 'fr',
+      text: 'Expose role→permission reads over the existing REST API surface (an initial GraphQL endpoint was retired).',
+      children: [], decision_refs: ['DEC-CAST-412-01', 'DEC-CAST-412-02'] },
+    { id: 'req-04', level: 3, kind: 'fr',
+      text: 'FR-014a — route every checkout request through the shared permission middleware.',
+      children: [], decision_refs: ['DEC-CAST-412-06'] },
+    { id: 'req-05', level: 3, kind: 'fr',
+      text: 'FR-014b — record every permission decision to the audit trail.',
+      children: [], decision_refs: ['DEC-CAST-412-06'] },
+    { id: 'req-06', level: 2, kind: 'constraint',
+      text: 'The legacy roles column must not be dropped until every remaining reader is repointed.',
+      children: [], decision_refs: ['DEC-CAST-412-04'] },
+  ],
+  comments: [
+    { id: 'cmt-req-1', anchor: 'req-02', author_id: '@priya', author_role: 'pm', state: 'resolved',
+      thread: [
+        { who: '@priya', text: 'Routing and recording are two concerns — should these be separate requirements?', time: t(150) },
+        { who: '@you', text: 'Agreed — split FR-014 into FR-014a (routing) and FR-014b (recording).', time: t(186) },
+      ] },
+  ],
+  delta: [
+    { anchor: 'req-03', change: 'permissions endpoint moved GraphQL → REST', origin_phase: 'planning' },
+    { anchor: 'req-04', change: 'FR-014 split → FR-014a (routing)', origin_phase: 'planning' },
+    { anchor: 'req-05', change: 'FR-014 split → FR-014b (recording)', origin_phase: 'planning' },
+  ],
+  writeback: {
+    origin_phase: 'planning',
+    summary: 'Requirements updated from planning — FR-014 split into routing + recording; the permissions endpoint settled on REST. Synced to your PM tool.',
+    anchors: ['req-03', 'req-04', 'req-05'],
+  },
+};
+
 const goals = {
   'CAST-412': {
     family: 'feature',
@@ -833,6 +939,7 @@ const goals = {
     autonomy: { value: 'balanced', trust: aggregateTrust(featureRoster) },
     execution: featureExecution,   // 3.1 additive — full drill-in tree (consumed by 3.2)
     morph_view: featureMorphView,  // 3.1 additive — debug-shape state for the 3.4 morph
+    requirements_doc: featureRequirementsDoc,   // 5.0 additive — the US7 substrate (consumed by 5c)
   },
   'CAST-431': {
     family: 'debug',
@@ -1442,6 +1549,68 @@ function check(data) {
         }
       }
     }
+  }
+
+  // ── Phase 5.0 additive invariants — the single Phase-5 generator batch (shared rails). Drift cannot
+  // be authored: a second dial_demo atom, a non-L2 dial_demo, a dangling requirements_doc anchor, a
+  // missing/duplicate PM comment author, a version-less agent, a non-cast skill slug, or a perturbed
+  // CAST-452/CAST-461 (Phase-4) canonical value all refuse to emit.
+
+  // Rule 16: exactly one dial_demo atom org-wide, and it is L2.
+  const dialAtoms = data.decisions.filter((a) => a.dial_demo === true);
+  if (dialAtoms.length !== 1) {
+    errors.push(`[dial-demo] expected exactly one dial_demo atom org-wide, has ${dialAtoms.length} (${dialAtoms.map((a) => a.id).join(', ')})`);
+  } else if (dialAtoms[0].reversibility !== 'L2') {
+    errors.push(`[dial-demo] the dial_demo atom ${dialAtoms[0].id} must be L2, is ${dialAtoms[0].reversibility}`);
+  }
+
+  // Rule 17: requirements_doc integrity (CAST-412 US7 substrate). element ids unique; every comment /
+  // delta / writeback anchor resolves to an element; EXACTLY ONE comment author has role 'pm'.
+  for (const [gid, g] of Object.entries(data.goals)) {
+    const rd = g.requirements_doc;
+    if (!rd) continue;                                    // requirements_doc is OPTIONAL (CAST-412 only)
+    const elIds = (rd.elements ?? []).map((e) => e.id);
+    const elSet = new Set(elIds);
+    if (elSet.size !== elIds.length) errors.push(`[reqs-doc] goal ${gid} requirements_doc element ids are not unique`);
+    for (const c of rd.comments ?? []) {
+      if (!elSet.has(c.anchor)) errors.push(`[reqs-doc] goal ${gid} comment ${c.id} anchor '${c.anchor}' does not resolve to an element`);
+    }
+    for (const d of rd.delta ?? []) {
+      if (!elSet.has(d.anchor)) errors.push(`[reqs-doc] goal ${gid} delta anchor '${d.anchor}' does not resolve to an element`);
+    }
+    for (const anc of rd.writeback?.anchors ?? []) {
+      if (!elSet.has(anc)) errors.push(`[reqs-doc] goal ${gid} writeback anchor '${anc}' does not resolve to an element`);
+    }
+    const pmAuthors = (rd.comments ?? []).filter((c) => c.author_role === 'pm');
+    if (pmAuthors.length !== 1) errors.push(`[reqs-doc] goal ${gid} requirements_doc must have exactly one comment authored by role 'pm', has ${pmAuthors.length}`);
+  }
+
+  // Rule 18: every agent carries ≥1 version (the agent-ops version history).
+  for (const [slug, a] of Object.entries(data.agents)) {
+    if (!Array.isArray(a.versions) || a.versions.length < 1) {
+      errors.push(`[agent-versions] agent ${slug} must carry ≥1 version`);
+    }
+  }
+
+  // Rule 19: org.skills slugs are lowercase cast-* (kebab).
+  for (const sk of data.org.skills ?? []) {
+    if (typeof sk.slug !== 'string' || !/^cast-[a-z0-9-]+$/.test(sk.slug)) {
+      errors.push(`[skill-slug] org.skills slug '${sk.slug}' must be a lowercase cast-* kebab slug`);
+    }
+  }
+
+  // Rule 20: PARALLEL-PHASE GUARD (Reconciliation F4) — the CAST-452 / CAST-461 (Phase-4-owned)
+  // canonical values stay byte-stable across this Phase-5 batch. Asserting the load-bearing digits
+  // refuses to emit if a 5.0 edit ever perturbs the Phase-4 sections (the git-diff check is the
+  // companion manual verification).
+  const sp = data.goals['CAST-452'];
+  if (!sp || sp.evidence?.E4?.p95_ms !== 180 || sp.evidence?.E4?.budget_ms !== 200 || sp.parity?.artifact_id !== 'E4-CAST-452') {
+    errors.push('[phase4-guard] CAST-452 (spike) Phase-4 canonical values drifted (E4 p95 180 / budget 200 / parity artifact E4-CAST-452)');
+  }
+  const dt = data.goals['CAST-461'];
+  const rvTotals = (dt?.evidence?.resolved_view?.series ?? []).map((s) => s.total).join(',');
+  if (!dt || dt.evidence?.E5?.gap !== '8%' || rvTotals !== '2595,2803') {
+    errors.push('[phase4-guard] CAST-461 (data) Phase-4 canonical values drifted (E5 gap 8% / resolved_view totals 2595,2803)');
   }
 
   return errors;

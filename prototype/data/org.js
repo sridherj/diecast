@@ -13,7 +13,41 @@ window.ORG = Object.freeze({
   },
   "org": {
     "name": "Northwind",
-    "crumb": "northwind / goals"
+    "crumb": "northwind / goals",
+    "skills": [
+      {
+        "slug": "cast-rbac-audit",
+        "title": "RBAC Endpoint Audit",
+        "visibility": "company",
+        "owner": "security-checker",
+        "created": "2026-06-11T11:00:00.000Z",
+        "blurb": "Audits every endpoint that reads a permission table for a matching authz-boundary check."
+      },
+      {
+        "slug": "cast-permission-matrix",
+        "title": "Permission Matrix",
+        "visibility": "company",
+        "owner": "api-contractor",
+        "created": "2026-06-11T11:30:00.000Z",
+        "blurb": "Renders the role→permission matrix for a checkout surface from the REST permissions API."
+      },
+      {
+        "slug": "cast-coverage-gate",
+        "title": "Coverage Gate",
+        "visibility": "company",
+        "owner": "test-coverage-checker",
+        "created": "2026-06-11T10:30:00.000Z",
+        "blurb": "Fails a PR whose branch coverage on a changed path drops below the 90% gate."
+      },
+      {
+        "slug": "cast-export-csv",
+        "title": "Export Board to CSV",
+        "visibility": "private",
+        "owner": "@you",
+        "created": "2026-06-11T17:20:00.000Z",
+        "blurb": "Pre-staged demo skill — exports the current board view to CSV. Not yet published org-wide."
+      }
+    ]
   },
   "humans": [
     {
@@ -74,6 +108,46 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 209,
         "avg_latency_ms": 233
+      },
+      "monitoring": {
+        "trend": [
+          100,
+          98.8,
+          99,
+          99.1,
+          99.3,
+          99.4,
+          99.6,
+          99.7,
+          99.9,
+          100,
+          99.9,
+          100
+        ],
+        "cost_p50_usd": 0.4,
+        "latency_p50_s": 1.4,
+        "recent_runs": [
+          {
+            "id": "crud-orchestrator-run-9223",
+            "when": "2026-06-11T16:28:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "crud-orchestrator-run-9224",
+            "when": "2026-06-11T16:29:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "crud-orchestrator-run-9225",
+            "when": "2026-06-11T16:30:00.000Z",
+            "status": "flagged"
+          },
+          {
+            "id": "crud-orchestrator-run-9226",
+            "when": "2026-06-11T16:31:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "entity-creation": {
@@ -105,6 +179,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 84,
         "avg_latency_ms": 115
+      },
+      "monitoring": {
+        "trend": [
+          98.1,
+          98.3,
+          98.4,
+          98.6,
+          98.8,
+          98.9,
+          99.1,
+          99.2,
+          99.4,
+          99.5,
+          99.3,
+          99.4
+        ],
+        "cost_p50_usd": 0.06,
+        "latency_p50_s": 2.6,
+        "recent_runs": [
+          {
+            "id": "entity-creation-run-7839",
+            "when": "2026-06-11T16:04:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "entity-creation-run-7840",
+            "when": "2026-06-11T16:05:00.000Z",
+            "status": "running"
+          }
+        ]
       }
     },
     "migration-author": {
@@ -136,6 +240,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 32,
         "avg_latency_ms": 282
+      },
+      "monitoring": {
+        "trend": [
+          99.1,
+          99.3,
+          99.4,
+          99.6,
+          99.8,
+          99.9,
+          98.8,
+          98.9,
+          99,
+          99.2,
+          99.3,
+          99.4
+        ],
+        "cost_p50_usd": 0.39,
+        "latency_p50_s": 3.9,
+        "recent_runs": [
+          {
+            "id": "migration-author-run-4488",
+            "when": "2026-06-11T16:53:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "migration-author-run-4489",
+            "when": "2026-06-11T16:54:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "api-contractor": {
@@ -167,6 +301,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 35,
         "avg_latency_ms": 243
+      },
+      "monitoring": {
+        "trend": [
+          98.6,
+          98.7,
+          98.9,
+          99,
+          99.2,
+          99.3,
+          99.5,
+          99.6,
+          99.8,
+          99.9,
+          99.1,
+          99.2
+        ],
+        "cost_p50_usd": 0.37,
+        "latency_p50_s": 2.9,
+        "recent_runs": [
+          {
+            "id": "api-contractor-run-6470",
+            "when": "2026-06-11T15:45:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "api-contractor-run-6471",
+            "when": "2026-06-11T15:46:00.000Z",
+            "status": "flagged"
+          }
+        ]
       }
     },
     "crud-compliance-checker": {
@@ -198,6 +362,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 232,
         "avg_latency_ms": 287
+      },
+      "monitoring": {
+        "trend": [
+          98.5,
+          98.6,
+          98.7,
+          98.9,
+          99.1,
+          99.2,
+          99.4,
+          99.5,
+          99.6,
+          99.8,
+          99.8,
+          99.9
+        ],
+        "cost_p50_usd": 0.05,
+        "latency_p50_s": 1.4,
+        "recent_runs": [
+          {
+            "id": "crud-compliance-checker-run-1144",
+            "when": "2026-06-11T17:19:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "crud-compliance-checker-run-1145",
+            "when": "2026-06-11T17:20:00.000Z",
+            "status": "running"
+          }
+        ]
       }
     },
     "test-coverage-checker": {
@@ -229,6 +423,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 18,
         "avg_latency_ms": 98
+      },
+      "monitoring": {
+        "trend": [
+          98.4,
+          98.5,
+          98.7,
+          98.8,
+          99,
+          99.1,
+          99.3,
+          98.1,
+          98.3,
+          98.4,
+          99.4,
+          99.5
+        ],
+        "cost_p50_usd": 0.38,
+        "latency_p50_s": 1.7,
+        "recent_runs": [
+          {
+            "id": "test-coverage-checker-run-8561",
+            "when": "2026-06-11T16:26:00.000Z",
+            "status": "running"
+          },
+          {
+            "id": "test-coverage-checker-run-8562",
+            "when": "2026-06-11T16:27:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "security-checker": {
@@ -260,6 +484,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 15,
         "avg_latency_ms": 116
+      },
+      "monitoring": {
+        "trend": [
+          99,
+          99.1,
+          99.3,
+          99.4,
+          99.6,
+          99.7,
+          98.6,
+          98.7,
+          98.9,
+          99,
+          99.5,
+          99.6
+        ],
+        "cost_p50_usd": 0.21,
+        "latency_p50_s": 4.1,
+        "recent_runs": [
+          {
+            "id": "security-checker-run-2838",
+            "when": "2026-06-11T16:03:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "security-checker-run-2839",
+            "when": "2026-06-11T16:04:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "decision-recorder": {
@@ -291,6 +545,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 28,
         "avg_latency_ms": 163
+      },
+      "monitoring": {
+        "trend": [
+          99.4,
+          99.5,
+          99.6,
+          99.8,
+          100,
+          100,
+          100,
+          100,
+          99.3,
+          99.4,
+          99.6,
+          99.7
+        ],
+        "cost_p50_usd": 0.28,
+        "latency_p50_s": 2.6,
+        "recent_runs": [
+          {
+            "id": "decision-recorder-run-4181",
+            "when": "2026-06-11T17:26:00.000Z",
+            "status": "running"
+          },
+          {
+            "id": "decision-recorder-run-4182",
+            "when": "2026-06-11T17:27:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "spike-runner": {
@@ -322,6 +606,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 79,
         "avg_latency_ms": 165
+      },
+      "monitoring": {
+        "trend": [
+          97.4,
+          97.5,
+          97.6,
+          97.8,
+          98,
+          98.1,
+          97,
+          97.1,
+          97.2,
+          97.4,
+          97.8,
+          97.9
+        ],
+        "cost_p50_usd": 0.3,
+        "latency_p50_s": 3.3,
+        "recent_runs": [
+          {
+            "id": "spike-runner-run-4133",
+            "when": "2026-06-11T15:08:00.000Z",
+            "status": "done"
+          },
+          {
+            "id": "spike-runner-run-4134",
+            "when": "2026-06-11T15:09:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "escalation-router": {
@@ -353,6 +667,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 24,
         "avg_latency_ms": 117
+      },
+      "monitoring": {
+        "trend": [
+          99,
+          99.1,
+          98,
+          98.1,
+          98.3,
+          98.4,
+          98.6,
+          98.7,
+          98.9,
+          99,
+          98.8,
+          98.9
+        ],
+        "cost_p50_usd": 0.3,
+        "latency_p50_s": 2.1,
+        "recent_runs": [
+          {
+            "id": "escalation-router-run-1151",
+            "when": "2026-06-11T15:56:00.000Z",
+            "status": "running"
+          },
+          {
+            "id": "escalation-router-run-1152",
+            "when": "2026-06-11T15:57:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "onboarding-mentor": {
@@ -384,6 +728,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 171,
         "avg_latency_ms": 213
+      },
+      "monitoring": {
+        "trend": [
+          98.6,
+          97.4,
+          97.6,
+          97.7,
+          97.9,
+          98,
+          98.2,
+          98.3,
+          98.4,
+          98.6,
+          97.9,
+          98
+        ],
+        "cost_p50_usd": 0.18,
+        "latency_p50_s": 1.2,
+        "recent_runs": [
+          {
+            "id": "onboarding-mentor-run-4137",
+            "when": "2026-06-11T16:32:00.000Z",
+            "status": "flagged"
+          },
+          {
+            "id": "onboarding-mentor-run-4138",
+            "when": "2026-06-11T16:33:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     },
     "repo-cartographer": {
@@ -415,6 +789,36 @@ window.ORG = Object.freeze({
       "usage": {
         "last_30d": 64,
         "avg_latency_ms": 245
+      },
+      "monitoring": {
+        "trend": [
+          98.1,
+          98.2,
+          98.4,
+          97.2,
+          97.4,
+          97.5,
+          97.7,
+          97.8,
+          98,
+          98.1,
+          98.5,
+          98.6
+        ],
+        "cost_p50_usd": 0.4,
+        "latency_p50_s": 2.2,
+        "recent_runs": [
+          {
+            "id": "repo-cartographer-run-1957",
+            "when": "2026-06-11T17:02:00.000Z",
+            "status": "flagged"
+          },
+          {
+            "id": "repo-cartographer-run-1958",
+            "when": "2026-06-11T17:03:00.000Z",
+            "status": "done"
+          }
+        ]
       }
     }
   },
@@ -1242,6 +1646,136 @@ window.ORG = Object.freeze({
             ]
           }
         }
+      },
+      "requirements_doc": {
+        "classification": "feature",
+        "version": "v2",
+        "version_history": [
+          {
+            "v": "v1",
+            "date": "2026-06-11T10:00:00.000Z"
+          },
+          {
+            "v": "v2",
+            "date": "2026-06-11T12:10:00.000Z",
+            "summary": "Split FR-014 into routing + recording; settled the permissions endpoint on REST."
+          }
+        ],
+        "elements": [
+          {
+            "id": "req-01",
+            "level": 1,
+            "kind": "intent",
+            "text": "Add role-based access control to checkout so only permitted roles can complete a purchase.",
+            "children": [
+              "req-02",
+              "req-03",
+              "req-06"
+            ],
+            "decision_refs": []
+          },
+          {
+            "id": "req-02",
+            "level": 2,
+            "kind": "story",
+            "text": "As the checkout service, resolve the caller's role and permitted actions before authorizing a purchase.",
+            "children": [
+              "req-04",
+              "req-05"
+            ],
+            "decision_refs": [
+              "DEC-CAST-412-05"
+            ]
+          },
+          {
+            "id": "req-03",
+            "level": 2,
+            "kind": "fr",
+            "text": "Expose role→permission reads over the existing REST API surface (an initial GraphQL endpoint was retired).",
+            "children": [],
+            "decision_refs": [
+              "DEC-CAST-412-01",
+              "DEC-CAST-412-02"
+            ]
+          },
+          {
+            "id": "req-04",
+            "level": 3,
+            "kind": "fr",
+            "text": "FR-014a — route every checkout request through the shared permission middleware.",
+            "children": [],
+            "decision_refs": [
+              "DEC-CAST-412-06"
+            ]
+          },
+          {
+            "id": "req-05",
+            "level": 3,
+            "kind": "fr",
+            "text": "FR-014b — record every permission decision to the audit trail.",
+            "children": [],
+            "decision_refs": [
+              "DEC-CAST-412-06"
+            ]
+          },
+          {
+            "id": "req-06",
+            "level": 2,
+            "kind": "constraint",
+            "text": "The legacy roles column must not be dropped until every remaining reader is repointed.",
+            "children": [],
+            "decision_refs": [
+              "DEC-CAST-412-04"
+            ]
+          }
+        ],
+        "comments": [
+          {
+            "id": "cmt-req-1",
+            "anchor": "req-02",
+            "author_id": "@priya",
+            "author_role": "pm",
+            "state": "resolved",
+            "thread": [
+              {
+                "who": "@priya",
+                "text": "Routing and recording are two concerns — should these be separate requirements?",
+                "time": "2026-06-11T11:30:00.000Z"
+              },
+              {
+                "who": "@you",
+                "text": "Agreed — split FR-014 into FR-014a (routing) and FR-014b (recording).",
+                "time": "2026-06-11T12:06:00.000Z"
+              }
+            ]
+          }
+        ],
+        "delta": [
+          {
+            "anchor": "req-03",
+            "change": "permissions endpoint moved GraphQL → REST",
+            "origin_phase": "planning"
+          },
+          {
+            "anchor": "req-04",
+            "change": "FR-014 split → FR-014a (routing)",
+            "origin_phase": "planning"
+          },
+          {
+            "anchor": "req-05",
+            "change": "FR-014 split → FR-014b (recording)",
+            "origin_phase": "planning"
+          }
+        ],
+        "writeback": {
+          "origin_phase": "planning",
+          "summary": "Requirements updated from planning — FR-014 split into routing + recording; the permissions endpoint settled on REST. Synced to your PM tool.",
+          "anchors": [
+            "req-03",
+            "req-04",
+            "req-05"
+          ]
+        }
       }
     },
     "CAST-431": {
@@ -2034,7 +2568,8 @@ window.ORG = Object.freeze({
       "superseded_by": null,
       "spike_ref": null,
       "influenced": [],
-      "diff": "FR-014 → FR-014a, FR-014b"
+      "diff": "FR-014 → FR-014a, FR-014b",
+      "dial_demo": true
     },
     {
       "id": "DEC-CAST-431-01",

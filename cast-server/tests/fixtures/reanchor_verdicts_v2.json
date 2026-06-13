@@ -1,0 +1,49 @@
+{
+  "_doc": "Golden contract-v2 reply for the refine_requirements_v2 fixture pair (sp4b-2). Offline replay: validates the v2 gate (schema, narration-keys-to-real-items, trust boundary, markdown-seam, relocated-verbatim, three-verdict enum) WITHOUT a model. Authored to PASS every gate; the negative trust-boundary case is generated in-code from this object. The item_notes keys are the three real summarize(diff_blocks(old,new)).items: added FR-021, modified FR-001, removed the cast-explore scope bullet.",
+  "narration": {
+    "overview": "FR-001 was reworded to keep HOW content non-binding, a new deterministic-id requirement (FR-021) was added, and the cast-explore out-of-scope exclusion was dropped.",
+    "item_notes": [
+      {
+        "change": "added",
+        "heading_or_ref": "FR-021",
+        "note": "Introduces a deterministic-id guarantee that did not exist in the prior version."
+      },
+      {
+        "change": "modified",
+        "heading_or_ref": "FR-001",
+        "note": "Rephrased but still leads with WHAT content and confines HOW to a non-binding section."
+      },
+      {
+        "change": "removed",
+        "heading_or_ref": "- Changes to the exploration pipeline (cast-explore) itself.",
+        "note": "The cast-explore exclusion line was removed from Out of Scope."
+      }
+    ]
+  },
+  "verdicts": [
+    {
+      "comment_id": 101,
+      "verdict": "relocated",
+      "new_quoted_text": "The refined output shall lead with WHAT content (intent, outcomes, scope) at the top of the document",
+      "new_section_hint": "Functional Requirements",
+      "confidence": 0.9,
+      "reasoning": "FR-001 was reworded but still leads with WHAT and confines HOW to a non-binding section, so the content survives and is re-anchored rather than resolved."
+    },
+    {
+      "comment_id": 102,
+      "verdict": "orphaned",
+      "new_quoted_text": null,
+      "new_section_hint": null,
+      "confidence": 0.85,
+      "reasoning": "The cast-explore exploration-pipeline exclusion was removed entirely from the new version."
+    },
+    {
+      "comment_id": 103,
+      "verdict": "relocated",
+      "new_quoted_text": "Workflow classification could surface as standard pills at the top of the document.",
+      "new_section_hint": "Directional Ideas",
+      "confidence": 0.95,
+      "reasoning": "The pill idea is unchanged and still present verbatim, so its anchor still resolves."
+    }
+  ]
+}

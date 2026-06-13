@@ -1,0 +1,810 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: a161de92349592ce7f1cb4bd80bf8e375329eacc87c361c11201f65b7ca9634a -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revamp DieCast — v2 Direction</title>
+<style>
+/* === Design Tokens — copied verbatim from static/style.css :root (pin-tested) === */
+:root {
+    /* Brand palette */
+    --color-bg: #F5F4F0;
+    --color-text: #1A1A28;
+    --color-muted: #4A4860;
+    --color-surface: #ECEAE4;
+    --color-accent: #D6235C;
+    --color-accent-hover: #B01D4D;
+    --color-callout-bg: rgba(214, 35, 92, 0.06);
+    --color-callout-border: var(--color-accent);
+    --color-question-bg: rgba(74, 72, 96, 0.06);
+    --color-question-border: var(--color-muted);
+    --color-link: var(--color-accent);
+    --color-link-hover: var(--color-accent-hover);
+
+    /* Typography */
+    --font-heading: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+    --font-body: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-display-accent: 'Caveat', cursive;
+
+    /* Subtle workshop grid */
+    --grid-size: 5px;
+    --grid-color: rgba(74, 72, 96, 0.07);
+
+    /* Semantic status colors (cream-friendly variants) */
+    --color-success: #2D7D4F;
+    --color-warning: #B5821A;
+    --color-danger: #B22439;
+    --color-info: #3B5BB0;
+    --color-focus: #6B47B0;
+
+    /* Back-compat aliases for legacy var refs throughout the codebase */
+    --bg-primary: var(--color-bg);
+    --bg-surface: var(--color-surface);
+    --bg-surface-hover: #E1DED7;
+    --border: rgba(74, 72, 96, 0.18);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-muted);
+    --text-muted: rgba(74, 72, 96, 0.65);
+    --color-primary: var(--color-accent);
+    --color-primary-hover: var(--color-accent-hover);
+    --font-sans: var(--font-body);
+    --font-mono: var(--font-heading);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --sidebar-width: 240px;
+}
+
+/* === Render-local tokens (not in style.css :root — render-only additions) ===
+   Kept OUTSIDE the pin-tested block conceptually but defined on :root so the
+   hex-literal scan (which only permits hex inside :root) stays satisfied.
+   These do not participate in the byte-match invariant (the drift test asserts
+   style.css tokens are preserved in the theme, not the reverse). */
+:root {
+    --color-on-accent: #FFFFFF;          /* white text on accent fills (callout-num) */
+    --rr-content-max: 52rem;             /* readable measure for the document column */
+    --rr-l1-size: 1.35rem;               /* L1 survives a 90% cut — the loudest body */
+    --rr-l2-size: 1.05rem;               /* L2 survives a 50% cut — must NOT out-weigh L1 */
+    --rr-l3-size: 0.95rem;               /* L3 detail inside <details> */
+}
+
+/* === Base / document frame === */
+* , *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+    margin: 0;
+    background-color: var(--color-bg);
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    font-family: var(--font-body);
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.rr-document {
+    max-width: var(--rr-content-max);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+a { color: var(--color-link); }
+a:hover { color: var(--color-link-hover); }
+
+/* === Typography — lifted from cast-preso toolkit, em-scaling adapted to rem ===
+   Class names kept VERBATIM so the checker rubric language transfers directly.
+   L1/L2/L3 are assigned by IMPORTANCE, not heading depth. */
+h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--color-text);
+}
+
+h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; }
+h3 { font-size: 1.15rem; margin: 1.25rem 0 0.5rem; }
+h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+
+.slide-title {
+    font-family: var(--font-heading);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-text);
+}
+
+/* L1 — survives a 90% cut: the loudest body line. */
+.l1-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l1-size);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* L2 — survives a 50% cut. Deliberately lighter + smaller than L1 so it can
+   never visually out-weigh it. */
+.l2-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l2-size);
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.source-citation {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.muted { color: var(--color-muted); }
+
+/* === Callout — decided WHAT accent (L2 emphasis). Lifted verbatim. === */
+.callout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-callout-border);
+    background: var(--color-callout-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 16px 20px;
+}
+
+.callout .callout-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.callout .callout-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* === Question annotation — tentative HOW / open questions (muted, italic). === */
+.question-annotation {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-question-border);
+    background: var(--color-question-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 12px 16px;
+    font-style: italic;
+}
+
+.question-annotation .question-icon {
+    font-size: 1.2em;
+    flex-shrink: 0;
+    color: var(--color-muted);
+    font-style: normal;
+}
+
+.question-annotation .question-text {
+    flex: 1;
+    line-height: 1.4;
+    color: var(--color-muted);
+}
+
+/* === Family pill — cloned from .phase-badge (style.css ~1979). Tints use
+   rgba() literals exactly like the .phase-badge precedent (rgba, not hex,
+   so FR-012's hex ban is satisfied). === */
+.family-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.family-pill--new_initiative     { background-color: rgba(107, 71, 176, 0.12); color: var(--color-focus); }
+.family-pill--pilot_poc          { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--bug_fix            { background-color: rgba(178, 36, 57, 0.12);  color: var(--color-danger); }
+.family-pill--data_analysis      { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--random_idea        { background-color: rgba(181, 130, 26, 0.14); color: var(--color-warning); }
+.family-pill--testing_qa         { background-color: rgba(45, 125, 79, 0.12);  color: var(--color-success); }
+.family-pill--refactor_migration { background-color: rgba(74, 72, 96, 0.12);   color: var(--color-muted); }
+.family-pill--personal_non_eng   { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+.family-pill--generic            { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+
+/* Rescue state — visually distinct (dashed accent border) for the
+   "Unclassified — re-run refinement" path used by sp2/sp3. */
+.family-pill--unclassified {
+    background-color: rgba(178, 36, 57, 0.08);
+    color: var(--color-danger);
+    border: 1px dashed var(--color-danger);
+}
+
+/* === Goal Card — the above-the-fold zero-click block === */
+.goal-card {
+    background: var(--color-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+}
+
+.goal-card .goal-card__job {
+    margin: 0.75rem 0 0;
+}
+
+.goal-card .goal-card__assertions {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.goal-card .goal-card__assertions > li {
+    margin: 0.4rem 0;
+}
+
+.version-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+/* === Recipe sections === */
+.recipe-section { margin: 1.5rem 0; }
+
+/* === Scope grid — side-by-side, renders OPEN, never collapsed === */
+.scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.scope-grid .scope-col h3 { margin-top: 0; }
+
+@media (max-width: 640px) {
+    .scope-grid { grid-template-columns: 1fr; }
+}
+
+/* === Disclosure (<details>) styling — closed by default, clear affordance === */
+details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0 1rem;
+    margin: 0.75rem 0;
+}
+
+details > summary {
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    padding: 0.75rem 0;
+    list-style: none;
+}
+
+details > summary::-webkit-details-marker { display: none; }
+
+details > summary::before {
+    content: "\25B8";              /* ▸ collapsed affordance */
+    display: inline-block;
+    margin-right: 0.5rem;
+    color: var(--color-muted);
+    transition: transform 0.15s ease;
+}
+
+details[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+details > summary:hover {
+    color: var(--color-accent);
+}
+
+details > .details-body {
+    font-size: var(--rr-l3-size);
+    padding-bottom: 1rem;
+}
+
+/* === Directional — quarantined HOW, muted, last === */
+.directional {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--color-muted);
+}
+
+.directional h2 { color: var(--color-muted); }
+
+/* === Expand-all control === */
+.rr-controls {
+    margin: 0 0 1.5rem;
+}
+
+.rr-controls .expand-all-btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.rr-controls .expand-all-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* === Phase 4 — version toggle (links to the throwaway diff view) === */
+.version-toggle {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.version-toggle__current {
+    color: var(--color-muted);
+}
+
+.version-toggle__diff {
+    color: var(--color-accent);
+}
+
+/* === Print: force every <details> open so nothing hides on paper === */
+@media print {
+    body { background-image: none; }
+    .rr-controls { display: none; }
+    details > * { display: block; }
+}
+
+/* === Phase 4 — tracked-changes (diff) view ============================================
+   Scoped to the diff classes only; emitted exclusively by diff_render.py's throwaway view,
+   never by the canonical render. Tokens only — green/amber/red map to the existing
+   success/warning/danger semantic tokens (the Phase 3a hex-scan forbids hex outside :root). */
+.diff-changed-panel {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+}
+
+.diff-changed-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.diff-changed-counts {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    margin: 0 0 0.75rem;
+}
+
+.diff-changed-list { margin: 0; padding-left: 1.25rem; }
+.diff-changed-item { margin: 0.2rem 0; }
+.diff-changed-empty { color: var(--color-muted); margin: 0; }
+.diff-changed-item--added a    { color: var(--color-success); }
+.diff-changed-item--modified a { color: var(--color-warning); }
+.diff-changed-item--removed a  { color: var(--color-danger); }
+
+.diff-block {
+    border-left: 4px solid var(--border);
+    padding: 0.5rem 0 0.5rem 1rem;
+    margin: 0.75rem 0;
+}
+
+.diff-block-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-bottom: 0.25rem;
+}
+
+.diff-block-body { white-space: pre-wrap; }
+
+.diff-added    { border-left-color: var(--color-success); }
+.diff-modified { border-left-color: var(--color-warning); }
+.diff-removed  { border-left-color: var(--color-danger); }
+
+.diff-removed .diff-block-body {
+    color: var(--color-danger);
+    text-decoration: line-through;
+}
+
+.diff-prev { margin-top: 0.4rem; }
+.diff-prev > summary {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+.diff-prev del {
+    display: block;
+    white-space: pre-wrap;
+    color: var(--color-muted);
+    margin-top: 0.3rem;
+}
+
+/* === Phase 4 (sp5) — vanilla comment layer (decision #7) ==============================
+   The locked commenting UX: <mark> highlight, floating 💬 pill, inline composer, and the
+   always-surfaced tray (decision #9). Tokens only — never hex (the Phase 3a hex-scan
+   forbids hex outside :root). These classes render only when the JS layer is live; the
+   bare-file artifact never shows them (progressive enhancement). */
+
+/* Highlighted span of a placed open comment. */
+.comment-mark {
+    background: var(--color-callout-bg);
+    border-bottom: 2px solid var(--color-accent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    cursor: pointer;
+    padding: 0 1px;
+}
+
+/* Floating "💬 Comment" pill at the selection rect. */
+.comment-pill {
+    position: absolute;
+    z-index: 40;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(26, 26, 40, 0.18);
+}
+
+/* Inline composer, anchored at the selection (JS flips it above near the viewport bottom). */
+.comment-composer {
+    position: absolute;
+    z-index: 41;
+    width: min(22rem, 90vw);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 4px 16px rgba(26, 26, 40, 0.22);
+}
+
+.comment-composer__quote {
+    margin: 0;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--color-accent);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    max-height: 4.5rem;
+    overflow: auto;
+}
+
+.comment-composer__body {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    resize: vertical;
+}
+
+.comment-composer__actions { display: flex; gap: 0.5rem; }
+
+.comment-composer__submit,
+.comment-composer__cancel {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.comment-composer__submit {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border-color: var(--color-accent);
+}
+
+.comment-composer__cancel {
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.comment-composer__error {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-danger);
+}
+
+/* The tray host — a fixed right rail; the server fragment (tray.html) fills it. */
+.comment-tray-host {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--sidebar-width);
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    z-index: 30;
+}
+
+.comment-tray {
+    font-size: 0.85rem;
+}
+
+.comment-tray-group {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.comment-tray-heading {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.comment-tray-count {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-thread-item {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.comment-thread-item:first-of-type { border-top: 0; }
+
+.comment-thread-item[data-displaced="true"] {
+    border-left: 3px solid var(--color-warning);
+    padding-left: 0.5rem;
+}
+
+.comment-thread-item[data-state="orphaned"] {
+    border-left: 3px solid var(--color-danger);
+    padding-left: 0.5rem;
+}
+
+/* Transient flash when a <mark> click reveals its tray item. */
+.comment-thread-item--flash {
+    background: var(--color-callout-bg);
+    transition: background 0.4s ease;
+}
+
+.comment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.comment-author { font-weight: 600; color: var(--color-text); }
+
+.comment-author-kind-badge,
+.comment-state-badge,
+.comment-displaced-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-author-kind-badge[data-kind="agent"] {
+    background: rgba(107, 71, 176, 0.12);
+    color: var(--color-focus);
+}
+
+.comment-state-badge[data-state="resolved"] {
+    background: rgba(45, 125, 79, 0.12);
+    color: var(--color-success);
+}
+
+.comment-displaced-badge { color: var(--color-warning); }
+
+.comment-quote {
+    margin: 0.25rem 0;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--border);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.comment-body { color: var(--color-text); }
+
+.comment-actions { margin-top: 0.35rem; }
+
+.comment-resolve-btn,
+.comment-reopen-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.comment-resolve-btn:hover,
+.comment-reopen-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* Goal Card convergence chip (client-filled; the baked HTML stays comment-agnostic). */
+.goal-card__convergence {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+.goal-card__convergence[data-convergence="unconverged"] {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.goal-card__convergence[data-convergence="converged"] {
+    color: var(--color-success);
+    border-color: var(--color-success);
+}
+
+/* Keep the fixed tray from colliding with the document on narrow viewports. */
+@media (max-width: 900px) {
+    .comment-tray-host {
+        position: static;
+        width: auto;
+        max-height: none;
+    }
+}
+
+@media print {
+    .comment-tray-host, .comment-pill, .comment-composer { display: none; }
+    .comment-mark { border-bottom: 0; background: transparent; }
+}</style>
+</head>
+<body data-goal-slug="revamp-diecast">
+<main class="rr-document">
+
+<div class="rr-controls">
+<button type="button" class="expand-all-btn" data-expand-all>Expand all</button>
+</div>
+
+<!-- LAYER 1: GOAL CARD (zero-click, always open) -->
+<section class="goal-card">
+<span class="family-pill family-pill--random_idea" title="Revamp DieCast / launch v2 is a large multi-direction product initiative, but the owner chose to keep it as a captured brainstorm to prioritize before scoping.">💡 You are jotting down an idea</span>
+<h1 class="slide-title">Revamp DieCast — v2 Direction</h1>
+<!-- open-comment-count: [PENDING Phase 4] -->
+<div class="goal-card__job">
+<p class="goal-card__job-text l1-body">Take stock of what the AI-coding industry now ships, decide what DieCast should absorb, lock down who it is for, and turn a pile of candidate directions into a prioritized v2 I can hand to engineers and PMs at a few companies.</p>
+</div>
+<ul class="goal-card__assertions">
+<li class="l2-body">Catch up and integrate — survey what Claude and the memory and self-learning tools now ship, then decide what DieCast should absorb and what it should drop.</li>
+<li class="l2-body">Workflow orchestration — lean on Claude workflows and goals, rethink the tmux-spawning model, and consider a conductor-style UI (build it, or pull from open source).</li>
+<li class="l2-body">Sharpen ICP and adoption — make DieCast land for a solid engineer and a PM at a typical office, and get a few companies actually using it.</li>
+<li class="l2-body">Lower setup friction — support Claude, Codex, and maybe Copilot across Linux, Mac, and Windows with minimal breakage.</li>
+<li class="l2-body">Make DieCast legible — improve the UI and the framing so a newcomer understands what it is.</li>
+</ul>
+</section>
+<!-- LAYER 2: RECIPE SECTIONS (ordered per family) -->
+<section class="recipe-section">
+<h2 class="slide-title">Intent</h2>
+<div class="l1-body">
+<p><strong>Job statement:</strong> Take stock of what the AI-coding industry now ships, decide what DieCast should absorb, lock down who it is for, and turn a pile of candidate directions into a prioritized v2 I can hand to engineers and PMs at a few companies.</p>
+<p>A few months after v1, a lot of what I hand-rolled now ships in the platform itself — Claude /goals, /workflow, and far stronger sub-agents — alongside a wave of memory and self-learning tooling (gstack, gbrain, hermes). Before building more, I want to take stock, then sequence the work.</p>
+<p>Primary user for v2: fairly solid engineers — competent ICs, not necessarily leaders — and PMs at a typical office, not an AI-native shop. They can code and reason, but they do not build their own AI harness and won't; DieCast is the harness and the opinions so they don't have to. Engineers who build (or want to build) their own harness are an explicit non-target. That one choice turns three things into blockers rather than nice-to-haves: near-zero setup friction, a legible UI, and an onboarding on-ramp.</p>
+<p>Directions on the table, not yet prioritized:</p>
+<ol>
+<li>Catch up and integrate — survey what Claude and the memory and self-learning tools now ship, then decide what DieCast should absorb and what it should drop. This is the stated first move.</li>
+<li>Workflow orchestration — lean on Claude workflows and goals, rethink the tmux-spawning model, and consider a conductor-style UI (build it, or pull from open source).</li>
+<li>Sharpen ICP and adoption — make DieCast land for a solid engineer and a PM at a typical office, and get a few companies actually using it.</li>
+<li>Lower setup friction — support Claude, Codex, and maybe Copilot across Linux, Mac, and Windows with minimal breakage.</li>
+<li>Make DieCast legible — improve the UI and the framing so a newcomer understands what it is.</li>
+<li>Docs as product — render requirements and reports as commentable standalone HTML, a Google-Docs equivalent; the cast-preso tooling already gestures at this.</li>
+<li>Workflow streams — give each kind of dev work its own stream: bug fix, data analysis, debug, small pilot, big initiative, PRD, add tests, POC. Parts already exist in the family taxonomy and the vision prototype.</li>
+<li>Prototype as a phase — make prototyping a first-class step in the flow.</li>
+<li>Skillify — a meta-skill that turns one of my manual workflows into sub-agents, complete with maker, tests, and checker.</li>
+<li>Onboarding video — a short how-to, ideally made unnecessary by the product being obvious.</li>
+</ol>
+</div>
+</section>
+<!-- LAYER 3: UNMODELED SECTIONS (typed model skipped — never silent) -->
+
+<!-- LAYER 4: DIRECTIONAL (quarantined HOW, muted, last) -->
+
+</main>
+<script>
+(function () {
+  var btn = document.querySelector('[data-expand-all]');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var items = document.querySelectorAll('details');
+    var anyClosed = Array.prototype.some.call(items, function (d) { return !d.open; });
+    Array.prototype.forEach.call(items, function (d) { d.open = anyClosed; });
+    btn.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+  });
+})();
+</script>
+
+
+<aside class="comment-tray-host"
+       hx-get="/api/goals/revamp-diecast/requirements/comments"
+       hx-trigger="load, comments:refresh from:body"
+       hx-swap="innerHTML"
+       aria-label="Comments"></aside>
+
+<template class="comment-composer-template">
+<form class="comment-composer"
+      hx-post="/api/goals/revamp-diecast/requirements/comments"
+      hx-swap="none">
+<blockquote class="comment-composer__quote" data-role="quote"></blockquote>
+<input type="hidden" name="quoted_text" data-role="quoted-text">
+<input type="hidden" name="section_hint" data-role="section-hint">
+<input type="hidden" name="author_kind" value="human">
+<textarea class="comment-composer__body" name="body" rows="3" placeholder="Add a comment…" aria-label="Comment" required></textarea>
+<div class="comment-composer__actions">
+<button type="submit" class="comment-composer__submit">Comment</button>
+<button type="button" class="comment-composer__cancel" data-role="cancel">Cancel</button>
+</div>
+<p class="comment-composer__error" data-role="error" hidden></p>
+</form>
+</template>
+
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js" defer></script>
+</body>
+</html>

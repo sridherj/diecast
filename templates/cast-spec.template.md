@@ -49,6 +49,31 @@ works in isolation}}
 | SC-001 | {{measurable success}} | {{test or metric}} |
 | SC-002 | {{measurable success}} | {{test or metric}} |
 
+<!-- OPTIONAL section. Present for families whose recipe includes the `evidence` block —
+     `bug_fix`, `data_analysis`, `testing_qa` (see the per-family shapes note below). Holds
+     repro steps, logs, data sources, and links that ground the Intent. Realizes to
+     `## Evidence` (parser `BlockKind.EVIDENCE`). Not required by the full-spec
+     cast-spec-checker profile; required by the Level-2 `--family` profile for the families
+     above. Omit for families whose recipe has no `evidence` block. -->
+## Evidence
+
+- {{repro / log / data source / link that grounds the Intent}}
+
+<!-- Per-family shapes: the sections a document carries depend on its classified
+     `WorkFamily`. The block-recipe model and per-family required-section profiles are
+     specified in `docs/specs/cast-goal-classification.collab.md` (FAMILY_RECIPES /
+     RECIPE_REALIZATION / REQUIRED_SECTIONS_BY_FAMILY). `random_idea` is the floor — its
+     recipe is `## Intent` only; never pad it with empty spec-kit tables. -->
+
+<!-- OPTIONAL section. Present only when human decisions were recorded during refinement
+     (and immediately before Out of Scope / Open Questions when those sections exist). Not
+     required by cast-spec-checker; omit when no human decisions were made. -->
+## Decisions
+
+| Date | Chose | Over | Because |
+|------|-------|------|---------|
+| {{YYYY-MM-DD}} | {{option picked}} | {{option(s) rejected}} | {{rationale at decision-time}} |
+
 ## Open Questions
 
 - **[NEEDS CLARIFICATION: how should this interact with the auth flow?]** — what

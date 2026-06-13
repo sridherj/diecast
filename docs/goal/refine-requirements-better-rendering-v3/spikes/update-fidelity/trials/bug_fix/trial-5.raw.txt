@@ -1,0 +1,247 @@
+I've worked through the CHANGED-SET against the prior render. My plan:
+
+- **Copy byte-exact:** hero/Goal Card, FR-001, SC-001, and all of Section 2 (FR-003, FR-004, SC-002, SC-003), plus the head/style.
+- **Re-render FR-002 (modified):** add the new verbatim kicker sentence into its existing `<li>`-carriage container.
+- **Add SC-004:** new success criterion for the kicker line, placed in Section 1 per the WHAT doc's section order (FR-001 → FR-002 → SC-001 → SC-004), styled like the other success-criterion blocks.
+- **Drop the removed open_question:** strip the "Deferred open question" framing from Section 3, keeping the still-current Evidence sentence-splitter note (unchanged, still mapped by the WHAT doc) carried verbatim.
+
+<!-- BEGIN RENDER -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal Card leaks raw markdown onto the zero-click surface</title>
+<style>
+  :root{
+    --ink:#16181d; --muted:#5b6270; --faint:#8b909c;
+    --paper:#f5f4f0; --card:#ffffff; --line:#e4e2db;
+    --accent:#3257d6; --accent-soft:#eaeefc;
+    --leak:#c0392b; --leak-soft:#fbecea;
+    --heal:#1f9d6b; --heal-soft:#e8f6ef;
+    --code-bg:#ecebe4; --code-ink:#3a3320;
+    --shadow:0 1px 2px rgba(20,24,33,.05),0 8px 28px rgba(20,24,33,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+  .wrap{max-width:880px; margin:0 auto; padding:32px 24px 72px}
+  code,.tok{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.86em; background:var(--code-bg); color:var(--code-ink);
+    padding:.08em .36em; border-radius:5px; white-space:nowrap;
+  }
+  /* ---------- hero ---------- */
+  .hero{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:28px 30px 26px; box-shadow:var(--shadow);
+  }
+  .badges{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px}
+  .badge{
+    font-size:12px; font-weight:650; letter-spacing:.02em;
+    padding:5px 11px; border-radius:999px; border:1px solid transparent;
+  }
+  .badge.fam{background:var(--leak-soft); color:var(--leak); border-color:#f0cfc9}
+  .badge.conf{background:var(--accent-soft); color:var(--accent); border-color:#cfd9f8}
+  .badge.scope{background:#eef0f3; color:var(--muted); border-color:#dfe2e8}
+  .hero h1{
+    font-size:27px; line-height:1.18; letter-spacing:-.01em; margin:2px 0 14px;
+  }
+  .job{
+    font-size:18px; line-height:1.5; color:var(--ink); margin:0 0 18px;
+    padding-left:15px; border-left:3px solid var(--accent);
+  }
+  .outcome{font-size:14.5px; color:var(--muted); margin:0 0 18px}
+  .metarow{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{
+    font-size:12.5px; color:var(--muted); background:var(--paper);
+    border:1px solid var(--line); border-radius:8px; padding:6px 10px;
+  }
+  .chip b{color:var(--ink); font-weight:650}
+  /* ---------- sections ---------- */
+  .sec{margin-top:40px}
+  .sec-eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 6px;
+  }
+  .sec h2{font-size:21px; line-height:1.25; letter-spacing:-.01em; margin:0 0 10px}
+  .sec-take{font-size:15px; color:var(--muted); margin:0 0 22px; max-width:64ch}
+  /* ---------- exhibit (before/after) ---------- */
+  .exhibit{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:0 0 26px;
+  }
+  .panel{
+    border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:var(--card);
+  }
+  .panel.before{border-color:#eccdc7; background:var(--leak-soft)}
+  .panel.after{border-color:#cfe9dd; background:var(--heal-soft)}
+  .panel .lbl{
+    font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    margin:0 0 9px; display:flex; align-items:center; gap:6px;
+  }
+  .panel.before .lbl{color:var(--leak)}
+  .panel.after .lbl{color:var(--heal)}
+  .panel .render{
+    font-size:15px; background:#fff; border:1px dashed #d9d7d0; border-radius:8px;
+    padding:10px 12px; color:var(--ink);
+  }
+  .panel.before .render{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13.5px}
+  /* ---------- requirement blocks ---------- */
+  .blocks{display:flex; flex-direction:column; gap:14px}
+  .rr-block{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:16px 18px 17px; box-shadow:var(--shadow);
+  }
+  .rr-block-head{
+    display:flex; align-items:center; gap:10px; margin:0 0 9px;
+    font-size:13px; font-weight:600;
+  }
+  .rr-anchor{
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; font-weight:700;
+    letter-spacing:.02em; color:var(--accent); background:var(--accent-soft);
+    border:1px solid #cfd9f8; border-radius:6px; padding:3px 8px;
+  }
+  .rr-block.crit .rr-anchor{color:#9a3027; background:var(--leak-soft); border-color:#eccdc7}
+  .rr-kind{color:var(--faint); font-weight:600; text-transform:uppercase; letter-spacing:.05em; font-size:11px}
+  .rr-carry{margin:0; font-size:15.5px; line-height:1.55; color:var(--ink)}
+  .rr-note{margin:10px 0 0; font-size:13px; color:var(--muted)}
+  /* ---------- guardrails ---------- */
+  .guard{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .guard .col{display:flex; flex-direction:column; gap:14px}
+  /* ---------- deferred ---------- */
+  .deferred{
+    border:1px dashed #d2cfc6; border-radius:12px; padding:18px 20px;
+    background:#faf9f6;
+  }
+  .deferred .tag{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--faint); border:1px solid var(--line);
+    background:#fff; border-radius:6px; padding:3px 9px; margin-bottom:10px;
+  }
+  .deferred p{margin:0; font-size:14.5px; color:var(--muted)}
+  @media (max-width:680px){
+    .exhibit,.guard{grid-template-columns:1fr}
+    .hero h1{font-size:23px}
+  }
+</style>
+</head>
+<body data-goal-slug="family-bug-fix">
+  <div class="wrap">
+
+    <!-- ================= ABOVE THE FOLD: GOAL CARD ================= -->
+    <header class="hero">
+      <div class="badges">
+        <span class="badge fam">Bug fix</span>
+        <span class="badge conf">Classification confidence 0.95</span>
+        <span class="badge scope">One-file fix · Goal Card emit path</span>
+      </div>
+      <h1>Goal Card leaks raw markdown onto the zero-click surface</h1>
+      <p class="job rr-carry">Stop the Goal Card from printing literal markdown syntax — **bold**, backtick-code, and _emphasis_ — so the one above-the-fold surface a first-time reader sees reads as clean prose instead of source.</p>
+      <p class="outcome">Outcome — the job statement and the L2 assertions are routed through the shared inline-markdown path, so <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> resolve to formatted HTML and zero literal markers reach the reader.</p>
+      <div class="metarow">
+        <span class="chip"><b>Surfaces</b> &nbsp;goal_card.py · renderer.py</span>
+        <span class="chip"><b>Scope</b> &nbsp;the Goal Card emit path only</span>
+        <span class="chip"><b>Invariant</b> &nbsp;thin-spine DOM, golden snapshots hold</span>
+      </div>
+    </header>
+
+    <!-- ================= SECTION 1: WHAT'S BROKEN ================= -->
+    <section class="sec">
+      <p class="sec-eyebrow">The defect</p>
+      <h2>What&rsquo;s broken: the card shows source, not prose</h2>
+      <p class="sec-take">The first surface a reader judges a goal by prints literal <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> instead of formatted text, because both emit sites pass author text through <code>escape()</code> only. The fix routes them through the inline-markdown path the recipe sections already use.</p>
+
+      <div class="exhibit">
+        <div class="panel before">
+          <p class="lbl">&#9888; Today &mdash; the leak</p>
+          <div class="render">Replace the **plain** deterministic render</div>
+        </div>
+        <div class="panel after">
+          <p class="lbl">&#10003; After the fix</p>
+          <div class="render">Replace the <strong>plain</strong> deterministic render</div>
+        </div>
+      </div>
+
+      <div class="blocks">
+        <section class="rr-block">
+          <h3 class="rr-block-head"><span class="rr-anchor">FR-001</span><span class="rr-kind">Functional requirement &middot; the job statement</span></h3>
+          <p class="rr-carry">The Goal Card job statement is rendered through the same inline-markdown path the recipe sections already use (_md_to_html), so **bold**, code, and _emphasis_ resolve to formatted HTML instead of literal syntax.</p>
+          <p class="rr-note">Reuse the existing shared markdown instance; do not add a second renderer.</p>
+        </section>
+
+        <section class="rr-block">
+          <h3 class="rr-block-head"><span class="rr-anchor">FR-002</span><span class="rr-kind">Functional requirement &middot; the L2 assertions</span></h3>
+          <p class="rr-carry">Each L2 assertion on the Goal Card resolves inline markdown the same way, while staying a single contiguous &lt;li&gt; with no fragmenting spans. The kicker line directly above the assertions resolves inline markdown the same way.</p>
+          <p class="rr-note">The &ldquo;no markdown wrapper&rdquo; comment is the bug, not the contract.</p>
+        </section>
+
+        <section class="rr-block crit">
+          <h3 class="rr-block-head"><span class="rr-anchor">SC-001</span><span class="rr-kind">Success criterion &middot; the proof</span></h3>
+          <p class="rr-carry">The Goal Card of a source containing **bold**, code, and _emphasis_ renders formatted text with zero literal markdown characters visible.</p>
+          <p class="rr-note">Verified by rendering a fixture carrying inline markdown and asserting no stray <code>*</code> / <code>`</code> / <code>_</code> remains in the Goal Card HTML text.</p>
+        </section>
+
+        <section class="rr-block crit">
+          <h3 class="rr-block-head"><span class="rr-anchor">SC-004</span><span class="rr-kind">Success criterion &middot; the kicker line</span></h3>
+          <p class="rr-carry">The kicker line above the Goal Card assertions renders inline markdown with zero literal markdown characters visible.</p>
+          <p class="rr-note">Verified by rendering a fixture whose kicker carries backtick-code and asserting no backticks survive.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 2: GUARDRAILS ================= -->
+    <section class="sec">
+      <p class="sec-eyebrow">The fence</p>
+      <h2>What the fix must not disturb</h2>
+      <p class="sec-take">A narrow, invisible change &mdash; except where it heals the leak. It preserves the thin-spine DOM contract (no <code>id=</code>, no <code>data-block-anchor</code>) the comment-and-version layer anchors against, and leaves markdown-free sources rendering byte-identically, so existing golden snapshots hold.</p>
+
+      <div class="guard">
+        <div class="col">
+          <section class="rr-block">
+            <h3 class="rr-block-head"><span class="rr-anchor">FR-003</span><span class="rr-kind">Functional requirement</span></h3>
+            <p class="rr-carry">The fix introduces no element id= and no data-block-anchor anywhere on the Goal Card, preserving the thin-spine DOM contract the comment-and-version layer anchors against.</p>
+            <p class="rr-note">A markdown renderer that emits header ids would violate this &mdash; inline-only conversion is required.</p>
+          </section>
+          <section class="rr-block">
+            <h3 class="rr-block-head"><span class="rr-anchor">SC-002</span><span class="rr-kind">Success criterion &middot; proof for FR-003</span></h3>
+            <p class="rr-carry">No id= and no data-block-anchor appear anywhere in the regenerated Goal Card markup.</p>
+            <p class="rr-note">Verified by grepping the rendered Goal Card section.</p>
+          </section>
+        </div>
+        <div class="col">
+          <section class="rr-block">
+            <h3 class="rr-block-head"><span class="rr-anchor">FR-004</span><span class="rr-kind">Functional requirement</span></h3>
+            <p class="rr-carry">A render whose source contains no inline markdown produces byte-identical Goal Card output to today, so the change is invisible except where it fixes the leak.</p>
+            <p class="rr-note">Protects the existing golden snapshots for markdown-free fixtures.</p>
+          </section>
+          <section class="rr-block">
+            <h3 class="rr-block-head"><span class="rr-anchor">SC-003</span><span class="rr-kind">Success criterion &middot; proof for FR-004</span></h3>
+            <p class="rr-carry">A markdown-free source renders a byte-identical Goal Card to the pre-fix output.</p>
+            <p class="rr-note">Verified by a golden-snapshot diff on an emphasis-free fixture.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 3: DEFERRED ================= -->
+    <section class="sec">
+      <p class="sec-eyebrow">Out of scope</p>
+      <h2>Deliberately left for later</h2>
+      <p class="sec-take">One sibling defect in the same file is explicitly deferred, not forgotten &mdash; named only so a fixer working in <code>goal_card.py</code> does not conflate the two leaks.</p>
+      <div class="deferred">
+        <span class="tag">Named &middot; out of scope</span>
+        <p>A sibling sentence-splitter defect lives one call deeper: <code>goal_card._first_sentence</code> splits on <code>(?&lt;=[.!?])\s+</code>, so a job statement containing <code>e.g.</code> or <code>v2.</code> is truncated at the abbreviation. It is out of scope here (tracked separately) but named so a fixer does not conflate the two while in the same file.</p>
+      </div>
+    </section>
+
+  </div>
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/requirements_comments.js"></script>
+</body>
+</html>
+<!-- END RENDER -->

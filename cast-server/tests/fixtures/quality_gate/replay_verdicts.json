@@ -1,0 +1,93 @@
+{
+  "_README": "Committed calibration verdicts for eval_quality_gate.py replay mode (the deterministic, no-LLM CI path). Each value is a bare cast-requirements-render-checker/v1 verdict object, parsed by the PRODUCTION checker_verdict.parse_verdict and gated by the PRODUCTION derive_pass (eval and production share one gate). The two BLOCKING cases — low_quality (MUST fail) and gap_amnesty (MUST NOT fail for a missing outcome) — are the autonomous-mode gate. The deterministic:/maker_evidence: PASS verdicts are the calibrated expectation for a human/scratch --live run (a live FAIL is a human-eyeball carry-forward, never a hard block). Regenerate via: eval_quality_gate.py --live --out-verdicts <file>.",
+
+  "low_quality": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": false,
+    "restated_job": "",
+    "restated_outcome": "",
+    "restated_scope": {"in": [], "out": []},
+    "missing": ["the job is not stated above the fold", "the primary outcome is buried", "scope is not stated"],
+    "issues": [
+      {"dimension": "comprehension", "criterion": "goal-card-first", "severity": "error",
+       "description": "No Goal Card and no one-sentence job statement above the fold; the WHAT is buried under a generic wall-of-text introduction.",
+       "evidence": "the zero-click surface opens with 'Introduction and Background Information' boilerplate, not the job"},
+      {"dimension": "visual", "criterion": "family-appropriate-structure", "severity": "error",
+       "description": "Undifferentiated template-dump layout — a single column of dense prose with generic headings; nothing is scannable in the first screen.",
+       "evidence": "no hierarchy, no pill, no assertions list; the requirement units sit below several screens of preamble"}
+    ],
+    "score": 0.2,
+    "rework_feedback": [
+      "Lead with a Goal Card: a classification pill, a one-sentence job statement, and 3-5 WHAT assertions, all above the fold.",
+      "Cut the boilerplate introduction; surface the US1 cadence, the FR-001 export requirement, and the SC-001 completion window in the first screen."
+    ]
+  },
+
+  "gap_amnesty": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": true,
+    "restated_job": "Ship a recurring nightly report export so downstream data lands on time within a tight, observable window.",
+    "restated_outcome": "The export runs nightly and completes within ten minutes; one quantified business outcome is explicitly flagged as an unfilled source gap (needs author input), not silently omitted.",
+    "restated_scope": {"in": ["a recurring nightly export cadence", "a bounded completion window"], "out": ["on-demand / ad-hoc exports", "downstream consumer changes"]},
+    "missing": [],
+    "issues": [
+      {"dimension": "comprehension", "criterion": "gap-honesty", "severity": "warning",
+       "description": "One business outcome is shown as a .rr-gap marker. This is honest communication of a SOURCE gap (needs author input), not a render defect — recorded as a warning, never an error.",
+       "evidence": "the 'Known gap' block carries the fixed status vocabulary and a question, not invented content"}
+    ],
+    "score": 0.95,
+    "rework_feedback": []
+  },
+
+  "deterministic:bug_fix": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": true,
+    "restated_job": "Fix the defect described in the goal so the broken behaviour is corrected.",
+    "restated_outcome": "The reported failure no longer reproduces and the fix is verified.",
+    "restated_scope": {"in": ["the specific defect and its verification"], "out": ["unrelated refactors"]},
+    "missing": [],
+    "issues": [],
+    "score": 1.0,
+    "rework_feedback": []
+  },
+
+  "deterministic:new_initiative": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": true,
+    "restated_job": "Stand up the new capability described in the goal.",
+    "restated_outcome": "The capability is delivered and its success criteria are met.",
+    "restated_scope": {"in": ["the new capability and its acceptance"], "out": ["adjacent systems not named"]},
+    "missing": [],
+    "issues": [],
+    "score": 1.0,
+    "rework_feedback": []
+  },
+
+  "maker_evidence:bug_fix": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": true,
+    "restated_job": "Resolve the defect so the broken path works as specified.",
+    "restated_outcome": "The defect is fixed, verified, and will not regress.",
+    "restated_scope": {"in": ["the defect, root cause, and verification"], "out": ["scope-expanding rewrites"]},
+    "missing": [],
+    "issues": [
+      {"dimension": "visual", "criterion": "scan-density", "severity": "warning",
+       "description": "A dense section could use more whitespace, but the WHAT is clearly stated above the fold.",
+       "evidence": "minor — does not block comprehension"}
+    ],
+    "score": 0.95,
+    "rework_feedback": []
+  },
+
+  "maker_evidence:new_initiative": {
+    "contract": "cast-requirements-render-checker/v1",
+    "can_state_what": true,
+    "restated_job": "Deliver the new initiative described in the goal end to end.",
+    "restated_outcome": "The initiative ships with its stated acceptance criteria satisfied.",
+    "restated_scope": {"in": ["the initiative's core capability and acceptance"], "out": ["unrelated platform work"]},
+    "missing": [],
+    "issues": [],
+    "score": 1.0,
+    "rework_feedback": []
+  }
+}

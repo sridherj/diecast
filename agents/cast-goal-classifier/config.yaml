@@ -1,0 +1,6 @@
+model: sonnet            # triage task; escalate to opus only if the sp4 corpus eval misses 85%
+dispatch_mode: subagent  # Agent tool, no cast-server dependency, no polling (owner Decision #2)
+interactive: false
+context_mode: lightweight
+timeout_minutes: 10
+proactive: false

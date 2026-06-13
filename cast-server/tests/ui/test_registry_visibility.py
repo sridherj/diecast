@@ -4,7 +4,7 @@ Verifies the `CAST_TEST_AGENTS_DIR` env-var merge in
 `cast_server.services.agent_service.get_all_agents`:
 
 * Dev calls (env unset) MUST return zero `cast-ui-test-*` entries.
-* Calls with the env var set MUST return all 9 expected test-agent names
+* Calls with the env var set MUST return all 10 expected test-agent names
   alongside the production registry.
 * On a name collision the production entry MUST win and a warning MUST be logged.
 """
@@ -27,6 +27,7 @@ EXPECTED_TEST_AGENTS = [
     "cast-ui-test-goal-detail",
     "cast-ui-test-focus",
     "cast-ui-test-about",
+    "cast-ui-test-requirements-render",
     "cast-ui-test-noop",
 ]
 

@@ -27,7 +27,7 @@ def runner():
     return _load_runner()
 
 
-def test_dispatch_keys_are_seven_screens(runner):
+def test_dispatch_keys_are_eight_screens(runner):
     expected = {
         "dashboard",
         "agents",
@@ -36,6 +36,7 @@ def test_dispatch_keys_are_seven_screens(runner):
         "goal_detail",
         "focus",
         "about",
+        "requirements_render",
     }
     assert set(runner.SCREEN_DISPATCH.keys()) == expected
 

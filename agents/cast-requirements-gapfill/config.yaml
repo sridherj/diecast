@@ -1,0 +1,12 @@
+# agents/cast-requirements-gapfill/config.yaml
+# Subagent carve-out (precedent: cast-requirements-what / cast-requirements-how — owner Decision #2).
+# Tool-free: the 5a render_job_service runs this as `claude -p ... --tools ""` and captures stdout.
+# It is NET-NEW (FR-010's "helpers as needed"), NOT an extension of the interactive
+# cast-refine-requirements (its AskUserQuestion protocol is a bad headless citizen).
+dispatch_mode: subagent   # Agent-tool / claude -p subprocess; no cast-server dependency, no polling
+interactive: false
+context_mode: lightweight
+allowed_delegations: []    # leaf agent — delegates to nothing
+timeout_minutes: 15        # open gaps + corpus in, one grounded-or-refuse YAML doc out
+model: opus                # [USER-DEFERRED] tier knob — opus confirmed as the starting tier (2026-06-12)
+proactive: false           # internal pipeline leaf — no next-command suggestions

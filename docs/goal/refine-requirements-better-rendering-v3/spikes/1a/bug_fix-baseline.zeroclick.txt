@@ -1,0 +1,16 @@
+Expand all
+🐛 You are fixing a bug
+Goal Card leaks raw markdown onto the zero-click surface
+Stop the Goal Card from printing literal markdown syntax — `**bold**`, backtick-code, and `_emphasis_` — so the one above-the-fold surface a first-time reader sees reads as clean prose instead of source.
+The Goal Card of a source containing `**bold**`, `` `code` ``, and `_emphasis_` renders formatted text with zero literal markdown characters visible.
+No `id=` and no `data-block-anchor` appear anywhere in the regenerated Goal Card markup.
+A markdown-free source renders a byte-identical Goal Card to the pre-fix output.
+Intent
+Job statement: Stop the Goal Card from printing literal markdown syntax — **bold**, backtick-code, and _emphasis_ — so the one above-the-fold surface a first-time reader sees reads as clean prose instead of source.
+The refined-requirements render has one job above all others: a reader who opens a goal grasps the job, the outcome, and the scope in seconds, from the Goal Card alone (this is SC-001). During v2 dogfooding the card betrayed that job. The job statement and the 3–5 L2 assertions are emitted through escape() only — never through the markdown renderer — so any inline markdown an author wrote in the Intent or Success-Criteria cells survives to the screen as raw syntax. A reader's very first impression is Replace the **plain** deterministic render, asterisks and all. The fix is narrow and contained to the Goal Card emit path; it must not regress the deliberate thin-spine DOM contract (no id=, no data-block-anchor) that the comment layer depends on.
+Evidence
+The leak is in two emit sites in renderer.py, both fed by the pure heuristics in goal_card.py:
+More on Evidence
+Open Questions
+[DEFERRED] Whether the sibling _first_sentence abbreviation-truncation defect should be fixed in the same change or tracked as its own bug. Leaning separate — different root cause, different test, and bundling risks scope creep in a one-file fix.
+CommentCancel

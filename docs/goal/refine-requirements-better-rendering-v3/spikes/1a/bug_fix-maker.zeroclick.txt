@@ -1,0 +1,50 @@
+🐛 You are fixing a bug
+Goal Card leaks raw markdown onto the zero-click surface
+0markdown characters should reach the Goal Card —
+today a reader's first impression is **plain**, asterisks and all.
+The fix: route the Goal Card job statement and L2 assertions through
+the same inline-markdown path the recipe sections already use, so **bold**,
+`code`, and _emphasis_ render as formatted text — without
+breaking the thin-spine DOM contract the comment layer depends on.
+01 · What broke
+The one above-the-fold surface prints its own source code.
+The refined-requirements render has one job above all: a reader grasps the
+job, outcome, and scope in seconds, from the Goal Card alone (this is SC-001). The job
+statement and the 3–5 L2 assertions are emitted through escape() only —
+never through the markdown renderer — so any inline markdown an author wrote survives to
+the screen as raw syntax. The defect is data-dependent: a source with no inline markdown
+looks fine, which is exactly why the golden-HTML snapshot never caught it.
+02 · The evidence
+Two emit sites, both in renderer.py, both fed by goal_card.py.
+The job statement
+_render_goal_card builds job_html as
+f'<p>{escape(job_statement)}</p>'. escape()
+HTML-escapes but does not interpret markdown, so **plain** renders as four
+literal asterisks around the word.
+The L2 assertions
+_render_assertions emits each assertion as
+f'<li>{escape(a)}</li>' with an explicit code comment,
+"no markdown wrapper." Success-Criteria cells routinely carry backtick-wrapped
+identifiers and _emphasis_; all of it leaks. Observed live on this goal's
+own new_initiative render.
+job_html = f'<p>{escape(job_statement)}</p>'
+job_html = f'<p>{_md_to_html(job_statement)}</p>'
+A sibling _first_sentence abbreviation-truncation defect lives
+one call deeper; it is tracked separately (see Still open) so a fixer does not conflate
+the two while in the same file.
+03 · The fix
+Four requirements — each anchored to its canonical id.
+FR-001The Goal Card job statement is rendered through the same inline-markdown path the recipe sections already use (_md_to_html), so **bold**, `code`, and _emphasis_ resolve to formatted HTML instead of literal syntax. Reuse the existing shared markdown instance; do not add a second renderer.
+FR-002Each L2 assertion on the Goal Card resolves inline markdown the same way, while staying a single contiguous <li> with no fragmenting spans. The "no markdown wrapper" comment is the bug, not the contract.
+FR-003The fix introduces no element id-attribute and no data-block-anchor anywhere on the Goal Card, preserving the thin-spine DOM contract the comment-and-version layer anchors against. Inline-only conversion is required — a markdown renderer that emits header ids would violate this.
+FR-004A render whose source contains no inline markdown produces byte-identical Goal Card output to today, so the change is invisible except where it fixes the leak. This protects the existing golden snapshots for markdown-free fixtures.
+04 · How we'll know it's fixed
+Three checks, each measurable.
+SC-001The Goal Card of a source containing **bold**, `code`, and _emphasis_ renders formatted text with zero literal markdown characters visible. Render a fixture carrying inline markdown; assert no stray * / ` / _ in the Goal Card text.
+SC-002No id-attribute and no data-block-anchor appear anywhere in the regenerated Goal Card markup. Grep the rendered Goal Card section.
+SC-003A markdown-free source renders a byte-identical Goal Card to the pre-fix output. Golden-snapshot diff on an emphasis-free fixture.
+05 · Still open
+Deferred
+Whether the sibling _first_sentence abbreviation-truncation defect is fixed
+in the same change or tracked as its own bug. Leaning separate — different root cause,
+different test, and bundling risks scope creep in a one-file fix.

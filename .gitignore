@@ -21,3 +21,11 @@ node_modules/
 
 # Local cast database (default install path)
 ~/.cast/diecast.db
+
+.claude
+build/
+
+# Local scratch / session logs
+scratchpad.md
+.cast/
+plan_and_progress/

@@ -1,0 +1,6 @@
+model: sonnet            # orchestrates a deterministic CLI apply; the byte-faithful logic is tested Python
+dispatch_mode: subagent  # Agent tool, no output.json envelope (the sole-writer carve-out, decision precedent)
+interactive: false
+context_mode: lightweight
+timeout_minutes: 15
+allowed_delegations: [cast-comment-reanchor]  # the ONLY quote->region relocator, for displaced targets

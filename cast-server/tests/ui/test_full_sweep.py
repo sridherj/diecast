@@ -138,7 +138,7 @@ def test_ui_e2e(test_server: str, seeded_test_goal: str) -> None:
             "instructions": (
                 f"Run the full UI test sweep against {test_server}. Trigger "
                 "each per-screen child agent (cast-ui-test-{dashboard,agents,"
-                "runs,scratchpad,goal-detail,focus,about}) in parallel, poll "
+                "runs,scratchpad,goal-detail,focus,about,requirements-render}) in parallel, poll "
                 "all to terminal status, aggregate per-child output.json, "
                 "write your own output.json with status=completed if all "
                 "children passed, partial if any failed."
@@ -178,4 +178,4 @@ def test_ui_e2e(test_server: str, seeded_test_goal: str) -> None:
 
     summary = orch_output.get("summary") or {}
     assert summary.get("failed", 0) == 0, f"summary indicates failures: {summary}"
-    assert summary.get("total", 0) == 7, f"expected 7 children, got {summary.get('total')}"
+    assert summary.get("total", 0) == 8, f"expected 8 children, got {summary.get('total')}"

@@ -40,6 +40,27 @@ ASSERTION_TIMEOUT_MS = 30_000
 USER_DATA_DIR_PREFIX = "/tmp/diecast-uitest"
 THREADED_SEED_GOAL_SLUG = "ui-test-runs-threaded"
 
+# --- requirements-render screen (Phase 4, sp7) ------------------------------
+# The repo root, derived the same way conftest does (cast-server/tests/ui → parents[3]).
+RENDER_REPO_ROOT = Path(__file__).resolve().parents[3]
+# Phase-4 fixtures: v1 (base) and the v2 reword that drops the displaced line.
+RENDER_FIXTURE_V1 = (
+    RENDER_REPO_ROOT
+    / "cast-server/tests/fixtures/refine_requirements_v2/refined_requirements.collab.md"
+)
+RENDER_FIXTURE_V2 = (
+    RENDER_REPO_ROOT
+    / "cast-server/tests/fixtures/refine_requirements_v2/refined_requirements.v2-edit.collab.md"
+)
+# A verbatim quote present in BOTH versions — anchors the select→pill→composer→<mark>
+# flow and the resolve flow (decision #7).
+RENDER_STABLE_QUOTE = (
+    "Per-family inspiration templates may be worth researching online before designing."
+)
+# A verbatim quote present in v1 and REMOVED in the v2 reword — after the version bump its
+# comment is displaced and must surface in the tray, never as a <mark> (decision #1).
+RENDER_DISPLACED_QUOTE = "Changes to the exploration pipeline (cast-explore) itself."
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -829,6 +850,206 @@ def _assert_about(page: Page, ctx: dict) -> None:
         )
 
 
+# ----------------------------------------------------------------------
+# requirements-render screen seed (Phase 4, sp7).
+# The render reads goals/{slug}/refined_requirements.collab.md (default goals
+# dir = repo_root/goals, since the test goal has no folder_path). We create the
+# goal via the API (so slug-validation passes) WITHOUT external_project_dir, copy
+# the v1 fixture into its goal dir, and snapshot v1. The `ui-test-*` slug means
+# conftest teardown's goals/ui-test-* sweep removes the working-tree dir.
+# ----------------------------------------------------------------------
+
+
+def _seed_render_goal(base_url: str) -> str:
+    """Create a goal with refined requirements + a v1 snapshot; return its slug."""
+    import urllib.parse
+
+    title = f"ui-test-render-{int(time.time())}"
+    body = urllib.parse.urlencode({"title": title}).encode()
+    req = urllib.request.Request(
+        f"{base_url}/api/goals",
+        data=body,
+        method="POST",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        html = resp.read().decode("utf-8", errors="replace")
+    import re
+    m = re.search(r'id="goal-card-([a-z0-9-]+)"', html)
+    if not m:
+        raise RuntimeError(f"could not extract slug from goal-card response:\n{html[:300]}")
+    slug = m.group(1)
+
+    goal_dir = RENDER_REPO_ROOT / "goals" / slug
+    goal_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(RENDER_FIXTURE_V1, goal_dir / "refined_requirements.collab.md")
+
+    # Snapshot v1 so versions/comments have a current version to attach to.
+    _http_post_json(f"{base_url}/api/goals/{slug}/requirements/versions", {})
+    return slug
+
+
+def _select_and_pill(page: Page, quote: str) -> bool:
+    """Programmatically select `quote` inside `.rr-document` and fire the mouseup
+    the comment layer listens for. Returns True if the text was found + selected.
+    Mirrors a human drag-select; the JS shows the 💬 pill on a non-collapsed
+    selection within the document."""
+    return page.evaluate(
+        """(quote) => {
+            const doc = document.querySelector('.rr-document');
+            if (!doc) return false;
+            const walker = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT, null);
+            let n;
+            while ((n = walker.nextNode())) {
+                const idx = n.nodeValue.indexOf(quote);
+                if (idx >= 0) {
+                    const range = document.createRange();
+                    range.setStart(n, idx);
+                    range.setEnd(n, idx + quote.length);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    doc.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                    return true;
+                }
+            }
+            return false;
+        }""",
+        quote,
+    )
+
+
+def _assert_requirements_render(page: Page, ctx: dict) -> None:
+    """Phase-4 render-page comment flows (cast-ui-testing US2, sp7).
+
+    Exercises the locked commenting UX (decision #7) + version-diff UX (decision #8)
+    against the real selectors this plan names:
+      select → .comment-pill → .comment-composer → mark.comment-mark;  resolve from
+      the thread;  .version-toggle → /render/diff;  displaced comment → .comment-tray.
+    The flows use the SAME `/api/goals/{slug}/requirements` door an agent curls (FR-013).
+    """
+    result: Result = ctx["result"]
+    screenshots_dir: Path = ctx["screenshots_dir"]
+    base_url: str = ctx["base_url"]
+
+    # --- seed a goal that actually has a render -----------------------------------
+    with assertion(result, "render_seed_goal", page, screenshots_dir):
+        slug = _seed_render_goal(base_url)
+        ctx["render_slug"] = slug
+    slug = ctx.get("render_slug")
+    if not slug:
+        return  # seed failed; the assertion above already recorded it
+
+    render_url = f"{base_url}/goals/{slug}/render"
+    goal_dir = RENDER_REPO_ROOT / "goals" / slug
+
+    with assertion(result, "render_page_loads", page, screenshots_dir):
+        resp = page.goto(render_url, wait_until="domcontentloaded")
+        assert resp is not None and resp.status == 200
+        page.locator(".rr-document").first.wait_for(state="visible")
+
+    # --- 2b: discoverable commenting affordance (US6 / FR-014 / SC-006) ------------
+    # A served render shows a visible control + a hint that STATES the hidden select
+    # gesture, so an unprompted reader can comment. JS-injected into .rr-controls behind
+    # the slug guard (never on a bare file:// open). Class-only; no new creation path.
+    with assertion(result, "render_affordance_present_on_load", page, screenshots_dir):
+        aff = page.locator(".comment-affordance").first
+        aff.wait_for(state="visible", timeout=5_000)
+        hint = page.locator(".comment-affordance__hint").first
+        hint.wait_for(state="visible", timeout=5_000)
+        btn_text = (aff.inner_text() or "").strip()
+        hint_text = (hint.inner_text() or "").strip()
+        combined = f"{btn_text} — {hint_text}"
+        assert combined == "💬 Comment — select any text to comment", (
+            f"affordance reads {combined!r}"
+        )
+
+    with assertion(result, "render_affordance_click_reveals_tray", page, screenshots_dir):
+        page.locator(".comment-affordance").first.click(timeout=ASSERTION_TIMEOUT_MS)
+        # Click teaches + surfaces the tray (scrolls to .comment-tray-host); it never opens
+        # a creation path — selection → pill → composer stays the only way to create.
+        page.locator(".comment-tray-host").first.wait_for(state="visible", timeout=5_000)
+
+    # --- Flow A: select → 💬 pill → composer → <mark> (decision #7) ----------------
+    with assertion(result, "render_select_shows_pill", page, screenshots_dir):
+        found = _select_and_pill(page, RENDER_STABLE_QUOTE)
+        assert found, f"stable quote not found in render: {RENDER_STABLE_QUOTE!r}"
+        page.locator(".comment-pill").first.wait_for(state="visible", timeout=5_000)
+
+    with assertion(result, "render_pill_opens_composer", page, screenshots_dir):
+        page.locator(".comment-pill").first.click(timeout=ASSERTION_TIMEOUT_MS)
+        page.locator(".comment-composer").first.wait_for(state="visible", timeout=5_000)
+
+    with assertion(result, "render_composer_creates_mark", page, screenshots_dir):
+        page.locator(".comment-composer textarea[name='body']").first.fill(
+            "e2e: this WHAT assertion needs a concrete example", timeout=ASSERTION_TIMEOUT_MS
+        )
+        page.locator(".comment-composer__submit").first.click(timeout=ASSERTION_TIMEOUT_MS)
+        # The composer's afterRequest handler refreshes marks on success.
+        page.locator("mark.comment-mark").first.wait_for(state="visible", timeout=8_000)
+
+    # --- Agent-parity: the SAME door an agent curls also yields a <mark> (FR-013) --
+    with assertion(result, "render_agent_door_comment_marks", page, screenshots_dir):
+        status, payload = _http_post_json(
+            f"{base_url}/api/goals/{slug}/requirements/comments",
+            {
+                "quoted_text": RENDER_DISPLACED_QUOTE,
+                "body": "agent-authored: confirm this exclusion is still intended",
+                "author": "cast-agent",
+                "author_kind": "agent",
+            },
+        )
+        assert status in (200, 201), f"agent-door POST /comments -> {status}"
+        page.reload(wait_until="domcontentloaded")
+        page.locator("mark.comment-mark").first.wait_for(state="visible", timeout=8_000)
+
+    # --- Flow B: resolve a comment from its thread item ---------------------------
+    with assertion(result, "render_resolve_from_thread", page, screenshots_dir):
+        # The tray host self-loads via hx-trigger="load"; wait for a thread item.
+        page.locator(".comment-tray .comment-thread-item").first.wait_for(
+            state="visible", timeout=8_000
+        )
+        open_item = page.locator(
+            ".comment-thread-item[data-state='open'] .comment-resolve-btn"
+        ).first
+        open_item.click(timeout=ASSERTION_TIMEOUT_MS)
+        # The swap replaces the item; a resolved item exposes the reopen button.
+        page.locator(
+            ".comment-thread-item[data-state='resolved']"
+        ).first.wait_for(state="visible", timeout=8_000)
+
+    # --- Reword the source + bump the version (the "editor save" of Flow D) -------
+    with assertion(result, "render_version_bump_after_reword", page, screenshots_dir):
+        shutil.copyfile(RENDER_FIXTURE_V2, goal_dir / "refined_requirements.collab.md")
+        status, payload = _http_post_json(
+            f"{base_url}/api/goals/{slug}/requirements/versions", {}
+        )
+        assert status in (200, 201), f"POST /versions (v2) -> {status}"
+        assert isinstance(payload, dict)
+        # The agent-door comment's quote was removed → it must be reported displaced.
+        displaced = payload.get("displaced_comment_ids") or []
+        assert displaced, f"expected a displaced comment after reword, got {payload!r}"
+
+    # --- Flow D: the displaced comment surfaces in the tray (decision #1) ----------
+    with assertion(result, "render_displaced_in_tray", page, screenshots_dir):
+        page.goto(render_url, wait_until="domcontentloaded")
+        page.locator(
+            ".comment-tray [data-group='displaced'] "
+            ".comment-thread-item[data-displaced='true']"
+        ).first.wait_for(state="visible", timeout=8_000)
+
+    # --- Flow C: version toggle → tracked-changes diff view (decision #8) ----------
+    with assertion(result, "render_toggle_opens_diff", page, screenshots_dir):
+        toggle = page.locator(".version-toggle .version-toggle__diff").first
+        toggle.wait_for(state="visible", timeout=5_000)
+        toggle.click(timeout=ASSERTION_TIMEOUT_MS)
+        page.wait_for_url("**/render/diff*", timeout=8_000)
+        # The diff view renders the tracked-changes spine + the "What changed" panel.
+        page.locator(
+            ".diff-changed-panel, .diff-added, .diff-removed, .diff-modified"
+        ).first.wait_for(state="visible", timeout=8_000)
+
+
 SCREEN_DISPATCH: dict[str, Callable[[Page, dict], None]] = {
     "dashboard": _assert_dashboard,
     "agents": _assert_agents,
@@ -837,6 +1058,7 @@ SCREEN_DISPATCH: dict[str, Callable[[Page, dict], None]] = {
     "goal_detail": _assert_goal_detail,
     "focus": _assert_focus,
     "about": _assert_about,
+    "requirements_render": _assert_requirements_render,
 }
 
 

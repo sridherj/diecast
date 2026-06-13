@@ -1,0 +1,8 @@
+model: haiku            # read-only resolve-and-show; no reasoning, just a GET-shaped call + render
+dispatch_mode: subagent  # Agent tool, returns text; no cast-server delegation, no polling, no envelope
+interactive: false
+context_mode: lightweight
+timeout_minutes: 5
+proactive: false
+# Read-only by contract: NO allowed_delegations. It POSTs to /route with NO body
+# (re-resolve from persisted state) — it never originates a routing decision.

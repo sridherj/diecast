@@ -1,0 +1,28 @@
+{
+  "verdicts": [
+    {
+      "comment_id": 101,
+      "verdict": "relocated",
+      "new_quoted_text": "all HOW content shall be confined to a clearly-marked, non-binding",
+      "new_section_hint": "Functional Requirements",
+      "confidence": 0.95,
+      "reasoning": "FR-001 was reworded in v2 but the non-binding HOW confinement constraint survives verbatim in the updated row."
+    },
+    {
+      "comment_id": 102,
+      "verdict": "orphaned",
+      "new_quoted_text": null,
+      "new_section_hint": null,
+      "confidence": 0.94,
+      "reasoning": "The bullet 'Changes to the exploration pipeline (cast-explore) itself.' was removed entirely from the Out of Scope section in the new version."
+    },
+    {
+      "comment_id": 103,
+      "verdict": "relocated",
+      "new_quoted_text": "Workflow classification could surface as standard pills at the top of the document.",
+      "new_section_hint": "Directional Ideas (non-binding HOW, captured from the raw writeup and refinement)",
+      "confidence": 0.99,
+      "reasoning": "The sentence is present verbatim and unchanged in the new Directional Ideas section."
+    }
+  ]
+}

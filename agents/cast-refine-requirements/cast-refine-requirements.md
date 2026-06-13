@@ -97,6 +97,95 @@ uncovering. If exploration exists, leverage its insights to draft a stronger ini
 
 ## Workflow
 
+> **HARD GATE.** Do NOT write `refined_requirements.collab.md` in your first response. Always
+> present the (fully reviewed) draft and give the user at least one opportunity to react before
+> persisting — even when every section is medium+ confidence. (Interactive runs only — headless /
+> HTTP-delegated runs auto-persist after the reviewer; see Step 3.0.)
+
+### Step 0 — Classify (runs FIRST, before any drafting)
+
+Classify the goal up front so the document's section recipe is known before you draft. The
+gate logic lives in `bin/cast-classify-gate`, the family logic in
+`cast_server/requirements_render/families.py`, the classification in the `cast-goal-classifier`
+subagent — Step 0 only orchestrates them.
+
+1. **Dispatch the classifier.** Invoke `cast-goal-classifier` via the **Agent tool** (subagent
+   dispatch — never HTTP) with the goal **title + raw writeup**. On a re-run, also pass the prior
+   `classification` mapping so a changed family is surfaced. It returns EXACTLY ONE bare JSON
+   object `{family, confidence, reasoning, uncertainty_factors, alt_family, modifiers}`.
+
+2. **Gate in code, not the model.** Pipe that raw JSON through the gate bin:
+   `echo "$RAW_JSON" | bin/cast-classify-gate` → `{classification, action, options}`. The bin runs
+   `validate_classification` + `gate` from `families.py`; an off-schema result is already coerced
+   onto the `random_idea` floor with `coercions` recorded. Never re-derive thresholds in the prompt.
+
+3. **Obey `action`:**
+   - `auto` (confidence ≥ 0.9) → record silently; `confirmed_by: auto`.
+   - `confirm` (≥ 0.5) → ONE `AskUserQuestion` (per `/cast-interactive-questions`): the pre-filled
+     family pill first, one-click accept, the gate's `options` as overrides; `confirmed_by: user`.
+   - `choose` (< 0.5) → ONE `AskUserQuestion` with the forced top-2 (`family`, `alt_family`) plus
+     the "just notes / not sure yet" escape hatch (→ `random_idea`); `confirmed_by: user`.
+
+4. **Question-budget ordering.** Classification asks **FIRST** — it shapes the whole document. The
+   Step 1.3 scope-mode confirm (if any) asks **after** Step 0. Worst case is two one-click
+   questions; the `auto` path asks zero. The classification question does NOT count against the
+   7-question refinement budget.
+
+5. **Headless / non-interactive policy** (mirrors Step 3.0's auto-persist override): when there is
+   no human to answer —
+   - `confirm` → accept the pill, `confirmed_by: auto`.
+   - `choose` → `random_idea` (the loose default), `confirmed_by: fallback`.
+   - BOTH also append a `[NEEDS CLARIFICATION: classification unconfirmed — <family>]` line to Open
+     Questions. Never block, never guess silently.
+
+6. **Classifier-failure fail-soft.** Subagent error / timeout / unparseable output → the gate's
+   coercion path already lands on `random_idea`; record `confirmed_by: fallback` and append the same
+   Open Questions note. **Refinement NEVER dies on classification.**
+
+7. **Persist ONCE, consume twice (Decision D3).** Write the resolved `classification` mapping (add
+   `confirmed_by`, `classified_at` = the harness `currentDate` as ISO-8601, `taxonomy_version: 1`)
+   into the front-matter of `refined_requirements.collab.md` via `families.py::merge_front_matter()`
+   — NOT by hand-editing YAML. This preserves `status:`, the existing per-section `confidence:` map,
+   and Phase 4 versioning keys **byte-for-byte**. Do this at persist time (Step 3.1), exactly once:
+   never re-classify on a later render/route.
+
+8. **Recipe-driven emission.** The family selects `FAMILY_RECIPES[family]`; apply
+   `modulate(recipe, irreversible=…, unknown_cause=…)` from the `modifiers`, then emit ONLY the
+   sections that `RECIPE_REALIZATION` maps those blocks to. `random_idea` → `## Intent` only,
+   closing with a one-line "structure is available when you're ready" **offer** (an offer, never
+   empty US/FR/SC tables). After writing, run `bin/cast-spec-checker --family <family> <output_path>`
+   so the Level-2 profile applies; fix any error before the file counts as persisted.
+
+> **The recipe overrides Step 3.1's fixed template** for non-`new_initiative` families: only
+> `new_initiative` emits the full `## User Stories` / `## Functional Requirements` /
+> `## Success Criteria` depth. Never pad a family's document with sections its recipe omits — the
+> checker errors on a padded `random_idea` / `personal_non_eng` (the Template-Enforcer guard).
+
+9. **Route the goal to its downstream workflow** (after the family is confirmed and merged via
+   `merge_front_matter`). Make ONE call through the single door — never write the goal columns
+   yourself; the service owns that write:
+   ```bash
+   curl -s -X POST http://localhost:8005/api/goals/{slug}/route \
+     -H 'Content-Type: application/json' -d '{"family": "<family>"}'
+   ```
+   This both writes `workflow_family` to the goal AND records the routing decision. The response
+   carries `status, steps, message, changed, previous_family, routing_handle`.
+   - **Authority (D2):** `goals.workflow_family` (the column this call sets) is the **authoritative**
+     routing record; the front-matter `classification.family` you merged in step 7 is the document's
+     self-description, reconciled to the column on each refine. A hand-edited front-matter family
+     takes effect only by re-running refinement (which re-routes and overwrites the column). Do NOT
+     make front-matter authoritative.
+   - **Surface it honestly** in the refinement summary, showing the stub status —
+     e.g. `Routed downstream workflow: bug_fix (stub) — steps: logs → RCA → confirm → fix/test`.
+   - **Reclassification (US6 S4):** when the response has `changed: true`, surface the new workflow
+     (old `previous_family` → new `family`, with the new `steps`) as part of the **existing**
+     classification confirm — add NO new `AskUserQuestion` slot. Headless: extend the Step 0 point-5
+     Open Questions note with the routing change.
+   - **Fail-soft:** server down / non-200 → do NOT abort refinement. Append an Open Questions line —
+     *"classification recorded in front-matter; routing not recorded — re-run `/cast-router` or POST
+     `/api/goals/{slug}/route`"* — and continue. Classification and routing are decoupled failure
+     domains.
+
 ### Phase 1: Draft (single-pass)
 
 #### Step 1.1: Read All Available Artifacts
@@ -148,6 +237,25 @@ Assess the maturity of the requirements:
 
 Adapt your approach to the stage. Don't force Stage 1 techniques on Stage 3 problems.
 
+This table is the **Template-Enforcer guard at the authoring layer**: a vague-stage writeup must
+never be forced to full EARS depth. The detected stage licenses which sections may legitimately
+stay thin (and therefore low-confidence) without padding — never invent detail to hit a template
+slot. **Stage = how mature the input is; scope mode = how ambitious the output should be** (the
+scope-mode table just below). Both are detected here in Phase 1 and both stated to the user in
+Step 2.1.
+
+**Detect scope mode** (how ambitious the output should be — orthogonal to stage):
+
+| Signal words in the writeup | Scope mode | Effect on the draft |
+|------------------------------|-----------|---------------------|
+| "MVP", "minimum", "just enough", "spike", "v0" | SCOPE REDUCTION | Fewer EARS scenarios; ruthless Out of Scope; defer-by-default |
+| none / balanced language | HOLD SCOPE (default) | Scenario depth per the stage table above |
+| "comprehensive", "full-featured", "dream", "ideal", "10x" | SCOPE EXPANSION | Exhaustive edge cases; stretch items captured in Directional ideas |
+
+State the detected mode and the quoted signal words to the user in Step 2.1. If signals conflict
+(reduction *and* expansion words both present), confirming the mode becomes one Phase 2 question
+(it counts against the 7-question budget — it is exactly the "high-risk unknown" tier).
+
 #### Step 1.4: Generate Structured Draft
 
 Produce a draft with these sections:
@@ -184,17 +292,37 @@ Assign confidence (low/medium/high) per section:
 | Constraints | None stated | Some stated, gaps likely | Comprehensive, realistic |
 | Out of Scope | Not defined | Partially defined | Clear boundaries |
 
-**Proceed to Phase 2 if any section is low confidence.** If all sections are medium+,
-skip directly to Phase 3.
+**Proceed to Phase 2 if any section is low confidence.** If all sections are medium+, skip the
+*questioning loop*, but still run the independent reviewer (Step 2.5), then present the draft and
+wait for one go-ahead (Step 3.0) before persisting. The minimum interaction is now one
+draft-review round-trip — the prompt no longer allows a zero-interaction one-shot. This costs one
+extra round-trip on otherwise-clean runs; that cost is accepted by design.
+
+**Evidence-quoting mandate.** A section may be rated **medium or high** confidence ONLY if you
+can cite a **verbatim quote** from the raw writeup or the conversation that supports the rating.
+This is `/plan-eng-review`'s "quote the verbatim motivating line" gate applied to confidence — it
+kills the "high confidence because I didn't check" failure mode the Quality Bar already names. If
+the supporting quote is **unquotable** (you cannot point to actual text), the rating **drops to
+low** and the gap is routed to Open Questions as a `[NEEDS CLARIFICATION: …]` entry. Carry the
+quote forward — it is shown next to the rating when you present the draft in Step 2.1.
 
 ### Phase 2: Refine (interactive, 7 questions max)
 
 #### Step 2.1: Present Draft
 
 Present the structured draft to the user with:
+- The detected scope mode and the verbatim signal words that triggered it (e.g. `Scope mode:
+  SCOPE REDUCTION — "MVP", "just the happy path"`). For HOLD SCOPE with no signals, say so
+  explicitly: `Scope mode: HOLD SCOPE — no scope signals detected`.
 - Each section clearly labeled
 - Low-confidence sections highlighted with `[LOW CONFIDENCE]` markers
 - A brief explanation of what's missing or unclear in each low-confidence section
+- For every section rated medium or high, the **verbatim quote** that justifies the rating
+  (the evidence-quoting mandate from Step 1.5), shown inline next to the rating. Example:
+  `Intent — HIGH ("we keep losing track of which goals are actually blocked")`. A medium/high
+  rating shown without a quote is invalid — drop it to low and route the gap to Open Questions.
+  This is a conversation-only presentation detail; the persisted front-matter `confidence:` shape
+  is unchanged.
 
 #### Step 2.2: Ask Clarifying Questions
 
@@ -295,10 +423,60 @@ Stop the refinement loop when ANY of these are true:
 - 7 questions have been asked (budget exhausted)
 - the user says "good enough", "let's move on", or similar
 
-When stopping due to budget exhaustion with remaining low-confidence sections, note them
-explicitly in Open Questions.
+**Zero-silent-failure invariant (no silent low-confidence sections):** whenever the loop exits —
+budget exhausted or otherwise — *every* section still below medium confidence MUST have a matching
+`[NEEDS CLARIFICATION: …]` entry in Open Questions (the shape `cast-spec-checker` already lints).
+No section may silently ship low-confidence: if it is not medium+, its open question is mandatory.
+
+#### Step 2.5: Independent Adversarial Review (fresh-context reviewer)
+
+Before the draft is presented for go-ahead, get a fresh pair of eyes on it. Dispatch a **Claude
+Code Agent tool** general-purpose subagent whose prompt contains **ONLY the draft document** —
+never the conversation. Fresh context is the whole point: the reviewer must judge the spec on its
+own merits, exactly as a downstream coder will read it cold.
+
+**Stub-skip (Decision #6):** if the input is a vague-stage stub (<200 words / Stage 1 per the Step
+1.3 stage table), skip the reviewer entirely and surface `review skipped: stub-sized input` — there
+is too little substance for adversarial review to add value.
+
+**Rubric — score the draft 1–10 on five dimensions; return specific issues for every dimension
+scoring below 7:**
+
+| Dimension | Scores high when… |
+|-----------|-------------------|
+| Completeness | All behaviors covered; no obvious missing scenarios or sections |
+| Consistency | No internal contradictions; terms and identifiers used uniformly |
+| Clarity | A coder could implement without asking the PM |
+| Scope | Out of Scope is explicit and matches the detected scope mode |
+| Feasibility | Constraints are realistic and quantified |
+
+**Convergence guard:** for each dimension <7, fix the cited issues in the draft and re-dispatch.
+**Max 3 iterations.** After the third pass, stop and log any remaining <7 issues to Open Questions
+as `[NEEDS CLARIFICATION: …]` entries. Never exceed the 7-question budget on the reviewer's behalf
+— user-resolvable issues fold into the question budget / Open Questions.
+
+**Fail-soft:** if the subagent errors or is unavailable, note `independent review skipped: <reason>`
+to the user and proceed. The reviewer must NEVER block refinement. (On a skipped or failed reviewer
+run there is no adversarial pass at all — accepted per Decision #3; the evidence-quoting mandate and
+the zero-silent-failure Open-Questions invariant still hold.)
+
+This is the **sole** adversarial pass — the activity-5 meta-pass was cut (Decision #3); do not add a
+second rubric. Run it **before** the Step 3.0 final draft presentation so the user signs off on the
+version that actually persists (Decision #2).
 
 ### Phase 3: Persist
+
+#### Step 3.0: Present the reviewed draft and wait (HARD GATE)
+
+**Interactive runs:** present the fully-reviewed draft (post-Step-2.5) and wait for at least one
+go-ahead before writing anything. The user must see the version that will persist and have a chance
+to react — even on a clean run where every section is medium+ confidence. Do not write the file in
+the same response that first shows the reviewed draft.
+
+**Headless / HTTP-delegated runs (supported — explicitly NOT a non-goal):** when invoked with no
+human to give the go-ahead — a parent agent dispatching `cast-refine-requirements` as a child — do
+NOT wait at the gate. After the Step 2.5 reviewer, **persist automatically** and record
+`auto-persisted: non-interactive run` in the output contract.
 
 #### Step 3.1: Write refined_requirements.collab.md
 
@@ -308,6 +486,7 @@ Render the final spec against `templates/cast-spec.template.md`. Write to
 ```yaml
 ---
 status: refined
+scope_mode: reduction | hold | expansion  # set from the Step 1.3 scope-mode detection
 confidence:
   intent: high
   behavior: medium
@@ -368,6 +547,12 @@ isolation]
 
 - [Explicitly excluded items]
 
+## Decisions
+
+| Date | Chose | Over | Because |
+|------|-------|------|---------|
+| 2026-06-12 | [option picked] | [option(s) rejected] | [rationale at decision-time] |
+
 ## Open Questions
 
 - **[NEEDS CLARIFICATION: <topic>]** — what specifically is unclear and who
@@ -378,6 +563,19 @@ The shape above is the canonical spec-kit shape adopted in US7. Every inline
 `[NEEDS CLARIFICATION: <what>]` marker MUST also appear as a matching entry in
 the Open Questions section (the `cast-spec-checker` lint enforces this).
 
+**Populate `## Decisions` by answer-time buffering** (mirrors `cast-plan-review`'s
+buffer-at-decision-time pattern). The moment an `AskUserQuestion` fork resolves in Phase 2,
+append `{date, chose, over, because}` to an in-memory list — `date` = the harness `currentDate`,
+`chose` = the option the user picked, `over` = the option(s) they rejected, `because` = their
+stated or implied rationale **at that moment**. At persist, render the table verbatim from that
+list. **Do NOT reconstruct the table from end-of-session memory** — reconstruction confabulates
+Over/Because after intervening turns. Record **human** choices only: a default the agent applied
+unilaterally (one the user never saw) does NOT belong here — recording only human decisions is
+what makes this section durable provenance for downstream (Phase 4) versioning. If no forks were
+resolved this refinement (a 0-question run), still emit the section, with a single
+`*No decisions recorded this refinement.*` line instead of the table — a stable section set is
+easier for the downstream parser to consume than a sometimes-absent H2.
+
 #### Step 3.2: Confirm Completion
 
 Tell the user:
@@ -385,6 +583,62 @@ Tell the user:
 - Summary of confidence levels
 - Any remaining open questions
 - What downstream agents will consume this file (planner, task suggester)
+
+### Phase 4: Iterate (only when the goal already has open comments)
+
+A goal whose requirements have reviewer comments is **unconverged**. When you are invoked on such
+a goal (`GET /api/goals/{slug}/requirements/comments?state=open` returns a non-empty list), run
+this loop instead of a from-scratch draft. It is API-driven — the composer and an agent hit the
+**same door** (FR-013); you never write comment/version rows directly.
+
+1. **Address the open comments** in a new draft and write `refined_requirements.collab.md` as usual
+   (Phase 3). The goal folder NEVER gains a second requirements file (FR-011) — versions are DB rows.
+2. **Cut the version:** `POST /api/goals/{slug}/requirements/versions` (reads the current goal file).
+   Read `displaced_comment_ids` from the returned contract dict — open comments whose stored quote
+   is no longer a verbatim substring of the new file.
+3. **Re-anchor the displaced comments AND narrate the diff (one dispatch — contract v2):** dispatch
+   **`cast-comment-reanchor`** via the **Agent tool** (subagent mode — never HTTP). It is a
+   backward-compatible superset, so pass the v2 inputs:
+   - The displaced comments `{id, quoted_text, section_hint, body}` + the OLD version content + the
+     NEW current content (exactly as v1).
+   - **`change_set`** — fetch `GET /api/goals/{slug}/requirements/changes?base=N-1&head=N` (JSON)
+     and pass its `{counts, items}` dict verbatim. (Asking the agent to narrate the deterministic
+     set, never invent one.)
+   - **Per-comment block context** — for each displaced comment derive its OLD `block_ref` +
+     `block_disposition` **deterministically** with the pure helper
+     `requirements_render.comment_anchor.resolve_block_context(old_content, comments, change_set)`
+     (it `parse_requirements(old_content)` then finds the `Block.ref` whose
+     `strip_inline_markdown(body)` contains the quote — the SAME stripper the survival gate uses,
+     never a second one). Attach `block_ref` + `block_disposition` to each comment that resolved to
+     a single block. **A cross-boundary quote (no single containing block) gets NO `block_ref` —
+     omit it, never guess** (orphan-over-guess at the resolver layer).
+
+   It returns ONE bare JSON `{narration: null|{overview, item_notes:[{change, heading_or_ref,
+   note}]}, verdicts:[{comment_id, verdict, new_quoted_text, new_section_hint, confidence,
+   reasoning}]}`. A failed / timed-out / unparseable dispatch is a **no-op** — apply no verdicts,
+   POST no narration, leave the comments in the tray, never crash (the next cycle retries).
+4. **Apply each verdict through the API** (the verdict safety machinery is unchanged — a bad guess
+   can never silently mis-place or wrongly close a comment):
+   - `relocated` → `POST .../comments/{id}/relocate` with `new_quoted_text` + `new_section_hint`.
+     A **422** (quote not verbatim in the file) **downgrades to** `POST .../comments/{id}/orphan` —
+     the comment surfaces in the tray either way. **Zero silent loss, zero invented anchors.**
+   - `resolved` → `POST .../comments/{id}/resolve` with `actor=cast-comment-reanchor` and a
+     body-note pointing at the change. **Respect the v2 state machine (Decision #11):** if a human
+     changed the comment's state between dispatch and apply, the server returns **409** (no longer
+     `open`) — treat that as a clean no-op/rejection, never a forced overwrite (symmetric to
+     relocate's 422 downgrade; the state machine owns the final transition).
+   - `orphaned` → `POST .../comments/{id}/orphan`.
+5. **POST the narration (when the dispatch returned one):** if `narration` is non-null,
+   `POST /api/goals/{slug}/requirements/versions/{head}/narration` with body
+   `{base: N-1, overview, item_notes, created_by: "cast-refine-requirements"}` (your own actor id —
+   same-door convention). The server **recomputes the deterministic set and 422s on any key
+   mismatch** — on a 422, **retry once**, then proceed **narration-less** (the deterministic
+   "What changed" panel is the floor; never block the loop on a narration miss). A human-initiated
+   cut simply has no narration. *(The narration endpoint lands in sp4b-3; if it 404s because 4b-3
+   has not shipped yet, treat it like the narration-less floor — guard the POST, never crash.)*
+
+> Dispatch/poll/apply mechanics: `/cast-child-delegation`. Convergence is derived, never stored:
+> the goal is converged iff `open_comment_count == 0`.
 
 ## Quality Bar
 

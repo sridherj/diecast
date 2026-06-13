@@ -1,0 +1,216 @@
+{
+  "capture-user-invocations-as-runs": {
+    "family": "random_idea",
+    "confidence": 0.88,
+    "reasoning": "The writeup contains only a section header with no substantive content \u2014 there is nothing to act on yet.",
+    "uncertainty_factors": [
+      "title hints at a real feature but writeup is empty"
+    ],
+    "alt_family": "new_initiative",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "cast-subagent-and-skill-capture": {
+    "family": "new_initiative",
+    "confidence": 0.92,
+    "reasoning": "Adds a new end-to-end capability \u2014 hook-based capture of Task()-spawned subagents and skill invocations into agent_runs with parent attribution and UI display \u2014 that does not exist today and requires DB schema changes, new hooks, and UI work.",
+    "uncertainty_factors": [],
+    "alt_family": "pilot_poc",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "cast-ui-harness-layered-fixes": {
+    "family": "random_idea",
+    "confidence": 0.72,
+    "reasoning": "The writeup is a single placeholder heading with no actual requirements, symptoms, or scope \u2014 not enough signal to act on yet.",
+    "uncertainty_factors": [
+      "title hints at bug_fix work but writeup has no repro, no symptoms, no scope",
+      "'finish brainstorming' signals pre-requirements state"
+    ],
+    "alt_family": "bug_fix",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "cast-ui-test-children-completion": {
+    "family": "bug_fix",
+    "confidence": 0.85,
+    "reasoning": "Test children demonstrably fail to complete (no output.json within timeout, sessions SIGKILL'd by pytest teardown); root cause is unknown but the defect is well-reproduced.",
+    "uncertainty_factors": [
+      "multiple candidate root causes listed (permission prompt, Playwright hang, resource contention)",
+      "some scope feels exploratory/investigative rather than fix-shaped"
+    ],
+    "alt_family": "testing_qa",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": true
+    }
+  },
+  "child-delegation-e2e": {
+    "family": "random_idea",
+    "confidence": 0.82,
+    "reasoning": "The writeup is a bare section header with no content \u2014 not enough signal to identify scope, requirements, or deliverables.",
+    "uncertainty_factors": [
+      "title hints at e2e testing work but writeup is empty"
+    ],
+    "alt_family": "testing_qa",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "child-delegation-integration-tests": {
+    "family": "bug_fix",
+    "confidence": 0.72,
+    "reasoning": "The primary deliverable is diagnosing and fixing known-broken delegation behaviors; tests are the mechanism to pin and verify the fixes, not the end goal itself.",
+    "uncertainty_factors": [
+      "title emphasizes 'integration tests' suggesting testing_qa",
+      "test re-establishment is substantial independent work"
+    ],
+    "alt_family": "testing_qa",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": true
+    }
+  },
+  "comprehensive-ui-test": {
+    "family": "testing_qa",
+    "confidence": 0.88,
+    "reasoning": "Requests end-to-end Playwright UI test coverage across all screens of an existing app with a reusable, repeatable test plan \u2014 core testing_qa scope even though agent infrastructure must be built to support it.",
+    "uncertainty_factors": [
+      "'create test agents with delegation capability' has new_initiative flavor \u2014 new infra is being built, not just tests added"
+    ],
+    "alt_family": "new_initiative",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "improved-first-launch": {
+    "family": "random_idea",
+    "confidence": 0.85,
+    "reasoning": "The writeup contains only a section heading with no actual content \u2014 it's a placeholder for future brainstorming, not actionable requirements.",
+    "uncertainty_factors": [
+      "title hints at a feature (first launch flow) which could be new_initiative, but no substance exists yet"
+    ],
+    "alt_family": "new_initiative",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "manual-test": {
+    "family": "random_idea",
+    "confidence": 0.82,
+    "reasoning": "A single heading with no supporting detail \u2014 'finish brainstorming/initial requirements' describes a state of thinking, not actionable work.",
+    "uncertainty_factors": [
+      "title 'manual-test' hints at testing but writeup gives no substance to pin that down"
+    ],
+    "alt_family": "testing_qa",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "product-revamp-diecast": {
+    "family": "new_initiative",
+    "confidence": 0.75,
+    "reasoning": "Defines a substantial new product vision with specific features, design principles, and target users \u2014 the 'mockup' framing is a starting point for execution, not a time-boxed learning experiment.",
+    "uncertainty_factors": [
+      "explicit 'mock up' framing has PoC flavor",
+      "many ideas described as open-ended / still being refined"
+    ],
+    "alt_family": "pilot_poc",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "refine-requirements-v2": {
+    "family": "new_initiative",
+    "confidence": 0.88,
+    "reasoning": "Substantial expansion of an existing skill with new deliverables: HTML output format, intent-based templates, inline annotations, versioning/archival, and drift-notification \u2014 all new capabilities, not repairs or cleanup.",
+    "uncertainty_factors": [
+      "some sub-items (archival strategy, annotation library) are exploratory and could be scoped as a pilot"
+    ],
+    "alt_family": "pilot_poc",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "revamp-diecast": {
+    "family": "new_initiative",
+    "confidence": 0.85,
+    "reasoning": "Describes a substantial v2 product overhaul with scope across UI, workflow orchestration, ICP definition, onboarding, and tooling \u2014 multiple user stories, clear launch intent, and named success criteria (eng/PM persona fit, easier setup, better UI).",
+    "uncertainty_factors": [
+      "contains a discovery/catch-up sub-goal that leans pilot_poc",
+      "some directions are half-formed spikes rather than committed scope"
+    ],
+    "alt_family": "pilot_poc",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "runs-threaded-tree": {
+    "family": "random_idea",
+    "confidence": 0.88,
+    "reasoning": "The writeup is a single heading with no content \u2014 not enough signal to determine what 'Runs Threaded Tree' means or what work it entails.",
+    "uncertainty_factors": [
+      "title is ambiguous without context",
+      "writeup has no body content"
+    ],
+    "alt_family": "new_initiative",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "test-python-scaffolding": {
+    "family": "random_idea",
+    "confidence": 0.72,
+    "reasoning": "The writeup is a single unstructured heading indicating brainstorming is still in progress \u2014 there is not enough signal to act on yet.",
+    "uncertainty_factors": [
+      "title hints at testing_qa but writeup has no requirements",
+      "could become new_initiative or testing_qa once fleshed out"
+    ],
+    "alt_family": "testing_qa",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "ui-debug-1777608711": {
+    "family": "random_idea",
+    "confidence": 0.85,
+    "reasoning": "The writeup is a single-line placeholder with no actionable content \u2014 no bug description, no scope, no requirements \u2014 just a note to finish brainstorming.",
+    "uncertainty_factors": [
+      "title hints at UI debugging but writeup provides no supporting detail"
+    ],
+    "alt_family": "bug_fix",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  },
+  "ui-debug-1777608769": {
+    "family": "random_idea",
+    "confidence": 0.82,
+    "reasoning": "Writeup contains only a section header with no described work, symptoms, or scope \u2014 not enough signal to classify as a specific family.",
+    "uncertainty_factors": [
+      "title suggests UI debugging but writeup has zero content",
+      "brainstorming/requirements stage means no concrete shape yet"
+    ],
+    "alt_family": "bug_fix",
+    "modifiers": {
+      "irreversible": false,
+      "unknown_cause": false
+    }
+  }
+}

@@ -1,0 +1,80 @@
+==============================================================================
+FAMILY: new_initiative
+==============================================================================
+[1] id-token SET EQUALITY .......... PASS
+    source ids (31): ['FR-001', 'FR-002', 'FR-003', 'FR-004', 'FR-005', 'FR-006', 'FR-007', 'FR-008', 'FR-009', 'FR-010', 'FR-011', 'FR-012', 'FR-013', 'FR-014', 'FR-015', 'FR-016', 'SC-001', 'SC-002', 'SC-003', 'SC-004', 'SC-005', 'SC-006', 'SC-007', 'SC-008', 'US1', 'US2', 'US3', 'US4', 'US5', 'US6', 'US7']
+    visible ids (31): ['FR-001', 'FR-002', 'FR-003', 'FR-004', 'FR-005', 'FR-006', 'FR-007', 'FR-008', 'FR-009', 'FR-010', 'FR-011', 'FR-012', 'FR-013', 'FR-014', 'FR-015', 'FR-016', 'SC-001', 'SC-002', 'SC-003', 'SC-004', 'SC-005', 'SC-006', 'SC-007', 'SC-008', 'US1', 'US2', 'US3', 'US4', 'US5', 'US6', 'US7']
+
+[2] FR-003 PER-BLOCK CORRESPONDENCE  PASS
+    anchor labels: 31   every id labeled exactly once: True
+    id        own-overlap  best-source-match  block-match
+    US1        12          US1      (12)       ok
+    US2         9          US2      ( 9)       ok
+    US3        11          US3      (11)       ok
+    US4        11          US4      (11)       ok
+    US5        14          US5      (14)       ok
+    US6        14          US6      (14)       ok
+    US7        16          US7      (16)       ok
+    FR-001     19          FR-001   (19)       ok
+    FR-002     12          FR-002   (12)       ok
+    FR-003     20          FR-003   (20)       ok
+    FR-004     23          FR-004   (23)       ok
+    FR-005     15          FR-005   (15)       ok
+    FR-006     22          FR-006   (22)       ok
+    FR-007     11          FR-007   (11)       ok
+    FR-008      9          FR-008   ( 9)       ok
+    FR-009     15          FR-009   (15)       ok
+    FR-010     19          FR-010   (19)       ok
+    FR-011     20          FR-011   (20)       ok
+    FR-012     20          FR-012   (20)       ok
+    FR-013     28          FR-013   (28)       ok
+    FR-014     13          FR-014   (13)       ok
+    FR-015     26          FR-015   (26)       ok
+    FR-016     19          FR-016   (19)       ok
+    SC-001     13          SC-001   (13)       ok
+    SC-002     11          SC-002   (11)       ok
+    SC-003     10          SC-003   (10)       ok
+    SC-004     10          SC-004   (10)       ok
+    SC-005      7          SC-005   ( 7)       ok
+    SC-006      9          SC-006   ( 9)       ok
+    SC-007     16          SC-007   (16)       ok
+    SC-008     14          SC-008   (14)       ok
+
+[3a] SELF-CONTAINMENT .............. PASS
+    external src (non-sanctioned): none
+    <link> tags: False   stray href: none
+[3b] ZERO-id / data-block-anchor ... PASS
+    elements with id attribute: 0   elements with data-block-anchor attribute: 0
+    (raw grep — start-tag 'id=': 0; substring 'data-block-anchor': 1 — prose/comment mentions of the contract, not attributes)
+
+==> new_initiative: ALL AUDITS PASS
+
+==============================================================================
+FAMILY: bug_fix
+==============================================================================
+[1] id-token SET EQUALITY .......... PASS
+    source ids (7): ['FR-001', 'FR-002', 'FR-003', 'FR-004', 'SC-001', 'SC-002', 'SC-003']
+    visible ids (7): ['FR-001', 'FR-002', 'FR-003', 'FR-004', 'SC-001', 'SC-002', 'SC-003']
+
+[2] FR-003 PER-BLOCK CORRESPONDENCE  PASS
+    anchor labels: 7   every id labeled exactly once: True
+    id        own-overlap  best-source-match  block-match
+    FR-001     22          FR-001   (22)       ok
+    FR-002     13          FR-002   (13)       ok
+    FR-003     17          FR-003   (17)       ok
+    FR-004     18          FR-004   (18)       ok
+    SC-001     15          SC-001   (15)       ok
+    SC-002      9          SC-002   ( 9)       ok
+    SC-003      9          SC-003   ( 9)       ok
+
+[3a] SELF-CONTAINMENT .............. PASS
+    external src (non-sanctioned): none
+    <link> tags: False   stray href: none
+[3b] ZERO-id / data-block-anchor ... PASS
+    elements with id attribute: 0   elements with data-block-anchor attribute: 0
+    (raw grep — start-tag 'id=': 0; substring 'data-block-anchor': 3 — prose/comment mentions of the contract, not attributes)
+
+==> bug_fix: ALL AUDITS PASS
+
+##############################################################################
+OVERALL: ALL FAMILIES PASS ALL AUDITS

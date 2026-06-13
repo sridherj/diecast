@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refine Requirements v2 — Workflow-Aware, HTML-First Requirements Refinement — changes v1 → v2</title>
+<style>
+/* === Design Tokens — copied verbatim from static/style.css :root (pin-tested) === */
+:root {
+    /* Brand palette */
+    --color-bg: #F5F4F0;
+    --color-text: #1A1A28;
+    --color-muted: #4A4860;
+    --color-surface: #ECEAE4;
+    --color-accent: #D6235C;
+    --color-accent-hover: #B01D4D;
+    --color-callout-bg: rgba(214, 35, 92, 0.06);
+    --color-callout-border: var(--color-accent);
+    --color-question-bg: rgba(74, 72, 96, 0.06);
+    --color-question-border: var(--color-muted);
+    --color-link: var(--color-accent);
+    --color-link-hover: var(--color-accent-hover);
+
+    /* Typography */
+    --font-heading: &#39;IBM Plex Mono&#39;, &#39;SF Mono&#39;, &#39;Fira Code&#39;, monospace;
+    --font-body: &#39;DM Sans&#39;, system-ui, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, sans-serif;
+    --font-display-accent: &#39;Caveat&#39;, cursive;
+
+    /* Subtle workshop grid */
+    --grid-size: 5px;
+    --grid-color: rgba(74, 72, 96, 0.07);
+
+    /* Semantic status colors (cream-friendly variants) */
+    --color-success: #2D7D4F;
+    --color-warning: #B5821A;
+    --color-danger: #B22439;
+    --color-info: #3B5BB0;
+    --color-focus: #6B47B0;
+
+    /* Back-compat aliases for legacy var refs throughout the codebase */
+    --bg-primary: var(--color-bg);
+    --bg-surface: var(--color-surface);
+    --bg-surface-hover: #E1DED7;
+    --border: rgba(74, 72, 96, 0.18);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-muted);
+    --text-muted: rgba(74, 72, 96, 0.65);
+    --color-primary: var(--color-accent);
+    --color-primary-hover: var(--color-accent-hover);
+    --font-sans: var(--font-body);
+    --font-mono: var(--font-heading);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --sidebar-width: 240px;
+}
+
+/* === Render-local tokens (not in style.css :root — render-only additions) ===
+   Kept OUTSIDE the pin-tested block conceptually but defined on :root so the
+   hex-literal scan (which only permits hex inside :root) stays satisfied.
+   These do not participate in the byte-match invariant (the drift test asserts
+   style.css tokens are preserved in the theme, not the reverse). */
+:root {
+    --color-on-accent: #FFFFFF;          /* white text on accent fills (callout-num) */
+    --rr-content-max: 52rem;             /* readable measure for the document column */
+    --rr-l1-size: 1.35rem;               /* L1 survives a 90% cut — the loudest body */
+    --rr-l2-size: 1.05rem;               /* L2 survives a 50% cut — must NOT out-weigh L1 */
+    --rr-l3-size: 0.95rem;               /* L3 detail inside &lt;details&gt; */
+}
+
+/* === Base / document frame === */
+* , *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+    margin: 0;
+    background-color: var(--color-bg);
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    font-family: var(--font-body);
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.rr-document {
+    max-width: var(--rr-content-max);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+a { color: var(--color-link); }
+a:hover { color: var(--color-link-hover); }
+
+/* === Typography — lifted from cast-preso toolkit, em-scaling adapted to rem ===
+   Class names kept VERBATIM so the checker rubric language transfers directly.
+   L1/L2/L3 are assigned by IMPORTANCE, not heading depth. */
+h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--color-text);
+}
+
+h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; }
+h3 { font-size: 1.15rem; margin: 1.25rem 0 0.5rem; }
+h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+
+.slide-title {
+    font-family: var(--font-heading);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-text);
+}
+
+/* L1 — survives a 90% cut: the loudest body line. */
+.l1-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l1-size);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* L2 — survives a 50% cut. Deliberately lighter + smaller than L1 so it can
+   never visually out-weigh it. */
+.l2-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l2-size);
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.source-citation {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.muted { color: var(--color-muted); }
+
+/* === Callout — decided WHAT accent (L2 emphasis). Lifted verbatim. === */
+.callout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-callout-border);
+    background: var(--color-callout-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 16px 20px;
+}
+
+.callout .callout-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.callout .callout-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* === Question annotation — tentative HOW / open questions (muted, italic). === */
+.question-annotation {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-question-border);
+    background: var(--color-question-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 12px 16px;
+    font-style: italic;
+}
+
+.question-annotation .question-icon {
+    font-size: 1.2em;
+    flex-shrink: 0;
+    color: var(--color-muted);
+    font-style: normal;
+}
+
+.question-annotation .question-text {
+    flex: 1;
+    line-height: 1.4;
+    color: var(--color-muted);
+}
+
+/* === Family pill — cloned from .phase-badge (style.css ~1979). Tints use
+   rgba() literals exactly like the .phase-badge precedent (rgba, not hex,
+   so FR-012&#39;s hex ban is satisfied). === */
+.family-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.family-pill--new_initiative     { background-color: rgba(107, 71, 176, 0.12); color: var(--color-focus); }
+.family-pill--pilot_poc          { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--bug_fix            { background-color: rgba(178, 36, 57, 0.12);  color: var(--color-danger); }
+.family-pill--data_analysis      { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--random_idea        { background-color: rgba(181, 130, 26, 0.14); color: var(--color-warning); }
+.family-pill--testing_qa         { background-color: rgba(45, 125, 79, 0.12);  color: var(--color-success); }
+.family-pill--refactor_migration { background-color: rgba(74, 72, 96, 0.12);   color: var(--color-muted); }
+.family-pill--personal_non_eng   { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+.family-pill--generic            { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+
+/* Rescue state — visually distinct (dashed accent border) for the
+   &#34;Unclassified — re-run refinement&#34; path used by sp2/sp3. */
+.family-pill--unclassified {
+    background-color: rgba(178, 36, 57, 0.08);
+    color: var(--color-danger);
+    border: 1px dashed var(--color-danger);
+}
+
+/* === Goal Card — the above-the-fold zero-click block === */
+.goal-card {
+    background: var(--color-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+}
+
+.goal-card .goal-card__job {
+    margin: 0.75rem 0 0;
+}
+
+.goal-card .goal-card__assertions {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.goal-card .goal-card__assertions &gt; li {
+    margin: 0.4rem 0;
+}
+
+.version-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+/* === Recipe sections === */
+.recipe-section { margin: 1.5rem 0; }
+
+/* === Scope grid — side-by-side, renders OPEN, never collapsed === */
+.scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.scope-grid .scope-col h3 { margin-top: 0; }
+
+@media (max-width: 640px) {
+    .scope-grid { grid-template-columns: 1fr; }
+}
+
+/* === Disclosure (&lt;details&gt;) styling — closed by default, clear affordance === */
+details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0 1rem;
+    margin: 0.75rem 0;
+}
+
+details &gt; summary {
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    padding: 0.75rem 0;
+    list-style: none;
+}
+
+details &gt; summary::-webkit-details-marker { display: none; }
+
+details &gt; summary::before {
+    content: &#34;\25B8&#34;;              /* ▸ collapsed affordance */
+    display: inline-block;
+    margin-right: 0.5rem;
+    color: var(--color-muted);
+    transition: transform 0.15s ease;
+}
+
+details[open] &gt; summary::before {
+    transform: rotate(90deg);
+}
+
+details &gt; summary:hover {
+    color: var(--color-accent);
+}
+
+details &gt; .details-body {
+    font-size: var(--rr-l3-size);
+    padding-bottom: 1rem;
+}
+
+/* === Directional — quarantined HOW, muted, last === */
+.directional {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--color-muted);
+}
+
+.directional h2 { color: var(--color-muted); }
+
+/* === Expand-all control === */
+.rr-controls {
+    margin: 0 0 1.5rem;
+}
+
+.rr-controls .expand-all-btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.rr-controls .expand-all-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* === Phase 4 — version toggle (links to the throwaway diff view) === */
+.version-toggle {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.version-toggle__current {
+    color: var(--color-muted);
+}
+
+.version-toggle__diff {
+    color: var(--color-accent);
+}
+
+/* === Print: force every &lt;details&gt; open so nothing hides on paper === */
+@media print {
+    body { background-image: none; }
+    .rr-controls { display: none; }
+    details &gt; * { display: block; }
+}
+
+/* === Phase 4 — tracked-changes (diff) view ============================================
+   Scoped to the diff classes only; emitted exclusively by diff_render.py&#39;s throwaway view,
+   never by the canonical render. Tokens only — green/amber/red map to the existing
+   success/warning/danger semantic tokens (the Phase 3a hex-scan forbids hex outside :root). */
+.diff-changed-panel {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+}
+
+.diff-changed-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.diff-changed-counts {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    margin: 0 0 0.75rem;
+}
+
+.diff-changed-list { margin: 0; padding-left: 1.25rem; }
+.diff-changed-item { margin: 0.2rem 0; }
+.diff-changed-empty { color: var(--color-muted); margin: 0; }
+.diff-changed-item--added a    { color: var(--color-success); }
+.diff-changed-item--modified a { color: var(--color-warning); }
+.diff-changed-item--removed a  { color: var(--color-danger); }
+
+.diff-block {
+    border-left: 4px solid var(--border);
+    padding: 0.5rem 0 0.5rem 1rem;
+    margin: 0.75rem 0;
+}
+
+.diff-block-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-bottom: 0.25rem;
+}
+
+.diff-block-body { white-space: pre-wrap; }
+
+.diff-added    { border-left-color: var(--color-success); }
+.diff-modified { border-left-color: var(--color-warning); }
+.diff-removed  { border-left-color: var(--color-danger); }
+
+.diff-removed .diff-block-body {
+    color: var(--color-danger);
+    text-decoration: line-through;
+}
+
+.diff-prev { margin-top: 0.4rem; }
+.diff-prev &gt; summary {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+.diff-prev del {
+    display: block;
+    white-space: pre-wrap;
+    color: var(--color-muted);
+    margin-top: 0.3rem;
+}
+
+/* === Phase 4 (sp5) — vanilla comment layer (decision #7) ==============================
+   The locked commenting UX: &lt;mark&gt; highlight, floating 💬 pill, inline composer, and the
+   always-surfaced tray (decision #9). Tokens only — never hex (the Phase 3a hex-scan
+   forbids hex outside :root). These classes render only when the JS layer is live; the
+   bare-file artifact never shows them (progressive enhancement). */
+
+/* Highlighted span of a placed open comment. */
+.comment-mark {
+    background: var(--color-callout-bg);
+    border-bottom: 2px solid var(--color-accent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    cursor: pointer;
+    padding: 0 1px;
+}
+
+/* Floating &#34;💬 Comment&#34; pill at the selection rect. */
+.comment-pill {
+    position: absolute;
+    z-index: 40;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(26, 26, 40, 0.18);
+}
+
+/* Discoverable commenting affordance (US6 / FR-014 / SC-006): a visible control + a hint that
+   states the otherwise-hidden select gesture. JS-injected into .rr-controls on served renders
+   (slug present) by requirements_comments.js; a bare file:// open 404s that script, so these
+   rules stay inert in the standalone artifact (FR-028 progressive enhancement). Class selectors
+   only, never an id (DOM contract US7/FR-013); tokens only — never hex (Phase 3a hex-scan). */
+.comment-affordance {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    margin-left: 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    cursor: pointer;
+}
+
+.comment-affordance:hover {
+    filter: brightness(1.05);
+}
+
+.comment-affordance__hint {
+    margin-left: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-muted);
+}
+
+/* The &#34; — &#34; separator before the gesture hint (visual only — kept out of the element&#39;s
+   textContent so the UI test reads the button and hint strings cleanly). */
+.comment-affordance__hint::before {
+    content: &#34;— &#34;;
+}
+
+/* Transient pulse on click — draws the eye to the gesture instruction for ~1.5s. */
+.comment-affordance__hint--pulse {
+    color: var(--color-accent);
+    transition: color 0.3s ease;
+}
+
+/* Inline composer, anchored at the selection (JS flips it above near the viewport bottom). */
+.comment-composer {
+    position: absolute;
+    z-index: 41;
+    width: min(22rem, 90vw);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 4px 16px rgba(26, 26, 40, 0.22);
+}
+
+.comment-composer__quote {
+    margin: 0;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--color-accent);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    max-height: 4.5rem;
+    overflow: auto;
+}
+
+.comment-composer__body {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    resize: vertical;
+}
+
+.comment-composer__actions { display: flex; gap: 0.5rem; }
+
+.comment-composer__submit,
+.comment-composer__cancel {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.comment-composer__submit {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border-color: var(--color-accent);
+}
+
+.comment-composer__cancel {
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.comment-composer__error {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-danger);
+}
+
+/* The tray host — a fixed right rail; the server fragment (tray.html) fills it. */
+.comment-tray-host {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--sidebar-width);
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    z-index: 30;
+}
+
+.comment-tray {
+    font-size: 0.85rem;
+}
+
+.comment-tray-group {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.comment-tray-heading {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.comment-tray-count {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-thread-item {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.comment-thread-item:first-of-type { border-top: 0; }
+
+.comment-thread-item[data-displaced=&#34;true&#34;] {
+    border-left: 3px solid var(--color-warning);
+    padding-left: 0.5rem;
+}
+
+.comment-thread-item[data-state=&#34;orphaned&#34;] {
+    border-left: 3px solid var(--color-danger);
+    padding-left: 0.5rem;
+}
+
+/* Transient flash when a &lt;mark&gt; click reveals its tray item. */
+.comment-thread-item--flash {
+    background: var(--color-callout-bg);
+    transition: background 0.4s ease;
+}
+
+.comment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.comment-author { font-weight: 600; color: var(--color-text); }
+
+.comment-author-kind-badge,
+.comment-state-badge,
+.comment-displaced-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-author-kind-badge[data-kind=&#34;agent&#34;] {
+    background: rgba(107, 71, 176, 0.12);
+    color: var(--color-focus);
+}
+
+.comment-state-badge[data-state=&#34;resolved&#34;] {
+    background: rgba(45, 125, 79, 0.12);
+    color: var(--color-success);
+}
+
+.comment-displaced-badge { color: var(--color-warning); }
+
+/* Phase 4b-1: the read-time &#34;quote not visible on the served render&#34; affordance. Derived in JS
+   (highlight()→false) — never stored. Covers both in-block (override: served+flagged) and
+   cross-boundary placement misses. Disjoint from 4b-3&#39;s `.diff-narration` block (additive-append
+   seam). A muted tray cue, NOT an error — the comment is intact, only its &lt;mark&gt; is unplaced. */
+.comment-thread-item.comment-unplaced {
+    border-left: 3px solid var(--color-muted);
+    padding-left: 0.5rem;
+}
+
+.comment-unplaced-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    border: 1px dashed var(--color-muted);
+}
+
+.comment-quote {
+    margin: 0.25rem 0;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--border);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.comment-body { color: var(--color-text); }
+
+.comment-actions { margin-top: 0.35rem; }
+
+.comment-resolve-btn,
+.comment-reopen-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.comment-resolve-btn:hover,
+.comment-reopen-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* Goal Card convergence chip (client-filled; the baked HTML stays comment-agnostic). */
+.goal-card__convergence {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+.goal-card__convergence[data-convergence=&#34;unconverged&#34;] {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.goal-card__convergence[data-convergence=&#34;converged&#34;] {
+    color: var(--color-success);
+    border-color: var(--color-success);
+}
+
+/* Keep the fixed tray from colliding with the document on narrow viewports. */
+@media (max-width: 900px) {
+    .comment-tray-host {
+        position: static;
+        width: auto;
+        max-height: none;
+    }
+}
+
+@media print {
+    .comment-tray-host, .comment-pill, .comment-composer { display: none; }
+    .comment-mark { border-bottom: 0; background: transparent; }
+}
+
+/* Phase 4b-3: the same-door agent-narration strip on the &#34;What changed&#34; panel + tracked-changes
+   view. A visibly-distinct, clearly-labelled &#34;agent narration&#34; affordance riding BESIDE the
+   deterministic counts/items — the structural diff is the floor; this only decorates it.
+   Tokens only (the Phase 3a hex-scan forbids hex outside :root). Additive + disjoint from 4b-1&#39;s
+   `.comment-unplaced` block above (the shared-file additive-append seam). */
+.diff-narration {
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    margin: 0 0 0.75rem;
+}
+
+.diff-narration-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-accent);
+    margin: 0 0 0.35rem;
+}
+
+.diff-narration-overview { margin: 0 0 0.5rem; color: var(--color-text); }
+
+.diff-narration-notes { margin: 0; padding-left: 1.1rem; list-style: disc; }
+.diff-narration-note { margin: 0.2rem 0; color: var(--color-muted); }
+.diff-narration-note-ref {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text);
+}
+
+/* Phase 5b: the honest `.rr-gap` gap-marker callout — the page surfacing that the SOURCE is
+   missing a detail (FR-015/FR-016). Carries the reader-facing QUESTION + exactly one fixed status
+   string; the proposed answer NEVER appears here (it lives only on the change-request surface).
+   Class-based only (no element ids, no data-block-anchor attributes, per the preserved v2 DOM
+   contract) — the marker sits BETWEEN block containers so anchorable block text is untouched
+   (carriage + survival gates stay green on a marked render). A muted &#34;missing detail&#34; affordance,
+   NOT an error: the
+   render is faithfully reporting an incomplete source. Tokens only (the Phase 3a hex-scan forbids
+   hex outside :root); additive + disjoint from the `.diff-narration` block above. */
+.rr-gap {
+    border-left: 3px solid var(--color-warning);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.rr-gap-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-warning);
+    margin: 0 0 0.35rem;
+}
+
+.rr-gap-question { margin: 0 0 0.35rem; color: var(--color-text); }
+
+.rr-gap-status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin: 0;
+}
+</style>
+</head>
+<body>
+<main class="rr-document rr-diff">
+
+<!-- The "What changed" panel renders FIRST (FR-017). -->
+<section class="diff-changed-panel" aria-label="What changed">
+<h2 class="diff-changed-title">What changed: v1 &rarr; v2</h2>
+<p class="diff-changed-counts">+1 added &middot; ~1 modified &middot; &minus;1 removed</p>
+<ul class="diff-changed-list">
+<li class="diff-changed-item diff-changed-item--modified"><a href="#diff-9">FR-001</a></li>
+<li class="diff-changed-item diff-changed-item--added"><a href="#diff-29">FR-021</a></li>
+<li class="diff-changed-item diff-changed-item--removed"><a href="#diff-49">- Changes to the exploration pipeline (cast-explore) itself.</a></li>
+</ul>
+</section>
+
+<section class="diff-block diff-unchanged" id="diff-1">
+<div class="diff-block-meta">intent · Intent</div>
+<div class="diff-block-body">## Intent
+
+**Job statement:** When a user finishes dumping raw requirements for a goal, they want the
+refinement step to produce an artifact they can grasp in minutes — leading with the WHAT,
+shaped to the type of work being done, and visually organized — so they can validate and
+iterate on requirements quickly instead of wading through long markdown files.
+
+Three threads are bundled in this goal, and all are in scope:
+
+1. **Faster comprehension** — workflow-aware HTML output with progressive disclosure,
+   L1/L2/L3 visual hierarchy, and an up-front classification of what kind of work this is
+   (&#34;You are building a new feature for XYZ&#34;).
+2. **Faster iteration** — inline comments/annotations on the refined document, with
+   unresolved comments driving v2/v3 versions until the spec converges, and a change
+   summary so each new version can be reviewed as a delta rather than re-read whole.
+3. **Workflow routing** — the same classification that shapes the document also routes the
+   goal into the right *downstream* workflow (a bug → logs/RCA/confirm/fix-test; a
+   prototype → a spike path). This is a first-class, **phase-agnostic** capability: the
+   router is designed to be invokable from any phase, not only after requirements.
+
+**The refined file is always a requirements document — never the work product.** A bug-fix
+goal&#39;s refined output is not the fix; it is the requirements that frame the fix. Workflow
+classification therefore has two *separate* effects: (a) it changes how the requirements
+*document* is organized per family, and (b) it determines which downstream workflow the
+goal routes into next. Do not conflate the artifact with the work that follows it.
+
+**This is product, not personal tooling.** Diecast is an open-source project; broader
+adoption is the success measure. Workflow classification and templates must generalize to
+arbitrary users&#39; work styles — not be tuned to the maintainer&#39;s three workspaces.
+
+**Build for the future.** The design should assume an AI-native world: agents are
+first-class producers *and* consumers of requirements. The iteration loop (comments,
+versions, resolution) and the workflow router should both be designed so that future agent
+participants can use them through the same mechanism as humans — not bolted on later.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-2">
+<div class="diff-block-meta">user_story · US1</div>
+<div class="diff-block-body">### US1 — WHAT/HOW separation (Priority: P1)
+
+**As a** goal owner reviewing refined requirements, **I want to** see the WHAT (outcome,
+job, scope) cleanly separated from any HOW (directional implementation ideas), **so that**
+I can validate intent quickly without implementation noise, while still capturing useful
+direction where it exists.
+
+**Independent test:** Refine a raw writeup that mixes outcome statements with
+implementation suggestions; the output&#39;s primary view contains only WHAT content, and every
+HOW item appears in a clearly-marked, secondary &#34;Directional&#34; section.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN the agent refines a raw writeup, THE SYSTEM SHALL lead the output
+  with WHAT content (intent, outcomes, scope) before any HOW content.
+- **Scenario 2:** WHEN the raw writeup contains implementation suggestions, THE SYSTEM
+  SHALL capture them in a visually distinct &#34;Directional ideas&#34; section marked as
+  non-binding and subject to change by exploration.
+- **Scenario 3:** WHEN a goal&#39;s workflow type makes HOW content irrelevant (e.g., pure data
+  analysis question), THE SYSTEM SHALL omit the Directional section rather than pad it.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-3">
+<div class="diff-block-meta">user_story · US2</div>
+<div class="diff-block-body">### US2 — Workflow-type classification with family-shaped requirements (Priority: P1)
+
+**As a** goal owner, **I want** the agent to detect what *kind* of work my goal is and shape
+the refined requirements document to that family, **so that** a bug-fix goal&#39;s requirements
+are organized around symptom/repro/expected-vs-actual and a big initiative&#39;s around PRD
+architecture — instead of every goal getting one shape.
+
+**Clarification (do not conflate the artifact with the work):** the refined requirements
+file is *always a requirements document*, never the work product. Classification has two
+separate effects: (a) it organizes *this document* per family — the focus of US2 — and
+(b) it routes the goal into a family-specific downstream workflow — the focus of US6. US2
+is only about how the requirements document is shaped.
+
+**Independent test:** Feed the agent one raw writeup per priority workflow family; each
+refined output is organized using that family&#39;s document template and displays the detected
+classification prominently at the top.
+
+**Priority workflow families (first-class document templates, in order):**
+
+1. **New initiative / PRD** — big goals needing clean architecture; richest template.
+2. **Small pilot feature / POC** — one-screen WHAT, minimal ceremony.
+3. **Bug fix / debug** — leads with symptom, repro, expected-vs-actual.
+4. **Data analysis / research** — leads with the question, data sources, expected output shape.
+5. **Random product ideas + explorations** — fuzzy ideation, pre-goal; the loosest
+   template. Structured scenarios are NOT forced onto raw ideas (the &#34;Template Enforcer&#34;
+   anti-pattern).
+
+Long tail (later): add tests, heavy UI flow (with mocks organized along user flows),
+PRD-only creation.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN the agent reads a raw writeup, THE SYSTEM SHALL classify the goal
+  into a workflow family and display the classification at the top of the output (e.g., as
+  a pill: &#34;You are building a new feature for XYZ&#34;).
+- **Scenario 2:** WHEN the classification is ambiguous between families, THE SYSTEM SHALL
+  ask the user to confirm the workflow type as one of its clarifying questions rather than
+  guess silently.
+- **Scenario 3:** WHEN a goal is classified into a family, THE SYSTEM SHALL organize the
+  refined *document* using that family&#39;s template (sections, ordering, visual treatment) —
+  independent of the downstream routing in US6.
+- **Scenario 4:** WHEN a goal matches no first-class family, THE SYSTEM SHALL fall back to
+  the generic spec shape and note the unmatched classification.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-4">
+<div class="diff-block-meta">user_story · US3</div>
+<div class="diff-block-body">### US3 — HTML-first human render (Priority: P1)
+
+**As a** goal owner, **I want to** consume refined requirements as a well-designed HTML
+document with progressive disclosure and clear visual hierarchy, **so that** I can grasp
+the WHAT within ~2 minutes instead of reading a long markdown file.
+
+**Independent test:** Open the HTML render of a refined goal; a reader unfamiliar with the
+goal can state its WHAT (job, outcome, scope) within 2 minutes without opening the raw
+writeup or the markdown render.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN refinement completes, THE SYSTEM SHALL produce an HTML render of
+  the refined requirements as the primary human-consumption artifact.
+- **Scenario 2:** WHEN the HTML renders, THE SYSTEM SHALL apply level-based visual
+  treatments (L1/L2/L3 hierarchy with distinct color/size/design elements) and progressive
+  disclosure (summary first, details expandable).
+- **Scenario 3:** WHEN the workflow family calls for it, THE SYSTEM SHALL vary the HTML
+  structure per family (e.g., user-flow organization for heavy UI goals).
+- **Scenario 4:** WHEN refinement completes, THE SYSTEM SHALL continue to produce the
+  machine-readable spec-kit markdown render so downstream agents (planner, task-suggester,
+  spec-checker) keep working unchanged.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-5">
+<div class="diff-block-meta">user_story · US4</div>
+<div class="diff-block-body">### US4 — Inline comments and iteration loop (Priority: P2)
+
+**As a** goal owner reviewing a refined spec, **I want to** leave inline comments anchored
+to specific requirement elements (Google-Docs-style) and, on each new version, see a clear
+summary of what changed, **so that** my feedback drives the next version of the spec and I
+can review the delta instead of re-reading the whole document.
+
+**Independent test:** Leave a comment on a specific FR in the rendered document; the
+comment persists, is visibly anchored to that FR, and carries an open/resolved state.
+Produce the next version; a change summary lists exactly which elements changed and why.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN a reviewer selects a requirement element in the HTML render, THE
+  SYSTEM SHALL allow attaching a comment anchored to that element.
+- **Scenario 2:** WHEN open comments exist on a spec, THE SYSTEM SHALL treat the spec as
+  unconverged and support producing a new version (v2, v3, ...) that addresses them.
+- **Scenario 3:** WHEN a comment is addressed in a new version, THE SYSTEM SHALL allow
+  marking it resolved and retain the resolution trail.
+- **Scenario 4:** WHEN a new version is produced, THE SYSTEM SHALL emit a change summary
+  describing what changed from the prior version (anchored to the affected elements), so
+  the reviewer can review the delta rather than re-read the whole document.
+
+[NEEDS CLARIFICATION: annotation implementation approach — standard JS annotation
+libraries vs. element-anchored comments on stable IDs vs. framework migration
+(react/nextjs); exploration to research and recommend]</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-6">
+<div class="diff-block-meta">user_story · US5</div>
+<div class="diff-block-body">### US5 — Versioning and archival of old versions (Priority: P2)
+
+**As a** goal owner iterating on a spec, **I want to** keep only the current version in
+the main goal folder with older versions archived out of the way, **so that** the goal
+directory stays clean while history remains recoverable.
+
+**Independent test:** Produce v3 of a spec; the main folder contains only the current
+version, and v1/v2 are retrievable from the archive (folder or DB).
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN a new spec version is produced, THE SYSTEM SHALL retain exactly one
+  current version in the main goal folder.
+- **Scenario 2:** WHEN a version is superseded, THE SYSTEM SHALL move it to the archive
+  mechanism (archive folder or DB) without data loss.
+- **Scenario 3:** WHEN a user requests an older version, THE SYSTEM SHALL retrieve it with
+  its comments and resolution state intact.
+
+[NEEDS CLARIFICATION: archive mechanism — archive folder vs. DB storage for old versions;
+owner leans DB; depends on the canonical-source architecture decision]</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-7">
+<div class="diff-block-meta">user_story · US6</div>
+<div class="diff-block-body">### US6 — Phase-agnostic workflow routing (Priority: P1)
+
+**As a** goal owner (or a future agent acting on the goal), **I want** the classification to
+hand the goal into the right family-specific downstream workflow — and to be able to invoke
+that router from any phase, not only after requirements — **so that** the work that follows
+requirements (a bug&#39;s logs→RCA→confirm→fix/test; a prototype&#39;s spike path) matches the kind
+of goal instead of defaulting to one pipeline.
+
+**Build boundary (v2):** v2 builds the classifier, the router mechanism, and a clean
+seam/interface plus **stubs** for each family pipeline. The downstream pipelines themselves
+are designed-for and built incrementally per family in later goals (see Out of Scope). The
+router is built phase-agnostic even though only the requirements phase invokes it today.
+
+**Independent test:** Classify a bug-fix goal; the router resolves to the bug-fix pipeline
+handle (a stub is acceptable) and records the routing decision on the goal. Invoking the
+same router later from a non-requirements phase resolves the same handle without re-running
+refinement.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN a goal is classified, THE SYSTEM SHALL resolve a family-specific
+  downstream-workflow handle and record the routing decision on the goal.
+- **Scenario 2:** IF a family pipeline is not yet implemented, THEN THE SYSTEM SHALL route
+  to a stub that names the intended workflow steps rather than failing or silently
+  falling back to a generic pipeline.
+- **Scenario 3:** WHERE the router is invoked from a phase other than requirements, THE
+  SYSTEM SHALL resolve routing from the goal&#39;s current classification without requiring
+  re-refinement.
+- **Scenario 4:** WHEN classification changes on a re-run, THE SYSTEM SHALL update the
+  routing decision and surface that the downstream workflow has changed.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-8">
+<div class="diff-block-meta">user_story · US7</div>
+<div class="diff-block-body">### US7 — Requirements files as living source of truth (Priority: P1)
+
+**As a** goal owner, **I want** the requirements files to remain the canonical source of
+truth, so that when downstream phases (exploration, planning, execution) surface changes
+that affect requirements, those changes are written back into the requirements files and
+I&#39;m notified, **so that** the requirements never silently drift out of date relative to the
+work.
+
+**Note on canonical store:** &#34;source of truth&#34; is about the *requirements artifact*, not a
+specific storage choice. Whether requirements stay file-canonical or move to a DB with
+generated file renders (see Open Questions), the human-facing requirements files MUST always
+reflect current truth — downstream changes round-trip back into them either way.
+
+**Independent test:** Simulate a downstream change that affects a requirement (e.g., a
+planning agent discovers a new constraint); the requirements file is updated (e.g., a new
+requirement appended at the end) and the user receives a notification describing what
+changed and which phase it originated from.
+
+**Acceptance scenarios:**
+
+- **Scenario 1:** WHEN a downstream phase produces a change that affects requirements, THE
+  SYSTEM SHALL write the change back into the requirements files (e.g., appended additions
+  or annotated edits) rather than leaving it only in downstream artifacts.
+- **Scenario 2:** WHEN the requirements files are updated from a downstream source, THE
+  SYSTEM SHALL notify the user that requirements changed, including what changed and which
+  phase/source originated it.
+- **Scenario 3:** WHEN a downstream change is written back, THE SYSTEM SHALL preserve
+  provenance (which phase/agent originated it) and present it in the version change summary
+  (US4 Scenario 4), so the write-back is reviewable as a delta.
+- **Scenario 4:** IF a downstream change conflicts with an existing requirement, THEN THE
+  SYSTEM SHALL surface the conflict for the user rather than silently overwriting.</div>
+</section>
+<section class="diff-block diff-modified" id="diff-9">
+<div class="diff-block-meta">fr · FR-001</div>
+<div class="diff-block-body">| FR-001 | The refined output shall lead with WHAT content (intent, outcomes, scope) at the top of the document; all HOW content shall be confined to a clearly-marked, non-binding &#34;Directional ideas&#34; section rendered last | US1; reworded v2 |</div>
+<details class="diff-prev"><summary>Previous version</summary><del>| FR-001 | The refined output shall lead with WHAT content; HOW content shall be confined to a clearly-marked, non-binding &#34;Directional ideas&#34; section | US1 |</del></details>
+</section>
+<section class="diff-block diff-unchanged" id="diff-10">
+<div class="diff-block-meta">fr · FR-002</div>
+<div class="diff-block-body">| FR-002 | The agent shall classify each goal into a workflow family and surface the classification at the top of the refined document | US2 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-11">
+<div class="diff-block-meta">fr · FR-003</div>
+<div class="diff-block-body">| FR-003 | The system shall organize the refined *document* using a first-class template per priority workflow family (5 families) | US2; document shape, distinct from routing; long tail later |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-12">
+<div class="diff-block-meta">fr · FR-004</div>
+<div class="diff-block-body">| FR-004 | When classification is ambiguous, the agent shall confirm the workflow type with the user instead of guessing | US2 Scenario 2 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-13">
+<div class="diff-block-meta">fr · FR-005</div>
+<div class="diff-block-body">| FR-005 | The system shall produce an HTML render as the primary human-consumption artifact | US3 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-14">
+<div class="diff-block-meta">fr · FR-006</div>
+<div class="diff-block-body">| FR-006 | The HTML render shall use progressive disclosure and L1/L2/L3 level-based visual treatments | US3 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-15">
+<div class="diff-block-meta">fr · FR-007</div>
+<div class="diff-block-body">| FR-007 | The system shall continue producing the spec-kit markdown render consumed by downstream agents (planner, task-suggester, spec-checker) | preserves existing contract |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-16">
+<div class="diff-block-meta">fr · FR-008</div>
+<div class="diff-block-body">| FR-008 | Requirement elements (US/FR/SC) shall carry stable identifiers usable as anchors for comments and cross-references | enables US4 regardless of architecture choice |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-17">
+<div class="diff-block-meta">fr · FR-009</div>
+<div class="diff-block-body">| FR-009 | Reviewers shall be able to attach comments anchored to requirement elements, with open/resolved state | US4 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-18">
+<div class="diff-block-meta">fr · FR-010</div>
+<div class="diff-block-body">| FR-010 | Open comments shall drive new spec versions; resolution trails shall be retained | US4/US5 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-19">
+<div class="diff-block-meta">fr · FR-011</div>
+<div class="diff-block-body">| FR-011 | Only the current spec version shall live in the main goal folder; older versions shall be archived | US5 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-20">
+<div class="diff-block-meta">fr · FR-012</div>
+<div class="diff-block-body">| FR-012 | Workflow classification, templates, and routing shall generalize to arbitrary users (open-source product), with no hardcoding to the maintainer&#39;s workspaces | OSS constraint |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-21">
+<div class="diff-block-meta">fr · FR-013</div>
+<div class="diff-block-body">| FR-013 | The iteration loop (comments, versions, resolution) shall be designed so agent participants can use it through the same mechanism as humans | future-facing constraint |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-22">
+<div class="diff-block-meta">fr · FR-014</div>
+<div class="diff-block-body">| FR-014 | The system shall provide a router that resolves a classified goal to a family-specific downstream-workflow handle and records the routing decision on the goal | US6 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-23">
+<div class="diff-block-meta">fr · FR-015</div>
+<div class="diff-block-body">| FR-015 | Each family&#39;s downstream pipeline shall sit behind a stable seam; v2 shall ship stubs that name the intended steps, with real pipelines added per family later | US6 build boundary |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-24">
+<div class="diff-block-meta">fr · FR-016</div>
+<div class="diff-block-body">| FR-016 | The router shall be invokable from any phase (not only post-requirements) and resolve from the goal&#39;s current classification without requiring re-refinement | US6; phase-agnostic |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-25">
+<div class="diff-block-meta">fr · FR-017</div>
+<div class="diff-block-body">| FR-017 | When a new spec version is produced, the system shall emit a change summary describing what changed from the prior version | US4 Scenario 4 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-26">
+<div class="diff-block-meta">fr · FR-018</div>
+<div class="diff-block-body">| FR-018 | The requirements artifact shall be the canonical source of truth for the goal; downstream changes affecting requirements shall be round-tripped into the requirements files (whatever the underlying store) so the files always reflect current truth | US7 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-27">
+<div class="diff-block-meta">fr · FR-019</div>
+<div class="diff-block-body">| FR-019 | When requirements are updated from a downstream source, the system shall notify the user with what changed and the originating phase/source | US7 Scenario 2 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-28">
+<div class="diff-block-meta">fr · FR-020</div>
+<div class="diff-block-body">| FR-020 | Downstream write-backs shall preserve provenance and appear in the version change summary; conflicting changes shall be surfaced to the user, not silently overwritten | US7 Scenarios 3-4 |</div>
+</section>
+<section class="diff-block diff-added" id="diff-29">
+<div class="diff-block-meta">fr · FR-021</div>
+<div class="diff-block-body">| FR-021 | The system shall expose a deterministic block-level change summary between two versions, listing each added, modified, and removed element | US4 Scenario 4; added v2 |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-30">
+<div class="diff-block-meta">sc · SC-001</div>
+<div class="diff-block-body">| SC-001 | A reader can state a goal&#39;s WHAT within 2 minutes of opening the HTML render, without reading the raw writeup | timed read test on 3+ real goals across workflow families |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-31">
+<div class="diff-block-meta">sc · SC-002</div>
+<div class="diff-block-body">| SC-002 | Requirement iteration happens through in-doc comments → new versions with change summaries, not through manual md edits or chat re-explanations | observe N consecutive real goals refined via the comment loop |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-32">
+<div class="diff-block-meta">sc · SC-003</div>
+<div class="diff-block-body">| SC-003 | The HTML render fully replaces markdown for human consumption; md is read only by agents | owner self-report after 2+ weeks of real use |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-33">
+<div class="diff-block-meta">sc · SC-004</div>
+<div class="diff-block-body">| SC-004 | Downstream agents (planner, task-suggester, spec-checker) work unchanged against v2 output | existing agent chain runs green on a v2-refined goal |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-34">
+<div class="diff-block-meta">sc · SC-005</div>
+<div class="diff-block-body">| SC-005 | A classified goal resolves to the correct family pipeline handle (or named stub), the routing decision is recorded, and re-invoking the router from another phase yields the same handle | trace routing on 5 goals, one per family, plus one cross-phase re-invocation |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-35">
+<div class="diff-block-meta">sc · SC-006</div>
+<div class="diff-block-body">| SC-006 | A downstream-originated requirement change appears in the requirements files and triggers a user notification; no requirement change lives only in a downstream artifact | trace one downstream change end-to-end into the files + notification |</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-36">
+<div class="diff-block-meta">directional · Directional Ideas (non-binding HOW, captured from the raw writeup and refinement)</div>
+<div class="diff-block-body">## Directional Ideas (non-binding HOW, captured from the raw writeup and refinement)
+
+- **Candidate architecture (owner deferred decision to exploration):** requirements as
+  structured DB entities — matching Diecast&#39;s existing goal/tasks pattern of
+  &#34;DB-canonical, auto-generated file renders&#34; — with HTML (human) and markdown (agents)
+  both generated. Makes annotations rows-on-stable-IDs instead of fragile text anchoring,
+  and makes versioning/archival natural. Alternative: files stay canonical with a DB layer
+  only for comments/versions.
+- **Router as a separate capability:** because routing must be callable from any phase, the
+  classify+route logic likely wants to live behind its own seam (a standalone
+  agent/service) that refine-requirements invokes — rather than being buried inside the
+  refinement agent. Pipeline stubs could simply name their steps (bug:
+  logs→RCA→confirm→fix/test; prototype: spike→demo→learnings) until the real pipeline lands.
+- cast-preso* skills carry reusable presentation ideas (visual hierarchy, progressive
+  disclosure, slide-archetype thinking) — inspiration for the HTML templates.
+- Workflow classification could surface as standard pills at the top of the document.
+- Per-family inspiration templates may be worth researching online before designing.
+- Change summaries could be generated by diffing stable-ID elements between versions
+  (another reason to favor stable identifiers / structured storage).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-37">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Downstream contract preserved:** planner, task-suggester, and cast-spec-checker
+  consume `refined_requirements.collab.md` in spec-kit shape today; v2 must keep that
+  render working (FR-007) regardless of what becomes canonical.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-38">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Open-source product:** all classification, templates, routing, and UI must generalize
+  beyond the maintainer&#39;s own workflows (FR-012).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-39">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Phase-agnostic router seam:** classification/routing is a capability behind a clean
+  seam, designed to be invokable from any phase; v2 builds the seam even though only the
+  requirements phase calls it today (FR-016).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-40">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Pipelines stubbed:** v2 ships family-pipeline *stubs* (named steps) behind the seam,
+  not the pipelines themselves; real pipelines are later per-family goals (FR-015).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-41">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Current stack:** cast-server is FastAPI + Jinja server-rendered. A framework migration
+  (react/nextjs) is not a goal in itself — it is only acceptable if exploration shows the
+  annotation UX genuinely requires it.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-42">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Requirements are the source of truth:** downstream phases must round-trip requirement
+  changes back into the requirements files with user notification; requirements must not
+  drift out of date relative to the work (FR-018).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-43">
+<div class="diff-block-meta">constraint</div>
+<div class="diff-block-body">- **Future-facing:** design for agents as first-class participants in both the
+  requirements loop and the workflow router (FR-013).</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-44">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- **Building the family-specific downstream pipelines themselves** (the RCA/fix flow, the
+  prototype spike flow, etc.) — v2 ships only the router seam + named stubs; each real
+  pipeline is a later, per-family goal.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-45">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- **Wiring the router into phases other than requirements** — the seam is built
+  phase-agnostic, but only the requirements phase invokes it in v2.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-46">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- Multi-user / realtime collaborative editing (Google-Docs-style *simultaneous* editing).
+  Comments and versions are asynchronous, single-writer.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-47">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- Rewriting downstream agents (planner, task-suggester, spec-checker) — they continue
+  consuming the markdown render.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-48">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- Long-tail workflow templates (add tests, heavy UI flow, PRD-only) — designed-for but not
+  built in v2&#39;s first pass.</div>
+</section>
+<section class="diff-block diff-removed" id="diff-49">
+<div class="diff-block-meta">scope</div>
+<div class="diff-block-body">- Changes to the exploration pipeline (cast-explore) itself.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-50">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: canonical source of truth — DB-entities-with-generated-renders
+  vs. files-canonical-with-DB-comment-layer]** — owner explicitly deferred this to
+  exploration (&#34;let exploration decide&#34;). Primary exploration target; both options and
+  trade-offs are captured in Directional Ideas. Resolver: cast-explore + owner decision at
+  plan review.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-51">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: router placement — does the classify+route capability live inside
+  cast-refine-requirements, or is it extracted as a standalone phase-agnostic agent/service
+  that refine-requirements (and later, other phases) call?]** — phase-agnostic invocation
+  (FR-016) implies extraction eventually; decide the seam boundary at exploration/plan
+  review. Resolver: cast-explore + owner.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-52">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: annotation implementation approach — standard JS annotation
+  libraries vs. element-anchored comments on stable IDs vs. framework migration
+  (react/nextjs); exploration to research and recommend]** — owner asked whether standard
+  libraries exist and whether react/nextjs is required. Resolver: cast-explore.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-53">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: archive mechanism — archive folder vs. DB storage for old
+  versions; owner leans DB; depends on the canonical-source architecture decision]** —
+  resolve together with the architecture question. Resolver: cast-explore.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-54">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: gbrain improvements]** — owner asked &#34;any improvements to
+  refine-requirements from gbrain?&#34;; nothing reviewed yet. Resolver: exploration to survey
+  gbrain&#39;s requirements handling for portable ideas.</div>
+</section>
+<section class="diff-block diff-unchanged" id="diff-55">
+<div class="diff-block-meta">open_question</div>
+<div class="diff-block-body">- **[NEEDS CLARIFICATION: classification taxonomy validation]** — the five priority
+  families come from the owner&#39;s experience; as an OSS product, the taxonomy should be
+  validated against external users&#39; workflow types during exploration. Resolver:
+  cast-explore (online research + inspiration templates).</div>
+</section>
+
+</main>
+</body>
+</html>

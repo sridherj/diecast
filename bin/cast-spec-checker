@@ -28,6 +28,62 @@ REQUIRED_SECTIONS = (
     "Open Questions",
 )
 
+# ---------------------------------------------------------------------------
+# Two-level family-aware checking (Refine Requirements v2, sub-phase 2c)
+# ---------------------------------------------------------------------------
+# MIRRORED copy of cast_server.requirements_render.families.REQUIRED_SECTIONS_BY_FAMILY.
+#
+# DELIBERATE DIVERGENCE (Decision D5): this checker is a portable, stdlib-only
+# linter that must run in CI / pre-commit where the `cast-server` package is NOT
+# importable. It therefore mirrors the per-family required-sections mapping as a
+# literal dict instead of importing `families.py`. The pin test
+# `cast-server/tests/test_spec_checker_family.py::test_mirror_matches_families`
+# imports the real mapping and asserts this copy equals it as a FULL mapping
+# (every family's exact section tuple), so the mirror can never silently drift.
+#
+# This is the OPPOSITE policy from `bin/cast-classify-gate`, which DOES import
+# `families.py` because it is part of the classify orchestration. Do NOT "unify"
+# the two bins — the divergence is intentional.
+REQUIRED_SECTIONS_BY_FAMILY: dict[str, tuple[str, ...]] = {
+    "new_initiative": (
+        "Intent",
+        "User Stories",
+        "Functional Requirements",
+        "Success Criteria",
+        "Out of Scope",
+    ),
+    "pilot_poc": ("Intent", "Decisions"),
+    "bug_fix": ("Intent", "Evidence"),
+    "data_analysis": ("Intent", "Evidence"),
+    "random_idea": ("Intent",),
+    "testing_qa": ("Intent", "Evidence", "Out of Scope"),
+    "refactor_migration": ("Intent", "Decisions", "Out of Scope"),
+    "personal_non_eng": ("Intent",),
+    "generic": ("Intent",),
+}
+
+# Floor families whose recipe offers NO spec-kit depth: a present-but-empty
+# US/FR/SC/Out-of-Scope section is the Template-Enforcer anti-pattern and is an
+# ERROR. Present-with-real-content is always fine — structure is *offered*,
+# never auto-padded (Decision D2: random_idea is the structural floor).
+_FLOOR_FAMILIES = ("random_idea", "personal_non_eng")
+_SPEC_KIT_DEPTH_SECTIONS = (
+    "User Stories",
+    "Functional Requirements",
+    "Success Criteria",
+    "Out of Scope",
+)
+# Families for which HOW/Directional content is expected to be omitted (US1 S3):
+# genuine content only WARNs (never errors).
+_DIRECTIONAL_WARN_FAMILIES = ("data_analysis", "personal_non_eng")
+
+# Level-1 generic regexes / tokens (additive; the re-exported grammar below is frozen).
+H1_RE = re.compile(r"^#\s+\S")
+_TABLE_SEP_RE = re.compile(r"^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$")
+_PLACEHOLDER_TOKENS = frozenset(
+    {"", "tbd", "tba", "todo", "n/a", "na", "none", "...", "…", "-", "—", "–"}
+)
+
 PRIORITY_RE = re.compile(r"\bPriority:\s*(P1|P2|P3)\b")
 US_HEADING_RE = re.compile(r"^###\s+(US\S+)\s*[—-]\s*(.+)$")
 INDEPENDENT_TEST_RE = re.compile(r"\*\*Independent test:?\*\*", re.IGNORECASE)
@@ -94,7 +150,44 @@ def _collect_user_stories(
     return out
 
 
-def lint_spec(path: Path, *, warn_only: bool = False) -> tuple[list[Finding], int]:
+def _section_body(lines: list[str], span: tuple[int, int]) -> list[str]:
+    """Return a section's body lines (everything after its H2 heading line).
+
+    ``span`` is the 1-indexed ``(heading_line, end_line)`` from ``_section_spans``;
+    the slice ``lines[heading_line:end_line]`` skips the heading and keeps the body.
+    """
+    start, end = span
+    return lines[start:end]
+
+
+def _is_empty_or_placeholder(body_lines: list[str]) -> bool:
+    """True when a section carries no real content.
+
+    Blank lines, HTML comments, placeholder tokens (TBD/TODO/N/A/…), and a
+    header-only table (separator + a single header row, zero data rows) all count
+    as empty. Any prose line, or a table with at least one data row (>= 2
+    non-separator rows), counts as real content.
+    """
+    table_nonsep_rows = 0
+    for raw in body_lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("<!--"):
+            continue
+        if _TABLE_SEP_RE.match(stripped):
+            continue
+        if stripped.startswith("|"):
+            table_nonsep_rows += 1
+            continue
+        token = stripped.strip("*_`[]() ").lower()
+        if token in _PLACEHOLDER_TOKENS or token.startswith("needs clarification"):
+            continue
+        return False  # real prose content
+    return table_nonsep_rows <= 1
+
+
+def lint_spec(
+    path: Path, *, warn_only: bool = False, family: str | None = None
+) -> tuple[list[Finding], int]:
     if not path.exists():
         print(f"{path}: invocation-error: file not found", file=sys.stderr)
         return ([], 2)
@@ -105,15 +198,34 @@ def lint_spec(path: Path, *, warn_only: bool = False) -> tuple[list[Finding], in
     findings: list[Finding] = []
     file_label = str(path)
 
-    # R1 — required sections present
-    for required in REQUIRED_SECTIONS:
+    # Level 1 (always) — document title present (a top-level `# ` H1).
+    if not any(H1_RE.match(raw) for raw in lines):
+        findings.append(
+            Finding(
+                file=file_label,
+                line=1,
+                severity="error",
+                rule="R8",
+                message="missing document title (expected a top-level '# ' H1 heading)",
+            )
+        )
+
+    # Required sections — no `--family` uses today's full-spec profile (R1,
+    # byte-for-byte); `--family <value>` uses the per-family Level-2 profile (F1).
+    if family is None:
+        required_sections = REQUIRED_SECTIONS
+        required_rule = "R1"
+    else:
+        required_sections = REQUIRED_SECTIONS_BY_FAMILY[family]
+        required_rule = "F1"
+    for required in required_sections:
         if required not in spans:
             findings.append(
                 Finding(
                     file=file_label,
                     line=1,
                     severity="error",
-                    rule="R1",
+                    rule=required_rule,
                     message=f"missing required section: ## {required}",
                 )
             )
@@ -281,6 +393,47 @@ def lint_spec(path: Path, *, warn_only: bool = False) -> tuple[list[Finding], in
             )
         )
 
+    # Level 2 — family-specific assertions (only when `--family` is passed).
+    if family is not None:
+        # Template-Enforcer guard: a floor family must not carry padded, empty
+        # spec-kit sections. Its recipe offers no such depth to fill.
+        if family in _FLOOR_FAMILIES:
+            for name in _SPEC_KIT_DEPTH_SECTIONS:
+                span = spans.get(name)
+                if span is not None and _is_empty_or_placeholder(
+                    _section_body(lines, span)
+                ):
+                    findings.append(
+                        Finding(
+                            file=file_label,
+                            line=span[0],
+                            severity="error",
+                            rule="F2",
+                            message=(
+                                f'family "{family}" carries an empty/placeholder '
+                                f"## {name} section — this family's recipe offers no "
+                                f"spec-kit depth to pad (remove it or add real content)"
+                            ),
+                        )
+                    )
+        # Directional/HOW content is expected omitted for these families; genuine
+        # content WARNs (never errors).
+        if family in _DIRECTIONAL_WARN_FAMILIES:
+            for name, span in spans.items():
+                if name.lower().startswith("directional"):
+                    findings.append(
+                        Finding(
+                            file=file_label,
+                            line=span[0],
+                            severity="warning",
+                            rule="F3",
+                            message=(
+                                f'family "{family}" usually omits HOW — found a '
+                                f"## {name} section (allowed, but verify it is intended)"
+                            ),
+                        )
+                    )
+
     has_error = any(f.severity == "error" for f in findings)
     if warn_only:
         exit_code = 0
@@ -304,12 +457,33 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit 0 even if errors are present (v1.0 rollout flag).",
     )
+    parser.add_argument(
+        "--family",
+        default=None,
+        metavar="VALUE",
+        help=(
+            "Apply the per-family Level-2 required-section profile and assertions "
+            "for the given WorkFamily value (e.g. bug_fix, random_idea). Omit for "
+            "the full-spec (no-family) path, which is unchanged."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.family is not None and args.family not in REQUIRED_SECTIONS_BY_FAMILY:
+        valid = ", ".join(sorted(REQUIRED_SECTIONS_BY_FAMILY))
+        print(
+            f"cast-spec-checker: invocation-error: unknown --family "
+            f"{args.family!r} (valid: {valid})",
+            file=sys.stderr,
+        )
+        return 2
 
     overall_exit = 0
     for raw_path in args.paths:
         path = Path(raw_path)
-        findings, code = lint_spec(path, warn_only=args.warn_only)
+        findings, code = lint_spec(
+            path, warn_only=args.warn_only, family=args.family
+        )
         for finding in findings:
             print(finding.render())
         if code > overall_exit:

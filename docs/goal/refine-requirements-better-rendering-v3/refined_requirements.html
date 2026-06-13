@@ -1,0 +1,1050 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: cb3971de16bc2bceac99c7832733cd8e5acf39db69e61d3b60f3476d4c2db3d3 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refine Requirements — Better Rendering (v3)</title>
+<style>
+/* === Design Tokens — copied verbatim from static/style.css :root (pin-tested) === */
+:root {
+    /* Brand palette */
+    --color-bg: #F5F4F0;
+    --color-text: #1A1A28;
+    --color-muted: #4A4860;
+    --color-surface: #ECEAE4;
+    --color-accent: #D6235C;
+    --color-accent-hover: #B01D4D;
+    --color-callout-bg: rgba(214, 35, 92, 0.06);
+    --color-callout-border: var(--color-accent);
+    --color-question-bg: rgba(74, 72, 96, 0.06);
+    --color-question-border: var(--color-muted);
+    --color-link: var(--color-accent);
+    --color-link-hover: var(--color-accent-hover);
+
+    /* Typography */
+    --font-heading: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+    --font-body: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-display-accent: 'Caveat', cursive;
+
+    /* Subtle workshop grid */
+    --grid-size: 5px;
+    --grid-color: rgba(74, 72, 96, 0.07);
+
+    /* Semantic status colors (cream-friendly variants) */
+    --color-success: #2D7D4F;
+    --color-warning: #B5821A;
+    --color-danger: #B22439;
+    --color-info: #3B5BB0;
+    --color-focus: #6B47B0;
+
+    /* Back-compat aliases for legacy var refs throughout the codebase */
+    --bg-primary: var(--color-bg);
+    --bg-surface: var(--color-surface);
+    --bg-surface-hover: #E1DED7;
+    --border: rgba(74, 72, 96, 0.18);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-muted);
+    --text-muted: rgba(74, 72, 96, 0.65);
+    --color-primary: var(--color-accent);
+    --color-primary-hover: var(--color-accent-hover);
+    --font-sans: var(--font-body);
+    --font-mono: var(--font-heading);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --sidebar-width: 240px;
+}
+
+/* === Render-local tokens (not in style.css :root — render-only additions) ===
+   Kept OUTSIDE the pin-tested block conceptually but defined on :root so the
+   hex-literal scan (which only permits hex inside :root) stays satisfied.
+   These do not participate in the byte-match invariant (the drift test asserts
+   style.css tokens are preserved in the theme, not the reverse). */
+:root {
+    --color-on-accent: #FFFFFF;          /* white text on accent fills (callout-num) */
+    --rr-content-max: 52rem;             /* readable measure for the document column */
+    --rr-l1-size: 1.35rem;               /* L1 survives a 90% cut — the loudest body */
+    --rr-l2-size: 1.05rem;               /* L2 survives a 50% cut — must NOT out-weigh L1 */
+    --rr-l3-size: 0.95rem;               /* L3 detail inside <details> */
+}
+
+/* === Base / document frame === */
+* , *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+    margin: 0;
+    background-color: var(--color-bg);
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    font-family: var(--font-body);
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.rr-document {
+    max-width: var(--rr-content-max);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+a { color: var(--color-link); }
+a:hover { color: var(--color-link-hover); }
+
+/* === Typography — lifted from cast-preso toolkit, em-scaling adapted to rem ===
+   Class names kept VERBATIM so the checker rubric language transfers directly.
+   L1/L2/L3 are assigned by IMPORTANCE, not heading depth. */
+h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--color-text);
+}
+
+h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; }
+h3 { font-size: 1.15rem; margin: 1.25rem 0 0.5rem; }
+h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+
+.slide-title {
+    font-family: var(--font-heading);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-text);
+}
+
+/* L1 — survives a 90% cut: the loudest body line. */
+.l1-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l1-size);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* L2 — survives a 50% cut. Deliberately lighter + smaller than L1 so it can
+   never visually out-weigh it. */
+.l2-body {
+    font-family: var(--font-body);
+    font-size: var(--rr-l2-size);
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.source-citation {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--color-muted);
+}
+
+.muted { color: var(--color-muted); }
+
+/* === Callout — decided WHAT accent (L2 emphasis). Lifted verbatim. === */
+.callout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-callout-border);
+    background: var(--color-callout-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 16px 20px;
+}
+
+.callout .callout-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.callout .callout-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* === Question annotation — tentative HOW / open questions (muted, italic). === */
+.question-annotation {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-left: 4px solid var(--color-question-border);
+    background: var(--color-question-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 12px 16px;
+    font-style: italic;
+}
+
+.question-annotation .question-icon {
+    font-size: 1.2em;
+    flex-shrink: 0;
+    color: var(--color-muted);
+    font-style: normal;
+}
+
+.question-annotation .question-text {
+    flex: 1;
+    line-height: 1.4;
+    color: var(--color-muted);
+}
+
+/* === Family pill — cloned from .phase-badge (style.css ~1979). Tints use
+   rgba() literals exactly like the .phase-badge precedent (rgba, not hex,
+   so FR-012's hex ban is satisfied). === */
+.family-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.family-pill--new_initiative     { background-color: rgba(107, 71, 176, 0.12); color: var(--color-focus); }
+.family-pill--pilot_poc          { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--bug_fix            { background-color: rgba(178, 36, 57, 0.12);  color: var(--color-danger); }
+.family-pill--data_analysis      { background-color: rgba(59, 91, 176, 0.12);  color: var(--color-info); }
+.family-pill--random_idea        { background-color: rgba(181, 130, 26, 0.14); color: var(--color-warning); }
+.family-pill--testing_qa         { background-color: rgba(45, 125, 79, 0.12);  color: var(--color-success); }
+.family-pill--refactor_migration { background-color: rgba(74, 72, 96, 0.12);   color: var(--color-muted); }
+.family-pill--personal_non_eng   { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+.family-pill--generic            { background-color: rgba(74, 72, 96, 0.10);   color: var(--color-muted); }
+
+/* Rescue state — visually distinct (dashed accent border) for the
+   "Unclassified — re-run refinement" path used by sp2/sp3. */
+.family-pill--unclassified {
+    background-color: rgba(178, 36, 57, 0.08);
+    color: var(--color-danger);
+    border: 1px dashed var(--color-danger);
+}
+
+/* === Goal Card — the above-the-fold zero-click block === */
+.goal-card {
+    background: var(--color-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+}
+
+.goal-card .goal-card__job {
+    margin: 0.75rem 0 0;
+}
+
+.goal-card .goal-card__assertions {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.goal-card .goal-card__assertions > li {
+    margin: 0.4rem 0;
+}
+
+.version-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+/* === Recipe sections === */
+.recipe-section { margin: 1.5rem 0; }
+
+/* === Scope grid — side-by-side, renders OPEN, never collapsed === */
+.scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.scope-grid .scope-col h3 { margin-top: 0; }
+
+@media (max-width: 640px) {
+    .scope-grid { grid-template-columns: 1fr; }
+}
+
+/* === Disclosure (<details>) styling — closed by default, clear affordance === */
+details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0 1rem;
+    margin: 0.75rem 0;
+}
+
+details > summary {
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    padding: 0.75rem 0;
+    list-style: none;
+}
+
+details > summary::-webkit-details-marker { display: none; }
+
+details > summary::before {
+    content: "\25B8";              /* ▸ collapsed affordance */
+    display: inline-block;
+    margin-right: 0.5rem;
+    color: var(--color-muted);
+    transition: transform 0.15s ease;
+}
+
+details[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+details > summary:hover {
+    color: var(--color-accent);
+}
+
+details > .details-body {
+    font-size: var(--rr-l3-size);
+    padding-bottom: 1rem;
+}
+
+/* === Directional — quarantined HOW, muted, last === */
+.directional {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--color-muted);
+}
+
+.directional h2 { color: var(--color-muted); }
+
+/* === Expand-all control === */
+.rr-controls {
+    margin: 0 0 1.5rem;
+}
+
+.rr-controls .expand-all-btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.rr-controls .expand-all-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* === Phase 4 — version toggle (links to the throwaway diff view) === */
+.version-toggle {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.version-toggle__current {
+    color: var(--color-muted);
+}
+
+.version-toggle__diff {
+    color: var(--color-accent);
+}
+
+/* === Print: force every <details> open so nothing hides on paper === */
+@media print {
+    body { background-image: none; }
+    .rr-controls { display: none; }
+    details > * { display: block; }
+}
+
+/* === Phase 4 — tracked-changes (diff) view ============================================
+   Scoped to the diff classes only; emitted exclusively by diff_render.py's throwaway view,
+   never by the canonical render. Tokens only — green/amber/red map to the existing
+   success/warning/danger semantic tokens (the Phase 3a hex-scan forbids hex outside :root). */
+.diff-changed-panel {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+}
+
+.diff-changed-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.diff-changed-counts {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    margin: 0 0 0.75rem;
+}
+
+.diff-changed-list { margin: 0; padding-left: 1.25rem; }
+.diff-changed-item { margin: 0.2rem 0; }
+.diff-changed-empty { color: var(--color-muted); margin: 0; }
+.diff-changed-item--added a    { color: var(--color-success); }
+.diff-changed-item--modified a { color: var(--color-warning); }
+.diff-changed-item--removed a  { color: var(--color-danger); }
+
+.diff-block {
+    border-left: 4px solid var(--border);
+    padding: 0.5rem 0 0.5rem 1rem;
+    margin: 0.75rem 0;
+}
+
+.diff-block-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-bottom: 0.25rem;
+}
+
+.diff-block-body { white-space: pre-wrap; }
+
+.diff-added    { border-left-color: var(--color-success); }
+.diff-modified { border-left-color: var(--color-warning); }
+.diff-removed  { border-left-color: var(--color-danger); }
+
+.diff-removed .diff-block-body {
+    color: var(--color-danger);
+    text-decoration: line-through;
+}
+
+.diff-prev { margin-top: 0.4rem; }
+.diff-prev > summary {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+.diff-prev del {
+    display: block;
+    white-space: pre-wrap;
+    color: var(--color-muted);
+    margin-top: 0.3rem;
+}
+
+/* === Phase 4 (sp5) — vanilla comment layer (decision #7) ==============================
+   The locked commenting UX: <mark> highlight, floating 💬 pill, inline composer, and the
+   always-surfaced tray (decision #9). Tokens only — never hex (the Phase 3a hex-scan
+   forbids hex outside :root). These classes render only when the JS layer is live; the
+   bare-file artifact never shows them (progressive enhancement). */
+
+/* Highlighted span of a placed open comment. */
+.comment-mark {
+    background: var(--color-callout-bg);
+    border-bottom: 2px solid var(--color-accent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    cursor: pointer;
+    padding: 0 1px;
+}
+
+/* Floating "💬 Comment" pill at the selection rect. */
+.comment-pill {
+    position: absolute;
+    z-index: 40;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(26, 26, 40, 0.18);
+}
+
+/* Inline composer, anchored at the selection (JS flips it above near the viewport bottom). */
+.comment-composer {
+    position: absolute;
+    z-index: 41;
+    width: min(22rem, 90vw);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 4px 16px rgba(26, 26, 40, 0.22);
+}
+
+.comment-composer__quote {
+    margin: 0;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--color-accent);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    max-height: 4.5rem;
+    overflow: auto;
+}
+
+.comment-composer__body {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    resize: vertical;
+}
+
+.comment-composer__actions { display: flex; gap: 0.5rem; }
+
+.comment-composer__submit,
+.comment-composer__cancel {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.comment-composer__submit {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border-color: var(--color-accent);
+}
+
+.comment-composer__cancel {
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.comment-composer__error {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-danger);
+}
+
+/* The tray host — a fixed right rail; the server fragment (tray.html) fills it. */
+.comment-tray-host {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--sidebar-width);
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    z-index: 30;
+}
+
+.comment-tray {
+    font-size: 0.85rem;
+}
+
+.comment-tray-group {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.comment-tray-heading {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.comment-tray-count {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-thread-item {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.comment-thread-item:first-of-type { border-top: 0; }
+
+.comment-thread-item[data-displaced="true"] {
+    border-left: 3px solid var(--color-warning);
+    padding-left: 0.5rem;
+}
+
+.comment-thread-item[data-state="orphaned"] {
+    border-left: 3px solid var(--color-danger);
+    padding-left: 0.5rem;
+}
+
+/* Transient flash when a <mark> click reveals its tray item. */
+.comment-thread-item--flash {
+    background: var(--color-callout-bg);
+    transition: background 0.4s ease;
+}
+
+.comment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.comment-author { font-weight: 600; color: var(--color-text); }
+
+.comment-author-kind-badge,
+.comment-state-badge,
+.comment-displaced-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.comment-author-kind-badge[data-kind="agent"] {
+    background: rgba(107, 71, 176, 0.12);
+    color: var(--color-focus);
+}
+
+.comment-state-badge[data-state="resolved"] {
+    background: rgba(45, 125, 79, 0.12);
+    color: var(--color-success);
+}
+
+.comment-displaced-badge { color: var(--color-warning); }
+
+.comment-quote {
+    margin: 0.25rem 0;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--border);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.comment-body { color: var(--color-text); }
+
+.comment-actions { margin-top: 0.35rem; }
+
+.comment-resolve-btn,
+.comment-reopen-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.comment-resolve-btn:hover,
+.comment-reopen-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* Goal Card convergence chip (client-filled; the baked HTML stays comment-agnostic). */
+.goal-card__convergence {
+    display: inline-block;
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    border: 1px solid var(--border);
+}
+
+.goal-card__convergence[data-convergence="unconverged"] {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.goal-card__convergence[data-convergence="converged"] {
+    color: var(--color-success);
+    border-color: var(--color-success);
+}
+
+/* Keep the fixed tray from colliding with the document on narrow viewports. */
+@media (max-width: 900px) {
+    .comment-tray-host {
+        position: static;
+        width: auto;
+        max-height: none;
+    }
+}
+
+@media print {
+    .comment-tray-host, .comment-pill, .comment-composer { display: none; }
+    .comment-mark { border-bottom: 0; background: transparent; }
+}</style>
+</head>
+<body data-goal-slug="refine-requirements-better-rendering-v3">
+<main class="rr-document">
+
+<div class="rr-controls">
+<button type="button" class="expand-all-btn" data-expand-all>Expand all</button>
+</div>
+
+<!-- LAYER 1: GOAL CARD (zero-click, always open) -->
+<section class="goal-card">
+<span class="family-pill family-pill--new_initiative" title="Scoped feature build: a new LLM maker agent for requirements rendering plus revisiting the v2 verification layer.">🚀 You are starting a new initiative</span>
+<h1 class="slide-title">Refine Requirements — Better Rendering (v3)</h1>
+<!-- open-comment-count: [PENDING Phase 4] -->
+<div class="goal-card__job">
+<p class="goal-card__job-text l1-body">Replace the plain deterministic requirements render with a cast-preso-style maker agent that generates a beautiful, easy-to-consume HTML per classification, so any reader grasps the job, outcome, and scope in seconds.</p>
+</div>
+<ul class="goal-card__assertions">
+<li class="l2-body">A first-time reader can state the job, the primary outcome, and the scope within sixty seconds of opening any family render.</li>
+<li class="l2-body">Every work family renders a visibly distinct and appropriate layout, confirmed across all nine families.</li>
+<li class="l2-body">Regenerating a render leaves every open comment anchored, with zero orphans introduced by the render change.</li>
+<li class="l2-body">On a true maker crash or timeout (no output), the deterministic render is served, so a render is never missing.</li>
+<li class="l2-body">An unchanged source serves the cached render with no new model call.</li>
+</ul>
+<div class="scope-grid">
+<div class="scope-col scope-col--in callout"><div class="callout-text">
+<h3>In focus</h3>
+<ul>
+<li class="l2-body">A first-time reader can state the job, the primary outcome, and the scope within sixty seconds of opening any family render.</li>
+<li class="l2-body">Every work family renders a visibly distinct and appropriate layout, confirmed across all nine families.</li>
+<li class="l2-body">Regenerating a render leaves every open comment anchored, with zero orphans introduced by the render change.</li>
+<li class="l2-body">On a true maker crash or timeout (no output), the deterministic render is served, so a render is never missing.</li>
+<li class="l2-body">An unchanged source serves the cached render with no new model call.</li>
+<li class="l2-body">A first-time reader discovers how to leave a comment without being told.</li>
+<li class="l2-body">When the requirements omit a detail needed to understand a block, the page supplies it (sourced upstream) or marks the gap, never shipping a silently incomplete explanation.</li>
+<li class="l2-body">On non-convergence, the reader is served the best-scoring attempt with a human-review flag recorded, never the plain deterministic page.</li>
+</ul>
+</div></div>
+<div class="scope-col scope-col--out">
+<h3>Out of scope</h3>
+<ul>
+<li class="l2-body muted">Replacing the canonical markdown source or the comment and version backend.</li>
+<li class="l2-body muted">The deferred human timed-read evaluation from v2.</li>
+<li class="l2-body muted">Rendering documents other than refined requirements.</li>
+<li class="l2-body muted">A live, always-regenerating render on every page view (caching is required).</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- LAYER 2: RECIPE SECTIONS (ordered per family) -->
+<section class="recipe-section">
+<h2 class="slide-title">Intent</h2>
+<div class="l1-body">
+<p><strong>Job statement:</strong> Replace the plain deterministic requirements render with a cast-preso-style maker agent that generates a beautiful, easy-to-consume HTML per classification, so any reader grasps the job, outcome, and scope in seconds.</p>
+<p>Refine-requirements v2 produces <code>refined_requirements.html</code> from a deterministic Python and Jinja renderer that borrows cast-preso styling but never lets an LLM craft the page. The result is functional but plain, and dogfooding surfaced two concrete defects (raw markdown leaking onto the Goal Card, and a sentence-splitter that truncates on abbreviations). The owner wants the render to reach cast-preso quality: a bespoke, per-classification layout an LLM maker generates, the way cast-preso-how generates slides.</p>
+<p>The chosen direction is the maker agent. The known cost of that choice — giving up render determinism and reproducibility, and the risk to the comment-and-version anchoring that Phase 4 depends on — is accepted and is captured below as constraints and open questions, not waved away.</p>
+<p>This is expected to mean revisiting parts of v2, especially the verification layer. The deterministic golden-HTML snapshot gate and the SC-001 checker were built for a render that never changes; a maker render that varies needs different checks. The same applies to the machinery that assumed a stable render — version diffing and comment resolution were deterministic in v2 (set-arithmetic over stable ids; quote-based re-anchoring), and a varying maker render breaks that assumption, so these likely need an LLM that reasons about meaning rather than a fixed algorithm. New LLM agents are explicitly in scope — a maker, one or more LLM checkers, a diff-and-comment-resolution agent, and any helper agents the loop needs — rather than only reusing what exists.</p>
+<p>A guiding principle, borrowed from cast-preso: separate what to communicate from how to communicate. A WHAT layer decides, per block and per family, the information and the outcome a reader must take away; a HOW layer (the maker) chooses the representation that lands it, picking from a named library of representation archetypes rather than improvising. cast-preso already ships reusable archetypes (compare-contrast with a code-diff variant, single-stat-hero, timeline, diagram-annotated, and more) and design utilities for diff representation that the version-diff surface should reuse rather than reinvent.</p>
+<p>The North Star is the user-facing HTML. Deciding what to build is the most valuable step, so the whole pipeline optimizes for exactly one thing: a reader understanding the requirement quickly and completely. Backend cost, the number of generation-and-check loops, model tier, and latency are explicitly NOT constraints to minimize — spend whatever it takes to make the page land. And when the presenter finds it is missing a detail that would genuinely help the reader but is absent from the requirements file, it asks the upstream WHAT or refine agent for that detail rather than shipping an incomplete page; it never fabricates requirement content.</p>
+</div>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Decisions</h2>
+<div class="l2-body">
+<p>| Date | Chose | Over | Because |
+|------|-------|------|---------|
+| 2026-06-12 | A preso-style maker agent (a cast-requirements-how cousin of cast-preso-how) | A hybrid deterministic-plus-LLM render (recommended); deterministic polish only | Want maximum, preso-grade beauty per classification, and accept giving up render determinism and reproducibility to get it. |
+| 2026-06-12 | Optimize for the comprehensibility of the user-facing HTML above all; cost, loops, and latency are not constraints, and the presenter may ask upstream for missing-but-useful detail | Treating cost/loop-count as constraints; rendering only what is literally in the file | Deciding what to build is the highest-value step; the holy grail is the page the reader understands, so everything else is subordinate. |
+| 2026-06-12 | LLM anchoring on a deterministic id backbone | LLM end-to-end anchoring (no ids); deterministic post-process id injection | Stable ids make anchoring exact and prevent silent orphans (a comment is never lost); the LLM reasons only when text genuinely moved. |
+| 2026-06-12 | Pipeline shape: a WHAT agent plus a HOW maker plus one thorough checker | A full cast-preso-depth pipeline (multi-checker coordinator with content, visual, and tone plus an adversarial pass); a single monolithic maker | Keep the what/how split that makes preso output good, without the overhead of a multi-checker coordinator. |
+| 2026-06-12 | On non-convergence, serve the best-scoring attempt and flag it for human review | Falling back to the deterministic render; blocking the page until a human intervenes | The page is the holy grail; a reader should never be down-graded to the plain render when a better attempt exists. Deterministic fallback is kept only for a true no-output crash. |
+| 2026-06-12 | A single new requirements-render checker (comprehension plus visual in one pass), rework until the comprehension bar is met, deterministic fallback only on genuine failure | Composing the existing cast-requirements-checker plus cast-preso-check-*; the full preso check-coordinator | Simpler to tune for requirement renders, and loops are driven by page quality rather than a cost cap. |
+| 2026-06-12 | Cache by source-content hash, regenerate on change (reuse the v2 lazy-regeneration) | Hash cache plus a manual regenerate control; hash cache plus staleness expiry | Caching only skips re-rendering unchanged content; it does not ration generation effort, which is governed by quality. |</p>
+</div>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">User Stories</h2>
+<div class="user-story">
+<p class="l2-body"><strong>US1 — A reader instantly understands any render (Priority: P1)</strong></p>
+<p><strong>As a</strong> reader unfamiliar with a goal, <strong>I want to</strong> open its requirements render and grasp the job, the primary outcome, and what is in and out of scope within seconds, <strong>so that</strong> I can act without reading the whole document or asking the author.</p>
+<details>
+<summary>US1 — A reader instantly understands any render (Priority: P1)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> Open the render for a goal in any family and, from the above-the-fold view alone, restate the job, the outcome, and the scope correctly.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN a reader opens a goal's render, THE SYSTEM SHALL present an above-the-fold summary (classification, one-line job statement, and the key outcome and scope assertions) that is readable without scrolling or clicking.</li>
+<li><strong>Scenario 2:</strong> WHEN the source document is a stub, IF there is not enough content to summarize, THE SYSTEM SHALL render a clear prompt-to-begin state rather than an empty or broken page.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US2 — The layout is bespoke per classification (Priority: P1)</strong></p>
+<p><strong>As a</strong> reader, <strong>I want to</strong> see a layout shaped to the kind of work, <strong>so that</strong> a bug fix reads like a bug fix and a new initiative reads like an initiative.</p>
+<details>
+<summary>US2 — The layout is bespoke per classification (Priority: P1)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> Render one goal per family and confirm each family's layout is visibly distinct and appropriate to that family's recipe.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN the maker renders a document, THE SYSTEM SHALL select a layout and emphasis driven by the document's classified family and its recipe blocks.</li>
+<li><strong>Scenario 2:</strong> WHEN a family carries no content for a block, THE SYSTEM SHALL omit that block rather than pad it with an empty section.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US3 — Comments and versions survive the new render (Priority: P1)</strong></p>
+<p><strong>As a</strong> reviewer who has left comments, <strong>I want to</strong> keep my comments anchored after the render changes, <strong>so that</strong> switching to the maker does not orphan my feedback.</p>
+<details>
+<summary>US3 — Comments and versions survive the new render (Priority: P1)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> With open comments present, regenerate the render through the maker and confirm every comment stays anchored to its quoted text with zero new orphans.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN the maker emits a document, THE SYSTEM SHALL produce stable anchors for each user story, functional requirement, and success criterion so the comment and version layer can attach to them.</li>
+<li><strong>Scenario 2:</strong> WHEN a regenerated render moves or rewrites anchored text, THE SYSTEM SHALL re-anchor or resolve the affected comments by reasoning about meaning (an LLM resolution agent), rather than relying on the v2 deterministic quote-match alone, and SHALL never silently drop a comment.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US4 — Generated quality is gated, not assumed (Priority: P2)</strong></p>
+<p><strong>As a</strong> maintainer, <strong>I want to</strong> gate the generated HTML behind a checker with a bounded rework loop, <strong>so that</strong> a bad generation never reaches a reader.</p>
+<details>
+<summary>US4 — Generated quality is gated, not assumed (Priority: P2)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> Force a low-quality generation and confirm the checker fails it and triggers a rework before the page is served.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN the maker produces a render, THE SYSTEM SHALL run a comprehension-and-visual checker over it and serve the result only after it passes or the rework budget is exhausted.</li>
+<li><strong>Scenario 2:</strong> IF the checker cannot reach the bar after sustained rework, THEN THE SYSTEM SHALL serve the best-scoring attempt and flag it for human review, rather than fall back to the plain deterministic page.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US5 — Renders are cached, not regenerated on every view (Priority: P2)</strong></p>
+<p><strong>As a</strong> cost-conscious owner, <strong>I want to</strong> generate the expensive render at most once per source version, <strong>so that</strong> viewing a page does not repeatedly call a model.</p>
+<details>
+<summary>US5 — Renders are cached, not regenerated on every view (Priority: P2)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> View an unchanged render twice and confirm the second view serves cached HTML with no new model call.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN a render is requested and the source content is unchanged since the last generation, THE SYSTEM SHALL serve the cached HTML without invoking the maker.</li>
+<li><strong>Scenario 2:</strong> WHEN the source content changes, THE SYSTEM SHALL regenerate on the next view and replace the cached render.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US6 — Commenting is discoverable (Priority: P2)</strong></p>
+<p><strong>As a</strong> reviewer opening a render for the first time, <strong>I want to</strong> see an obvious way to start a comment, <strong>so that</strong> I can leave feedback without knowing a hidden select-text gesture.</p>
+<details>
+<summary>US6 — Commenting is discoverable (Priority: P2)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> A first-time reader, given no instructions, leaves a comment on the render.</p>
+<p><strong>Note:</strong> this fix is independent of the maker and applies to today's deterministic render too, so it can ship ahead of the rest of v3.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN a reader views a render, THE SYSTEM SHALL show a visible commenting affordance (a hint or control) in addition to the select-to-comment gesture.</li>
+<li><strong>Scenario 2:</strong> WHEN a reader selects text, THE SYSTEM SHALL continue to offer the inline comment pill it offers today.</li>
+</ul>
+</div></div>
+</details>
+</div>
+<div class="user-story">
+<p class="l2-body"><strong>US7 — The presenter fills comprehension gaps by asking upstream (Priority: P1)</strong></p>
+<p><strong>As a</strong> reader, <strong>I want to</strong> get the detail I need to understand a requirement even when the source file left it out, <strong>so that</strong> I am never stuck on a page that explains something incompletely.</p>
+<details>
+<summary>US7 — The presenter fills comprehension gaps by asking upstream (Priority: P1)</summary>
+<div class="details-body"><div class="l2-body">
+<p><strong>Independent test:</strong> Given a requirements file missing a detail that materially aids comprehension, the rendered page either supplies it (sourced by asking the upstream agent) or clearly marks the gap — it never silently ships an incomplete explanation.</p>
+<p><strong>Acceptance scenarios:</strong></p>
+<ul>
+<li><strong>Scenario 1:</strong> WHEN the presenter detects a comprehension gap the requirements file does not cover, THE SYSTEM SHALL request the missing detail from the upstream WHAT or refine agent before finalizing the render.</li>
+<li><strong>Scenario 2:</strong> WHEN the upstream agent cannot supply the detail, THE SYSTEM SHALL surface the gap explicitly on the page rather than fabricate an answer.</li>
+</ul>
+</div></div>
+</details>
+</div>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Functional Requirements</h2>
+<details>
+<summary>Functional Requirements (16)</summary>
+<div class="details-body"><ul>
+<li class="l2-body"><strong>FR-001</strong> <p>A HOW maker agent (a cast-requirements-how cousin of cast-preso-how) consumes the per-section communication intent produced by the WHAT agent plus the confirmed classification and produces the self-contained HTML render.</p></li>
+<li class="l2-body"><strong>FR-002</strong> <p>The maker selects layout and emphasis from the document's family and recipe blocks, producing a visibly distinct render per family.</p></li>
+<li class="l2-body"><strong>FR-003</strong> <p>Canonical anchor ids (US-NN, FR-NNN, SC-NNN) are assigned upstream by the deterministic engine, and the maker must emit them verbatim on the corresponding blocks; it never invents or renames an id. An LLM re-anchors a comment only when its target text genuinely moved or was reworded.</p></li>
+<li class="l2-body"><strong>FR-004</strong> <p>A single new requirements-render checker agent grades the generated HTML for comprehension and visual quality and drives a rework loop that continues until the comprehension bar is met — quality-driven, not a cost-capped number of rounds (only a high safety ceiling guards against an infinite loop).</p></li>
+<li class="l2-body"><strong>FR-005</strong> <p>The generated render is cached against the source content hash and regenerated when the source changes, reusing the v2 embedded-source-hash lazy-regeneration mechanism unchanged.</p></li>
+<li class="l2-body"><strong>FR-006</strong> <p>On a true maker failure (crash, timeout, no output at all) the deterministic renderer is served. On non-convergence (output was produced but the checker never reached the bar) the best-scoring attempt is served and flagged for human review — never the plain deterministic page.</p></li>
+<li class="l2-body"><strong>FR-007</strong> <p>The render is served through the existing self-healing <code>GET /goals/{slug}/render</code> loop and remains self-contained.</p></li>
+<li class="l2-body"><strong>FR-008</strong> <p>The canonical source stays <code>refined_requirements.collab.md</code>; the HTML is a generated, read-only projection.</p></li>
+<li class="l2-body"><strong>FR-009</strong> <p>The v2 verification layer is revisited for a non-deterministic render: the deterministic golden-HTML snapshot gate is replaced or supplemented by LLM-judged comprehension and visual checks.</p></li>
+<li class="l2-body"><strong>FR-010</strong> <p>The new agents are a WHAT agent, a HOW maker, a single thorough comprehension-plus-visual checker, and a diff-and-comment-resolution agent (plus helpers as needed), following the cast agent-design conventions.</p></li>
+<li class="l2-body"><strong>FR-011</strong> <p>Because anchor ids are stable (the deterministic backbone above), the structural version diff stays deterministic (id-based set-arithmetic, as in v2); an LLM is used only to narrate the diff and to re-anchor or resolve comments whose text genuinely moved or was reworded, never inventing a change absent from the source.</p></li>
+<li class="l2-body"><strong>FR-012</strong> <p>The pipeline is split into two agents: a WHAT agent decides, per block and family, the information and outcome to communicate; a separate HOW maker chooses the representation and generates the HTML. The HOW layer never invents the WHAT.</p></li>
+<li class="l2-body"><strong>FR-013</strong> <p>The maker selects representations from a named archetype library rather than improvising, reusing cast-preso archetypes (compare-contrast and its code-diff variant, single-stat-hero, timeline, diagram-annotated, and others) and cast-preso's diff-representation utilities for the version-diff surface.</p></li>
+<li class="l2-body"><strong>FR-014</strong> <p>The render exposes a discoverable way to comment — a visible affordance, not selection-only with no hint — while keeping the existing select-to-comment path.</p></li>
+<li class="l2-body"><strong>FR-015</strong> <p>When the presenter finds a comprehension gap — a detail that would materially help the reader but is absent from the requirements file — it requests that detail from the upstream WHAT or refine agent before finalizing, rather than rendering an incomplete page; it never fabricates requirement content.</p></li>
+<li class="l2-body"><strong>FR-016</strong> <p>Detail obtained by such a request is reconciled upstream (written back to or flagged on the canonical requirements) so the page never shows requirement content that exists nowhere else.</p></li>
+</ul></div>
+</details>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Success Criteria</h2>
+<details>
+<summary>Success Criteria (8)</summary>
+<div class="details-body"><ul>
+<li class="l2-body"><strong>SC-001</strong> <p>A first-time reader can state the job, the primary outcome, and the scope within sixty seconds of opening any family render.</p></li>
+<li class="l2-body"><strong>SC-002</strong> <p>Every work family renders a visibly distinct and appropriate layout, confirmed across all nine families.</p></li>
+<li class="l2-body"><strong>SC-003</strong> <p>Regenerating a render leaves every open comment anchored, with zero orphans introduced by the render change.</p></li>
+<li class="l2-body"><strong>SC-004</strong> <p>On a true maker crash or timeout (no output), the deterministic render is served, so a render is never missing.</p></li>
+<li class="l2-body"><strong>SC-005</strong> <p>An unchanged source serves the cached render with no new model call.</p></li>
+<li class="l2-body"><strong>SC-006</strong> <p>A first-time reader discovers how to leave a comment without being told.</p></li>
+<li class="l2-body"><strong>SC-007</strong> <p>When the requirements omit a detail needed to understand a block, the page supplies it (sourced upstream) or marks the gap, never shipping a silently incomplete explanation.</p></li>
+<li class="l2-body"><strong>SC-008</strong> <p>On non-convergence, the reader is served the best-scoring attempt with a human-review flag recorded, never the plain deterministic page.</p></li>
+</ul></div>
+</details>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Out of Scope</h2>
+<ul>
+<li class="l2-body"><ul>
+<li>Replacing the canonical markdown source or the comment and version backend.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>The deferred human timed-read evaluation from v2.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Rendering documents other than refined requirements.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>A live, always-regenerating render on every page view (caching is required).</li>
+</ul></li>
+</ul>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Constraints</h2>
+<details>
+<summary>Constraints (10)</summary>
+<div class="details-body"><ul>
+<li class="l2-body"><ul>
+<li>Reuse the cast-preso visual toolkit and style bible rather than building a new visual system.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Separate what to communicate from how to communicate (the cast-preso what-then-how split): a WHAT layer owns the information and outcome per block; the HOW maker owns the representation and must never invent the WHAT.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Pick representations from a named archetype library (reuse cast-preso archetypes and its diff-representation utilities) rather than improvising a layout per render.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Commenting must be discoverable: keep select-to-comment, but add a visible affordance so a reader knows comments exist without being told.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Keep the server-served, self-healing regenerate-on-view loop and the self-contained single-file output.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>The maker output must carry stable per-block anchors; the comment and version layer is non-negotiable.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>The deterministic renderer stays in the codebase as the fallback substrate.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Correctness still matters most for comment anchoring and version diffs, but a varying maker render breaks the v2 assumption that these can stay purely deterministic; an LLM-assisted diff and comment-resolution approach is in scope where stable structure no longer holds. The trust boundary must stay tight: the LLM may narrate and re-anchor, but a diff must never invent a change that is not in the source.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>Optimize for one thing above all: the comprehensibility of the user-facing HTML. Backend cost, loop count, model tier, and latency are explicitly NOT constraints to minimize — spend whatever it takes to make the page land. Caching exists only to skip re-rendering unchanged content, never to ration generation effort.</li>
+</ul></li>
+<li class="l2-body"><ul>
+<li>The presenter may ask the upstream WHAT or refine agent for a missing-but-useful detail rather than ship an incomplete page; it never invents requirement content, and anything it obtains is reconciled back to the canonical source.</li>
+</ul></li>
+</ul></div>
+</details>
+</section>
+<section class="recipe-section">
+<h2 class="slide-title">Open Questions</h2>
+<ul>
+<li class="l2-body"><ul>
+<li><strong>[USER-DEFERRED]</strong> Maker and checker model tier (which model each runs on). Reason: deferred as a later tuning knob once the generation-and-check loop works end to end.</li>
+</ul></li>
+</ul>
+</section>
+<!-- LAYER 3: UNMODELED SECTIONS (typed model skipped — never silent) -->
+
+<!-- LAYER 4: DIRECTIONAL (quarantined HOW, muted, last) -->
+
+</main>
+<script>
+(function () {
+  var btn = document.querySelector('[data-expand-all]');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var items = document.querySelectorAll('details');
+    var anyClosed = Array.prototype.some.call(items, function (d) { return !d.open; });
+    Array.prototype.forEach.call(items, function (d) { d.open = anyClosed; });
+    btn.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+  });
+})();
+</script>
+
+
+<aside class="comment-tray-host"
+       hx-get="/api/goals/refine-requirements-better-rendering-v3/requirements/comments"
+       hx-trigger="load, comments:refresh from:body"
+       hx-swap="innerHTML"
+       aria-label="Comments"></aside>
+
+<template class="comment-composer-template">
+<form class="comment-composer"
+      hx-post="/api/goals/refine-requirements-better-rendering-v3/requirements/comments"
+      hx-swap="none">
+<blockquote class="comment-composer__quote" data-role="quote"></blockquote>
+<input type="hidden" name="quoted_text" data-role="quoted-text">
+<input type="hidden" name="section_hint" data-role="section-hint">
+<input type="hidden" name="author_kind" value="human">
+<textarea class="comment-composer__body" name="body" rows="3" placeholder="Add a comment…" aria-label="Comment" required></textarea>
+<div class="comment-composer__actions">
+<button type="submit" class="comment-composer__submit">Comment</button>
+<button type="button" class="comment-composer__cancel" data-role="cancel">Cancel</button>
+</div>
+<p class="comment-composer__error" data-role="error" hidden></p>
+</form>
+</template>
+
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js" defer></script>
+</body>
+</html>

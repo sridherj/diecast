@@ -1,0 +1,23 @@
+# DELIBERATELY-FAILING FIXTURE — do not "fix" the bug.
+# This agent's prompt tries to dispatch a non-allowlisted target so US3.S2
+# can assert that allowlist denial flows through to a 422 with a deterministic
+# summary string. See sp1.2 of the execution plan
+# (goals/child-delegation-integration-tests/execution/sp1_2_fixture_configs/plan.md).
+name: cast-test-delegation-denied
+description: |
+  DELIBERATELY-FAILING delegation-test fixture. Tries to HTTP-dispatch
+  cast-test-child-worker-subagent, which is NOT in this agent's allowlist,
+  to exercise the 422 allowlist-denial path. The misalignment between
+  allowed_delegations and the curl target is intentional test data — do not
+  "fix" it.
+entrypoint: cast-test-delegation-denied.md
+model: haiku
+dispatch_mode: http
+allowed_delegations:
+  - cast-test-child-worker
+tags:
+  - test
+  - integration
+  - delegation
+  - deliberately-failing
+visible: false

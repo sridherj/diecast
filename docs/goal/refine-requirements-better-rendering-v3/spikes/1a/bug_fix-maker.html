@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal Card leaks raw markdown onto the zero-click surface</title>
+<style>
+/* ============================================================================
+   Hand-crafted maker render — spike 1a, bug_fix family.
+   Same cast-preso toolkit tokens as the new_initiative page (one shared visual
+   system), accent dialed toward the red end of the raspberry so a bug fix reads
+   like a bug fix (US2). Self-contained; thin-spine DOM contract: NO id-attrs,
+   NO data-block-anchor.
+   ============================================================================ */
+:root{
+  --color-bg:#F5F4F0; --color-text:#1A1A28; --color-muted:#4A4860;
+  --color-surface:#ECEAE4; --color-accent:#C81D3C;
+  --color-callout-bg:rgba(200,29,60,0.07); --color-callout-border:var(--color-accent);
+  --color-question-bg:rgba(74,72,96,0.06);
+  --color-good:#1F7A52; --color-good-bg:rgba(31,122,82,0.08);
+  --grid:rgba(74,72,96,0.035);
+  --mono:'IBM Plex Mono','SF Mono','Fira Code',ui-monospace,monospace;
+  --body:'DM Sans',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background-color:var(--color-bg); color:var(--color-text);
+  font-family:var(--body); font-size:17px; line-height:1.6;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+::selection{background:var(--color-accent); color:#fff;}
+main{max-width:820px; margin:0 auto; padding:64px 28px 120px;}
+h1,h2,h3,h4{font-family:var(--mono); letter-spacing:-0.02em; line-height:1.16; color:var(--color-text);}
+h2{font-size:1.45rem; margin:0 0 6px;}
+p{margin:0 0 14px;}
+code{font-family:var(--mono); font-size:0.86em; background:var(--color-surface);
+  padding:1px 6px; border-radius:4px;}
+.muted{color:var(--color-muted);}
+.kicker{font-family:var(--mono); font-size:0.72rem; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--color-accent); margin:0 0 10px;}
+.section{position:relative; padding:44px 0 8px; border-top:1px solid rgba(74,72,96,0.12);}
+
+/* --- defect hero: single-stat-hero, "the bug as a target" --- */
+.goal-card{background:var(--color-surface); border-radius:14px; padding:40px 38px; margin-bottom:8px;}
+.family-pill{display:inline-block; font-family:var(--mono); font-size:0.78rem; font-weight:600;
+  padding:6px 14px; border-radius:999px; background:var(--color-accent); color:#fff;}
+.goal-card h1{font-size:1.7rem; margin:18px 0 22px; line-height:1.2;}
+.stat{display:flex; align-items:baseline; gap:18px; margin:0 0 12px;}
+.stat .num{font-family:var(--mono); font-size:3.4rem; font-weight:700; color:var(--color-accent); line-height:1;}
+.stat .ctx{font-size:1.05rem; font-weight:600; line-height:1.35;}
+.job{font-size:1.08rem; color:var(--color-muted); margin-top:18px;}
+.job b{color:var(--color-text);}
+
+/* --- visible canonical-id anchor label (NOT an id attribute) --- */
+.anchor{font-family:var(--mono); font-size:0.7rem; font-weight:600; color:var(--color-accent);
+  background:var(--color-callout-bg); border:1px solid rgba(200,29,60,0.28);
+  border-radius:5px; padding:1px 7px; margin-right:9px; vertical-align:middle; white-space:nowrap;}
+
+/* --- evidence: code-showcase / before-after --- */
+.evidence{background:#fff; border:1px solid rgba(74,72,96,0.16); border-radius:10px;
+  padding:18px 20px; margin:0 0 14px;}
+.evidence h3{font-family:var(--mono); font-size:0.95rem; margin:0 0 8px;}
+.evidence p{font-size:0.93rem; color:var(--color-muted); margin:0;}
+.diff{font-family:var(--mono); font-size:0.84rem; border-radius:8px; overflow:hidden;
+  margin:14px 0 4px; border:1px solid rgba(74,72,96,0.16);}
+.diff div{padding:8px 14px;}
+.diff .bad{background:var(--color-callout-bg); color:var(--color-text);}
+.diff .bad::before{content:"− "; color:var(--color-accent); font-weight:700;}
+.diff .good{background:var(--color-good-bg); color:var(--color-text);}
+.diff .good::before{content:"+ "; color:var(--color-good); font-weight:700;}
+
+/* --- the fix: build-up checklist of FRs --- */
+.req-list{padding:0; margin:0;}
+.req-unit{list-style:none; background:#fff; border:1px solid rgba(74,72,96,0.14);
+  border-radius:10px; padding:14px 18px; margin:0 0 10px; display:flex; align-items:baseline;}
+.fix-list .req-unit{border-left:4px solid var(--color-accent);}
+.req-text{font-size:0.94rem;}
+.sc-list .req-unit{border-left:4px solid var(--color-good);}
+.sc-list .anchor{color:var(--color-good); background:var(--color-good-bg); border-color:rgba(31,122,82,0.3);}
+
+.open-q{background:var(--color-question-bg); border-left:4px solid var(--color-muted);
+  border-radius:8px; padding:16px 20px; font-size:0.95rem; color:var(--color-muted);}
+.open-q b{font-family:var(--mono); font-size:0.72rem; letter-spacing:0.08em;
+  text-transform:uppercase; display:block; margin-bottom:6px;}
+</style>
+</head>
+<body data-goal-slug="">
+<main>
+
+<!-- ===== DEFECT GOAL CARD (above the fold) ===== -->
+<section class="goal-card">
+  <span class="family-pill">🐛 You are fixing a bug</span>
+  <h1>Goal Card leaks raw markdown onto the zero-click surface</h1>
+  <div class="stat">
+    <span class="num">0</span>
+    <span class="ctx">markdown characters should reach the Goal Card —<br>today a reader's first impression is <code>**plain**</code>, asterisks and all.</span>
+  </div>
+  <p class="job"><b>The fix:</b> route the Goal Card job statement and L2 assertions through
+    the same inline-markdown path the recipe sections already use, so <code>**bold**</code>,
+    <code>`code`</code>, and <code>_emphasis_</code> render as formatted text — without
+    breaking the thin-spine DOM contract the comment layer depends on.</p>
+</section>
+
+<!-- ===== WHAT BROKE ===== -->
+<section class="section">
+  <p class="kicker">01 · What broke</p>
+  <h2>The one above-the-fold surface prints its own source code.</h2>
+  <p class="muted">The refined-requirements render has one job above all: a reader grasps the
+    job, outcome, and scope in seconds, from the Goal Card alone (this is SC-001). The job
+    statement and the 3–5 L2 assertions are emitted through <code>escape()</code> only —
+    never through the markdown renderer — so any inline markdown an author wrote survives to
+    the screen as raw syntax. The defect is data-dependent: a source with no inline markdown
+    looks fine, which is exactly why the golden-HTML snapshot never caught it.</p>
+</section>
+
+<!-- ===== THE EVIDENCE ===== -->
+<section class="section">
+  <p class="kicker">02 · The evidence</p>
+  <h2>Two emit sites, both in <code>renderer.py</code>, both fed by <code>goal_card.py</code>.</h2>
+
+  <div class="evidence">
+    <h3>The job statement</h3>
+    <p><code>_render_goal_card</code> builds <code>job_html</code> as
+      <code>f'&lt;p&gt;{escape(job_statement)}&lt;/p&gt;'</code>. <code>escape()</code>
+      HTML-escapes but does not interpret markdown, so <code>**plain**</code> renders as four
+      literal asterisks around the word.</p>
+  </div>
+  <div class="evidence">
+    <h3>The L2 assertions</h3>
+    <p><code>_render_assertions</code> emits each assertion as
+      <code>f'&lt;li&gt;{escape(a)}&lt;/li&gt;'</code> with an explicit code comment,
+      "no markdown wrapper." Success-Criteria cells routinely carry backtick-wrapped
+      identifiers and <code>_emphasis_</code>; all of it leaks. Observed live on this goal's
+      own <code>new_initiative</code> render.</p>
+  </div>
+
+  <div class="diff" aria-label="before and after">
+    <div class="bad"><code>job_html = f'&lt;p&gt;{escape(job_statement)}&lt;/p&gt;'</code></div>
+    <div class="good"><code>job_html = f'&lt;p&gt;{_md_to_html(job_statement)}&lt;/p&gt;'</code></div>
+  </div>
+  <p class="muted">A sibling <code>_first_sentence</code> abbreviation-truncation defect lives
+    one call deeper; it is tracked separately (see Still open) so a fixer does not conflate
+    the two while in the same file.</p>
+</section>
+
+<!-- ===== THE FIX (functional requirements — the content the baseline drops) ===== -->
+<section class="section">
+  <p class="kicker">03 · The fix</p>
+  <h2>Four requirements — each anchored to its canonical id.</h2>
+  <ul class="req-list fix-list">
+    <li class="req-unit"><span class="anchor">FR-001</span><span class="req-text">The Goal Card job statement is rendered through the same inline-markdown path the recipe sections already use (<code>_md_to_html</code>), so <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> resolve to formatted HTML instead of literal syntax. Reuse the existing shared markdown instance; do not add a second renderer.</span></li>
+    <li class="req-unit"><span class="anchor">FR-002</span><span class="req-text">Each L2 assertion on the Goal Card resolves inline markdown the same way, while staying a single contiguous <code>&lt;li&gt;</code> with no fragmenting spans. The "no markdown wrapper" comment is the bug, not the contract.</span></li>
+    <li class="req-unit"><span class="anchor">FR-003</span><span class="req-text">The fix introduces no element id-attribute and no <code>data-block-anchor</code> anywhere on the Goal Card, preserving the thin-spine DOM contract the comment-and-version layer anchors against. Inline-only conversion is required — a markdown renderer that emits header ids would violate this.</span></li>
+    <li class="req-unit"><span class="anchor">FR-004</span><span class="req-text">A render whose source contains no inline markdown produces byte-identical Goal Card output to today, so the change is invisible except where it fixes the leak. This protects the existing golden snapshots for markdown-free fixtures.</span></li>
+  </ul>
+</section>
+
+<!-- ===== HOW WE'LL KNOW IT'S FIXED (success criteria — also dropped by baseline) ===== -->
+<section class="section">
+  <p class="kicker">04 · How we'll know it's fixed</p>
+  <h2>Three checks, each measurable.</h2>
+  <ul class="req-list sc-list">
+    <li class="req-unit"><span class="anchor">SC-001</span><span class="req-text">The Goal Card of a source containing <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> renders formatted text with zero literal markdown characters visible. <i class="muted">Render a fixture carrying inline markdown; assert no stray <code>*</code> / <code>`</code> / <code>_</code> in the Goal Card text.</i></span></li>
+    <li class="req-unit"><span class="anchor">SC-002</span><span class="req-text">No id-attribute and no <code>data-block-anchor</code> appear anywhere in the regenerated Goal Card markup. <i class="muted">Grep the rendered Goal Card section.</i></span></li>
+    <li class="req-unit"><span class="anchor">SC-003</span><span class="req-text">A markdown-free source renders a byte-identical Goal Card to the pre-fix output. <i class="muted">Golden-snapshot diff on an emphasis-free fixture.</i></span></li>
+  </ul>
+</section>
+
+<!-- ===== STILL OPEN ===== -->
+<section class="section">
+  <p class="kicker">05 · Still open</p>
+  <div class="open-q">
+    <b>Deferred</b>
+    Whether the sibling <code>_first_sentence</code> abbreviation-truncation defect is fixed
+    in the same change or tracked as its own bug. Leaning separate — different root cause,
+    different test, and bundling risks scope creep in a one-file fix.
+  </div>
+</section>
+
+</main>
+
+<!-- FR-028 progressive enhancement: the only sanctioned external references. -->
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js" defer></script>
+</body>
+</html>

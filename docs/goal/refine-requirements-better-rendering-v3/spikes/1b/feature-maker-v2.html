@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export Scheduler — Refined Requirements (maker layout B, regenerated)</title>
+<style>
+  :root { --ink:#16202c; --muted:#566173; --line:#e2e7ee; --accent:#0b7285; --chip:#e3fafc; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.6 ui-sans-serif,Segoe UI,Roboto,sans-serif; color:var(--ink); background:#fbfdfe; }
+  .rr-document { max-width:920px; margin:0 auto; padding:48px 28px 96px; }
+  .rr-hero { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
+  .rr-hero h1 { font-size:32px; margin:0; }
+  .rr-job { color:var(--muted); font-size:17px; margin:0; max-width:62ch; }
+  .rr-section { margin:36px 0; border-top:1px solid var(--line); padding-top:20px; }
+  .rr-section > h2 { font-size:14px; letter-spacing:.04em; color:var(--accent); margin:0 0 14px; }
+  .rr-grid { display:grid; gap:10px; }
+  .rr-unit { padding:12px 16px; border-left:3px solid var(--accent); background:#fff; }
+  .rr-id { font:600 12px/1 ui-monospace,monospace; color:var(--accent); background:var(--chip); padding:3px 7px; border-radius:4px; margin-right:8px; }
+  .rr-unit p { margin:6px 0 0; }
+  .rr-story h3 { font-size:16px; margin:8px 0 4px; }
+  ul.rr-list { margin:0; padding-left:0; list-style:none; }
+  ul.rr-list > li { padding:10px 16px; border-left:3px solid var(--line); margin:8px 0; background:#fff; }
+</style>
+</head>
+<body data-goal-slug="spike-1b-anchor-survival">
+<main class="rr-document">
+
+  <header class="rr-hero">
+    <h1>Export Scheduler</h1>
+    <p class="rr-job">Schedule a configured report to export on a recurring cadence so
+    stakeholders receive fresh data automatically, with failures surfaced fast.</p>
+  </header>
+
+  <section class="rr-section">
+    <h2>The job</h2>
+    <div class="rr-grid">
+      <div class="rr-unit">
+        <span class="rr-id">Intent</span>
+        <p>When an analyst finishes configuring a report, they want to schedule it to export
+        automatically on a recurring cadence, so that stakeholders receive fresh data without
+        anyone re-running the export by hand.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rr-section">
+    <h2>How we'll know it works</h2>
+    <div class="rr-grid">
+      <div class="rr-unit"><span class="rr-id">SC-001</span><p>A schedule created with a valid cron expression produces its first export within one cadence interval.</p></div>
+      <div class="rr-unit"><span class="rr-id">SC-002</span><p>A failed export run delivers a failure notification to the schedule owner within five minutes.</p></div>
+      <div class="rr-unit"><span class="rr-id">SC-003</span><p>The export history view lists runs newest-first with a status badge per run.</p></div>
+    </div>
+  </section>
+
+  <section class="rr-section">
+    <h2>Capabilities</h2>
+    <div class="rr-grid">
+      <div class="rr-unit"><span class="rr-id">FR-001</span><p>The scheduler shall accept a cron-style cadence expression and validate it before saving.</p></div>
+      <div class="rr-unit"><span class="rr-id">FR-002</span><p>The system shall run each due export within sixty seconds of its scheduled instant.</p></div>
+      <div class="rr-unit"><span class="rr-id">FR-004</span><p>The scheduler shall alert the report owner if a run fails.</p></div>
+      <div class="rr-unit"><span class="rr-id">FR-006</span><p>The scheduler shall let an operator pause and resume a schedule without deleting it.</p></div>
+    </div>
+  </section>
+
+  <section class="rr-section">
+    <h2>Observability</h2>
+    <div class="rr-grid">
+      <div class="rr-unit"><span class="rr-id">FR-005</span><p>The system shall expose a read-only history of the last fifty export runs with their outcomes.</p></div>
+    </div>
+  </section>
+
+  <section class="rr-section">
+    <h2>What people want to do</h2>
+    <div class="rr-grid">
+      <div class="rr-unit rr-story">
+        <span class="rr-id">US1</span>
+        <h3>Recurring schedule</h3>
+        <p>As an analyst, I want to set a recurring cadence for a report export, so that
+        stakeholders receive the report on schedule without anyone lifting a finger.</p>
+      </div>
+      <div class="rr-unit rr-story">
+        <span class="rr-id">US2</span>
+        <h3>Failure visibility</h3>
+        <p>As an analyst, I want to be notified when a scheduled export fails, so that I can
+        intervene before stakeholders notice missing data.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rr-section">
+    <h2>Guardrails</h2>
+    <ul class="rr-list">
+      <li>The export pipeline shall reuse the existing report-rendering service without modification.</li>
+      <li>Cadence expressions shall be limited to a minimum interval of fifteen minutes.</li>
+    </ul>
+  </section>
+
+  <section class="rr-section">
+    <h2>Not now</h2>
+    <ul class="rr-list">
+      <li>Ad-hoc one-off exports triggered manually outside any schedule.</li>
+      <li>Delivery channels other than email such as Slack or webhook in this version.</li>
+    </ul>
+  </section>
+
+  <section class="rr-section">
+    <h2>Directional ideas</h2>
+    <ul class="rr-list">
+      <li>A durable job queue such as a DB-backed outbox likely fits the at-least-once delivery
+      need better than an in-process timer.</li>
+    </ul>
+  </section>
+
+</main>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

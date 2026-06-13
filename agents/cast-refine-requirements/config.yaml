@@ -3,3 +3,13 @@ timeout_minutes: 60
 context_mode: full
 interactive: true
 proactive: true
+# Documents the Step 0 classify seam. Subagent dispatch (cast-goal-classifier is
+# dispatch_mode: subagent) does not consult this allowlist, but listing it here makes a
+# future HTTP switch config-only and keeps intent discoverable.
+allowed_delegations:
+  - cast-goal-classifier
+  # Phase 4 Iteration mode (sp4b): subagent-dispatched to re-anchor displaced comments
+  # after a version bump. Like cast-goal-classifier, dispatch_mode is subagent so this
+  # allowlist is intent-documenting, not consulted — listing it keeps a future HTTP switch
+  # config-only and the delegation discoverable.
+  - cast-comment-reanchor

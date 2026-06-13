@@ -1,0 +1,89 @@
+🚀 You are starting a new initiativev1
+Refine Requirements — Better Rendering (v3)
+Replace the plain deterministic requirements render with a
+cast-preso-style maker agent that generates a beautiful, easy-to-consume
+HTML per classification — so any reader grasps the job, outcome, and scope in seconds.
+In focus
+A bespoke, per-family LLM-generated render that beats the plain page on comprehension.
+New agents: a WHAT planner, a HOW maker, one comprehension-plus-visual checker, a diff-and-comment agent.
+Comments and versions survive the new render with zero new orphans.
+Out of scope
+Replacing the canonical markdown source or the comment-and-version backend.
+Rendering documents other than refined requirements.
+A live render that regenerates on every page view (caching is required).
+01 · The bet
+Let an LLM craft the page, the way cast-preso crafts a slide.
+v2's renderer borrows cast-preso styling but never lets a model shape the
+layout. It is functional but plain, and dogfooding surfaced real defects — raw markdown
+leaking onto the Goal Card, a sentence-splitter that truncates on abbreviations.
+The chosen direction is a maker agent. The known cost — giving up render
+determinism and reproducibility, and the risk to comment-and-version anchoring — is
+accepted openly, captured below as decisions and constraints, not waved away. One guiding
+principle, borrowed from cast-preso: separate what to communicate from how to
+communicate. A WHAT layer decides, per block and family, the information and the
+outcome a reader must take away; a HOW layer (the maker) picks the representation that
+lands it, from a named archetype library rather than improvising.
+02 · Key decisions
+Six forks, each resolved toward the page the reader understands.
+ChoseA preso-style maker agent (a cast-requirements-how cousin of cast-preso-how).
+OverA hybrid deterministic-plus-LLM render; deterministic polish only.
+Want maximum, preso-grade beauty per classification — and accept giving up render determinism to get it.
+ChoseLLM anchoring on a deterministic id backbone.
+OverLLM end-to-end anchoring with no ids; deterministic post-process id injection.
+Stable ids make anchoring exact and prevent silent orphans; the LLM reasons only when text genuinely moved.
+ChoseA WHAT agent + a HOW maker + one thorough checker.
+OverA full preso-depth multi-checker coordinator; a single monolithic maker.
+Keep the what/how split that makes preso output good, without the multi-checker overhead.
+ChoseOn non-convergence, serve the best-scoring attempt and flag it for human review.
+OverFalling back to the deterministic render; blocking the page until a human intervenes.
+The page is the holy grail; a reader is never down-graded to the plain render when a better attempt exists.
+03 · What a reader walks away with
+Seven outcomes the render must deliver — not features, results.
+US1 Instant understanding P1
+An unfamiliar reader grasps the job, the primary outcome, and what is in and out of scope within seconds — from the above-the-fold view alone.
+US2 Bespoke per classification P1
+The layout is shaped to the kind of work, so a bug fix reads like a bug fix and a new initiative reads like an initiative.
+US3 Comments survive the render P1
+A reviewer's comments stay anchored to their quoted text after the render changes, with zero new orphans.
+US4 Quality is gated, not assumed P2
+A checker grades each generation and runs a bounded rework loop, so a bad generation never reaches a reader.
+US5 Renders are cached P2
+The expensive render is generated at most once per source version; viewing a page does not repeatedly call a model.
+US6 Commenting is discoverable P2
+A first-time reader sees an obvious way to start a comment, without knowing a hidden select-text gesture.
+US7 Gaps are filled by asking upstream P1
+When the source omits a detail that aids comprehension, the presenter requests it from the upstream WHAT or refine agent, or marks the gap — it never ships an incomplete explanation.
+04 · What we're building
+Sixteen requirements, each anchored to its canonical id.
+FR-001A HOW maker agent (a cast-requirements-how cousin of cast-preso-how) consumes the per-section communication intent from the WHAT agent plus the confirmed classification and produces the self-contained HTML render.
+FR-002The maker selects layout and emphasis from the document's family and recipe blocks, producing a visibly distinct render per family.
+FR-003Canonical anchor ids (US-NN, FR-NNN, SC-NNN) are assigned upstream by the deterministic engine, and the maker emits them verbatim on the corresponding blocks; it never invents or renames an id. An LLM re-anchors a comment only when its target text genuinely moved or was reworded.
+FR-004A single new requirements-render checker grades the generated HTML for comprehension and visual quality and drives a rework loop until the comprehension bar is met — quality-driven, not a cost-capped round count (only a high safety ceiling guards against an infinite loop).
+FR-005The generated render is cached against the source content hash and regenerated when the source changes, reusing the v2 embedded-source-hash lazy-regeneration mechanism unchanged.
+FR-006On a true maker failure (crash, timeout, no output) the deterministic renderer is served. On non-convergence (output produced but the checker never reached the bar) the best-scoring attempt is served and flagged for human review — never the plain deterministic page.
+FR-007The render is served through the existing self-healing GET /goals/{slug}/render loop and remains self-contained.
+FR-008The canonical source stays refined_requirements.collab.md; the HTML is a generated, read-only projection. The maker never writes the canonical markdown.
+FR-009The v2 verification layer is revisited for a non-deterministic render: the deterministic golden-HTML snapshot gate is replaced or supplemented by LLM-judged comprehension and visual checks.
+FR-010The new agents are a WHAT agent, a HOW maker, a single thorough comprehension-plus-visual checker, and a diff-and-comment-resolution agent (plus helpers as needed), following the cast agent-design conventions.
+FR-011Because anchor ids are stable, the structural version diff stays deterministic (id-based set-arithmetic, as in v2); an LLM only narrates the diff and re-anchors or resolves comments whose text genuinely moved or was reworded, never inventing a change absent from the source.
+FR-012The pipeline is split into two agents: a WHAT agent decides, per block and family, the information and outcome to communicate; a separate HOW maker chooses the representation and generates the HTML. The HOW layer never invents the WHAT.
+FR-013The maker selects representations from a named archetype library rather than improvising, reusing cast-preso archetypes (compare-contrast and its code-diff variant, single-stat-hero, timeline, diagram-annotated, and others) and cast-preso's diff-representation utilities for the version-diff surface.
+FR-014The render exposes a discoverable way to comment — a visible affordance, not selection-only with no hint — while keeping the existing select-to-comment path.
+FR-015When the presenter finds a comprehension gap — a detail that would materially help the reader but is absent from the requirements file — it requests that detail from the upstream WHAT or refine agent before finalizing, rather than rendering an incomplete page; it never fabricates requirement content.
+FR-016Detail obtained by such a request is reconciled upstream (written back to or flagged on the canonical requirements) so the page never shows requirement content that exists nowhere else.
+05 · How we'll know it worked
+Eight measurable criteria — the bar the render is held to.
+SC-001A first-time reader can state the job, the primary outcome, and the scope within sixty seconds of opening any family render. Cold-reader test (the cast-requirements-checker stands in for the human).
+SC-002Every work family renders a visibly distinct and appropriate layout, confirmed across all nine families. One golden render per family, reviewed.
+SC-003Regenerating a render leaves every open comment anchored, with zero orphans introduced by the render change. Comment-survival check across a regenerate.
+SC-004On a true maker crash or timeout (no output), the deterministic render is served, so a render is never missing. Fault-injection of the maker (no-output).
+SC-005An unchanged source serves the cached render with no new model call. Cache-hit observation on a repeat view.
+SC-006A first-time reader discovers how to leave a comment without being told. Unprompted usability check on the render.
+SC-007When the requirements omit a detail needed to understand a block, the page supplies it (sourced upstream) or marks the gap, never shipping a silently incomplete explanation. Gap-injection test.
+SC-008On non-convergence, the reader is served the best-scoring attempt with a human-review flag recorded, never the plain deterministic page. Force the checker to never pass; confirm best-attempt is served.
+06 · Still open
+Deferred tuning knob
+Maker and checker model tier (which model each runs on) — deferred as a later tuning knob
+once the generation-and-check loop works end to end.
+Every other design fork raised during refinement was resolved and folded into
+the decisions and requirements above.

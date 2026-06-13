@@ -25,6 +25,44 @@ landed in sub-phase 4a (US7).
   Used during the v1.0 rollout while legacy specs are still being migrated;
   the strict-mode flip happens in v1.0.1 once the v1 specs validate clean.
   Tracked in `~/.cast/config.yaml:spec_check_strict`.
+- `--family <value>` (optional): apply the per-family **Level 2** profile for a
+  `WorkFamily` value (`new_initiative`, `pilot_poc`, `bug_fix`, `data_analysis`,
+  `random_idea`, `testing_qa`, `refactor_migration`, `personal_non_eng`,
+  `generic`). Omitting it keeps the full-spec (no-family) path **unchanged**.
+  The family comes from the caller's `--family` flag, never from parsing the
+  doc's front matter (the checker has no YAML reader and stays a portable
+  stdlib linter). An unknown value is an invocation error (exit 2).
+
+## Two Levels of Inspection
+
+The checker applies rules in two levels (Refine Requirements v2):
+
+- **Level 1 — generic (always runs):** document title (H1) present; per-User-Story
+  shape (Priority / Independent test / EARS acceptance scenario); `FR-NNN` / `SC-NNN`
+  identifier formats and duplicates; orphan `[NEEDS CLARIFICATION]` markers; no
+  mixed shape. These apply to whichever of those sections exist.
+- **Level 2 — family (only with `--family <value>`):** the per-family required
+  sections (`REQUIRED_SECTIONS_BY_FAMILY`) plus family assertions —
+  - **Template-Enforcer guard (`F2`, error):** a floor family (`random_idea`,
+    `personal_non_eng`) must not carry an empty/placeholder `User Stories` /
+    `Functional Requirements` / `Success Criteria` / `Out of Scope` section. The
+    floor recipe offers no spec-kit depth to pad — present-with-real-content is
+    fine, present-but-empty is the anti-pattern this guard catches permanently.
+  - **Missing Evidence (`F1`, error):** `bug_fix` / `data_analysis` / `testing_qa`
+    require `## Evidence` (via their required-section profile).
+  - **Directional WARN (`F3`, warning):** `data_analysis` / `personal_non_eng`
+    usually omit HOW — a present `## Directional` section warns, never errors.
+
+**No `--family` → byte-for-byte today's behavior.** Product specs in `docs/specs/`
+and pre-v2 refined docs keep validating exactly as before.
+
+> The checker keeps a **mirrored** copy of `REQUIRED_SECTIONS_BY_FAMILY` rather than
+> importing `cast_server.requirements_render.families` — it must run in CI / pre-commit
+> where `cast-server` is not importable (Decision D5). A pin test
+> (`cast-server/tests/test_spec_checker_family.py::test_mirror_matches_families`) asserts
+> the mirror equals `families.py` as a FULL mapping, so it can never silently drift. This
+> is the OPPOSITE import policy from `bin/cast-classify-gate`, which imports `families.py`
+> on purpose — do not unify the two bins.
 
 ## Implementation
 
@@ -35,7 +73,9 @@ Tests under `tests/test_us7_spec_kit_shape.py` exercise the script directly.
 ## Checks
 
 1. **Required sections present:** `User Stories`, `Functional Requirements`,
-   `Success Criteria`, `Open Questions`. Missing → **error**.
+   `Success Criteria`, `Open Questions`. Missing → **error**. (`## Decisions` — the
+   `| Date | Chose | Over | Because |` provenance table — is a recognized **optional** section;
+   it is additive and MUST NOT be added to REQUIRED_SECTIONS.)
 2. **Each User Story has Priority** (`P1` | `P2` | `P3`). Missing → **error**.
 3. **Each User Story has an Independent Test line.** Missing → **warning**.
 4. **Each User Story has at least one Acceptance Scenario** in EARS-style

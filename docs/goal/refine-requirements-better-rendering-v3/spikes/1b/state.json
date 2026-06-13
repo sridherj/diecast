@@ -1,0 +1,142 @@
+{
+  "slug": "spike-1b-anchor-survival",
+  "db": "/data/workspace/diecast/docs/goal/refine-requirements-better-rendering-v3/spikes/1b/scratch.sqlite",
+  "comments": [
+    {
+      "case": "reword",
+      "intended": "US1",
+      "section_hint": "User Stories",
+      "quoted_text": "delivered on time without manual effort",
+      "body": "Is 'on time' defined by an SLA, or best-effort?",
+      "author_kind": "human",
+      "id": 1
+    },
+    {
+      "case": "delete",
+      "intended": "FR-003",
+      "section_hint": "Functional Requirements",
+      "quoted_text": "retain the three most recent export artifacts per schedule",
+      "body": "Why three? Should retention be configurable?",
+      "author_kind": "agent",
+      "id": 2
+    },
+    {
+      "case": "stay",
+      "intended": "SC-003",
+      "section_hint": "Success Criteria",
+      "quoted_text": "lists runs newest-first with a status badge per run",
+      "body": "Confirm the badge covers partial-success runs.",
+      "author_kind": "human",
+      "id": 3
+    },
+    {
+      "case": "move",
+      "intended": "FR-005",
+      "section_hint": "Functional Requirements",
+      "quoted_text": "read-only history of the last fifty export runs",
+      "body": "Fifty feels arbitrary \u2014 paginate instead?",
+      "author_kind": "agent",
+      "id": 4
+    },
+    {
+      "case": "generic",
+      "intended": "FR-004",
+      "section_hint": "Functional Requirements",
+      "quoted_text": "the owner",
+      "body": "Notify the owner specifically, not the whole team.",
+      "author_kind": "human",
+      "id": 5
+    },
+    {
+      "case": "section",
+      "intended": "FR-001",
+      "section_hint": "Functional Requirements",
+      "quoted_text": "accept a cron-style cadence expression and validate it before saving",
+      "body": "Which cron dialect \u2014 5-field or 6-field?",
+      "author_kind": "agent",
+      "id": 6
+    }
+  ],
+  "v1": [
+    {
+      "id": 1,
+      "case": "reword",
+      "intended": "US1",
+      "quote": "delivered on time without manual effort",
+      "found": true,
+      "landed": "US1",
+      "in_intended": true
+    },
+    {
+      "id": 2,
+      "case": "delete",
+      "intended": "FR-003",
+      "quote": "retain the three most recent export artifacts per schedule",
+      "found": true,
+      "landed": "FR-003",
+      "in_intended": true
+    },
+    {
+      "id": 3,
+      "case": "stay",
+      "intended": "SC-003",
+      "quote": "lists runs newest-first with a status badge per run",
+      "found": true,
+      "landed": "SC-003",
+      "in_intended": true
+    },
+    {
+      "id": 4,
+      "case": "move",
+      "intended": "FR-005",
+      "quote": "read-only history of the last fifty export runs",
+      "found": true,
+      "landed": "FR-005",
+      "in_intended": true
+    },
+    {
+      "id": 5,
+      "case": "generic",
+      "intended": "FR-004",
+      "quote": "the owner",
+      "found": true,
+      "landed": "HERO",
+      "in_intended": false
+    },
+    {
+      "id": 6,
+      "case": "section",
+      "intended": "FR-001",
+      "quote": "accept a cron-style cadence expression and validate it before saving",
+      "found": true,
+      "landed": "FR-001",
+      "in_intended": true
+    }
+  ],
+  "displaced_ids": [
+    1,
+    2,
+    5
+  ],
+  "displaced_cases": [
+    "delete",
+    "generic",
+    "reword"
+  ],
+  "expected_displaced": [
+    1,
+    2,
+    5
+  ],
+  "survive_ids": [
+    3,
+    4,
+    6
+  ],
+  "convergence": "unconverged",
+  "version": 2,
+  "assertions": {
+    "displaced_equals_reword_delete_generic": true,
+    "untouched_did_not_displace": true
+  }
+}

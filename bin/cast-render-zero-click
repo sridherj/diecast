@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# bin/cast-render-zero-click — print the zero-click view of a rendered requirements doc.
+#
+# The `cast-requirements-checker` agent runs this against a rendered
+# `refined_requirements.html` and judges ONLY what it prints — the text a
+# non-clicking reader sees (Goal Card, headings, open content, <summary> labels;
+# never the body of a closed <details>). Making "zero clicks" a property of the
+# checker's INPUT (not a prompt instruction) is the whole point of the SC-001 gate.
+#
+# Import policy: bootstraps sys.path and imports the cast_server package
+# (mirrors bin/cast-classify-gate). The extractor is the single source of truth;
+# this wrapper is just stdin/argv plumbing.
+#
+# Contract:
+#   Argv   : exactly one path to a rendered HTML file.
+#   Stdout : the extracted zero-click text.
+#   Exit   : 0 on success; 2 on unreadable input (missing path, no arg, read error).
+#
+# Usage:
+#   bin/cast-render-zero-click goals/<slug>/refined_requirements.html
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+# Resolve the repo root and add cast-server/ to sys.path so the renderer package
+# is importable without an installed package (mirrors bin/cast-classify-gate).
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_DIR = _SCRIPT_DIR.parent
+_CAST_SERVER_DIR = _REPO_DIR / "cast-server"
+if str(_CAST_SERVER_DIR) not in sys.path:
+    sys.path.insert(0, str(_CAST_SERVER_DIR))
+
+from cast_server.requirements_render.zero_click import (  # noqa: E402
+    extract_zero_click_view,
+)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    if len(args) != 1:
+        print(
+            "cast-render-zero-click: invocation-error: expected exactly one HTML file path",
+            file=sys.stderr,
+        )
+        return 2
+
+    path = Path(args[0])
+    try:
+        html = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(
+            f"cast-render-zero-click: invocation-error: cannot read {path}: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+
+    sys.stdout.write(extract_zero_click_view(html))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

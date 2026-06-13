@@ -1,0 +1,19 @@
+{
+  "_README": "Held-out gold labels for the cast-goal-classifier corpus eval (Phase 2, sp4). HEADLESS PROVENANCE: hand-labeled by the sp4 runner from title + writeup using the family rubric in cast-goal-classifier.md — NOT owner-validated. The owner must review these labels (and ideally expand the corpus to 25-40 across workspaces) before any model-tier decision is treated as final. Stubs whose body is the literal 'Finish brainstorming/initial requirements' placeholder carry no actionable signal, so their honest gold is random_idea (the floor); title-implied alternatives are recorded in 'note' for confusion analysis.",
+  "cast-subagent-and-skill-capture": {"family": "new_initiative", "subset": "substantive", "note": "Substantial new observability capability: capture Task()-dispatched subagents + skills in agent_runs; has scope, DB change, UI change, out-of-scope, open questions. alt=generic."},
+  "cast-ui-test-children-completion": {"family": "bug_fix", "subset": "substantive", "note": "Test harness is broken (no child writes output.json, test times out); has a repro; investigation needed -> unknown_cause. alt=testing_qa."},
+  "child-delegation-integration-tests": {"family": "testing_qa", "subset": "substantive", "note": "Re-establish integration-test discipline for child delegation across both transports; tests-first then fix. Dominant framing is test coverage. alt=bug_fix."},
+  "comprehensive-ui-test": {"family": "testing_qa", "subset": "substantive", "note": "Plan + execute Playwright UI tests across all screens, re-runnable anytime. alt=new_initiative."},
+  "product-revamp-diecast": {"family": "new_initiative", "subset": "substantive", "note": "Large product revamp / vision mockup with target users, principles, vision; substantial new direction. Genuinely ambiguous with pilot_poc ('mock up to explore vision'). alt=pilot_poc."},
+  "refine-requirements-v2": {"family": "new_initiative", "subset": "substantive", "note": "Substantial feature evolution of cast-refine-requirements (WHAT/HOW split, HTML render, classification, comments, versioning, source-of-truth). alt=refactor_migration."},
+  "revamp-diecast": {"family": "new_initiative", "subset": "substantive", "note": "Improve diecast and launch v2; intent is clear but framed as 'understand/prioritize directions' + 'grill me', so borderline with the floor. alt=random_idea."},
+  "capture-user-invocations-as-runs": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies a feature (new_initiative) but no actionable signal in the writeup."},
+  "cast-ui-harness-layered-fixes": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies bug_fix ('fixes') but no signal."},
+  "child-delegation-e2e": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body, no title. e2e implies testing_qa but no signal."},
+  "improved-first-launch": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies an improvement/initiative but no signal."},
+  "manual-test": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies testing_qa but no signal."},
+  "runs-threaded-tree": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies a feature but no signal."},
+  "test-python-scaffolding": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Title implies testing_qa/new_initiative but no signal."},
+  "ui-debug-1777608711": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Slug implies bug_fix/debug but no signal."},
+  "ui-debug-1777608769": {"family": "random_idea", "subset": "stub", "note": "Empty placeholder body. Slug implies bug_fix/debug but no signal."}
+}

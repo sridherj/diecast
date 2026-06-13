@@ -1,0 +1,107 @@
+{
+  "applied": [
+    {
+      "id": 1,
+      "case": "reword",
+      "verdict": "relocated",
+      "new_quoted_text": "stakeholders receive the report on schedule without anyone lifting a finger",
+      "backstop_ok": true,
+      "outcome": "relocated",
+      "confidence": 0.92
+    },
+    {
+      "id": 2,
+      "case": "delete",
+      "verdict": "orphaned",
+      "new_quoted_text": null,
+      "backstop_ok": true,
+      "outcome": "orphaned",
+      "confidence": 0.9
+    },
+    {
+      "id": 5,
+      "case": "generic",
+      "verdict": "relocated",
+      "new_quoted_text": "the report owner",
+      "backstop_ok": true,
+      "outcome": "relocated",
+      "confidence": 0.78
+    }
+  ],
+  "v2": [
+    {
+      "id": 1,
+      "case": "reword",
+      "intended": "US1",
+      "quote": "stakeholders receive the report on schedule without anyone lifting a finger",
+      "found": true,
+      "landed": "US1",
+      "in_intended": true
+    },
+    {
+      "id": 3,
+      "case": "stay",
+      "intended": "SC-003",
+      "quote": "lists runs newest-first with a status badge per run",
+      "found": true,
+      "landed": "SC-003",
+      "in_intended": true
+    },
+    {
+      "id": 4,
+      "case": "move",
+      "intended": "FR-005",
+      "quote": "read-only history of the last fifty export runs",
+      "found": true,
+      "landed": "FR-005",
+      "in_intended": true
+    },
+    {
+      "id": 5,
+      "case": "generic",
+      "intended": "FR-004",
+      "quote": "the report owner",
+      "found": true,
+      "landed": "FR-004",
+      "in_intended": true
+    },
+    {
+      "id": 6,
+      "case": "section",
+      "intended": "FR-001",
+      "quote": "accept a cron-style cadence expression and validate it before saving",
+      "found": true,
+      "landed": "FR-001",
+      "in_intended": true
+    }
+  ],
+  "orphaned_ids": [
+    2
+  ],
+  "deleted_comment_id": 2,
+  "only_deleted_orphaned": true,
+  "surviving_all_placed": true,
+  "v2_placement_rate": "5/5",
+  "diff": {
+    "deterministic": true,
+    "partition_old_ok": true,
+    "partition_new_ok": true,
+    "counts": {
+      "added": 1,
+      "modified": 3,
+      "removed": 1,
+      "unchanged": 12
+    },
+    "removed_refs": [
+      "FR-003"
+    ],
+    "added_refs": [
+      "FR-006"
+    ],
+    "modified_refs": [
+      "FR-004",
+      "SC-002",
+      "US1"
+    ]
+  }
+}

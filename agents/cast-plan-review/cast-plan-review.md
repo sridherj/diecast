@@ -39,7 +39,13 @@ Use these to guide all recommendations:
 
 ## Step 1: Determine Review Scope
 
-Ask the user using AskUserQuestion:
+**When invoked as a delegated child** — a `.delegation-<run_id>.json` context file exists in the
+goal dir (i.e. dispatched by another agent such as `cast-detailed-plan` / `cast-fanout-detailed-plan`):
+do **NOT** ask about review scope. Default to **BIG CHANGE**, unless the delegation `context` carries
+`review_scope: "small"` (then SMALL CHANGE). Note the chosen scope in your output; never prompt for it.
+Delegated review is for catching real issues, not for a scope hand-off question.
+
+**When invoked directly by a human** (no delegation context file), ask using AskUserQuestion:
 
 **Option 1 -- BIG CHANGE:** Work through all 4 sections interactively (Architecture -> Code Quality -> Tests -> Performance) with at most 4 top issues per section.
 

@@ -1,0 +1,110 @@
+<!doctype html>
+<!--
+  sp4a-3 calibration fixture — the load-bearing "two gates measure different things" case.
+
+  This page is deliberately *structurally VALID* and *communicatively BAD*:
+
+    • It PASSES `maker_gate.check_html` against `parse_requirements(_LOW_QUALITY_SOURCE)`
+      (the source embedded in eval_quality_gate.py): every canonical id (US1 / FR-001 / SC-001)
+      appears verbatim exactly once as a visible label, each unit's anchorable text is carried
+      verbatim and contiguous inside one semantic container, there are zero `id=` /
+      `data-block-anchor` attributes, no external resources, a `data-goal-slug` body, and a real
+      <h2>/<h3> heading hierarchy.
+
+    • It FAILS the checker (`derive_pass` → False): there is NO Goal Card, NO one-sentence job
+      statement, and NO above-the-fold WHAT. The actual requirements are buried under a generic
+      wall-of-text, below the fold, in an undifferentiated layout that looks like every other
+      template dump. A cold reader cannot state the job / outcome / scope from the zero-click
+      surface — which is the whole point of the Phase-4a thesis.
+
+  Below the bar, the FIRST lever is always the checker prompt or the maker's IA — NEVER weakening
+  the code-side gate (the eval_render_checker.py discipline).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Requirements Document</title>
+<style>
+  body{font-family:Arial,sans-serif;color:#222;max-width:none;margin:0;padding:24px;line-height:1.9}
+  h2{font-size:1.05rem;font-weight:normal;text-transform:none;margin:18px 0 4px}
+  h3{font-size:1rem;font-weight:normal;margin:10px 0 2px}
+  p{margin:6px 0}
+  .label{color:#666;font-size:.8rem}
+  ul{margin:6px 0;padding-left:18px}
+</style>
+</head>
+<body data-goal-slug="demo-goal">
+<main class="rr-document">
+
+<h2>Introduction and Background Information</h2>
+<p>
+  This document has been prepared in order to comprehensively capture, enumerate, and otherwise set
+  forth the full and complete set of requirements, considerations, constraints, assumptions,
+  dependencies, stakeholders, and other relevant material pertaining to the initiative described
+  herein. It is intended to serve as a reference for all parties who may have an interest in the
+  matters discussed below, and should be read in its entirety so that the reader may develop a
+  thorough and well-rounded understanding of the various aspects of the work. The contents that
+  follow are organized into a number of sections, each of which addresses a particular area of
+  concern, and the reader is encouraged to review each section in turn rather than attempting to
+  draw conclusions from any single portion in isolation.
+</p>
+<p>
+  Throughout the preparation of this material, considerable effort has been expended to ensure that
+  the information presented is accurate, current, and reflective of the present understanding of the
+  relevant subject matter. Nevertheless, it should be understood that requirements of this nature are
+  by their very character subject to revision, refinement, and elaboration over time as additional
+  information becomes available and as the understanding of the relevant parties continues to evolve.
+  The reader should therefore treat the contents below as a point-in-time articulation rather than a
+  final and immutable statement, and should consult the relevant maintainers should any question of
+  interpretation or intent arise during the course of review.
+</p>
+<p>
+  It is further noted, for the avoidance of doubt and in the interest of completeness, that the
+  ordering of the sections below is not intended to convey any particular sense of priority,
+  sequence, or relative importance, and that all of the material presented should be considered as
+  part of a single integrated whole. The terminology employed is intended to be consistent with
+  prevailing conventions; however, where any ambiguity may exist, the substance of the underlying
+  requirement should be taken to prevail over its particular phrasing.
+</p>
+
+<h2>Additional Context and Supplementary Notes</h2>
+<p>
+  Before proceeding to the substantive content, the reader may find it helpful to be aware of a
+  number of supplementary notes which, while not themselves constituting requirements, provide useful
+  surrounding context. These notes are provided on an informational basis only and should not be
+  construed as altering, expanding, or limiting the scope of any of the items set forth elsewhere in
+  this document. The general subject area concerns recurring data-handling activities of the kind
+  commonly encountered in operational settings, and the items below should be read with that broad
+  framing in mind.
+</p>
+<p>
+  As with any document of this kind, a degree of judgement is required in applying the material to
+  any specific situation, and nothing herein should be taken as a substitute for such judgement. The
+  remainder of the document now proceeds to set out the specific items, which appear below under their
+  respective headings without further preamble.
+</p>
+
+<h2>Detailed Item Listing</h2>
+
+<section class="rr-unit">
+<h3>Item — user-facing narrative <span class="label">US1</span></h3>
+<p>As a user I want a recurring cadence for a report export.</p>
+<p>Acceptance: the export runs nightly.</p>
+</section>
+
+<ul>
+<li><span class="label">FR-001</span> The system must export nightly.</li>
+<li><span class="label">SC-001</span> Exports complete within ten minutes.</li>
+</ul>
+
+<h2>Closing Remarks</h2>
+<p>
+  This concludes the present articulation of the relevant material. Readers with questions regarding
+  any of the foregoing are encouraged to reach out through the usual channels. The document will be
+  revised from time to time as circumstances warrant, and the most current version should always be
+  consulted in preference to any earlier copy that may be in circulation.
+</p>
+
+</main>
+</body>
+</html>
