@@ -67,6 +67,11 @@
             {% endif %}
             {% endfor %}
         </div>
+
+        {# Read-only HTML render of the refined requirements (SC-003) #}
+        <div class="goal-detail-render-link">
+            <a href="/goals/{{ goal.slug }}/render" class="btn btn-ghost btn-sm">View requirements render</a>
+        </div>
     </div>
 
     {# Status guidance #}

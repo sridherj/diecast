@@ -1,0 +1,31 @@
+{# The comment tray — negotiated HTML half of GET /comments. Comments are grouped by
+   open / displaced ("needs re-anchor") / orphaned ("triage") / resolved (collapsed). The
+   composer fragment is sp5; styling (.comment-tray, .comment-tray-group) is sp5's CSS. #}
+{% set open_active = comments | selectattr('state', 'equalto', 'open')
+                              | rejectattr('displaced') | list %}
+{% set open_displaced = comments | selectattr('state', 'equalto', 'open')
+                                 | selectattr('displaced') | list %}
+{% set orphaned = comments | selectattr('state', 'equalto', 'orphaned') | list %}
+{% set resolved = comments | selectattr('state', 'equalto', 'resolved') | list %}
+<div class="comment-tray" id="comment-tray" data-goal-slug="{{ goal_slug }}">
+  <div class="comment-tray-group" data-group="open">
+    <h3 class="comment-tray-heading">Open <span class="comment-tray-count">{{ open_active | length }}</span></h3>
+    {% for comment in open_active %}{% include "fragments/requirements_comments/thread_item.html" %}{% endfor %}
+  </div>
+  {% if open_displaced %}
+  <div class="comment-tray-group" data-group="displaced">
+    <h3 class="comment-tray-heading">Needs re-anchor <span class="comment-tray-count">{{ open_displaced | length }}</span></h3>
+    {% for comment in open_displaced %}{% include "fragments/requirements_comments/thread_item.html" %}{% endfor %}
+  </div>
+  {% endif %}
+  {% if orphaned %}
+  <div class="comment-tray-group" data-group="orphaned">
+    <h3 class="comment-tray-heading">Triage <span class="comment-tray-count">{{ orphaned | length }}</span></h3>
+    {% for comment in orphaned %}{% include "fragments/requirements_comments/thread_item.html" %}{% endfor %}
+  </div>
+  {% endif %}
+  <details class="comment-tray-group" data-group="resolved">
+    <summary class="comment-tray-heading">Resolved <span class="comment-tray-count">{{ resolved | length }}</span></summary>
+    {% for comment in resolved %}{% include "fragments/requirements_comments/thread_item.html" %}{% endfor %}
+  </details>
+</div>

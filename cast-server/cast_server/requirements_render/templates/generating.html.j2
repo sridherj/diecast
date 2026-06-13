@@ -1,0 +1,67 @@
+{# generating.html.j2 — the dedicated "no render yet" live generating state (Phase 3 sp3d).
+
+   Served at HTTP 200 when a goal's source is non-stub but no cached render exists yet: the
+   background maker job has been kicked off and this page polls for completion, reloading itself
+   the moment the finished render is ready ("swap-in" = reload-on-ready).
+
+   Self-contained like the canonical render (inline <style>, the same _theme.css.j2 tokens) so it
+   reads on its own. FR-028 spirit: content NEVER depends on JS — the <noscript> meta-refresh makes
+   the page converge by plain reload when scripting is off, and the poll script is the progressive
+   enhancement on top. The poll script itself is built once in pages.py and injected here AND into
+   the stale-render banner, so there is a single poll implementation. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generating — {{ goal_slug }}</title>
+{# No-JS fallback: reload every 4s so the finished render eventually replaces this page. #}
+<noscript><meta http-equiv="refresh" content="4"></noscript>
+<style>
+{% include "_theme.css.j2" %}
+.render-generating {
+    max-width: var(--rr-content-max);
+    margin: 4rem auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+.render-generating__spinner {
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0 auto 1.5rem;
+    border: 3px solid var(--border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: render-spin 0.9s linear infinite;
+}
+@keyframes render-spin { to { transform: rotate(360deg); } }
+.render-generating__title {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--color-text);
+}
+.render-generating__status {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    color: var(--color-muted);
+    margin: 0;
+}
+.render-generating[data-render-state="failed"] .render-generating__spinner { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .render-generating__spinner { animation: none; }
+}
+</style>
+</head>
+<body data-goal-slug="{{ goal_slug }}">
+<main class="render-generating" data-render-root>
+<div class="render-generating__spinner" aria-hidden="true"></div>
+<h1 class="render-generating__title">Generating your requirements render…</h1>
+<p class="render-generating__status" data-render-status role="status" aria-live="polite">
+This usually takes a moment. The finished page will appear automatically.
+</p>
+</main>
+{{ poll_script | safe }}
+</body>
+</html>

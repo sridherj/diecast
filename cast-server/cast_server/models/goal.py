@@ -18,6 +18,9 @@ class Goal(BaseModel):
     folder_path: str = ""
     gstack_dir: str | None = None
     external_project_dir: str | None = None
+    workflow_family: str | None = None
+    routing_handle: str | None = None
+    routed_at: str | None = None
 
 
 class GoalCreate(BaseModel):
@@ -35,3 +38,5 @@ class GoalUpdate(BaseModel):
     tags: list[str] | None = None
     gstack_dir: str | None = None
     external_project_dir: str | None = None
+    workflow_family: str | None = None
+    routing_handle: str | None = None  # routed_at is server-set (record_routing_decision), never client-supplied

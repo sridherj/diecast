@@ -30,6 +30,31 @@
     </div>
     {% endif %}
 
+    {# Phase 5d: read-only flagged-renders list — the honest degraded-page signal under the
+       structural-violation override. Renders only when at least one render is flagged for
+       human review; sourced from the 4a recording-only render_jobs flag columns. #}
+    {% if flagged_renders %}
+    <div class="flagged-renders" role="region" aria-label="Renders flagged for review">
+        <h2 class="flagged-renders-title">⚑ Renders flagged for review ({{ flagged_renders|length }})</h2>
+        <p class="flagged-renders-note">Best-attempt pages served with a quality flag — surfaced, not suppressed.</p>
+        <table class="flagged-renders-table">
+            <thead>
+                <tr><th>Goal</th><th>Reason</th><th>Score</th><th>Render</th></tr>
+            </thead>
+            <tbody>
+                {% for fr in flagged_renders %}
+                <tr>
+                    <td class="flagged-renders-slug">{{ fr.goal_slug }}</td>
+                    <td><span class="flagged-renders-reason">{{ fr.review_reason or "—" }}</span></td>
+                    <td class="flagged-renders-score">{{ "%.2f"|format(fr.published_score) if fr.published_score is not none else "—" }}</td>
+                    <td><a href="/goals/{{ fr.goal_slug }}/render" class="flagged-renders-link">View render →</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
     <div class="runs-filters">
         <button class="filter-btn {% if active_filter == 'all' %}active{% endif %}"
                 hx-get="/api/agents/runs?status=all"

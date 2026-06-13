@@ -1,0 +1,24 @@
+{# The inline comment composer (Phase 4, sp5 — decision #7: select → 💬 pill → composer).
+   The composer captures the selection as `quoted_text` and the nearest heading as
+   `section_hint`, then hx-posts to the SAME `POST /comments` an agent curls (FR-013, no
+   privileged UI write path). It carries NO user/comment content of its own — the only
+   dynamic value is the reader's own selected text, set client-side via `textContent`.
+
+   This fragment is the canonical source of the composer markup. Because the render's
+   package PackageLoader cannot reach this app-template directory, document.html.j2 embeds
+   a byte-identical copy inside its `<template class="comment-composer-template">`; keep the
+   two in sync. The JS clones the inline `<template>`, never this file directly. #}
+<form class="comment-composer"
+      hx-post="/api/goals/{{ goal_slug }}/requirements/comments"
+      hx-swap="none">
+<blockquote class="comment-composer__quote" data-role="quote"></blockquote>
+<input type="hidden" name="quoted_text" data-role="quoted-text">
+<input type="hidden" name="section_hint" data-role="section-hint">
+<input type="hidden" name="author_kind" value="human">
+<textarea class="comment-composer__body" name="body" rows="3" placeholder="Add a comment…" aria-label="Comment" required></textarea>
+<div class="comment-composer__actions">
+<button type="submit" class="comment-composer__submit">Comment</button>
+<button type="button" class="comment-composer__cancel" data-role="cancel">Cancel</button>
+</div>
+<p class="comment-composer__error" data-role="error" hidden></p>
+</form>

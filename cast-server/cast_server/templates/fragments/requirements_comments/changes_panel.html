@@ -1,0 +1,22 @@
+{# "What changed" panel — negotiated HTML half of GET …/requirements/changes (FR-017).
+   Counts come straight from block_diff.summarize(); the structural change SET is the source
+   of truth (decision #8) — this panel never invents entries, it only renders summarize().
+   Each item links to the tracked-changes diff page (which carries the transient diff-{n}
+   anchors). Reuses the .diff-changed-* classes already in the render theme. #}
+<section class="diff-changed-panel" aria-label="What changed">
+<h2 class="diff-changed-title">What changed: v{{ base }} &rarr; v{{ head }}</h2>
+<p class="diff-changed-counts">+{{ summary.counts.added }} added &middot; ~{{ summary.counts.modified }} modified &middot; &minus;{{ summary.counts.removed }} removed</p>
+{# Optional agent-narration strip (4b-3). Autoescaped, lookup-only against summary["items"];
+   absent narration renders nothing, so the deterministic panel is byte-identical without it. #}
+{% set items = summary["items"] %}
+{% include "fragments/requirements_comments/_diff_narration.html" %}
+{% if summary["items"] %}
+<ul class="diff-changed-list">
+{% for item in summary["items"] %}
+<li class="diff-changed-item diff-changed-item--{{ item.change }}"><a href="/goals/{{ goal_slug }}/render/diff?base={{ base }}&amp;head={{ head }}">{{ item.heading_or_ref }}</a></li>
+{% endfor %}
+</ul>
+{% else %}
+<p class="diff-changed-empty">No structural changes between these versions.</p>
+{% endif %}
+</section>

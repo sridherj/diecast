@@ -1,0 +1,29 @@
+{# Agent-narration strip (Phase 4b-3) — shared by the changes panel and the tracked-changes view.
+
+   AUTOESCAPED ONLY. Narration is LLM-authored; it MUST flow through the escaped template and is
+   NEVER marked `| safe` / injected via innerHTML. {{ ... }} escapes HTML metacharacters here.
+
+   Lookup-only render (the third structural guard against an invented change): notes render solely
+   by attaching to a deterministic `items` entry by (change, heading_or_ref). The loop is driven by
+   `items` (the byte-for-byte `summarize()` set), so a note with no matching item renders NOTHING.
+
+   Context in: `narration` ({overview, item_notes:[{change, heading_or_ref, note}]} | None),
+               `items`     (summarize()'s items list — the deterministic attachment surface). #}
+{% if narration %}
+<div class="diff-narration" aria-label="Agent narration">
+<p class="diff-narration-label">Agent narration</p>
+{% if narration.overview %}
+<p class="diff-narration-overview">{{ narration.overview }}</p>
+{% endif %}
+{% if items %}
+<ul class="diff-narration-notes">
+{% for item in items %}
+{% set note = (narration.item_notes | selectattr("change", "equalto", item.change) | selectattr("heading_or_ref", "equalto", item.heading_or_ref) | first) if narration.item_notes else none %}
+{% if note %}
+<li class="diff-narration-note"><span class="diff-narration-note-ref">{{ item.heading_or_ref }}</span> {{ note.note }}</li>
+{% endif %}
+{% endfor %}
+</ul>
+{% endif %}
+</div>
+{% endif %}

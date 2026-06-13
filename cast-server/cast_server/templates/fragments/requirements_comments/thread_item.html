@@ -1,0 +1,28 @@
+{# One comment thread item — the negotiated HTML half of POST /comments and the
+   transition endpoints. All content is Jinja-autoescaped; never raw HTML. The visual
+   styling (.comment-thread-item, .comment-state-*) is sp5's CSS — here we emit only the
+   structure and class names the negotiated responses need. #}
+<div class="comment-thread-item" id="comment-{{ comment.id }}"
+     data-state="{{ comment.state }}"
+     data-author-kind="{{ comment.author_kind }}"
+     {% if comment.displaced %}data-displaced="true"{% endif %}>
+  <div class="comment-meta">
+    <span class="comment-author">{{ comment.author }}</span>
+    <span class="comment-author-kind-badge" data-kind="{{ comment.author_kind }}">{{ comment.author_kind }}</span>
+    <span class="comment-state-badge" data-state="{{ comment.state }}">{{ comment.state }}</span>
+    {% if comment.displaced %}<span class="comment-displaced-badge" title="Needs re-anchor">displaced</span>{% endif %}
+  </div>
+  <blockquote class="comment-quote">{{ comment.quoted_text }}</blockquote>
+  <div class="comment-body">{{ comment.body }}</div>
+  <div class="comment-actions">
+    {% if comment.state == 'open' %}
+    <button type="button" class="comment-resolve-btn"
+            hx-post="/api/goals/{{ goal_slug }}/requirements/comments/{{ comment.id }}/resolve"
+            hx-target="closest .comment-thread-item" hx-swap="outerHTML">Resolve</button>
+    {% elif comment.state == 'resolved' %}
+    <button type="button" class="comment-reopen-btn"
+            hx-post="/api/goals/{{ goal_slug }}/requirements/comments/{{ comment.id }}/reopen"
+            hx-target="closest .comment-thread-item" hx-swap="outerHTML">Reopen</button>
+    {% endif %}
+  </div>
+</div>

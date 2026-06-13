@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from cast_server.config import CAST_ROOT, DB_URL, DEFAULT_CAST_HOST, STATIC_DIR
 from cast_server.db.connection import init_db
+from cast_server.services import notification_service
 from cast_server.services.agent_service import recover_stale_runs, start_dispatcher
 
 # Hosts treated as loopback for the unauthenticated-hook-endpoint warning.
@@ -161,13 +162,20 @@ async def lifespan(app: FastAPI):
     dispatcher_task = asyncio.create_task(start_dispatcher())
     logger.info("Dispatcher background task created")
 
+    # Phase 5 sp3b: drain the transactional notifications_outbox at-least-once so round-trip
+    # write-back alerts reach the Goal-Card badge + agent /inbox. Same lifespan posture as the
+    # dispatcher — created here, cancelled on shutdown.
+    relay_task = asyncio.create_task(notification_service.run_relay())
+    logger.info("Notification relay background task created")
+
     yield
 
-    dispatcher_task.cancel()
-    try:
-        await dispatcher_task
-    except asyncio.CancelledError:
-        logger.info("Dispatcher stopped")
+    for task, name in ((dispatcher_task, "Dispatcher"), (relay_task, "Notification relay")):
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            logger.info("%s stopped", name)
 
 
 app = FastAPI(title="Diecast", lifespan=lifespan)
@@ -183,6 +191,8 @@ from cast_server.routes.api_health import router as api_health_router
 from cast_server.routes.api_scratchpad import router as api_scratchpad_router
 from cast_server.routes.api_task_suggestions import router as api_task_suggestions_router
 from cast_server.routes.api_artifacts import router as api_artifacts_router
+from cast_server.routes.api_requirements import router as api_requirements_router
+from cast_server.routes.change_requests import router as change_requests_router
 app.include_router(pages_router)
 app.include_router(api_goals_router)
 app.include_router(api_tasks_router)
@@ -191,3 +201,5 @@ app.include_router(api_agents_router)
 app.include_router(api_health_router)
 app.include_router(api_task_suggestions_router)
 app.include_router(api_artifacts_router)
+app.include_router(api_requirements_router)
+app.include_router(change_requests_router)

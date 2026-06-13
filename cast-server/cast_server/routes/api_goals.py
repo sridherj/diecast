@@ -3,14 +3,17 @@
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, Request, Form, HTTPException
+from fastapi import APIRouter, Request, Form, HTTPException, Body
 from fastapi.responses import HTMLResponse, Response
+from pydantic import BaseModel
 
 from cast_server.deps import templates
 from cast_server.services.goal_service import (
     create_goal, update_status as change_status, update_phase as set_phase, toggle_focus,
 )
-from cast_server.services import agent_service, goal_service, task_service
+from cast_server.services import (
+    agent_service, goal_service, task_service, workflow_router_service,
+)
 from cast_server.services.suggestion_service import approve_suggestion, decline_suggestion
 from cast_server.utils.responses import toast_header
 
@@ -166,6 +169,77 @@ async def update_phase(
             "HX-Trigger": toast_header(f"Phase updated to {phase}"),
         },
     )
+
+
+class RouteRequest(BaseModel):
+    """Optional body for ``POST /{slug}/route``.
+
+    With ``family`` set: the refinement path (resolve + record that family).
+    Bodyless / ``family is None``: the FR-016 path — re-resolve from the
+    persisted ``goals.workflow_family`` column and re-record idempotently.
+    """
+
+    family: str | None = None
+
+
+@router.post("/{slug}/route")
+def route_goal(slug: str, body: RouteRequest | None = Body(default=None)):
+    """Resolve (and, when routable, record) a goal's downstream-workflow handle.
+
+    The ONE phase-agnostic door (FR-016): any caller in any phase hits this to
+    map a goal's persisted ``WorkFamily`` to a workflow handle. Returns **JSON**
+    (agent-facing, like ``api_agents.py``) — never an HTMX fragment.
+
+    * **With body** ``{"family": ...}`` (refinement path): resolve that family,
+      then record it.
+    * **No body** (FR-016 path): ``family`` falls back to the persisted
+      ``goals.workflow_family``; resolve + idempotent re-record. The no-op leaves
+      ``routed_at`` untouched, so the response stays byte-stable across an
+      unrelated state change like a phase flip (SC-005).
+
+    Totality keeps the API from ever 500-ing on content: an unknown family string
+    resolves to ``unmatched`` and an un-routed goal to ``needs-classification`` —
+    both **200** with ``recorded: false`` (non-routable handles are announced,
+    never persisted). Only an unknown *slug* is a **404**.
+
+    By construction this handler imports nothing that could re-classify — it calls
+    only ``goal_service.get_goal`` and ``workflow_router_service.{resolve,
+    record_routing_decision}``. A source-pin test (D4) enforces that invariant.
+    """
+    goal = goal_service.get_goal(slug)
+    if goal is None:
+        raise HTTPException(status_code=404, detail=f"Unknown goal: {slug}")
+
+    family = (body.family if body else None) or goal.get("workflow_family")
+    handle = workflow_router_service.resolve(family)
+
+    # Default metadata for the non-routable paths; ``routed_at`` falls back to the
+    # goal's persisted stamp so an idempotent no-op reports the unchanged value
+    # (the crux of the SC-005 byte-stability guarantee).
+    meta = {
+        "recorded": False,
+        "changed": False,
+        "previous_family": None,
+        "routing_handle": goal.get("routing_handle"),
+        "routed_at": goal.get("routed_at"),
+    }
+    if handle.status in ("stub", "implemented"):
+        # ``record_routing_decision`` omits ``routed_at`` on a no-op — merge so the
+        # response keeps the goal's existing stamp rather than nulling it.
+        meta.update(workflow_router_service.record_routing_decision(slug, family, handle))
+
+    return {
+        "family": handle.family,
+        "status": handle.status,
+        "steps": list(handle.steps),
+        "pipeline_ref": handle.pipeline_ref,
+        "message": handle.message,
+        "recorded": meta["recorded"],
+        "changed": meta["changed"],
+        "previous_family": meta["previous_family"],
+        "routing_handle": meta["routing_handle"],
+        "routed_at": meta["routed_at"],
+    }
 
 
 @router.put("/{slug}/focus")

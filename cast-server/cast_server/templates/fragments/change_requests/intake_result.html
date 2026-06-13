@@ -1,0 +1,30 @@
+{# The negotiated HTML half of POST /api/goals/{slug}/change-requests (the human/browser
+   lane). Same data as the JSON response, rendered as a fragment. All content is
+   Jinja-autoescaped; never raw HTML. Visual styling (.change-request-*) is deferred to a
+   later sub-phase — here we emit only the structure + class names + data attributes the
+   negotiated response needs. #}
+<div class="change-request-item" id="change-request-{{ change_request.id }}"
+     data-status="{{ change_request.status }}"
+     data-kind="{{ change_request.kind }}"
+     data-author-type="{{ change_request.author_type }}">
+  <div class="change-request-meta">
+    <span class="change-request-author">{{ change_request.author }}</span>
+    <span class="change-request-author-type-badge"
+          data-type="{{ change_request.author_type }}">{{ change_request.author_type }}</span>
+    <span class="change-request-kind-badge"
+          data-kind="{{ change_request.kind }}">{{ change_request.kind }}</span>
+    <span class="change-request-status-badge"
+          data-status="{{ change_request.status }}">{{ change_request.status }}</span>
+  </div>
+  {% if change_request.target_quote %}
+  <blockquote class="change-request-target">{{ change_request.target_quote }}</blockquote>
+  {% endif %}
+  <div class="change-request-body">{{ change_request.proposed_body }}</div>
+  {% if change_request.origin_phase or change_request.origin_artifact_path %}
+  <div class="change-request-provenance">
+    from
+    {% if change_request.origin_phase %}<span class="change-request-origin-phase">{{ change_request.origin_phase }}</span>{% endif %}
+    {% if change_request.origin_artifact_path %}<span class="change-request-origin-artifact">{{ change_request.origin_artifact_path }}</span>{% endif %}
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,119 @@
+{# document.html.j2 — the self-contained standalone HTML5 shell every later
+   sub-phase renders into (Phase 3a, sp1, WP-A).
+
+   This template does NOT extend the app's base.html — the generated
+   refined_requirements.html must be a self-contained artifact (inline <style>
+   only, no <link>, no external <script src>). sp2 (recipe engine) and sp3
+   (Goal Card + disclosure + WHAT/HOW) fill the named blocks below; the block
+   names are a stable contract — do not rename them.
+
+   The body is a five-layer skeleton, in fixed order:
+     1. Goal Card        — always open, outside any <details> (zero-click)
+     2. Recipe sections  — ordered per work-family
+     3. Unmodeled        — sections the typed model skipped (never silent)
+     4. Directional      — quarantined HOW, muted, last
+
+   Forbidden here (thin spine): NO element id=, NO data-block-anchor. Phase 4
+   stores the quote and re-derives placement. #}
+{# Phase 4 (sp5): `data-goal-slug` on <body> is page chrome (NOT a block anchor) —
+   the vanilla comment layer reads it to address the same-door comment API. When the
+   slug is absent (the family goldens render slug-free) it stays empty and the JS
+   no-ops, so the artifact degrades to a perfectly readable read-only render
+   (progressive enhancement — the self-contained property of Phase 3a). #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ document_title | default('Requirements') }}{% endblock %}</title>
+<style>
+{% include "_theme.css.j2" %}
+</style>
+</head>
+<body data-goal-slug="{{ goal_slug or '' }}">
+<main class="rr-document">
+
+<div class="rr-controls">
+<button type="button" class="expand-all-btn" data-expand-all>Expand all</button>
+{# Version toggle (Phase 4, sp4a): a plain link to the throwaway tracked-changes view.
+   Renders ONLY when ≥2 versions exist — there is a prior version to compare. NO swap
+   machinery, NO id=, NO script: the canonical render stays a thin-spine standalone doc. #}
+{% if show_diff_toggle %}
+<nav class="version-toggle" aria-label="Version view">
+<span class="version-toggle__current" aria-current="page">Current (v{{ current_version }})</span>
+<a class="version-toggle__diff" href="/goals/{{ goal_slug }}/render/diff">Changes since v{{ current_version - 1 }}</a>
+</nav>
+{% endif %}
+</div>
+
+<!-- LAYER 1: GOAL CARD (zero-click, always open) -->
+{% block goal_card %}{% if goal_card_html %}{{ goal_card_html | safe }}{% endif %}{% endblock %}
+
+<!-- LAYER 2: RECIPE SECTIONS (ordered per family) -->
+{% block recipe_sections %}{% if recipe_sections_html %}{{ recipe_sections_html | safe }}{% endif %}{% endblock %}
+
+<!-- LAYER 3: UNMODELED SECTIONS (typed model skipped — never silent) -->
+{% block unmodeled_sections %}{% if unmodeled_html %}{{ unmodeled_html | safe }}{% endif %}{% endblock %}
+
+<!-- LAYER 4: DIRECTIONAL (quarantined HOW, muted, last) -->
+{% block directional %}{% if directional_html %}{{ directional_html | safe }}{% endif %}{% endblock %}
+
+</main>
+{# The ONE inline script permitted: "expand all" toggles `open` on every
+   <details>. No framework, no library, no external src. #}
+<script>
+(function () {
+  var btn = document.querySelector('[data-expand-all]');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var items = document.querySelectorAll('details');
+    var anyClosed = Array.prototype.some.call(items, function (d) { return !d.open; });
+    Array.prototype.forEach.call(items, function (d) { d.open = anyClosed; });
+    btn.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+  });
+})();
+</script>
+
+{# === Phase 4 (sp5): the locked commenting UX (decision #7) =========================
+   ~150 lines of vanilla JS over the existing Jinja+HTMX stack — no framework, no
+   annotation library. The tray host self-loads its server fragment (tray.html); the
+   composer is cloned from the inline <template> below; both speak ONLY the same-door
+   comment API a human composer and an agent curl share (FR-013). These external
+   <script src> tags are the one deviation from Phase 3a's fully-inlined artifact: when
+   opened as a bare file:// the scripts 404 and the document stays a readable read-only
+   render (progressive enhancement — recorded in the spec by sp7). #}
+
+{# The tray: displaced ("needs re-anchor") + orphaned ("triage") + open + resolved
+   comments, always surfaced (decision #9). hx-trigger="load" fills it from GET /comments
+   (tray.html); a `comments:refresh` body event reloads it after a transition. #}
+<aside class="comment-tray-host"
+       hx-get="/api/goals/{{ goal_slug or '' }}/requirements/comments"
+       hx-trigger="load, comments:refresh from:body"
+       hx-swap="innerHTML"
+       aria-label="Comments"></aside>
+
+{# The inline composer (decision #7: select → 💬 pill → inline composer). Cloned by the
+   JS and anchored at the selection; its hx-post hits the IDENTICAL endpoint an agent
+   curls (no privileged UI write path). Mirrors fragments/requirements_comments/composer.html
+   verbatim — kept inline because the package PackageLoader cannot reach the app template dir. #}
+<template class="comment-composer-template">
+<form class="comment-composer"
+      hx-post="/api/goals/{{ goal_slug or '' }}/requirements/comments"
+      hx-swap="none">
+<blockquote class="comment-composer__quote" data-role="quote"></blockquote>
+<input type="hidden" name="quoted_text" data-role="quoted-text">
+<input type="hidden" name="section_hint" data-role="section-hint">
+<input type="hidden" name="author_kind" value="human">
+<textarea class="comment-composer__body" name="body" rows="3" placeholder="Add a comment…" aria-label="Comment" required></textarea>
+<div class="comment-composer__actions">
+<button type="submit" class="comment-composer__submit">Comment</button>
+<button type="button" class="comment-composer__cancel" data-role="cancel">Cancel</button>
+</div>
+<p class="comment-composer__error" data-role="error" hidden></p>
+</form>
+</template>
+
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js" defer></script>
+</body>
+</html>
