@@ -1,0 +1,17 @@
+{
+  "id": 3,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "open",
+  "author_kind": "human",
+  "section_hint": "Success Criteria",
+  "quoted_text": "lists runs newest-first with a status badge per run",
+  "placed": true,
+  "offset": 761,
+  "block_ref": "SC-003",
+  "in_block": true,
+  "miss_class": null,
+  "unit_tag": "div",
+  "unit_ids": [
+    "SC-003"
+  ]
+}

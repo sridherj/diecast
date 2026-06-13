@@ -1,0 +1,553 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 543ac5a935aa6bda7ced92fc411663927d65890495f7da88bb2841b119ab55a3 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refine Requirements — Better Rendering (v3)</title>
+<style>
+  :root{
+    --ink:#14142b; --ink-soft:#3a3a5c; --muted:#6b6b86;
+    --paper:#f7f7fb; --card:#ffffff; --line:#e6e6ef;
+    --accent:#4f46e5; --accent-soft:#eef0ff; --accent-ink:#3730a3;
+    --good:#0f766e; --good-soft:#e7f6f3;
+    --warn:#b45309; --warn-soft:#fdf3e7;
+    --shadow:0 1px 2px rgba(20,20,43,.06),0 8px 24px rgba(20,20,43,.06);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--sans);color:var(--ink);
+    background:var(--paper);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+  a{color:var(--accent)}
+
+  /* ---- anchor labels ---- */
+  .rr-anchor{
+    display:inline-flex;align-items:center;gap:.3em;
+    font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;
+    color:var(--accent-ink);background:var(--accent-soft);
+    padding:2px 8px;border-radius:999px;line-height:1.6;
+    border:1px solid #dcdcfb;white-space:nowrap;
+  }
+  .rr-anchor.us{color:#0f766e;background:var(--good-soft);border-color:#c5e9e2}
+  .rr-anchor.sc{color:#9a3412;background:#fdeee4;border-color:#f6d8c2}
+
+  /* ---- hero ---- */
+  .hero{
+    background:linear-gradient(150deg,#1d1d3a 0%,#2c2c5c 55%,#3b3580 100%);
+    color:#fff;border-radius:0 0 28px 28px;
+    padding:40px 0 48px;margin-bottom:40px;
+    box-shadow:var(--shadow);
+  }
+  .hero .wrap{padding-bottom:0}
+  .kicker{
+    display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    color:#c7c7f0;margin-bottom:18px;
+  }
+  .chip{
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+    border-radius:999px;padding:4px 12px;letter-spacing:.06em;
+    font-family:var(--mono);font-size:11px;text-transform:none;color:#eaeaff;
+  }
+  .hero h1{
+    font-size:30px;line-height:1.2;margin:0 0 14px;font-weight:700;letter-spacing:-.01em;
+  }
+  .job{
+    font-size:19px;line-height:1.5;color:#e7e7ff;max-width:62ch;margin:0 0 28px;
+  }
+  .job b{color:#fff;font-weight:600}
+  .summary-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  }
+  .scard{
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    border-radius:14px;padding:16px 18px;
+  }
+  .scard .lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b9b9ec;margin-bottom:6px}
+  .scard .val{font-size:14px;color:#fff;line-height:1.45}
+
+  /* ---- sections ---- */
+  section.band{margin:0 0 44px}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;color:var(--accent);
+    letter-spacing:.08em;font-weight:600;margin-bottom:8px;
+  }
+  h2{font-size:23px;line-height:1.25;margin:0 0 6px;letter-spacing:-.01em}
+  .takeaway{
+    font-size:16px;color:var(--ink-soft);max-width:70ch;margin:0 0 22px;
+  }
+  .takeaway b{color:var(--ink);font-weight:600}
+
+  /* ---- cards / lists ---- */
+  .cards{display:grid;gap:14px}
+  .cards.two{grid-template-columns:repeat(2,1fr)}
+  .cards.three{grid-template-columns:repeat(3,1fr)}
+  .unit{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;box-shadow:var(--shadow);
+    list-style:none;
+  }
+  .unit .top{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+  .unit h3{font-size:15px;margin:0;font-weight:600;color:var(--ink)}
+  .unit p{margin:0;color:var(--ink-soft);font-size:14.5px}
+  .unit p + p{margin-top:8px}
+  ul.units{margin:0;padding:0;display:grid;gap:14px}
+
+  /* pipeline flow */
+  .flow{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+  .flow .stage{position:relative}
+  .stage-head{
+    display:flex;align-items:center;gap:8px;margin-bottom:10px;
+    font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-ink);
+  }
+  .stage-head .n{
+    width:24px;height:24px;border-radius:7px;background:var(--accent);color:#fff;
+    display:grid;place-items:center;font-family:var(--mono);font-size:12px;
+  }
+
+  /* compare-contrast */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .col{
+    border-radius:14px;padding:18px 20px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);
+  }
+  .col.det{border-top:3px solid var(--good)}
+  .col.llm{border-top:3px solid var(--accent)}
+  .col h4{margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+  .col.det h4{color:var(--good)}
+  .col.llm h4{color:var(--accent-ink)}
+  .col .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+
+  /* fence (out of scope) */
+  .fence{
+    background:#fbfbfe;border:1px dashed #d7d7e6;border-radius:14px;padding:20px 22px;
+  }
+  .fence ul{margin:0;padding-left:20px}
+  .fence li{margin:0 0 8px;color:var(--ink-soft);font-size:14.5px}
+  .fence li::marker{color:#b45309}
+
+  .open{
+    background:var(--warn-soft);border:1px solid #f2dcc0;border-radius:14px;padding:18px 22px;
+  }
+  .open .tag{
+    font-family:var(--mono);font-size:11px;color:var(--warn);font-weight:700;
+    background:#fff;border:1px solid #f2dcc0;border-radius:6px;padding:2px 7px;margin-right:8px;
+  }
+  .open p{margin:0;color:#7a4a12;font-size:14.5px}
+
+  .pri{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.05em;
+    padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted);background:#fafaff;
+  }
+  .pri.p1{color:#9a3412;background:#fdeee4;border-color:#f6d8c2}
+  .pri.p2{color:#3730a3;background:var(--accent-soft);border-color:#dcdcfb}
+
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:48px;font-family:var(--mono)}
+
+  @media (max-width:820px){
+    .summary-grid,.flow,.compare,.cards.two,.cards.three{grid-template-columns:1fr}
+    .hero h1{font-size:25px}
+  }
+</style>
+</head>
+<body data-goal-slug="family-new-initiative">
+
+  <!-- ABOVE THE FOLD — US1 / SC-001 -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="kicker">
+        <span>Refine Requirements · v3</span>
+        <span class="chip">family · new_initiative</span>
+        <span class="chip">classification confidence · 0.90</span>
+      </div>
+      <h1>Replace the plain render with a cast-preso-style maker</h1>
+      <p class="job">
+        Swap v2's plain deterministic requirements render for a <b>cast-preso-style maker agent</b>
+        that generates a beautiful, per-classification HTML page — so any reader grasps the
+        <b>job, outcome, and scope in seconds</b>. The North Star is exactly one thing: a reader
+        understanding the requirement quickly and completely.
+      </p>
+      <div class="summary-grid">
+        <div class="scard">
+          <div class="lab">The job</div>
+          <div class="val">An LLM maker crafts the page the way cast-preso-how generates slides — not a fixed Python/Jinja template.</div>
+        </div>
+        <div class="scard">
+          <div class="lab">Primary outcome</div>
+          <div class="val">A bespoke layout per family that lands the requirement above the fold, with comments and versions still anchored.</div>
+        </div>
+        <div class="scard">
+          <div class="lab">Scope fence</div>
+          <div class="val">Refined-requirements renders only. The canonical markdown and the comment/version backend stay untouched.</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- SECTION 1 — What we're building and why -->
+    <section class="band">
+      <div class="eyebrow">01 · The North Star</div>
+      <h2>What we're building, and why now</h2>
+      <p class="takeaway">
+        v2's deterministic renderer borrows cast-preso styling but never lets an LLM craft the page —
+        functional but plain, and dogfooding leaked two defects (raw markdown on the Goal Card, an
+        abbreviation-truncating sentence splitter). <b>The whole pipeline optimizes for one thing:</b>
+        a reader understanding the requirement fast.
+      </p>
+      <ul class="units">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US1</span><span class="pri p1">P1</span>
+            <h3>A reader instantly understands any render</h3></div>
+          <p>Open the render for a goal in any family and, from the above-the-fold view alone, grasp the
+            job, the primary outcome, and what is in and out of scope — without reading the whole document
+            or asking the author. The fold presents classification, a one-line job statement, and the key
+            outcome and scope, readable without scrolling.</p>
+          <p>If the source is only a stub with too little to summarize, the page shows a clear
+            prompt-to-begin state — never an empty or broken page.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-001</span>
+            <h3>Sixty-second cold read</h3></div>
+          <p>A first-time reader can state the job, the primary outcome, and the scope within sixty seconds
+            of opening any family render. Verified by a cold-reader test, with the requirements-checker
+            agent standing in for the human reader.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 2 — WHAT-then-HOW maker pipeline -->
+    <section class="band">
+      <div class="eyebrow">02 · The shape we committed to</div>
+      <h2>A WHAT-then-HOW maker pipeline</h2>
+      <p class="takeaway">
+        Borrowed from cast-preso: <b>separate what to communicate from how to communicate.</b>
+        A WHAT layer decides, per block and family, the information and outcome to land; a HOW maker
+        chooses the representation and emits the self-contained HTML — and never invents the WHAT.
+      </p>
+
+      <div class="flow">
+        <div class="stage">
+          <div class="stage-head"><span class="n">W</span>WHAT layer · decide</div>
+          <ul class="units">
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-012</span><h3>The two-brain split</h3></div>
+              <p>The pipeline is two agents: a WHAT agent decides, per block and family, the information and
+                outcome to communicate; a separate HOW maker chooses the representation and generates the HTML.
+                The HOW layer never invents the WHAT — mirroring the cast-preso planner-then-how split that
+                makes its output good.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-008</span><h3>The source stays the truth</h3></div>
+              <p>The canonical source remains <code>refined_requirements.collab.md</code>; the HTML is a
+                generated, read-only projection. The maker never writes the canonical markdown.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-010</span><h3>A deliberately lean roster</h3></div>
+              <p>The new agents are a WHAT agent, a HOW maker, a single thorough comprehension-plus-visual
+                checker, and a diff-and-comment-resolution agent (plus helpers) — a what-plus-how-plus-one-checker
+                shape chosen over a fuller multi-checker coordinator.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="stage">
+          <div class="stage-head"><span class="n">H</span>HOW maker · render</div>
+          <ul class="units">
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-001</span><h3>The maker, end to end</h3></div>
+              <p>A HOW maker agent — a cast-requirements-how cousin of cast-preso-how — consumes the WHAT
+                agent's per-section communication intent plus the confirmed classification and produces the
+                self-contained HTML render, replacing the single deterministic renderer on the happy path.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-013</span><h3>A named archetype library</h3></div>
+              <p>The maker picks representations from a named archetype library rather than improvising —
+                reusing cast-preso archetypes (compare-contrast and its code-diff variant, single-stat-hero,
+                timeline, diagram-annotated, and others) and cast-preso's diff-representation utilities.
+                Reuse over rebuild.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-007</span><h3>Same door for the reader</h3></div>
+              <p>The render is served through the existing self-healing <code>GET /goals/{slug}/render</code>
+                loop and stays self-contained. Nothing changes about how a human reaches the page.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 — Render shaped to the work -->
+    <section class="band">
+      <div class="eyebrow">03 · Bespoke per family</div>
+      <h2>A render shaped to the kind of work</h2>
+      <p class="takeaway">
+        Every render is bespoke to its classified family, so <b>a bug fix reads like a bug fix and a new
+        initiative reads like an initiative.</b> Distinctness must hold visibly across all nine families.
+      </p>
+      <ul class="units cards three">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US2</span><span class="pri p1">P1</span>
+            <h3>Layout bespoke per classification</h3></div>
+          <p>A reader sees a layout shaped to the kind of work. Independent test: render one goal per family
+            and confirm each is visibly distinct and appropriate to that family's recipe.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-002</span><h3>Layout from family + recipe</h3></div>
+          <p>The maker selects layout and emphasis from the document's classified family and its recipe
+            blocks, producing a visibly distinct render per family. When a family carries no content for a
+            block, that block is omitted — never padded with an empty section.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-002</span><h3>Distinct across all nine</h3></div>
+          <p>Every work family renders a visibly distinct and appropriate layout, confirmed across all nine
+            families via one golden render per family, reviewed.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 4 — Comments & versions anchored -->
+    <section class="band">
+      <div class="eyebrow">04 · Identity backbone</div>
+      <h2>Comments and versions stay anchored across the new render</h2>
+      <p class="takeaway">
+        Switching to a varying maker render must <b>never orphan a reviewer's feedback.</b> Stable canonical
+        ids are the backbone: the deterministic engine owns them, the maker emits them verbatim, and an LLM
+        reasons about meaning only to re-anchor text that genuinely moved.
+      </p>
+      <div class="compare">
+        <div class="col det">
+          <h4>Deterministic — owns identity</h4>
+          <div class="sub">Stable structure, exact set-arithmetic</div>
+          <ul class="units">
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-003</span><h3>The id backbone</h3></div>
+              <p>Canonical anchor ids (US-NN, FR-NNN, SC-NNN) are assigned upstream by the deterministic
+                engine, and the maker must emit them verbatim — never inventing or renaming an id. The maker
+                decorates; it does not own identity.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor">FR-011</span><h3>Deterministic version diff</h3></div>
+              <p>Because anchor ids are stable, the structural version diff stays deterministic — id-based
+                set-arithmetic, as in v2.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="col llm">
+          <h4>LLM — reasons only when text moved</h4>
+          <div class="sub">Re-anchor / resolve, never invent</div>
+          <ul class="units">
+            <li class="unit">
+              <div class="top"><span class="rr-anchor us">US3</span><span class="pri p1">P1</span>
+                <h3>Comments survive the new render</h3></div>
+              <p>With open comments present, regenerate through the maker and every comment stays anchored to
+                its quoted text. When text moves or is rewritten, an LLM resolution agent re-anchors or resolves
+                by reasoning about meaning — never relying on the v2 quote-match alone, and never silently
+                dropping a comment.</p>
+            </li>
+            <li class="unit">
+              <div class="top"><span class="rr-anchor sc">SC-003</span><h3>Zero new orphans</h3></div>
+              <p>Regenerating a render leaves every open comment anchored, with zero orphans introduced by the
+                render change. The LLM may narrate and re-anchor, but a diff must never invent a change absent
+                from the source.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 — Gating quality -->
+    <section class="band">
+      <div class="eyebrow">05 · Quality is gated, not assumed</div>
+      <h2>A bad generation never reaches a reader</h2>
+      <p class="takeaway">
+        A single comprehension-plus-visual checker grades every render and drives a rework loop that runs
+        <b>until the comprehension bar is met</b> — quality-driven, with only a high safety ceiling against an
+        infinite loop. The fallback policy is split by failure type.
+      </p>
+      <ul class="units cards two">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US4</span><span class="pri p2">P2</span>
+            <h3>Generated quality is gated</h3></div>
+          <p>The generated HTML sits behind a checker with a rework loop, so a bad generation never reaches a
+            reader. Independent test: force a low-quality generation and confirm the checker fails it and
+            triggers rework before the page is served.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-004</span><h3>One checker, rework to the bar</h3></div>
+          <p>A single requirements-render checker grades the HTML for comprehension and visual quality and
+            drives a rework loop that continues until the comprehension bar is met — not a cost-capped number
+            of rounds. Page quality is the objective, so loops are not rationed.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-009</span><h3>LLM-judged checks</h3></div>
+          <p>The v2 verification layer is revisited for a non-deterministic render: the deterministic
+            golden-HTML snapshot gate is replaced or supplemented by LLM-judged comprehension and visual
+            checks.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-006</span><h3>Split fallback policy</h3></div>
+          <p>On a true maker failure (crash, timeout, no output at all) the deterministic renderer is served.
+            On non-convergence (output produced but the bar never reached) the best-scoring attempt is served
+            and flagged for human review — never the plain deterministic page.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-004</span><h3>No-output → deterministic</h3></div>
+          <p>On a true maker crash or timeout with no output, the deterministic render is served, so a render
+            is never missing. Verified by fault-injection of the maker.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-008</span><h3>Non-convergence → best attempt</h3></div>
+          <p>On non-convergence the reader is served the best-scoring attempt with a human-review flag
+            recorded — never the plain deterministic page. Verified by forcing the checker to never pass.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 6 — Caching -->
+    <section class="band">
+      <div class="eyebrow">06 · Generate at most once per version</div>
+      <h2>Cached, not regenerated on every view</h2>
+      <p class="takeaway">
+        The expensive render is generated <b>at most once per source version</b> — an unchanged source serves
+        cached HTML with no new model call. Caching exists only to skip identical work; it never rations
+        generation effort, which is governed by quality.
+      </p>
+      <ul class="units cards three">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US5</span><span class="pri p2">P2</span>
+            <h3>Renders are cached</h3></div>
+          <p>Generate the expensive render at most once per source version, so viewing a page does not
+            repeatedly call a model. Independent test: view an unchanged render twice; the second view serves
+            cached HTML with no new model call.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-005</span><h3>Cache by source hash</h3></div>
+          <p>The render is cached against the source content hash and regenerated when the source changes,
+            reusing the v2 embedded-source-hash lazy-regeneration mechanism unchanged.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-005</span><h3>No call on a cache hit</h3></div>
+          <p>An unchanged source serves the cached render with no new model call. Verified by a cache-hit
+            observation on a repeat view.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 7 — Discoverable commenting -->
+    <section class="band">
+      <div class="eyebrow">07 · Independent dogfooding fix</div>
+      <h2>Making commenting discoverable</h2>
+      <p class="takeaway">
+        A first-time reader can find how to leave a comment <b>without being told.</b> This fix applies to
+        today's deterministic render too, so it can ship ahead of the rest of v3.
+      </p>
+      <ul class="units cards three">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US6</span><span class="pri p2">P2</span>
+            <h3>Commenting is discoverable</h3></div>
+          <p>A reviewer opening a render for the first time sees an obvious way to start a comment, without
+            knowing a hidden select-text gesture. Independent test: a first-time reader, given no
+            instructions, leaves a comment.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-014</span><h3>A visible affordance</h3></div>
+          <p>The render exposes a discoverable way to comment — a visible hint or control, not selection-only —
+            while keeping the existing select-to-comment path. Dogfooding found that today the pill appears
+            only on text selection, so the feature reads as absent.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-006</span><h3>Discovered unprompted</h3></div>
+          <p>A first-time reader discovers how to leave a comment without being told. Verified by an unprompted
+            usability check on the render.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 8 — Gaps: ask upstream, never fabricate -->
+    <section class="band">
+      <div class="eyebrow">08 · HOW asks WHAT</div>
+      <h2>Filling comprehension gaps by asking upstream — never fabricating</h2>
+      <p class="takeaway">
+        When the source omits a detail that would materially help the reader, the page gets it by
+        <b>asking the upstream WHAT or refine agent</b> — never shipping a silently incomplete explanation,
+        never inventing requirement content. The page is the objective; the source stays the truth.
+      </p>
+      <ul class="units cards two">
+        <li class="unit">
+          <div class="top"><span class="rr-anchor us">US7</span><span class="pri p1">P1</span>
+            <h3>The presenter fills gaps upstream</h3></div>
+          <p>A reader gets the detail needed to understand a requirement even when the source left it out, so
+            they are never stuck on an incomplete explanation. Independent test: given a file missing a
+            comprehension-critical detail, the page either supplies it (sourced upstream) or clearly marks the
+            gap — never silently ships incomplete.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-015</span><h3>Request before finalizing</h3></div>
+          <p>On detecting a gap — a detail that would materially help the reader but is absent from the file —
+            the presenter requests it from the upstream WHAT or refine agent before finalizing, rather than
+            rendering an incomplete page. It never fabricates requirement content.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor">FR-016</span><h3>Reconcile back to canon</h3></div>
+          <p>Any detail obtained by such a request is reconciled upstream — written back to or flagged on the
+            canonical requirements — so the page never shows requirement content that exists nowhere else.</p>
+        </li>
+        <li class="unit">
+          <div class="top"><span class="rr-anchor sc">SC-007</span><h3>Supply or mark, never invent</h3></div>
+          <p>When the requirements omit a detail needed to understand a block, the page supplies it (sourced
+            upstream) or marks the gap, never shipping a silently incomplete explanation. Verified by a
+            gap-injection test: remove a key detail and confirm the render asks upstream or flags it.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 9 — Out of scope (no refs) -->
+    <section class="band">
+      <div class="eyebrow">09 · The fence</div>
+      <h2>Deliberately out of scope</h2>
+      <p class="takeaway">
+        Naming the fence keeps the maker's ambition from creeping into the source-of-truth and backend layers.
+      </p>
+      <div class="fence">
+        <ul>
+          <li>Replacing the canonical markdown source or the comment-and-version backend.</li>
+          <li>The deferred human timed-read evaluation carried over from v2.</li>
+          <li>Rendering documents other than refined requirements.</li>
+          <li>A live, always-regenerating render on every page view — caching is required.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION 10 — Still open (no refs) -->
+    <section class="band">
+      <div class="eyebrow">10 · Still open</div>
+      <h2>Almost nothing structural remains open</h2>
+      <p class="takeaway">
+        Every design fork raised during refinement was resolved interactively and folded into the Decisions
+        table and the functional requirements. One tuning knob is deliberately deferred.
+      </p>
+      <div class="open">
+        <p><span class="tag">USER-DEFERRED</span>Maker and checker model tier — which model each runs on —
+          is deferred as a later tuning knob, to be settled once the generation-and-check loop works end to
+          end.</p>
+      </div>
+    </section>
+
+    <footer>
+      refined_requirements.collab.md · new_initiative · source 543ac5a9 · read-only projection
+    </footer>
+
+  </div>
+
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/requirements_comments.js"></script>
+</body>
+</html>

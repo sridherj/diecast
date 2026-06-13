@@ -1,0 +1,6 @@
+model: sonnet            # [USER-DEFERRED] tier knob — mechanical re-location + narration; not one of the four opus pipeline agents; eval_reanchor.py is the gate. v3 render-space hints are additive — tier UNCHANGED.
+dispatch_mode: subagent  # Agent tool, no cast-server dependency, no polling (decision #2 precedent)
+interactive: false
+context_mode: lightweight
+timeout_minutes: 15      # contract v2 adds narration output volume; v3 render-space hints add none
+allowed_delegations: []

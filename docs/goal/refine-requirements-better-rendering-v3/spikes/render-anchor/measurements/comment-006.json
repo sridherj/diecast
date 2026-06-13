@@ -1,0 +1,17 @@
+{
+  "id": 6,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "open",
+  "author_kind": "agent",
+  "section_hint": "Functional Requirements",
+  "quoted_text": "accept a cron-style cadence expression and validate it before saving",
+  "placed": true,
+  "offset": 880,
+  "block_ref": "FR-001",
+  "in_block": true,
+  "miss_class": null,
+  "unit_tag": "div",
+  "unit_ids": [
+    "FR-001"
+  ]
+}

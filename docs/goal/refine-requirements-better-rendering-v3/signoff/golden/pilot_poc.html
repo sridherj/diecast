@@ -1,0 +1,209 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 83552b2699b78fdf78db0d928905da8f76e7347ea1aa0a044b08fc3a3f4bfd78 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spike — does an LLM maker render beat the deterministic v2 page?</title>
+<style>
+  :root{
+    --ink:#16202b; --ink-soft:#41505f; --ink-faint:#73828f;
+    --paper:#f6f7f4; --card:#ffffff; --line:#e2e5df;
+    --accent:#1f6f57; --accent-soft:#e7f1ec;
+    --warn:#b07a17; --warn-soft:#f6efdd;
+    --probe:#5a4b8a; --probe-soft:#ece8f5;
+    --shadow:0 1px 2px rgba(20,32,43,.05),0 8px 24px rgba(20,32,43,.06);
+    --maxw:980px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.1px;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:32px 24px 80px}
+  .eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  /* ---- Above the fold hero ---- */
+  .hero{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:30px 32px; margin-bottom:26px;
+  }
+  .badges{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px}
+  .badge{
+    font-size:12px; font-weight:700; letter-spacing:.4px;
+    padding:5px 11px; border-radius:999px; line-height:1;
+  }
+  .badge.probe{background:var(--probe-soft); color:var(--probe)}
+  .badge.verdict{background:var(--accent-soft); color:var(--accent)}
+  .badge.scope{background:#eef1ee; color:var(--ink-soft)}
+  h1.job{
+    font-size:27px; line-height:1.28; font-weight:760; margin:6px 0 18px;
+    letter-spacing:-.2px; max-width:38ch;
+  }
+  h1.job em{font-style:normal; color:var(--accent)}
+  .hero-grid{
+    display:grid; grid-template-columns:1.15fr 1fr; gap:18px; margin-top:6px;
+  }
+  .hero-cell{
+    border:1px solid var(--line); border-radius:12px; padding:16px 18px; background:#fbfcfb;
+  }
+  .hero-cell .k{font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ink-faint)}
+  .hero-cell .verdict-big{
+    font-size:21px; font-weight:780; color:var(--accent); margin:6px 0 4px; letter-spacing:-.2px;
+  }
+  .hero-cell .sub{font-size:14px; color:var(--ink-soft)}
+  /* ---- Sections ---- */
+  section.block{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:26px 30px; margin-bottom:22px;
+  }
+  section.block > h2{
+    font-size:19px; font-weight:740; margin:2px 0 4px; letter-spacing:-.15px;
+  }
+  .takeaway{
+    font-size:16px; color:var(--ink); font-weight:600; margin:10px 0 16px;
+    padding-left:14px; border-left:3px solid var(--accent);
+  }
+  p{margin:0 0 14px; color:var(--ink-soft)}
+  p:last-child{margin-bottom:0}
+  strong{color:var(--ink)}
+  /* compare-contrast exhibit */
+  .exhibit{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0 4px}
+  .finding{
+    border:1px solid var(--line); border-radius:12px; padding:16px 18px; background:#fbfcfb;
+    position:relative;
+  }
+  .finding .tag{
+    font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+    display:inline-block; padding:3px 9px; border-radius:999px; margin-bottom:9px;
+  }
+  .finding.strong .tag{background:var(--accent-soft); color:var(--accent)}
+  .finding.qualified .tag{background:var(--warn-soft); color:var(--warn)}
+  .finding h3{font-size:15px; margin:0 0 6px; font-weight:720}
+  .finding code{
+    font:13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; background:#eef1ee;
+    padding:2px 6px; border-radius:5px; color:var(--ink)
+  }
+  .finding p{font-size:14.5px; margin:0}
+  /* anomaly note */
+  .anomaly{
+    margin-top:16px; border:1px dashed var(--warn); background:var(--warn-soft);
+    border-radius:12px; padding:14px 18px;
+  }
+  .anomaly .k{font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--warn)}
+  .anomaly p{font-size:14.5px; color:var(--ink); margin:5px 0 0}
+  /* deferred list */
+  .deferred{display:grid; gap:14px; margin-top:4px}
+  .deferred li{
+    list-style:none; border:1px solid var(--line); border-radius:12px; padding:15px 18px;
+    background:#fbfcfb; display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start;
+  }
+  .deferred .chip{
+    font-size:11px; font-weight:700; letter-spacing:.6px; color:var(--ink-faint);
+    background:#eef1ee; border-radius:999px; padding:5px 10px; white-space:nowrap; margin-top:1px;
+  }
+  .deferred p{margin:0; font-size:14.5px}
+  .deferred .where{display:block; margin-top:6px; font-size:13px; color:var(--ink-faint)}
+  ul.clean{margin:0; padding:0}
+  footer{margin-top:30px; font-size:12px; color:var(--ink-faint); text-align:center}
+  @media (max-width:720px){
+    .hero-grid,.exhibit{grid-template-columns:1fr}
+    h1.job{font-size:23px}
+    .wrap{padding:22px 16px 64px}
+  }
+</style>
+</head>
+<body data-goal-slug="family-pilot-poc">
+<div class="wrap">
+
+  <!-- Above the fold: classification + job statement + headline outcome + scope -->
+  <header class="hero">
+    <div class="badges">
+      <span class="badge probe">Pilot / POC spike</span>
+      <span class="badge verdict">Verdict: PROCEED to Phase 3</span>
+      <span class="badge scope">Ceiling test · 2 families · time-boxed</span>
+    </div>
+    <h1 class="job">Can an LLM-crafted requirements page <em>clearly out-communicate</em> the deterministic v2 render — enough to justify giving up render determinism?</h1>
+    <div class="hero-grid">
+      <div class="hero-cell">
+        <div class="k">Where it landed</div>
+        <div class="verdict-big">Yes — by hand, for both tested families.</div>
+        <div class="sub">The quality bar is reachable, so the recommendation is to commit to the Phase-3 maker pipeline.</div>
+      </div>
+      <div class="hero-cell">
+        <div class="k">What this is (and isn't)</div>
+        <p style="margin:6px 0 0;font-size:14px">A deliberately cheap, hand-built probe of one bet — answered for two real families. <strong>Not</strong> a shipped feature, and <strong>not</strong> a proof that an unaided agent or all nine families clear the same bar.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1 — the question under test -->
+  <section class="block">
+    <span class="eyebrow">The bet under test</span>
+    <h2>The question this spike was probing</h2>
+    <p class="takeaway">This was a deliberately cheap, time-boxed probe of a single bet — does giving up render determinism buy enough reader comprehension to be worth it — answered by hand, not shipped.</p>
+    <p>Before committing to a full Phase-3 maker pipeline, the spike set out to prove <strong>by hand</strong> that an LLM-crafted requirements page can clearly out-communicate the v2 deterministic render for at least two work families — or to surface, with evidence, that it cannot.</p>
+    <p>A human crafted maker pages for two real classified documents following the cast-preso-how discipline, then audited them against the deterministic baselines on three axes: <strong>canonical-id coverage</strong>, <strong>single-file self-containment</strong>, and <strong>above-the-fold scannability</strong>.</p>
+    <p>Crucially, this is a <strong>ceiling</strong> validation: it establishes that the bar exists and can be cleared by hand — not that an unaided agent will clear it. It is explicitly time-boxed — two families is the gate bar, and the stretch third family is descoped the moment budget runs thin. The deliverable is a recommended gate disposition plus the audit artifacts, handed to the owner at G1 for the binding maker-vs-hybrid call.</p>
+  </section>
+
+  <!-- Section 2 — where the spike landed -->
+  <section class="block">
+    <span class="eyebrow">The result</span>
+    <h2>Where the spike landed</h2>
+    <p class="takeaway">PROCEED to Phase 3 — the quality bar (clearly beat the v2 page, carry every canonical id verbatim on the right block, stay a self-contained single file) was reachable by hand for both <code style="font-family:ui-monospace,Menlo,monospace">bug_fix</code> and <code style="font-family:ui-monospace,Menlo,monospace">new_initiative</code>.</p>
+
+    <div class="exhibit">
+      <div class="finding strong">
+        <span class="tag">Strong · structural win</span>
+        <h3><code>bug_fix</code></h3>
+        <p>The deterministic baseline <strong>silently drops five of seven</strong> canonical ids; the maker surfaces <strong>all seven</strong> in family-appropriate sections. A measured comprehension gap — not a taste call.</p>
+      </div>
+      <div class="finding qualified">
+        <span class="tag">Qualified win</span>
+        <h3><code>new_initiative</code></h3>
+        <p>Id coverage at <strong>parity</strong>, but the maker keeps the whole WHAT open in <strong>under half the bytes</strong> where the baseline collapses depth behind thirteen <code>&lt;details&gt;</code> — a hierarchy-and-scannability win that still needs the human-eyeball confirmation.</p>
+      </div>
+    </div>
+
+    <div class="anomaly">
+      <div class="k">Recorded anomaly — flagged, not acted on</div>
+      <p>The v2 success-criteria checker is <strong>necessary-but-not-sufficient</strong>: it passes the deterministic baseline too, so it cannot be the quality gate for a varying render. Logged as Phase-4a input.</p>
+    </div>
+  </section>
+
+  <!-- Section 3 — what this spike deliberately did not prove -->
+  <section class="block">
+    <span class="eyebrow">The edge of the evidence</span>
+    <h2>What this spike deliberately did not prove</h2>
+    <p class="takeaway">Two cleared families is a <strong>ceiling</strong> proof — not a breadth proof and not an autonomy proof. Both unknowns are open, deferred, and re-validated agent-generated downstream.</p>
+    <ul class="clean deferred">
+      <li>
+        <span class="chip">Deferred · breadth</span>
+        <div>
+          <p><strong>Family breadth across all nine families</strong> is not proven by a two-family ceiling spike.</p>
+          <span class="where">Re-validated agent-generated in Phase 5 — out of scope here.</span>
+        </div>
+      </li>
+      <li>
+        <span class="chip">Deferred · autonomy</span>
+        <div>
+          <p>Whether the eventual <strong>Phase-3 agent clears the bar unaided</strong> is not proven — the spike only proves the bar is reachable by hand.</p>
+          <span class="where">Phase 3 re-proves it agent-generated, reusing this spike's id-audit pattern.</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <footer>Pilot / POC spike · family-pilot-poc · ceiling validation, two families, time-boxed</footer>
+</div>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

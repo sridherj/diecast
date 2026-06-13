@@ -1,0 +1,205 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 6f496c2be3d65d987fffc4a90db8f99e17aed9c2e0591cfdb861517441c540d9 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea: a glanceable health ribbon for the goals list</title>
+<style>
+  :root{
+    --ink:#1d2024;
+    --ink-soft:#4a5159;
+    --ink-faint:#7b838c;
+    --paper:#f7f6f3;
+    --card:#ffffff;
+    --line:#e4e2dc;
+    --accent:#3a6ea5;
+    --fresh:#2f8f5b;
+    --fresh-bg:#eaf6ef;
+    --flag:#c98a16;
+    --flag-bg:#fbf2dd;
+    --stale:#8a9098;
+    --stale-bg:#eef0f1;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(20,24,28,.05), 0 8px 24px rgba(20,24,28,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+  .eyebrow{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:18px;
+  }
+  .pill{
+    display:inline-block;padding:3px 9px;border-radius:999px;
+    font-size:11px;letter-spacing:.06em;font-weight:600;
+    background:#edeae3;color:var(--ink-soft);border:1px solid var(--line);
+  }
+  .pill.idea{background:#e8eef5;color:#2f5577;border-color:#d4e0ec}
+  h1{
+    font-size:30px;line-height:1.2;margin:0 0 8px;font-weight:700;letter-spacing:-.01em;
+  }
+  .draft-note{color:var(--ink-faint);font-size:14px;margin:0 0 28px}
+  .hero{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:26px 26px 24px;margin-bottom:34px;
+    border-left:4px solid var(--accent);
+  }
+  .hero .label{
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+    font-weight:700;margin:0 0 10px;
+  }
+  .hero .job{font-size:19px;line-height:1.45;margin:0 0 16px;color:var(--ink)}
+  .hero .takeaway{font-size:15px;color:var(--ink-soft);margin:0}
+  .hero .takeaway b{color:var(--ink)}
+  h2{
+    font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+    font-weight:700;margin:42px 0 14px;
+  }
+  p{margin:0 0 16px;color:var(--ink-soft);font-size:15.5px}
+  .itch{font-size:16px;color:var(--ink-soft)}
+  /* ribbon illustration */
+  .ribbons{display:flex;flex-direction:column;gap:10px;margin:6px 0 8px}
+  .ribbon{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--line);border-radius:8px;
+    padding:13px 16px 13px 14px;
+  }
+  .ribbon.fresh{border-left:5px solid var(--fresh)}
+  .ribbon.flag{border-left:5px solid var(--flag)}
+  .ribbon.stale{border-left:5px solid var(--stale)}
+  .ribbon .name{font-weight:600;color:var(--ink);font-size:14.5px;flex:1}
+  .tok{
+    font-size:11px;font-weight:600;letter-spacing:.04em;
+    padding:3px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .tok.fresh{background:var(--fresh-bg);color:var(--fresh)}
+  .tok.flag{background:var(--flag-bg);color:var(--flag)}
+  .tok.stale{background:var(--stale-bg);color:var(--stale)}
+  .caption{font-size:13px;color:var(--ink-faint);font-style:italic;margin-top:10px}
+  /* existing-states list */
+  .states{list-style:none;padding:0;margin:0;display:grid;gap:0}
+  .states li{
+    padding:13px 0;border-top:1px solid var(--line);display:flex;gap:14px;align-items:baseline;
+    font-size:15px;color:var(--ink-soft);
+  }
+  .states li:last-child{border-bottom:1px solid var(--line)}
+  .states code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;
+    background:#eef0f1;padding:1px 6px;border-radius:5px;color:var(--ink);
+  }
+  .states .what{font-weight:600;color:var(--ink);min-width:170px;display:inline-block}
+  /* form note */
+  .formnote{
+    background:#fcfbf9;border:1px dashed var(--line);border-radius:var(--radius);
+    padding:18px 20px;font-size:15px;color:var(--ink-soft);
+  }
+  .formnote b{color:var(--ink)}
+  /* unknowns */
+  .unknowns{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px 8px;
+  }
+  .unknowns .lead{font-size:14px;color:var(--ink-faint);margin:0 0 14px}
+  .blanks{list-style:none;padding:0;margin:0}
+  .blanks li{
+    display:flex;align-items:center;gap:12px;padding:11px 0;
+    border-top:1px solid var(--line);font-size:15px;color:var(--ink-soft);
+  }
+  .blanks li:first-child{border-top:none}
+  .blanks .q{flex:1;color:var(--ink)}
+  .blanks .blank{
+    color:var(--ink-faint);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    font-weight:600;white-space:nowrap;
+  }
+  .verdict{
+    margin-top:30px;font-size:16px;color:var(--ink-soft);
+    border-left:3px solid var(--line);padding:4px 0 4px 18px;font-style:italic;
+  }
+  footer{margin-top:46px;font-size:12.5px;color:var(--ink-faint);
+    border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body data-goal-slug="family-random-idea">
+<div class="wrap">
+
+  <div class="eyebrow">
+    <span class="pill idea">Random idea</span>
+    <span class="pill">Draft · v0.1.0</span>
+    <span>Captured during v3 dogfooding</span>
+  </div>
+
+  <h1>A glanceable health ribbon for the goals list</h1>
+  <p class="draft-note">A thought jotted down before it evaporated — not a plan, not a commitment. Everything below is captured exactly as far as the idea has been thought through, and no further.</p>
+
+  <section class="hero">
+    <p class="label">The idea, in one line</p>
+    <p class="job">The goals list could carry a single glanceable <b>health ribbon</b> per goal — one strip of color and a couple of tokens — that tells you, without a click, whether that goal's last render is <b>fresh</b>, <b>flagged for human review</b>, or <b>stale</b>.</p>
+    <p class="takeaway">That's the whole idea. It surfaces state that <b>already exists in the data</b> right where the eye already is — it doesn't compute anything new, and it isn't a dashboard.</p>
+  </section>
+
+  <h2>The itch that prompted it</h2>
+  <p class="itch">Watching the goals list during dogfooding, the page kept feeling like it forces a click into each goal just to learn anything about its state — is the render current, did the last maker run get flagged, is a child still working? The signal is all there in the data; it just isn't surfaced where you're already looking.</p>
+
+  <h2>What it might look like</h2>
+  <div class="ribbons">
+    <div class="ribbon fresh">
+      <span class="name">payments-reconciliation</span>
+      <span class="tok fresh">Fresh</span>
+    </div>
+    <div class="ribbon flag">
+      <span class="name">onboarding-rewrite</span>
+      <span class="tok flag">Flagged for review</span>
+    </div>
+    <div class="ribbon stale">
+      <span class="name">legacy-export</span>
+      <span class="tok stale">Stale</span>
+    </div>
+  </div>
+  <p class="caption">A colored left-border-plus-label per row — enough to scan twenty goals and know which two need attention. Illustrative only; the exact look is not decided.</p>
+
+  <h2>The states already exist</h2>
+  <p>A goal is a living thing, and these signals are already in the data — the idea is to <em>surface</em> them, not to invent or recompute anything:</p>
+  <ul class="states">
+    <li><span class="what">Render freshness</span><span>whether the last render is current or has gone stale</span></li>
+    <li><span class="what">Human-review flag</span><span>the <code>human_review</code> flag set when a maker run gets flagged</span></li>
+    <li><span class="what">Dispatch in flight</span><span>whether a child is still working on the goal right now</span></li>
+  </ul>
+
+  <h2>The intended form is deliberately small</h2>
+  <div class="formnote">
+    Think the <b>colored left-border-plus-label</b> pattern — a thin ribbon, not a panel and explicitly <b>not a dashboard</b>. Just enough weight to scan the list and spot the goals that need attention.
+  </div>
+
+  <h2>Honest about its own unknowns</h2>
+  <div class="unknowns">
+    <p class="lead">These aren't oversights — they're the parts of the idea that genuinely haven't been thought through yet, and are <strong>left blank on purpose rather than invented</strong>:</p>
+    <ul class="blanks">
+      <li><span class="q">What exactly are the states?</span><span class="blank">Left blank</span></li>
+      <li><span class="q">Where does the data come from?</span><span class="blank">Left blank</span></li>
+      <li><span class="q">Does it update live, or on load?</span><span class="blank">Left blank</span></li>
+      <li><span class="q">Is it even worth the visual weight?</span><span class="blank">Left blank</span></li>
+    </ul>
+  </div>
+
+  <p class="verdict">It might be noise. It might be the single most useful thing on the page. Captured here so the idea survives long enough to find out.</p>
+
+  <footer>
+    random_idea · structural floor — one idea, no decisions, scope, or acceptance yet. This page surfaces the captured thought as-is.
+  </footer>
+
+</div>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

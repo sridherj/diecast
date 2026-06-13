@@ -1,0 +1,240 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 5e6bc58e63892355e24321e1186152ad8dbbda4e5b8adb23999604be1f958e80 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal Card leaks raw markdown — bug fix</title>
+<style>
+  :root{
+    --ink:#1a1d24; --ink-soft:#4a5160; --ink-faint:#727a89;
+    --paper:#f7f8fa; --card:#ffffff; --line:#e4e7ec;
+    --bug:#c2410c; --bug-bg:#fff4ed; --bug-line:#fcd9c2;
+    --fix:#0f766e; --fix-bg:#effbf8; --fix-line:#bfe9e1;
+    --guard:#3949ab; --guard-bg:#f1f3ff; --guard-line:#d3d9f7;
+    --mute:#64748b; --mute-bg:#f1f3f6;
+    --code:#0b1020; --code-ink:#e6edf3;
+    --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:32px 24px 72px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.88em}
+  code{background:#eef1f4;border:1px solid #e1e6eb;border-radius:4px;padding:.08em .34em;color:#2b3240}
+
+  /* ---- Hero (single-stat-hero) ---- */
+  .hero{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:26px 28px;margin-bottom:30px;
+  }
+  .crumb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .badge{
+    display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;padding:5px 11px;border-radius:999px;
+    background:var(--bug-bg);color:var(--bug);border:1px solid var(--bug-line);
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--bug)}
+  .crumb .file{font-size:12.5px;color:var(--ink-faint)}
+  .hero h1{
+    font-size:15px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 8px;
+  }
+  .job{font-size:24px;line-height:1.35;font-weight:650;letter-spacing:-.01em;margin:0 0 6px;color:var(--ink)}
+  .job code{font-size:.78em}
+  .strip{display:flex;flex-wrap:wrap;gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .pill{flex:1 1 220px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .pill .k{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+  .pill .v{font-size:14px;color:var(--ink-soft);line-height:1.45}
+  .pill.is-fix{background:var(--fix-bg);border-color:var(--fix-line)}
+  .pill.is-fix .v{color:#0d5b54}
+
+  /* ---- Sections ---- */
+  section.block{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:24px 26px;margin:0 0 20px;
+  }
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin:0 0 4px}
+  .eyebrow.bug{color:var(--bug)} .eyebrow.fix{color:var(--fix)}
+  .eyebrow.guard{color:var(--guard)} .eyebrow.mute{color:var(--mute)}
+  h2{font-size:21px;line-height:1.3;font-weight:680;letter-spacing:-.01em;margin:0 0 10px}
+  .lede{font-size:16.5px;color:var(--ink);margin:0 0 12px}
+  .lede strong{font-weight:680}
+  p{margin:0 0 12px;color:var(--ink-soft)}
+  section.block p:last-child{margin-bottom:0}
+
+  /* ---- Annotated emit sites (diagram-annotated) ---- */
+  .sites{display:grid;gap:14px;margin-top:6px}
+  .site{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .site .where{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+    white-space:nowrap;color:var(--bug);background:var(--bug-bg);border:1px solid var(--bug-line);
+    border-radius:8px;padding:7px 10px;font-weight:600;
+  }
+  .snippet{
+    background:var(--code);color:var(--code-ink);border-radius:9px;padding:12px 14px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;
+    overflow-x:auto;
+  }
+  .snippet .cmt{color:#7d8aa0}
+  .snippet .bad{color:#ff9b73;font-weight:600}
+  .site .note{font-size:14px;color:var(--ink-soft);margin-top:8px}
+
+  /* ---- Unit exhibits (consulting-exhibit) ---- */
+  ul.units{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px}
+  li.unit{
+    border:1px solid var(--line);border-left:4px solid var(--fix);border-radius:10px;
+    padding:14px 16px;background:#fcfdfe;
+  }
+  li.unit.guard{border-left-color:var(--guard)}
+  li.unit.crit{border-left-color:#0891b2;border-left-style:dashed}
+  .unit-head{display:flex;align-items:center;gap:10px;margin-bottom:7px;flex-wrap:wrap}
+  .rr-anchor{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;font-weight:700;
+    letter-spacing:.03em;color:var(--fix);background:var(--fix-bg);border:1px solid var(--fix-line);
+    border-radius:6px;padding:3px 8px;
+  }
+  li.unit.guard .rr-anchor{color:var(--guard);background:var(--guard-bg);border-color:var(--guard-line)}
+  li.unit.crit .rr-anchor{color:#0e7490;background:#ecfeff;border-color:#bae6fd}
+  .kind{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
+  li.unit .body{font-size:15px;color:var(--ink);line-height:1.55}
+  li.unit .body strong{font-weight:670}
+  .verify{margin-top:8px;font-size:13px;color:var(--ink-faint);display:flex;gap:7px;align-items:baseline}
+  .verify .vk{font-weight:700;color:#0e7490;text-transform:uppercase;letter-spacing:.04em;font-size:11px;white-space:nowrap}
+
+  /* ---- Out of scope (one-statement) ---- */
+  section.oos{background:var(--mute-bg);border-style:dashed;border-color:#cfd6df}
+  .oos .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:#e6eaef;border:1px solid #d3dae2;border-radius:6px;padding:3px 9px;margin-bottom:10px}
+  .oos h2{color:var(--ink-soft)}
+  .oos code{background:#e4e9ee;border-color:#d6dce2}
+
+  @media (max-width:560px){
+    .job{font-size:20px}
+    .site{grid-template-columns:1fr}
+    .site .where{white-space:normal}
+  }
+</style>
+</head>
+<body data-goal-slug="family-bug-fix">
+<div class="wrap">
+
+  <!-- Above-the-fold summary: classification + job statement + outcome/scope -->
+  <header class="hero">
+    <div class="crumb">
+      <span class="badge"><span class="dot"></span>Bug fix</span>
+      <span class="file mono">goal_card.py · renderer.py</span>
+    </div>
+    <h1>Goal Card leaks raw markdown onto the zero-click surface</h1>
+    <p class="job">Stop the Goal Card from printing literal <code>**bold**</code>, backtick-code, and <code>_emphasis_</code> — so the one above-the-fold surface a reader sees reads as clean prose, not source.</p>
+    <div class="strip">
+      <div class="pill is-fix">
+        <div class="k">The fix</div>
+        <div class="v">Route the card's job statement and L2 assertions through the same inline-markdown path the recipe sections already use.</div>
+      </div>
+      <div class="pill">
+        <div class="k">Scope</div>
+        <div class="v">One file, the Goal Card emit path. The sibling sentence-splitter defect is named but deliberately left out.</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ref-less prose: zero anchor labels -->
+  <section class="block">
+    <p class="eyebrow bug">The symptom</p>
+    <h2>What's broken on the zero-click surface</h2>
+    <p class="lede">The Goal Card — the single above-the-fold surface a first-time reader lands on — is printing <strong>raw markdown syntax instead of formatted prose</strong>. A reader's first impression of a goal is literally <code>Replace the **plain** deterministic render</code>, asterisks and all.</p>
+    <p>That defeats the render's stated core job: a reader should grasp the job, outcome, and scope in seconds from the card alone. The leak isn't cosmetic — it lands on the exact surface the whole feature is justified by, and it surfaces wherever an author wrote inline markdown in the Intent job statement or in a Success-Criteria cell.</p>
+  </section>
+
+  <!-- ref-less prose: zero anchor labels -->
+  <section class="block">
+    <p class="eyebrow bug">Root cause</p>
+    <h2>Where the leak lives</h2>
+    <p class="lede">The cause is known and narrow: <strong>two emit sites in <code>renderer.py</code></strong>, both fed by the pure heuristics in <code>goal_card.py</code>, send text through <code>escape()</code> — which HTML-escapes but never interprets markdown — and never through the markdown renderer.</p>
+    <div class="sites">
+      <div class="site">
+        <div class="where">_render_goal_card<br>→ job statement</div>
+        <div>
+          <div class="snippet">job_html = f'&lt;p ...&gt;{<span class="bad">escape</span>(job_statement)}&lt;/p&gt;'</div>
+          <p class="note">A source line like <code>Replace the **plain** render</code> renders the inner <code>**plain**</code> verbatim as four asterisks around the word.</p>
+        </div>
+      </div>
+      <div class="site">
+        <div class="where">_render_assertions<br>→ each L2 line</div>
+        <div>
+          <div class="snippet"><span class="cmt"># no markdown wrapper</span><br>f'&lt;li ...&gt;{<span class="bad">escape</span>(a)}&lt;/li&gt;'</div>
+          <p class="note">Success-Criteria cells routinely carry backtick identifiers and <code>_emphasis_</code> — all of it leaks. That code comment is the bug, not a contract.</p>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:14px">The defect is <strong>data-dependent</strong> — a source with no inline markdown looks fine — which is precisely why it slipped past the golden-HTML snapshot until an author used emphasis. It was observed live on this goal's own render.</p>
+  </section>
+
+  <!-- FR-001, FR-002, SC-001 -->
+  <section class="block">
+    <p class="eyebrow fix">The fix</p>
+    <h2>Render the card through the real markdown path</h2>
+    <p class="lede">Route the job statement and its L2 assertions through the same inline-markdown path the recipe sections already use (<code>_md_to_html</code>), so <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> resolve to formatted HTML instead of literal characters.</p>
+    <ul class="units">
+      <li class="unit">
+        <div class="unit-head"><span class="rr-anchor">FR-001</span><span class="kind">Functional requirement</span></div>
+        <div class="body">Render the Goal Card <strong>job statement</strong> through the existing inline-markdown path (<code>_md_to_html</code>) so bold, code, and emphasis resolve to formatted HTML. Reuse the existing shared markdown instance — do not stand up a second renderer.</div>
+      </li>
+      <li class="unit">
+        <div class="unit-head"><span class="rr-anchor">FR-002</span><span class="kind">Functional requirement</span></div>
+        <div class="body">Resolve inline markdown the same way for <strong>each L2 assertion</strong>, while keeping every assertion a single contiguous <code>&lt;li&gt;</code> with no fragmenting spans. The "no markdown wrapper" comment is overturned.</div>
+      </li>
+      <li class="unit crit">
+        <div class="unit-head"><span class="rr-anchor">SC-001</span><span class="kind">Success criterion</span></div>
+        <div class="body">A Goal Card built from a source containing <code>**bold**</code>, <code>`code`</code>, and <code>_emphasis_</code> renders formatted text with <strong>zero literal markdown characters</strong> visible.</div>
+        <div class="verify"><span class="vk">Verify</span><span>Render a fixture carrying all three markup forms; assert no stray <code>*</code> / <code>`</code> / <code>_</code> survives in the Goal Card HTML text.</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- FR-003, FR-004, SC-002, SC-003 -->
+  <section class="block">
+    <p class="eyebrow guard">Guard rails</p>
+    <h2>The contracts this fix must not break</h2>
+    <p class="lede">The change must be invisible everywhere except at the leak: <strong>no new element <code>id=</code> or <code>data-block-anchor</code></strong> on the Goal Card, and <strong>byte-identical output</strong> for any markdown-free source.</p>
+    <ul class="units">
+      <li class="unit guard">
+        <div class="unit-head"><span class="rr-anchor">FR-003</span><span class="kind">Functional requirement</span></div>
+        <div class="body">Introduce no element <code>id=</code> and no <code>data-block-anchor</code> anywhere on the Goal Card, preserving the thin-spine DOM contract the comment-and-version layer anchors against. A renderer that emitted header ids would violate it — <strong>inline-only conversion is required</strong>.</div>
+      </li>
+      <li class="unit guard">
+        <div class="unit-head"><span class="rr-anchor">FR-004</span><span class="kind">Functional requirement</span></div>
+        <div class="body">A render whose source contains no inline markdown produces <strong>byte-identical</strong> Goal Card output to today, so the change is invisible except where it fixes the leak. This protects the existing golden snapshots for markdown-free fixtures.</div>
+      </li>
+      <li class="unit crit">
+        <div class="unit-head"><span class="rr-anchor">SC-002</span><span class="kind">Success criterion</span></div>
+        <div class="body">No <code>id=</code> and no <code>data-block-anchor</code> appear anywhere in the regenerated Goal Card markup.</div>
+        <div class="verify"><span class="vk">Verify</span><span>Grep the rendered Goal Card section.</span></div>
+      </li>
+      <li class="unit crit">
+        <div class="unit-head"><span class="rr-anchor">SC-003</span><span class="kind">Success criterion</span></div>
+        <div class="body">A markdown-free source renders a Goal Card byte-identical to the pre-fix output.</div>
+        <div class="verify"><span class="vk">Verify</span><span>Golden-snapshot diff on an emphasis-free fixture.</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ref-less prose: zero anchor labels -->
+  <section class="block oos">
+    <span class="tag">Deliberately out of scope</span>
+    <h2>The sibling sentence-splitter defect — not fixed here</h2>
+    <p class="lede">A second defect lives one call deeper in the same file: <code>goal_card._first_sentence</code> splits on <code>(?&lt;=[.!?])\s+</code>, so a job statement containing an abbreviation like <code>e.g.</code> or <code>v2.</code> is truncated at the abbreviation.</p>
+    <p>It is named precisely so a fixer doesn't conflate the two while editing the same file — but it is explicitly <strong>not</strong> addressed by this change. The leaning, captured as the single deferred open question, is to track it as its own bug: different root cause, different test, and bundling it risks scope creep in a one-file fix.</p>
+  </section>
+
+</div>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

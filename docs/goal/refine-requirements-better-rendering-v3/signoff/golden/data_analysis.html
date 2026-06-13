@@ -1,0 +1,323 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 22114a4598730367c0f152cdb4da47542954c9e269029f73492c94a6091c1978 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does the dispatcher silently stop launching children?</title>
+<style>
+  :root {
+    --ink: #15212e;
+    --ink-soft: #3a4a5a;
+    --muted: #6b7a89;
+    --line: #dfe5ec;
+    --paper: #ffffff;
+    --wash: #f4f7fa;
+    --accent: #1f6feb;
+    --accent-wash: #eaf2ff;
+    --alarm: #b4451f;
+    --alarm-wash: #fbeee8;
+    --good: #1d7a4d;
+    --good-wash: #e9f5ee;
+    --defer: #7a5b1d;
+    --defer-wash: #f6efe1;
+    --maxw: 920px;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(21,33,46,.06), 0 8px 24px rgba(21,33,46,.06);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--wash);
+    line-height: 1.58;
+    font-size: 17px;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 80px; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .86em;
+    background: #eef2f6;
+    color: #2a3947;
+    padding: .08em .38em;
+    border-radius: 5px;
+    word-break: break-word;
+  }
+
+  /* ---- Above the fold ---- */
+  .hero {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 34px 34px 30px;
+    margin: 30px 0 26px;
+  }
+  .eyebrow {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    font-size: 12.5px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  .tag {
+    display: inline-block;
+    background: var(--accent-wash); color: var(--accent);
+    font-weight: 600; letter-spacing: .03em;
+    padding: 3px 10px; border-radius: 999px; font-size: 11.5px;
+  }
+  .tag.ghost { background: #eef2f6; color: var(--ink-soft); }
+  h1 {
+    font-size: 30px; line-height: 1.2; margin: 2px 0 14px; letter-spacing: -.01em;
+  }
+  .lead { font-size: 18px; color: var(--ink-soft); margin: 0 0 22px; }
+  .fold-grid {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px;
+  }
+  .callout {
+    border-radius: 10px; padding: 16px 18px; border: 1px solid var(--line);
+    background: var(--wash);
+  }
+  .callout .k { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+  .callout.finding { background: var(--alarm-wash); border-color: #f1d6c9; }
+  .callout.finding .k { color: var(--alarm); }
+  .callout p { margin: 0; font-size: 15.5px; }
+  .bignum { font-size: 15.5px; }
+  .bignum strong { font-size: 19px; }
+
+  /* ---- Sections ---- */
+  section.block { margin: 40px 0 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .sec-num {
+    font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent);
+    font-size: 14px; padding-top: 3px;
+  }
+  h2 { font-size: 23px; margin: 0; letter-spacing: -.01em; }
+  .takeaway {
+    font-size: 17px; color: var(--ink-soft); margin: 8px 0 18px;
+    border-left: 3px solid var(--accent); padding-left: 14px;
+  }
+  .card {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px 22px; margin: 14px 0;
+  }
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ---- Stat exhibit ---- */
+  .gap-exhibit {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 8px; text-align: center; margin: 4px 0 6px;
+  }
+  .stat { padding: 14px 10px; border-radius: 10px; }
+  .stat .num { font-size: 46px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .stat.api .num { color: var(--ink-soft); }
+  .stat.api { background: var(--wash); }
+  .stat.db .num { color: var(--alarm); }
+  .stat.db { background: var(--alarm-wash); }
+  .vs { color: var(--muted); font-weight: 700; font-size: 15px; }
+  .gap-note { text-align: center; font-size: 14.5px; color: var(--ink-soft); margin-top: 4px; }
+  .gap-note strong { color: var(--alarm); }
+
+  /* ---- Evidence chain ---- */
+  .evidence { list-style: none; margin: 16px 0 0; padding: 0; counter-reset: ev; }
+  .evidence > li {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px 18px 16px 56px; margin: 10px 0;
+    position: relative; box-shadow: var(--shadow);
+  }
+  .evidence > li::before {
+    counter-increment: ev; content: counter(ev);
+    position: absolute; left: 16px; top: 16px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-wash); color: var(--accent);
+    font-weight: 700; font-size: 13px; display: grid; place-items: center;
+  }
+  .evidence .et { font-weight: 650; display: block; margin-bottom: 4px; }
+  .evidence.lead > li { border-color: #f1d6c9; padding-left: 18px; }
+  .evidence.lead > li::before { display: none; }
+
+  /* ---- Open questions ---- */
+  .open { list-style: none; margin: 14px 0 0; padding: 0; }
+  .open > li {
+    background: var(--paper); border: 1px solid var(--line); border-left-width: 4px;
+    border-radius: 10px; padding: 16px 18px; margin: 10px 0; box-shadow: var(--shadow);
+  }
+  .open > li.is-open { border-left-color: var(--good); }
+  .open > li.is-deferred { border-left-color: var(--defer); }
+  .disp {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 6px; margin-bottom: 8px;
+  }
+  .disp.open { background: var(--good-wash); color: var(--good); }
+  .disp.deferred { background: var(--defer-wash); color: var(--defer); }
+  .open p { font-size: 15.5px; color: var(--ink-soft); }
+
+  .foot { margin-top: 46px; color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (max-width: 680px) {
+    body { font-size: 16px; }
+    h1 { font-size: 25px; }
+    .fold-grid { grid-template-columns: 1fr; }
+    .hero { padding: 26px 22px; }
+    .gap-exhibit { grid-template-columns: 1fr; }
+    .vs { padding: 4px 0; }
+  }
+</style>
+</head>
+<body data-goal-slug="family-data-analysis">
+<div class="wrap">
+
+  <!-- Above-the-fold summary (classification · job statement · key finding · scope) -->
+  <header class="hero">
+    <div class="eyebrow">
+      <span class="tag">Data Analysis</span>
+      <span class="tag ghost">Investigation</span>
+      <span>Deliverable: a measured diagnosis, not a fix</span>
+    </div>
+    <h1>Why does the dispatcher silently stop launching children?</h1>
+    <p class="lead">
+      Children pile up <code>pending</code>, the dispatcher loop launches nothing,
+      and the log stays empty. This analysis reads the run-state data to explain
+      why — and to quantify the gap between what the status API reports and what
+      the database actually holds.
+    </p>
+    <div class="fold-grid">
+      <div class="callout finding">
+        <div class="k">Key finding</div>
+        <p class="bignum">
+          A live capture showed the API reporting <strong>2 running</strong> while
+          the database held <strong>7</strong> — every slot full. The slots are
+          occupied by zombies, not workers.
+        </p>
+      </div>
+      <div class="callout">
+        <div class="k">The reframe</div>
+        <p>
+          The right question isn't <em>"is the loop dead?"</em> It's
+          <em>"how many slots does the database think are occupied, and by what?"</em>
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1 -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">01</span><h2>What we're trying to find out</h2></div>
+    <p class="takeaway">
+      One question carries the whole investigation: why does the cast-server
+      dispatcher enqueue children as <code>pending</code> yet never launch them,
+      with nothing in the log? The output is a measured finding, not a patch.
+    </p>
+    <div class="card">
+      <p>
+        The symptom is alarming and quiet at once — <code>pending</code> children
+        accumulate, the dispatcher loop logs nothing, and HTTP latency stays flat
+        and healthy.
+      </p>
+      <p>
+        That flat latency is a clue, not just reassurance: a hung event loop would
+        stall HTTP too. Healthy latency therefore <em>rules out</em> a dead loop and
+        points the investigation elsewhere.
+      </p>
+      <p>
+        The decisive move is to distrust the
+        <code>GET /api/agents/runs?status=running</code> view and read the
+        <code>agent_runs</code> table directly — because the two disagree, and the
+        size of that disagreement is the entire point.
+      </p>
+    </div>
+  </section>
+
+  <!-- Section 2 -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">02</span><h2>What the data shows</h2></div>
+    <p class="takeaway">
+      The diagnosis the data supports: the slots are full of zombies, not workers,
+      and the status API is under-reporting it. The load-bearing number is the gap
+      between what the API says and what the database actually holds.
+    </p>
+
+    <div class="card">
+      <div class="gap-exhibit">
+        <div class="stat api">
+          <div class="num">2</div>
+          <div class="lbl">running, per the status API</div>
+        </div>
+        <div class="vs">vs</div>
+        <div class="stat db">
+          <div class="num">7</div>
+          <div class="lbl">running, straight from the database</div>
+        </div>
+      </div>
+      <p class="gap-note">
+        Seven of seven slots — <strong>full saturation</strong>. The only
+        trustworthy count is the one taken directly from the DB:
+        <code>SELECT COUNT(*) FROM agent_runs WHERE status='running'</code> at
+        <code>~/.cast/diecast.db</code>. That gap <em>is</em> the finding.
+      </p>
+    </div>
+
+    <ul class="evidence">
+      <li>
+        <span class="et">The launch predicate is slot-bounded.</span>
+        <code>_dispatcher_loop</code> launches only when
+        <code>COUNT(status='running') &lt; MAX_CONCURRENT_AGENTS</code>
+        (default 7, <code>CAST_MAX_CONCURRENT_AGENTS</code>). At 7 it launches
+        nothing and logs nothing — no error, because nothing failed.
+      </li>
+      <li>
+        <span class="et">The occupants are zombies, not workers.</span>
+        Abandoned interactive Claude sessions idling at a <code>new task?</code> /
+        selection-menu prompt stay <code>status='running'</code> forever: the monitor
+        sees a live tmux session and has no terminal-output contract, so it never
+        marks them terminal. On restart, <code>recover_stale_runs</code> resumes them
+        and re-saturates the slots.
+      </li>
+      <li>
+        <span class="et">The signature is diagnostic.</span>
+        Flat ~16&nbsp;ms HTTP latency, zero <code>Launched</code> lines across several
+        10-second dispatcher cycles, and free slots on paper together read as
+        saturation — not a stuck loop.
+      </li>
+    </ul>
+  </section>
+
+  <!-- Section 3 -->
+  <section class="block">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Still unanswered</h2></div>
+    <p class="takeaway">
+      The analysis ends at diagnosis. Two questions are deliberately left open and
+      are not resolved into a recommendation the data does not make.
+    </p>
+    <ul class="open">
+      <li class="is-open">
+        <span class="disp open">Open</span>
+        <p>
+          Should the monitor auto-reap interactive sessions idle past a threshold,
+          or is operator-driven cancellation the safer default given the risk of
+          killing an actively-working pane?
+        </p>
+      </li>
+      <li class="is-deferred">
+        <span class="disp deferred">Deferred</span>
+        <p>
+          Should the status API's <code>running</code> filter be reconciled to the
+          raw DB count, or is the divergence intentional — with only the docs needing
+          a warning against trusting it?
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <p class="foot">Run-state investigation · family: data_analysis · diagnosis only</p>
+
+</div>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

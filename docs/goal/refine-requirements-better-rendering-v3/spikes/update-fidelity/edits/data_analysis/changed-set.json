@@ -1,0 +1,22 @@
+{
+  "counts": {
+    "added": 0,
+    "modified": 1,
+    "removed": 1,
+    "unchanged": 2
+  },
+  "items": [
+    {
+      "change": "modified",
+      "kind": "evidence",
+      "heading_or_ref": "Evidence",
+      "excerpt": "## Evidence - **The launch predicate is slot-bounded.** `_dispatcher_loop` only\u2026"
+    },
+    {
+      "change": "removed",
+      "kind": "open_question",
+      "heading_or_ref": "- **[DEFERRED]** Whether the status API's `running` filter should be reconciled\u2026",
+      "excerpt": "- **[DEFERRED]** Whether the status API's `running` filter should be reconciled\u2026"
+    }
+  ]
+}

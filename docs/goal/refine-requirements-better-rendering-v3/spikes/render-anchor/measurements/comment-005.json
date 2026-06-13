@@ -1,0 +1,17 @@
+{
+  "id": 5,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "open",
+  "author_kind": "human",
+  "section_hint": "Functional Requirements",
+  "quoted_text": "the report owner",
+  "placed": true,
+  "offset": 1084,
+  "block_ref": "FR-004",
+  "in_block": true,
+  "miss_class": null,
+  "unit_tag": "div",
+  "unit_ids": [
+    "FR-004"
+  ]
+}

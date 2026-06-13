@@ -1,0 +1,310 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: 1b2f592fa1ef93b1da335a96e8157c7b40e29ad0ee66d3c0735fce68c0118d4e -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Namespace the .cast runtime link per goal</title>
+<style>
+  :root{
+    --ink:#10141c; --ink-2:#2b3340; --muted:#5d6776; --faint:#8a94a4;
+    --line:#e3e7ee; --line-2:#eef1f6; --paper:#ffffff; --wash:#f6f8fb;
+    --accent:#b45309; --accent-wash:#fdf4e7; --accent-line:#f0d8b0;
+    --good:#0f766e; --good-wash:#eafaf6; --good-line:#bfe8e0;
+    --open:#6d4 caf; --open:#6d4caf; --open-wash:#f3eefb; --open-line:#ddd0f1;
+    --radius:14px; --maxw:980px;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--wash); color:var(--ink);
+    font-family:var(--sans); line-height:1.55;
+    font-size:16px; letter-spacing:-0.003em;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:40px 24px 80px}
+  code,kbd{font-family:var(--mono); font-size:.86em}
+  .path{
+    font-family:var(--mono); font-size:.86em; color:var(--ink-2);
+    background:var(--line-2); border:1px solid var(--line);
+    border-radius:6px; padding:1px 6px; white-space:nowrap;
+  }
+
+  /* ---- Hero / Goal card (single-stat-hero) ---- */
+  .hero{
+    background:var(--paper); border:1px solid var(--line);
+    border-radius:var(--radius); padding:30px 32px 28px;
+    box-shadow:0 1px 2px rgba(16,20,28,.04),0 10px 30px rgba(16,20,28,.05);
+  }
+  .badges{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:18px}
+  .badge{
+    font-size:12px; font-weight:650; letter-spacing:.02em;
+    padding:4px 11px; border-radius:999px; text-transform:uppercase;
+    border:1px solid var(--line);
+  }
+  .badge-fam{background:#eef2fb; color:#2c4a9a; border-color:#d6e0f6}
+  .badge-oneway{background:var(--accent-wash); color:var(--accent); border-color:var(--accent-line)}
+  .badge-alt{background:var(--wash); color:var(--muted)}
+  .eyebrow{font-size:12.5px; font-weight:650; letter-spacing:.07em; text-transform:uppercase; color:var(--faint); margin:0 0 6px}
+  h1{font-size:30px; line-height:1.18; margin:0 0 16px; letter-spacing:-0.02em; font-weight:720}
+  .job{
+    font-size:18px; line-height:1.5; color:var(--ink-2); margin:0;
+    max-width:62ch;
+  }
+  .job b{color:var(--ink); font-weight:680}
+  .stat-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:24px;
+    border-top:1px solid var(--line-2); padding-top:22px;
+  }
+  .stat .k{font-size:11.5px; font-weight:680; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin:0 0 4px}
+  .stat .v{font-size:15px; color:var(--ink-2); margin:0; line-height:1.45}
+  .stat .v b{color:var(--ink); font-weight:660}
+
+  /* ---- Section scaffolding ---- */
+  section{margin-top:34px}
+  .sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 4px}
+  .sec-num{font-family:var(--mono); font-size:13px; color:var(--faint); font-weight:600}
+  h2{font-size:21px; margin:0; letter-spacing:-0.015em; font-weight:700}
+  .takeaway{font-size:15.5px; color:var(--muted); margin:8px 0 18px; max-width:70ch}
+
+  .card{
+    background:var(--paper); border:1px solid var(--line);
+    border-radius:var(--radius); padding:24px 26px;
+    box-shadow:0 1px 2px rgba(16,20,28,.04);
+  }
+
+  /* ---- Before/After compare (compare-contrast) ---- */
+  .compare{display:grid; grid-template-columns:1fr auto 1fr; gap:0; align-items:stretch}
+  .pane{padding:22px 22px}
+  .pane-before{background:var(--accent-wash); border:1px solid var(--accent-line); border-radius:var(--radius) 0 0 var(--radius)}
+  .pane-after{background:var(--good-wash); border:1px solid var(--good-line); border-left:0; border-radius:0 var(--radius) var(--radius) 0}
+  .pane h3{margin:0 0 4px; font-size:13px; letter-spacing:.05em; text-transform:uppercase; font-weight:700}
+  .pane-before h3{color:var(--accent)}
+  .pane-after h3{color:var(--good)}
+  .pane .lead{font-size:14.5px; color:var(--ink-2); margin:0 0 14px}
+  .arrow{display:flex; align-items:center; justify-content:center; width:48px; color:var(--faint); font-size:22px}
+  .layout{font-family:var(--mono); font-size:12.5px; line-height:1.7; color:var(--ink-2); margin:0; white-space:nowrap; overflow:auto}
+  .layout .lk{color:var(--accent)}
+  .pane-after .layout .lk{color:var(--good)}
+  .layout .dim{color:var(--faint)}
+  .symptom{
+    margin:16px 0 0; padding:12px 14px; border-radius:10px;
+    background:rgba(180,83,9,.08); border:1px solid var(--accent-line);
+    font-size:13.5px; color:#7a3b06;
+  }
+  .symptom b{font-weight:680}
+  @media (max-width:680px){
+    .compare{grid-template-columns:1fr}
+    .pane-before{border-radius:var(--radius) var(--radius) 0 0}
+    .pane-after{border-radius:0 0 var(--radius) var(--radius); border-left:1px solid var(--good-line); border-top:0}
+    .arrow{width:auto; height:40px}
+    .stat-row{grid-template-columns:1fr}
+  }
+
+  /* ---- Decisions exhibit (consulting-exhibit) ---- */
+  .exhibit{display:flex; flex-direction:column; gap:0}
+  .decision{padding:20px 24px; border-top:1px solid var(--line-2); display:grid; grid-template-columns:34px 1fr; gap:16px}
+  .decision:first-child{border-top:0}
+  .dnum{
+    width:30px; height:30px; border-radius:8px; background:var(--ink);
+    color:#fff; font-weight:700; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .decision.primary .dnum{background:var(--good)}
+  .dtitle{font-size:16px; font-weight:670; margin:2px 0 6px; letter-spacing:-0.01em}
+  .dbody{font-size:14.5px; color:var(--ink-2); margin:0; max-width:74ch}
+  .dbody .path{font-size:.8em}
+  .pill-primary{
+    display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--good); background:var(--good-wash);
+    border:1px solid var(--good-line); border-radius:999px; padding:1px 8px;
+    margin-left:8px; vertical-align:1.5px;
+  }
+
+  /* ---- Out of scope (fences) ---- */
+  .fences{list-style:none; margin:0; padding:0}
+  .fence{display:grid; grid-template-columns:22px 1fr; gap:14px; padding:14px 0; border-top:1px solid var(--line-2); font-size:14.5px; color:var(--ink-2)}
+  .fence:first-child{border-top:0}
+  .fence .mark{color:var(--faint); font-size:16px; line-height:1.4; text-align:center}
+  .fence b{color:var(--ink); font-weight:660}
+
+  /* ---- Open question (one-statement) ---- */
+  .open-card{
+    background:var(--open-wash); border:1px solid var(--open-line);
+    border-radius:var(--radius); padding:24px 26px;
+    display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start;
+  }
+  .open-card .tag{
+    font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--open); background:#fff; border:1px solid var(--open-line);
+    border-radius:999px; padding:4px 12px; white-space:nowrap; margin-top:2px;
+  }
+  .open-card .q{font-size:16.5px; line-height:1.5; color:var(--ink); margin:0; font-weight:560}
+  .open-card .q b{font-weight:700}
+  .fork{margin:14px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+  .fork li{display:grid; grid-template-columns:auto 1fr; gap:10px; font-size:14px; color:var(--ink-2)}
+  .fork .opt{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--open); background:#fff; border:1px solid var(--open-line); border-radius:6px; padding:1px 7px; height:max-content}
+
+  footer{margin-top:48px; padding-top:18px; border-top:1px solid var(--line); color:var(--faint); font-size:12.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+  footer .path{background:transparent; border:0; padding:0; color:var(--faint)}
+</style>
+</head>
+<body data-goal-slug="family-refactor-migration">
+<div class="wrap">
+
+  <!-- ABOVE THE FOLD — Goal card / single-stat-hero -->
+  <header class="hero">
+    <div class="badges">
+      <span class="badge badge-fam">Refactor &middot; Migration</span>
+      <span class="badge badge-oneway">One-way migration</span>
+      <span class="badge badge-alt">motivated by a collision bug</span>
+    </div>
+    <p class="eyebrow">Runtime tracking layout</p>
+    <h1>Namespace the <code>.cast</code> runtime link per goal</h1>
+    <p class="job">
+      Turn the per-directory <b>singleton</b> <span class="path">&lt;ext&gt;/.cast</span> symlink
+      into a <b>directory of per-goal links</b> <span class="path">&lt;ext&gt;/.cast/&lt;slug&gt;</span>,
+      so two goals that share one external project directory stop silently
+      misrouting each other's runtime writes — migrating any existing bare-symlink layout in place.
+    </p>
+    <div class="stat-row">
+      <div class="stat">
+        <p class="k">Key outcome</p>
+        <p class="v">Shared external dirs become safe — each goal resolves its own
+          <b><span class="path">.cast/&lt;slug&gt;</span></b> instead of a single link they fight over.</p>
+      </div>
+      <div class="stat">
+        <p class="k">Scope fence</p>
+        <p class="v">Only the <b>link layout</b> under the external repo changes; where runtime
+          directories actually live <span class="path">goals_dir/&lt;slug&gt;</span> does not move.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1 — Why (compare-contrast: before/after) -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Why we're changing the shape</h2></div>
+    <p class="takeaway">A single shared <code>.cast</code> link can only point one place at a time —
+      so when two goals share an external dir, dispatching one repoints it away from the other and
+      that goal's writes land in the wrong place with <b>no error at all</b>.</p>
+    <div class="compare">
+      <div class="pane pane-before">
+        <h3>Today &mdash; singleton link</h3>
+        <p class="lead">One <span class="path">.cast</span> symlink, recreated on every dispatch, can
+          name only a single goal's runtime directory.</p>
+        <pre class="layout"><span class="dim">&lt;ext&gt;/</span><span class="lk">.cast</span> &rarr; goals_dir/<b>goal-A</b>
+<span class="dim"># goal-B dispatched →</span>
+<span class="dim">&lt;ext&gt;/</span><span class="lk">.cast</span> &rarr; goals_dir/<b>goal-B</b></pre>
+        <p class="symptom"><b>Silent misroute:</b> goal-A's runtime writes now follow
+          <code>.cast</code> to goal-B's directory. No exception, no warning — just data in the wrong place.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">&rarr;</div>
+      <div class="pane pane-after">
+        <h3>After &mdash; per-goal namespace</h3>
+        <p class="lead">A <span class="path">.cast</span> <em>directory</em> holds one link per goal,
+          so both coexist under the same external repo.</p>
+        <pre class="layout"><span class="dim">&lt;ext&gt;/</span><span class="lk">.cast/</span><b>goal-A</b> &rarr; goals_dir/goal-A
+<span class="dim">&lt;ext&gt;/</span><span class="lk">.cast/</span><b>goal-B</b> &rarr; goals_dir/goal-B</pre>
+        <p class="symptom" style="background:rgba(15,118,110,.08);border-color:var(--good-line);color:#0c5e57">
+          <b>Structural fix:</b> the singleton becomes a namespace. Because older checkouts already
+          wrote the bare-link layout, this is a <b>one-way migration</b> that carries the legacy case
+          forward rather than assuming a clean slate.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 — The change (consulting-exhibit) -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>The change we're making</h2></div>
+    <p class="takeaway">Three committed decisions: the layout flips to a per-goal directory,
+      removal becomes per-goal and self-cleaning, and dispatch resolves through the namespace.</p>
+    <div class="card exhibit">
+      <div class="decision primary">
+        <div class="dnum">1</div>
+        <div>
+          <p class="dtitle"><code>.cast</code> becomes a directory of per-goal symlinks
+            <span class="pill-primary">core decision</span></p>
+          <p class="dbody"><code>ensure_cast_symlink</code> writes
+            <span class="path">&lt;ext&gt;/.cast/&lt;slug&gt; &rarr; goals_dir/&lt;slug&gt;</span>,
+            and on first touch migrates a legacy bare <code>.cast</code> symlink into the new
+            directory form.</p>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dnum">2</div>
+        <div>
+          <p class="dtitle">Removal is per-goal and self-cleaning</p>
+          <p class="dbody"><code>remove_cast_symlink</code> takes a slug, removes only that goal's
+            link, and deletes <code>.cast</code> only once it is empty. Both
+            <code>update_config</code> callers are updated to pass the slug.</p>
+        </div>
+      </div>
+      <div class="decision">
+        <div class="dnum">3</div>
+        <div>
+          <p class="dtitle">Dispatch resolves through the namespace</p>
+          <p class="dbody"><code>agent_service</code> dispatch and invoke tracking directories now
+            resolve to <span class="path">.cast/&lt;slug&gt;</span> rather than the bare link.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — Out of scope (fences) -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Deliberately out of scope</h2></div>
+    <p class="takeaway">Only the link layout under the external repo moves — the runtime directories,
+      the dispatch/monitoring contract, and any eager backfill all stay put.</p>
+    <div class="card">
+      <ul class="fences">
+        <li class="fence">
+          <span class="mark">&times;</span>
+          <span><b>Where runtime directories live.</b> <span class="path">goals_dir/&lt;slug&gt;</span>
+            is untouched — only the link layout under the external repo changes.</span>
+        </li>
+        <li class="fence">
+          <span class="mark">&times;</span>
+          <span><b>The dispatch / monitoring contract.</b> Nothing changes beyond the path the
+            tracking directory now resolves to.</span>
+        </li>
+        <li class="fence">
+          <span class="mark">&times;</span>
+          <span><b>Eager backfill of links.</b> Goals never dispatched into the shared repo get no
+            link — links are still created on dispatch, not ahead of time.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4 — Still open (one-statement) -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Still open</h2></div>
+    <p class="takeaway">One unresolved question — left open, not decided.</p>
+    <div class="open-card">
+      <span class="tag">Open question</span>
+      <div>
+        <p class="q">When a <span class="path">.cast/&lt;slug&gt;</span> link is <b>orphaned</b>
+          because its goal was deleted out-of-band, should it be garbage-collected on the next
+          dispatch — or left until the empty-directory cleanup eventually removes the parent
+          <code>.cast</code>?</p>
+        <ul class="fork">
+          <li><span class="opt">A</span><span>Garbage-collect the orphaned link proactively on the next dispatch.</span></li>
+          <li><span class="opt">B</span><span>Leave it; let empty-directory cleanup reclaim the parent when nothing is left.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Refactor &middot; Migration &mdash; one-way</span>
+    <span class="path">goal: family-refactor-migration</span>
+  </footer>
+
+</div>
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

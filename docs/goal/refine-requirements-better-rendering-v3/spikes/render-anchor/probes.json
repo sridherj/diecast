@@ -1,0 +1,38 @@
+[
+  {
+    "name": "ref-less unit (Not-now bullet)",
+    "quote": "Ad-hoc one-off exports triggered manually outside any schedule.",
+    "expect_miss": "no-anchor-label",
+    "got_miss": "no-anchor-label",
+    "expect_block_ref": null,
+    "got_block_ref": null,
+    "ok": true,
+    "placed": true,
+    "unit_tag": "li",
+    "unit_ids": []
+  },
+  {
+    "name": "cross-boundary (FR-001 -> FR-002 span)",
+    "quote": "validate it before saving.\n      FR-002The system shall run",
+    "expect_miss": "cross-boundary",
+    "got_miss": "cross-boundary",
+    "expect_block_ref": null,
+    "got_block_ref": null,
+    "ok": true,
+    "placed": true,
+    "unit_tag": "div",
+    "unit_ids": []
+  },
+  {
+    "name": "decoration-spanning (hero title, outside every unit)",
+    "quote": "Export Scheduler",
+    "expect_miss": "decoration-spanning",
+    "got_miss": "decoration-spanning",
+    "expect_block_ref": null,
+    "got_block_ref": null,
+    "ok": true,
+    "placed": true,
+    "unit_tag": null,
+    "unit_ids": []
+  }
+]

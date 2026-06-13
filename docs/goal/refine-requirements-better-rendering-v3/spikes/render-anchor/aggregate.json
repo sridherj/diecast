@@ -1,0 +1,27 @@
+{
+  "render": "docs/goal/refine-requirements-better-rendering-v3/spikes/1b/feature-maker-v2.html",
+  "comment_source": "docs/goal/refine-requirements-better-rendering-v3/spikes/1b/scratch.sqlite",
+  "total_comments": 6,
+  "open_comments": 5,
+  "non_open_comments": [
+    {
+      "id": 2,
+      "state": "orphaned",
+      "placed": false
+    }
+  ],
+  "open_placed": 5,
+  "open_in_block": 5,
+  "ref_unique": 5,
+  "ref_less_null_by_construction": 0,
+  "miss_cross_boundary": 0,
+  "miss_decoration_spanning": 0,
+  "miss_no_anchor_label": 0,
+  "unplaced_open": 0,
+  "mysterious_unclassified": 0,
+  "placement_rate": "5/5",
+  "block_ref_unique_rate": "5/5",
+  "probes_total": 3,
+  "probes_ok": 3,
+  "verdict": "PASS"
+}

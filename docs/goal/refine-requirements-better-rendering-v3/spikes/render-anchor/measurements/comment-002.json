@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "orphaned",
+  "author_kind": "agent",
+  "section_hint": "Functional Requirements",
+  "quoted_text": "retain the three most recent export artifacts per schedule",
+  "placed": false,
+  "offset": -1,
+  "block_ref": null,
+  "in_block": false,
+  "miss_class": "not-on-render",
+  "unit_tag": null,
+  "unit_ids": []
+}

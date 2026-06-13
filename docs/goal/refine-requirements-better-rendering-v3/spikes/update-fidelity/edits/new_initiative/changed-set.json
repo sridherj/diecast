@@ -1,0 +1,28 @@
+{
+  "counts": {
+    "added": 1,
+    "modified": 1,
+    "removed": 1,
+    "unchanged": 46
+  },
+  "items": [
+    {
+      "change": "added",
+      "kind": "sc",
+      "heading_or_ref": "SC-009",
+      "excerpt": "| SC-009 | A re-classification of a goal's work family invalidates its cached r\u2026"
+    },
+    {
+      "change": "modified",
+      "kind": "fr",
+      "heading_or_ref": "FR-005",
+      "excerpt": "| FR-005 | The generated render is cached against the source content hash and r\u2026"
+    },
+    {
+      "change": "removed",
+      "kind": "scope",
+      "heading_or_ref": "- Rendering documents other than refined requirements.",
+      "excerpt": "- Rendering documents other than refined requirements."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": 4,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "open",
+  "author_kind": "agent",
+  "section_hint": "Functional Requirements",
+  "quoted_text": "read-only history of the last fifty export runs",
+  "placed": true,
+  "offset": 1287,
+  "block_ref": "FR-005",
+  "in_block": true,
+  "miss_class": null,
+  "unit_tag": "div",
+  "unit_ids": [
+    "FR-005"
+  ]
+}

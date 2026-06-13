@@ -1,0 +1,96 @@
+{
+  "verdict": "FAIL",
+  "mechanism": "deterministic-splice",
+  "per_doc": {
+    "bug_fix": {
+      "trials_total": 5,
+      "trials_extractable": 5,
+      "unchanged_containers_measured": 40,
+      "text_byte_identical": 36,
+      "raw_byte_identical": 36,
+      "text_identity_pct": 90.0,
+      "raw_identity_pct": 90.0,
+      "divergence_whitespace_only": 0,
+      "divergence_reworded": 4,
+      "added_modified_rendered_all": true,
+      "removed_block_dropped_all": true,
+      "per_trial_raw_rate": [
+        0.875,
+        0.875,
+        1.0,
+        0.875,
+        0.875
+      ],
+      "per_trial_text_rate": [
+        0.875,
+        0.875,
+        1.0,
+        0.875,
+        0.875
+      ]
+    },
+    "data_analysis": {
+      "trials_total": 5,
+      "trials_extractable": 5,
+      "unchanged_containers_measured": 5,
+      "text_byte_identical": 5,
+      "raw_byte_identical": 5,
+      "text_identity_pct": 100.0,
+      "raw_identity_pct": 100.0,
+      "divergence_whitespace_only": 0,
+      "divergence_reworded": 0,
+      "added_modified_rendered_all": true,
+      "removed_block_dropped_all": true,
+      "per_trial_raw_rate": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_trial_text_rate": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "new_initiative": {
+      "trials_total": 5,
+      "trials_extractable": 5,
+      "unchanged_containers_measured": 200,
+      "text_byte_identical": 200,
+      "raw_byte_identical": 200,
+      "text_identity_pct": 100.0,
+      "raw_identity_pct": 100.0,
+      "divergence_whitespace_only": 0,
+      "divergence_reworded": 0,
+      "added_modified_rendered_all": true,
+      "removed_block_dropped_all": true,
+      "per_trial_raw_rate": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_trial_text_rate": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "per_doc_pass": {
+    "bug_fix": false,
+    "data_analysis": true,
+    "new_initiative": true
+  },
+  "overall_raw_pct": 98.36734693877551,
+  "overall_text_pct": 98.36734693877551,
+  "whitespace_only": 0,
+  "reworded": 4
+}

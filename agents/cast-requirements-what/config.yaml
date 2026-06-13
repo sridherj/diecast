@@ -1,0 +1,10 @@
+# agents/cast-requirements-what/config.yaml
+# Subagent carve-out (precedent: cast-comment-reanchor, cast-goal-classifier — owner Decision #2).
+# Tool-free: the 3c render_job_service runs this as `claude -p ... --tools ""` and captures stdout.
+dispatch_mode: subagent   # Agent-tool / claude -p subprocess; no cast-server dependency, no polling
+interactive: false
+context_mode: lightweight
+allowed_delegations: []    # leaf agent — delegates to nothing
+timeout_minutes: 15        # WHAT plan only (source + inventory in, one doc out); HOW gets 30
+model: opus                # [USER-DEFERRED] tier knob — placeholder, do not tune here
+proactive: false           # internal pipeline leaf — no next-command suggestions

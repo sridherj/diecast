@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "goal_slug": "spike-1b-anchor-survival",
+  "state": "open",
+  "author_kind": "human",
+  "section_hint": "User Stories",
+  "quoted_text": "stakeholders receive the report on schedule without anyone lifting a finger",
+  "placed": true,
+  "offset": 1540,
+  "block_ref": "US1",
+  "in_block": true,
+  "miss_class": null,
+  "unit_tag": "div",
+  "unit_ids": [
+    "US1"
+  ]
+}

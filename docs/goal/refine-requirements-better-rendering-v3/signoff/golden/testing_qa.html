@@ -1,0 +1,260 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: a57ceb3e83ad0124e5eff998948e0ffdc311129091a57de0c78319467dfac923 -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cast UI test harness &amp; runner-dispatch hardening</title>
+<style>
+  :root{
+    --ink:#1a1f2e; --muted:#5b6472; --faint:#8a93a3;
+    --accent:#1f7a5c; --accent-deep:#155c45; --accent-soft:#e7f4ef;
+    --warn:#9a6b12; --warn-soft:#fbf1dc;
+    --surface:#ffffff; --page:#f4f6f8; --border:#e4e7ec; --border-strong:#d3d8e0;
+    --shadow:0 1px 2px rgba(20,30,50,.04), 0 6px 20px rgba(20,30,50,.06);
+    --radius:14px;
+    --maxw:880px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:32px 24px 96px;}
+  a{color:var(--accent-deep);}
+
+  /* ---- above the fold hero ---- */
+  .hero{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:34px 34px 30px; position:relative; overflow:hidden;
+  }
+  .hero::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:6px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+  }
+  .eyebrow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .pill{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--accent-deep); background:var(--accent-soft);
+    border:1px solid #cfe8de; padding:5px 11px; border-radius:999px;
+  }
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--accent);}
+  .pill.muted{color:var(--muted); background:#eef1f5; border-color:var(--border);}
+  .slug{font-size:12px; color:var(--faint); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .hero h1{
+    font-size:27px; line-height:1.25; margin:4px 0 14px; letter-spacing:-.01em;
+    max-width:42ch;
+  }
+  .lede{font-size:17px; color:#374050; margin:0; max-width:62ch;}
+  .keyrow{
+    display:flex; gap:14px; flex-wrap:wrap; margin-top:24px;
+    padding-top:22px; border-top:1px solid var(--border);
+  }
+  .key{
+    flex:1 1 220px; min-width:200px;
+  }
+  .key .lbl{font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--faint);}
+  .key .val{font-size:14.5px; color:var(--ink); margin-top:4px;}
+  .key .val strong{color:var(--accent-deep);}
+
+  /* ---- sections ---- */
+  section.block{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:28px 30px; margin-top:22px;
+  }
+  .sechead{display:flex; align-items:baseline; gap:12px; margin-bottom:6px;}
+  .secnum{
+    font-size:12px; font-weight:800; color:var(--accent);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.04em;
+    padding-top:3px;
+  }
+  h2{font-size:20px; margin:0; letter-spacing:-.01em;}
+  .takeaway{
+    font-size:16.5px; color:#2c3543; margin:10px 0 0; font-weight:500;
+    max-width:64ch;
+  }
+  .support{font-size:15px; color:var(--muted); margin:14px 0 0; max-width:66ch;}
+
+  /* evidence cards */
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:22px;}
+  .card{
+    border:1px solid var(--border); border-radius:11px; padding:18px 18px 16px;
+    background:#fbfcfd; position:relative;
+  }
+  .card .tag{
+    font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--accent-deep); margin-bottom:8px; display:flex; align-items:center; gap:7px;
+  }
+  .card .tag .n{
+    width:20px; height:20px; border-radius:6px; background:var(--accent-soft);
+    color:var(--accent-deep); display:inline-flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800; border:1px solid #cfe8de;
+  }
+  .card p{margin:0; font-size:14px; color:#3a4250;}
+  .card code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px;
+    background:#eef1f5; padding:1px 5px; border-radius:5px; color:#39414f;
+  }
+
+  /* scope fences */
+  ul.fences{list-style:none; margin:20px 0 0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  ul.fences li{
+    display:flex; gap:13px; align-items:flex-start;
+    border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:#fbfcfd;
+  }
+  .xmark{
+    flex:0 0 auto; width:22px; height:22px; border-radius:6px; margin-top:1px;
+    background:#fbecec; color:#b5402f; border:1px solid #f1d3cd;
+    display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;
+  }
+  ul.fences li div{font-size:14.5px; color:#3a4250;}
+  ul.fences li strong{color:var(--ink);}
+
+  /* open question */
+  section.open{
+    border-color:#ecd9a8; background:linear-gradient(180deg,#fffdf7,#fdfaf1);
+  }
+  section.open::before{}
+  .openflag{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--warn); background:var(--warn-soft); border:1px solid #ecd9a8;
+    padding:5px 11px; border-radius:999px; margin-bottom:12px;
+  }
+  .openflag .dot{background:var(--warn);}
+  .open .q{font-size:17px; color:#2c3543; margin:0; max-width:64ch; font-weight:500;}
+  .open .ctx{font-size:14.5px; color:var(--muted); margin:12px 0 0; max-width:64ch;}
+
+  footer{margin-top:34px; text-align:center; color:var(--faint); font-size:12.5px;}
+
+  @media (max-width:560px){
+    .wrap{padding:20px 14px 72px;}
+    .hero{padding:26px 22px;}
+    .hero h1{font-size:23px;}
+    section.block{padding:22px 20px;}
+  }
+</style>
+</head>
+<body data-goal-slug="family-testing-qa">
+  <main class="wrap">
+
+    <!-- ABOVE THE FOLD: classification · job statement · key outcome + scope -->
+    <header class="hero">
+      <div class="eyebrow">
+        <span class="pill"><span class="dot"></span>Testing &amp; QA</span>
+        <span class="pill muted">Problem &amp; harness</span>
+        <span class="slug">family-testing-qa</span>
+      </div>
+      <h1>Stand up the cast UI test harness and harden runner dispatch</h1>
+      <p class="lede">
+        Build a trustworthy end-to-end UI test harness for cast-server — a real runner that
+        dispatches lightweight no-op test agents through the production path — and stabilize the
+        dispatch contract under it, so the suite is a signal rather than a flake generator.
+      </p>
+      <div class="keyrow">
+        <div class="key">
+          <div class="lbl">Key outcome</div>
+          <div class="val">A green run is <strong>real evidence the contract holds</strong> — it drives the same dispatch path the live UI uses.</div>
+        </div>
+        <div class="key">
+          <div class="lbl">Scope</div>
+          <div class="val"><strong>Additive</strong> coverage of dispatch-and-complete — not a rewrite, not a load test.</div>
+        </div>
+        <div class="key">
+          <div class="lbl">Still open</div>
+          <div class="val"><strong>1 decision</strong> — should the nine skipped tests block the suite once their fixes land?</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1 — PROBLEM -->
+    <section class="block">
+      <div class="sechead"><span class="secnum">01</span><h2>What we&rsquo;re hardening</h2></div>
+      <p class="takeaway">
+        The deliverable is a <strong>trustworthy test harness</strong> — not a product feature or a
+        single defect fix. The spine is the job statement: an end-to-end UI test harness that drives
+        a real runner dispatching no-op agents through the production path, with the dispatch
+        contract stabilized underneath it.
+      </p>
+      <p class="support">
+        Why now: the render and delegation surfaces had grown faster than their coverage. Manual
+        clicking was the only way to confirm a dispatch actually launched, threaded its children,
+        and wrote the canonical output envelope. This work makes that confirmation automatic — and
+        makes the suite fail loudly the moment the runner regresses.
+      </p>
+    </section>
+
+    <!-- SECTION 2 — EVIDENCE -->
+    <section class="block">
+      <div class="sechead"><span class="secnum">02</span><h2>How we test it</h2></div>
+      <p class="takeaway">
+        The harness is credible because it exercises the <strong>production</strong> runner.
+        <code>tests/ui/runner.py</code> drives dispatch through the same path the live UI uses — not
+        a stubbed shortcut — so a passing run is genuine evidence the contract holds.
+      </p>
+      <div class="cards">
+        <div class="card">
+          <div class="tag"><span class="n">1</span>Real children to drive</div>
+          <p>A fleet of <strong>nine no-op test agents</strong> gives the sweep deterministic, cheap children to launch, thread, and complete — without invoking real model work.</p>
+        </div>
+        <div class="card">
+          <div class="tag"><span class="n">2</span>First break, now fixed</div>
+          <p>An early run exposed test agents not writing the canonical <code>.agent-&lt;run_id&gt;.output.json</code> envelope. The fix makes the no-op agents emit it — exactly what the completion assertions key on.</p>
+        </div>
+        <div class="card">
+          <div class="tag"><span class="n">3</span>Honest red state</div>
+          <p>Nine delegation/UI tests that fail for known, unfixed reasons are <strong>skipped with their reason attached</strong>, not deleted — keeping the denominator truthful and the debt visible.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 — SCOPE FENCE -->
+    <section class="block">
+      <div class="sechead"><span class="secnum">03</span><h2>Out of scope for this sweep</h2></div>
+      <p class="takeaway">
+        This is <strong>additive</strong> end-to-end coverage of the dispatch-and-complete
+        contract. Don&rsquo;t read it as a rewrite or a full red-test cleanup.
+      </p>
+      <ul class="fences">
+        <li>
+          <span class="xmark" aria-hidden="true">&times;</span>
+          <div>It does <strong>not replace the existing unit tests</strong> — the UI sweep adds end-to-end coverage on top of <code>test_*.py</code>.</div>
+        </li>
+        <li>
+          <span class="xmark" aria-hidden="true">&times;</span>
+          <div>It does <strong>not fix every red delegation test</strong> in this pass — the known failures are skipped-with-reason and tracked separately.</div>
+        </li>
+        <li>
+          <span class="xmark" aria-hidden="true">&times;</span>
+          <div>It does <strong>no performance or load testing</strong> of the dispatcher — this asserts correctness of the contract, not throughput.</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 4 — OPEN -->
+    <section class="block open">
+      <div class="secnum" style="margin-bottom:10px;">04</div>
+      <span class="openflag"><span class="dot"></span>Open question · 1</span>
+      <p class="q">
+        Should the nine skipped delegation/UI tests <strong>block the suite</strong> once their
+        underlying fixes land — or stay opt-in until the delegation surface itself stabilizes?
+      </p>
+      <p class="ctx">
+        This is the one decision still genuinely unresolved. Treat it as open, not settled.
+      </p>
+    </section>
+
+    <footer>cast-server · testing &amp; QA · dispatch-and-complete contract</footer>
+  </main>
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/requirements_comments.js"></script>
+</body>
+</html>

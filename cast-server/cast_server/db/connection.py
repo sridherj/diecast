@@ -103,6 +103,13 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         except sqlite3.OperationalError:
             pass  # column already exists
 
+    # Workflow routing columns (Phase 3b) — written by record_routing_decision
+    for col in ["workflow_family", "routing_handle", "routed_at"]:
+        try:
+            conn.execute(f"ALTER TABLE goals ADD COLUMN {col} TEXT")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+
     # Session display name for agent runs (Phase 3.4)
     try:
         conn.execute("ALTER TABLE agent_runs ADD COLUMN session_name TEXT")
@@ -169,6 +176,209 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_agent_runs_claude_agent_id "
         "ON agent_runs(claude_agent_id) WHERE claude_agent_id IS NOT NULL"
+    )
+
+    # Phase: requirements thin spine (refine-requirements-v2 Phase 1).
+    # Deliberately absent: block_anchor / element surrogate (thin-spine #1), routing cols (Phase 3b).
+    # change_request* tables (Phase 5) now live below. Mirrors db/schema.sql — keep the two in lockstep.
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS requirement_versions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_slug TEXT NOT NULL,
+        version INTEGER NOT NULL,                -- 1, 2, 3, ... per goal
+        content TEXT NOT NULL,                   -- full .collab.md snapshot, byte-faithful
+        content_hash TEXT NOT NULL,              -- requirements_render.hashing.content_hash(content)
+        status TEXT NOT NULL DEFAULT 'current',  -- 'current' | 'archived'
+        created_at TEXT NOT NULL,                -- ISO timestamp
+        created_by TEXT,                         -- agent name or 'human'
+        UNIQUE (goal_slug, version),
+        FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
+    )
+    """)
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS requirement_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_slug TEXT NOT NULL,
+        version INTEGER NOT NULL,                -- version the comment was left against
+        quoted_text TEXT NOT NULL,               -- the reviewer's selection, verbatim
+        section_hint TEXT,                       -- nearest heading at capture time (a hint, not a key)
+        body TEXT NOT NULL,
+        state TEXT NOT NULL DEFAULT 'open',      -- 'open' | 'resolved' | 'orphaned'
+        author TEXT NOT NULL,
+        author_kind TEXT NOT NULL DEFAULT 'human', -- 'human' | 'agent' (FR-013: the ONLY distinction)
+        block_ref TEXT,                          -- canonical id of the enclosing labeled unit
+                                                 --   container (server-resolved); NULL = cross-boundary
+                                                 --   OR a ref-less render — both honest (sp2 Decision #1)
+        anchor_space TEXT NOT NULL DEFAULT 'source', -- 'source' | 'render' (refine-req-v3 sp2)
+        created_at TEXT NOT NULL,
+        updated_at TEXT,
+        FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
+    )
+    """)
+    # refine-req-v3 sp2: a pre-existing DB whose requirement_comments predates the render-anchor
+    # columns gets them added additively. Old rows keep anchor_space='source', block_ref=NULL —
+    # the back-compatible default (a legacy source-anchored comment until the one-time migration
+    # flips it). heartbeat/flag precedent: nullable/defaulted, no row rewrites.
+    for col_name, col_type in [
+        ("block_ref", "TEXT"),
+        ("anchor_space", "TEXT NOT NULL DEFAULT 'source'"),
+    ]:
+        try:
+            conn.execute(f"ALTER TABLE requirement_comments ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS comment_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        comment_id INTEGER NOT NULL,
+        event_type TEXT NOT NULL,                -- 'created'|'resolved'|'reopened'|'orphaned'|'relocated'
+        actor TEXT,
+        payload TEXT,                            -- JSON
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (comment_id) REFERENCES requirement_comments(id) ON DELETE CASCADE
+    )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_req_versions_goal_status "
+        "ON requirement_versions(goal_slug, status)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_req_comments_goal_state "
+        "ON requirement_comments(goal_slug, state)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_comment_events_comment "
+        "ON comment_events(comment_id)"
+    )
+
+    # Phase 5 (round-trip write-back). THIN SPINE: change_requests locates its target by
+    # target_quote + section_hint (mirrors requirement_comments) — there is NO spec_elements
+    # surrogate FK (that table never existed). base_version is the integer requirement_versions.version
+    # the change assumed. Do not "restore" a surrogate column. Mirrors db/schema.sql byte-for-byte.
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS change_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_slug TEXT NOT NULL,
+        target_quote TEXT,                       -- NULL means pure addition, no target region
+        section_hint TEXT,                       -- nearest heading hint, mirrors requirement_comments
+        base_version INTEGER,                    -- the requirement_versions.version the change assumed
+        proposed_body TEXT NOT NULL,             -- the addition/modification text
+        kind TEXT NOT NULL,                      -- 'addition' | 'modification' | 'annotation'
+        status TEXT NOT NULL DEFAULT 'proposed', -- 'proposed'|'applied'|'conflicted'|'rejected'|'superseded'
+        origin_phase TEXT,                       -- e.g. 'planning'
+        origin_activity_id TEXT,                 -- run_id of the emitting agent
+        origin_artifact_path TEXT,               -- e.g. 'plan.collab.md'
+        author TEXT NOT NULL,                    -- agent name or human identity (server-derived for humans)
+        author_type TEXT NOT NULL CHECK (author_type IN ('human','agent')),  -- DATA, never a code branch (FR-013)
+        created_at TEXT NOT NULL,
+        updated_at TEXT,
+        FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
+    )
+    """)
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS change_request_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        change_request_id INTEGER NOT NULL,
+        event_type TEXT NOT NULL,                -- 'proposed'|'accepted'|'rejected'|'conflicted'|'applied'|'superseded'
+        actor TEXT,
+        payload TEXT,                            -- JSON
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (change_request_id) REFERENCES change_requests(id) ON DELETE CASCADE
+    )
+    """)
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS notifications_outbox (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        change_request_id INTEGER NOT NULL,
+        payload TEXT NOT NULL,                   -- JSON: what changed + from where
+        status TEXT NOT NULL DEFAULT 'pending',  -- 'pending' | 'delivered'
+        created_at TEXT NOT NULL,
+        delivered_at TEXT,
+        FOREIGN KEY (change_request_id) REFERENCES change_requests(id) ON DELETE CASCADE
+    )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_change_requests_goal_status "
+        "ON change_requests(goal_slug, status)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_change_request_events_cr "
+        "ON change_request_events(change_request_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_notifications_outbox_status "
+        "ON notifications_outbox(status)"
+    )
+
+    # Background maker render-job pipeline (refine-requirements-v3 Phase 3c). INITIAL table per
+    # revision (a): heartbeat_at ships in the create table, not a later migration. 4a-2 adds ONLY
+    # the four flag columns later — Phase 3 does not. Mirrors db/schema.sql byte-for-byte.
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS render_jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_slug TEXT NOT NULL,
+        source_hash TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'running',  -- running|published|fallback|superseded|failed|flagged
+        attempts INTEGER NOT NULL DEFAULT 0,
+        error TEXT,
+        started_at TEXT,
+        finished_at TEXT,
+        heartbeat_at TEXT,                        -- revision a: written at every stage boundary
+        -- 4a-2: the four flag columns (queryable/observability copy; status enum unchanged).
+        human_review INTEGER NOT NULL DEFAULT 0,
+        review_reason TEXT,
+        published_attempt INTEGER,
+        published_score REAL,
+        -- HOW-update-mode 3a: the CREATE/UPDATE decision for the job (additive observability, nullable).
+        mode TEXT,
+        FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
+    )
+    """)
+    # 4a-2 migration: a pre-existing v3 DB whose render_jobs predates the flag columns gets them
+    # added additively (nullable / defaulted; no row rewrites). heartbeat_at is NOT here — it ships
+    # in the CREATE TABLE above (revision a / reconciliation C4). HOW-update-mode 3a adds `mode` to
+    # the SAME additive list (nullable; old rows read NULL).
+    for col_name, col_type in [
+        ("human_review", "INTEGER NOT NULL DEFAULT 0"),
+        ("review_reason", "TEXT"),
+        ("published_attempt", "INTEGER"),
+        ("published_score", "REAL"),
+        ("mode", "TEXT"),
+    ]:
+        try:
+            conn.execute(f"ALTER TABLE render_jobs ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_render_jobs_goal_hash "
+        "ON render_jobs(goal_slug, source_hash)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_render_jobs_status "
+        "ON render_jobs(status)"
+    )
+
+    # Same-door version-diff narration (refine-requirements-v3 Phase 4b-3). One row per
+    # (goal_slug, base_version, head_version); the write path recomputes the deterministic diff
+    # server-side and 422s any note referencing a change absent from it. UNIQUE makes a re-post an
+    # upsert. Mirrors db/schema.sql byte-for-byte.
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS version_diff_narrations (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_slug     TEXT NOT NULL,
+        base_version  INTEGER NOT NULL,
+        head_version  INTEGER NOT NULL,
+        overview      TEXT NOT NULL,
+        item_notes    TEXT NOT NULL,            -- JSON [{change, heading_or_ref, note}]
+        created_by    TEXT,                     -- the dispatching parent's actor id
+        created_at    TEXT NOT NULL,
+        UNIQUE (goal_slug, base_version, head_version),
+        FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
+    )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_version_diff_narrations_goal "
+        "ON version_diff_narrations(goal_slug, base_version, head_version)"
     )
 
     _seed_system_goals(conn)
