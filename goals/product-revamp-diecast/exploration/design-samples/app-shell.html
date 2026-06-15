@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diecast — Add RBAC to checkout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F5F4F0; --cream-deep:#EDEBE4; --cream-shadow:#E3E0D6;
+  --paper:#FFFFFF; --ink:#1A1A28; --ink-60:#4A4860; --ink-35:#9C99AC;
+  --hairline:#DDD8CD; --hairline-soft:#E8E5DC;
+  --rasp:#D6235C; --rasp-08:rgba(214,35,92,.08); --rasp-15:rgba(214,35,92,.15);
+  --maker:#3B5BB0; --checker:#6B47B0; --ok:#2D7D4F; --warn:#B5821A;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--cream-deep);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;
+  -webkit-font-smoothing:antialiased;
+}
+/* ——— stage entrance ——— */
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rise{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){.rise{animation:none}}
+
+.shell{
+  display:grid;grid-template-columns:236px minmax(0,1fr) 304px;
+  width:min(1280px,100%);height:min(780px,calc(100vh - 56px));
+  background:var(--cream);border:1px solid var(--hairline);
+  box-shadow:0 24px 60px -30px rgba(26,26,40,.25), 0 2px 6px rgba(26,26,40,.05);
+  border-radius:14px;overflow:hidden;
+}
+
+/* ============ GOAL RAIL ============ */
+.rail{
+  background:var(--cream);border-right:1px solid var(--hairline);
+  display:flex;flex-direction:column;padding:20px 12px 14px;
+}
+.brand{
+  font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:-.03em;
+  padding:0 10px 4px;
+}
+.brand em{font-style:normal;color:var(--rasp)}
+.tagline{font-family:var(--mono);font-size:9px;color:var(--ink-35);letter-spacing:.14em;
+  text-transform:uppercase;padding:0 10px 22px}
+.rail-h{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-35);padding:0 10px 8px;display:flex;align-items:baseline;gap:8px;
+}
+.rail-h::after{content:"";flex:1;height:1px;background:var(--hairline-soft)}
+.goal{
+  display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;
+  font-size:13px;color:var(--ink-60);cursor:pointer;position:relative;
+  transition:background .15s ease,color .15s ease;
+}
+.goal:hover{background:rgba(26,26,40,.04)}
+.goal.sel{
+  background:var(--paper);color:var(--ink);font-weight:500;
+  box-shadow:0 1px 3px rgba(26,26,40,.07), inset 0 0 0 1px var(--hairline);
+}
+.goal.sel::before{
+  content:"";position:absolute;left:-12px;top:9px;bottom:9px;width:3px;
+  background:var(--rasp);border-radius:0 2px 2px 0;
+}
+.fam{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;flex-shrink:0;
+  padding:2.5px 6px;border-radius:3px;color:var(--ink-60);background:var(--cream-deep);
+  border:1px solid var(--hairline-soft);
+}
+.goal.sel .fam{background:var(--rasp-08);border-color:var(--rasp-15);color:var(--rasp)}
+.goal .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;letter-spacing:-.01em}
+.pulse{
+  width:7px;height:7px;border-radius:50%;background:var(--rasp);flex-shrink:0;position:relative;
+}
+.pulse::after{
+  content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--rasp);
+  opacity:.45;animation:ping 2.2s cubic-bezier(.2,.6,.3,1) infinite;
+}
+@keyframes ping{0%{transform:scale(.5);opacity:.5}80%,100%{transform:scale(1.25);opacity:0}}
+.ws{margin-top:auto;padding-top:14px}
+.ws .goal{font-size:12.5px;padding:7px 10px}
+.badge{
+  font-family:var(--mono);font-size:9.5px;background:var(--ink);color:var(--cream);
+  border-radius:99px;padding:2px 8px;letter-spacing:.02em;
+}
+.glyph{width:15px;text-align:center;color:var(--ink-35);font-size:12px}
+
+/* ============ CANVAS ============ */
+.canvas{
+  position:relative;overflow-y:auto;padding:26px 32px 30px;
+  background:
+    radial-gradient(circle, rgba(26,26,40,.045) 1px, transparent 1.2px) 0 0/18px 18px,
+    var(--cream);
+}
+/* crop marks — the print-shop signature */
+.canvas::before,.canvas::after{
+  content:"";position:absolute;width:14px;height:14px;pointer-events:none;opacity:.5;
+}
+.canvas::before{top:14px;left:16px;border-top:1px solid var(--ink-35);border-left:1px solid var(--ink-35)}
+.canvas::after{top:14px;right:16px;border-top:1px solid var(--ink-35);border-right:1px solid var(--ink-35)}
+.crumb{
+  font-family:var(--mono);font-size:10px;color:var(--ink-35);letter-spacing:.05em;
+  margin-bottom:14px;
+}
+.crumb b{color:var(--ink-60);font-weight:500}
+.headrow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+.gtitle{
+  font-family:var(--mono);font-weight:600;font-size:23px;letter-spacing:-.035em;
+}
+.fampill{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--rasp);
+  border:1px solid var(--rasp-15);background:var(--rasp-08);
+  border-radius:99px;padding:4px 11px;position:relative;top:-3px;
+}
+.meta{font-family:var(--mono);font-size:11px;color:var(--ink-35);letter-spacing:.02em}
+.guide-line{
+  font-size:13px;color:var(--ink-60);margin:6px 0 20px;display:flex;align-items:center;gap:8px;
+}
+.guide-mark{
+  font-family:var(--mono);font-size:10px;color:var(--rasp);letter-spacing:.08em;
+  border-bottom:1px solid var(--rasp-15);padding-bottom:1px;
+}
+
+/* —— stage rail (the machined spine) —— */
+.spine{display:flex;gap:3px;margin-bottom:20px;counter-reset:stage}
+.seg{
+  flex:1;counter-increment:stage;position:relative;cursor:pointer;
+  padding:9px 10px 8px;background:var(--paper);border:1px solid var(--hairline);
+  transition:background .15s ease;
+}
+.seg:first-child{border-radius:7px 0 0 7px}
+.seg:last-child{border-radius:0 7px 7px 0}
+.seg .n{font-family:var(--mono);font-size:8.5px;color:var(--ink-35);letter-spacing:.1em;display:block}
+.seg .n::before{content:"0" counter(stage) " · "}
+.seg .s{font-family:var(--mono);font-size:11px;letter-spacing:-.01em;color:var(--ink-60);font-weight:500}
+.seg.done{background:var(--cream-deep)}
+.seg.done .s{color:var(--ink-35);}
+.seg.done .n::after{content:" ✓";color:var(--ok)}
+.seg.now{
+  background:var(--ink);border-color:var(--ink);
+}
+.seg.now .s{color:var(--cream)}
+.seg.now .n{color:rgba(245,244,240,.55)}
+.seg.now::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--rasp);
+}
+.seg:hover:not(.now){background:#FBFAF6}
+
+/* —— guide nudge —— */
+.nudge{
+  display:flex;align-items:center;gap:16px;margin-bottom:22px;
+  background:var(--paper);border:1px solid var(--hairline);border-left:3px solid var(--rasp);
+  border-radius:9px;padding:14px 18px;
+  box-shadow:0 1px 3px rgba(26,26,40,.05);
+}
+.nudge .who{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--rasp);
+  text-transform:uppercase;margin-bottom:3px}
+.nudge .do{font-weight:700;font-size:14.5px;letter-spacing:-.015em}
+.nudge .why{font-size:12.5px;color:var(--ink-60);margin-top:2px}
+.btn{
+  font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:-.01em;
+  background:var(--rasp);color:#FFF6F9;border:0;border-radius:8px;padding:10px 18px;
+  margin-left:auto;cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 8px -2px rgba(214,35,92,.5);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px -2px rgba(214,35,92,.5)}
+.btn-ghost{
+  background:transparent;color:var(--ink-60);border:1px solid var(--hairline);
+  box-shadow:none;font-weight:500;margin-left:0;
+}
+
+/* —— two-part body —— */
+.body{display:grid;grid-template-columns:1.12fr .88fr;gap:18px;align-items:start}
+.sect-h{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-35);display:flex;align-items:baseline;gap:10px;margin-bottom:10px;
+}
+.sect-h::after{content:"";flex:1;height:1px;background:var(--hairline)}
+.sect-h .k{color:var(--ink-60)}
+.panel{
+  background:var(--paper);border:1px solid var(--hairline);border-radius:10px;
+  padding:16px;box-shadow:0 1px 3px rgba(26,26,40,.04);
+}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline-soft);
+  border:1px solid var(--hairline-soft);border-radius:7px;overflow:hidden;margin-bottom:12px}
+.tile{background:var(--paper);padding:13px 10px 11px;text-align:center}
+.tile .v{font-family:var(--mono);font-weight:600;font-size:17px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tile .v.ok{color:var(--ok)} .tile .v .w{color:var(--warn);font-size:13px}
+.tile .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-35);margin-top:4px}
+.shots{display:flex;gap:8px}
+.shot{
+  flex:1;aspect-ratio:16/7;border:1px solid var(--hairline);border-radius:5px;position:relative;
+  background:
+    linear-gradient(160deg,var(--cream) 0%,var(--cream-deep) 100%);
+  overflow:hidden;
+}
+.shot::before{
+  content:"";position:absolute;inset:18% 12% auto;height:5px;border-radius:2px;background:var(--cream-shadow);
+  box-shadow:0 9px 0 var(--cream-shadow), 0 18px 0 var(--cream-shadow);
+}
+.shot i{
+  position:absolute;left:7px;bottom:5px;font-style:normal;
+  font-family:var(--mono);font-size:8.5px;color:var(--ink-35);letter-spacing:.04em;
+}
+.trail{
+  font-family:var(--mono);font-size:10px;color:var(--ink-35);margin-top:12px;
+  padding-top:10px;border-top:1px dashed var(--hairline);letter-spacing:.02em;line-height:1.7;
+}
+.trail a{color:var(--ink-60);text-decoration:none;border-bottom:1px solid var(--hairline)}
+
+/* —— work stream —— */
+.task{
+  position:relative;border:1px solid var(--hairline);border-radius:8px;
+  padding:11px 13px 11px 16px;margin-bottom:9px;background:var(--paper);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.task:hover{transform:translateY(-1px);box-shadow:0 3px 10px -4px rgba(26,26,40,.18)}
+.task::before{content:"";position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;border-radius:8px 0 0 8px}
+.task.run::before{background:var(--maker)}
+.task.queued::before{background:var(--hairline)}
+.task.you::before{background:var(--rasp)}
+.task .r1{display:flex;align-items:center;gap:9px}
+.av{
+  width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:600;border-radius:6px;
+}
+.av.maker{border:1.5px solid var(--maker);color:var(--maker);background:#fff}
+.av.checker{background:var(--checker);color:#fff;border-radius:6px}
+.av.human{background:var(--ink);color:var(--cream);border-radius:50%}
+.task .name{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:-.02em;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task.queued .name,.task.queued .sub{color:var(--ink-35)}
+.task .sub{
+  display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:10px;
+  color:var(--ink-60);margin-top:7px;letter-spacing:.01em;
+}
+.task .sub .sep{color:var(--hairline)}
+.kind{
+  margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-35);
+}
+.task.you .kind{color:var(--rasp)}
+.meter{display:inline-flex;gap:2.5px;align-items:center}
+.meter i{width:11px;height:4px;border-radius:2px;background:var(--cream-shadow)}
+.meter i.u{background:var(--warn)}
+.runbar{
+  height:2px;border-radius:2px;background:var(--cream-shadow);margin-top:9px;overflow:hidden;position:relative;
+}
+.runbar::after{
+  content:"";position:absolute;inset:0;width:38%;border-radius:2px;background:var(--maker);
+  animation:sweep 2.6s ease-in-out infinite;
+}
+@keyframes sweep{0%{transform:translateX(-40%)}55%{transform:translateX(190%)}100%{transform:translateX(190%)}}
+@media (prefers-reduced-motion:reduce){.runbar::after,.pulse::after{animation:none}}
+
+/* —— decision seal —— */
+.seal{
+  display:inline-flex;gap:9px;align-items:center;margin-top:12px;
+  font-size:11.5px;color:var(--ink-60);
+  border:1px dashed var(--ink-35);border-radius:6px;padding:7px 12px;background:var(--cream);
+}
+.seal b{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:11px;letter-spacing:-.01em}
+.lvl{font-family:var(--mono);font-size:8.5px;padding:1.5px 6px;border-radius:3px;letter-spacing:.06em}
+.lvl.l1{color:var(--ink-35);border:1px solid var(--hairline)}
+
+/* —— exec drill —— */
+.exec{margin-top:18px}
+.exec summary{
+  cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-35);
+  padding:11px 0;border-top:1px solid var(--hairline);
+}
+.exec summary::before{content:"▸";color:var(--rasp);transition:transform .15s}
+.exec[open] summary::before{transform:rotate(90deg)}
+.exec summary:hover{color:var(--ink-60)}
+.exec .k2{color:var(--ink-60)}
+
+/* ============ GUIDE RAIL (chat) ============ */
+.chat{
+  background:var(--paper);border-left:1px solid var(--hairline);
+  display:flex;flex-direction:column;min-height:0;
+}
+.chat-h{
+  padding:18px 18px 13px;border-bottom:1px solid var(--hairline-soft);
+  display:flex;align-items:center;gap:9px;
+}
+.gmark{
+  width:26px;height:26px;border-radius:7px;background:var(--rasp-08);
+  border:1px solid var(--rasp-15);color:var(--rasp);
+  display:inline-flex;align-items:center;justify-content:center;font-size:13px;
+}
+.chat-h .t{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:-.02em}
+.chat-h .s{font-family:var(--mono);font-size:9px;color:var(--ink-35);letter-spacing:.1em;text-transform:uppercase}
+.msgs{padding:16px 16px 8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:13px}
+.m{max-width:94%;font-size:12.5px;line-height:1.55}
+.m .lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-35);margin-bottom:4px}
+.m.you{align-self:flex-end;text-align:left}
+.m.you .bub{background:var(--cream);border:1px solid var(--hairline-soft);border-radius:10px 10px 3px 10px;padding:9px 12px}
+.m.guide .lab{color:var(--rasp)}
+.m.guide .bub{
+  border-left:2px solid var(--rasp-15);padding:2px 0 2px 12px;color:var(--ink);
+}
+.op{
+  font-family:var(--mono);font-size:9.5px;color:var(--rasp);background:var(--rasp-08);
+  border-radius:4px;padding:1.5px 6px;letter-spacing:.02em;white-space:nowrap;
+}
+.acard{
+  margin-top:9px;border:1px solid var(--hairline);border-radius:8px;background:var(--cream);
+  padding:10px 12px;font-size:11.5px;
+}
+.acard .at{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:-.01em;margin-bottom:3px}
+.acard .am{color:var(--ink-60);font-size:11px}
+.acard .pin{
+  display:inline-block;margin-top:8px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.08em;color:var(--rasp);cursor:pointer;border-bottom:1px solid var(--rasp-15);
+  text-transform:uppercase;
+}
+.inp{
+  margin:12px 14px 16px;display:flex;align-items:center;gap:9px;
+  border:1px solid var(--hairline);border-radius:9px;padding:11px 13px;
+  font-size:12.5px;color:var(--ink-35);background:var(--cream);
+}
+.inp .key{
+  margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--ink-35);
+  border:1px solid var(--hairline);border-radius:4px;padding:2px 6px;background:var(--paper);
+}
+</style></head>
+<body>
+
+<div class="shell">
+
+  <!-- ════ GOAL RAIL ════ -->
+  <nav class="rail">
+    <div class="brand rise">die<em>cast</em></div>
+    <div class="tagline rise">cast to spec · no drift</div>
+
+    <div class="rail-h rise" style="animation-delay:.05s">Goals</div>
+    <div class="goal sel rise" style="animation-delay:.08s">
+      <span class="fam">FEAT</span><span class="t">Add RBAC to checkout</span><span class="pulse" title="needs you"></span>
+    </div>
+    <div class="goal rise" style="animation-delay:.11s">
+      <span class="fam">BUG</span><span class="t">Checkout 500s on coupon</span>
+    </div>
+    <div class="goal rise" style="animation-delay:.14s">
+      <span class="fam">DEBUG</span><span class="t">Intermittent auth timeouts</span>
+    </div>
+    <div class="goal rise" style="animation-delay:.17s">
+      <span class="fam">PRD</span><span class="t">PRD · Team workspaces</span>
+    </div>
+    <div class="goal rise" style="animation-delay:.2s">
+      <span class="fam">SPIKE</span><span class="t">SQLite for event store?</span>
+    </div>
+
+    <div class="ws rise" style="animation-delay:.24s">
+      <div class="rail-h">Workspace</div>
+      <div class="goal"><span class="glyph">▦</span><span class="t">Board</span><span class="badge">@you · 1</span></div>
+      <div class="goal"><span class="glyph">⬡</span><span class="t">Marketplace</span></div>
+      <div class="goal"><span class="glyph">⚙</span><span class="t">Agent ops</span></div>
+    </div>
+  </nav>
+
+  <!-- ════ ADAPTIVE CANVAS ════ -->
+  <main class="canvas">
+    <div class="crumb rise">northwind <span style="color:var(--hairline)">/</span> goals <span style="color:var(--hairline)">/</span> <b>add-rbac-to-checkout</b></div>
+
+    <div class="headrow rise" style="animation-delay:.05s">
+      <span class="gtitle">Add RBAC to checkout</span>
+      <span class="fampill">FEATURE</span>
+      <span class="meta">execution · 2/5 tickets · day 3</span>
+    </div>
+    <div class="guide-line rise" style="animation-delay:.08s">
+      <span class="guide-mark">◈ GUIDE</span>
+      Path composed for a feature build — 5 stages. One thing needs you.
+    </div>
+
+    <div class="spine rise" style="animation-delay:.12s">
+      <div class="seg done"><span class="n"></span><span class="s">Requirements</span></div>
+      <div class="seg done"><span class="n"></span><span class="s">Exploration</span></div>
+      <div class="seg done"><span class="n"></span><span class="s">Plan</span></div>
+      <div class="seg now"><span class="n"></span><span class="s">Execution</span></div>
+      <div class="seg"><span class="n"></span><span class="s">Ship</span></div>
+    </div>
+
+    <div class="nudge rise" style="animation-delay:.16s">
+      <div>
+        <div class="who">◈ Guide · next step</div>
+        <div class="do">Review CAST-412’s PR</div>
+        <div class="why">checker flagged R02 (missing FK index) — your review unblocks two queued tasks</div>
+      </div>
+      <button class="btn">Review now</button>
+      <button class="btn btn-ghost">Later</button>
+    </div>
+
+    <div class="body">
+      <!-- Part 1 · stage artifacts -->
+      <section class="rise" style="animation-delay:.2s">
+        <div class="sect-h"><span class="k">Execution</span> artifacts</div>
+        <div class="panel">
+          <div class="tiles">
+            <div class="tile"><div class="v ok">47<span style="color:var(--ink-35)">/47</span></div><div class="l">tests green</div></div>
+            <div class="tile"><div class="v">2/3 <span class="w">⚠</span></div><div class="l">checker rules</div></div>
+            <div class="tile"><div class="v" style="font-size:13px;line-height:21px">PR #2341</div><div class="l">artifact</div></div>
+          </div>
+          <div class="shots">
+            <div class="shot"><i>before.png</i></div>
+            <div class="shot"><i>after.png</i></div>
+            <div class="shot"><i>admin-view.png</i></div>
+          </div>
+          <div class="trail">
+            ◂ <a href="#">plan.collab.md</a> · <a href="#">6 playbooks</a> · <a href="#">requirements v0.3</a>
+            — every stage keeps its artifacts
+          </div>
+        </div>
+      </section>
+
+      <!-- Part 2 · work happening -->
+      <section class="rise" style="animation-delay:.24s">
+        <div class="sect-h"><span class="k">In flight</span> 2 auto · 1 yours</div>
+
+        <div class="task run">
+          <div class="r1">
+            <span class="av maker">CO</span>
+            <span class="name">CAST-412 · invoice CRUD stack</span>
+            <span class="kind">auto</span>
+          </div>
+          <div class="sub">crud-orchestrator <span class="sep">|</span> iter 2
+            <span class="sep">|</span> rework <span class="meter"><i class="u"></i><i></i><i></i></span></div>
+          <div class="runbar"></div>
+        </div>
+
+        <div class="task queued">
+          <div class="r1">
+            <span class="av maker" style="border-color:var(--ink-35);color:var(--ink-35)">EC</span>
+            <span class="name">CAST-413 · role entity schema</span>
+            <span class="kind">auto</span>
+          </div>
+          <div class="sub">entity-creation <span class="sep">|</span> queued behind 412</div>
+        </div>
+
+        <div class="task you">
+          <div class="r1">
+            <span class="av human">SJ</span>
+            <span class="name">Review PR #2341</span>
+            <span class="kind">yours</span>
+          </div>
+          <div class="sub">@you <span class="sep">|</span> blocks CAST-413 <span class="sep">|</span> est 10 min</div>
+        </div>
+
+        <div class="seal">⚖ <b>classification: feature → confirmed</b> · 09:18 <span class="lvl l1">L1</span></div>
+      </section>
+    </div>
+
+    <details class="exec rise" style="animation-delay:.28s">
+      <summary><span class="k2">Execution detail</span> — 3 runs · dispatch tree · maker-checker</summary>
+    </details>
+  </main>
+
+  <!-- ════ GUIDE RAIL ════ -->
+  <aside class="chat">
+    <div class="chat-h rise" style="animation-delay:.1s">
+      <span class="gmark">◈</span>
+      <div><div class="t">Guide</div><div class="s">add-rbac-to-checkout</div></div>
+    </div>
+    <div class="msgs">
+      <div class="m you rise" style="animation-delay:.18s">
+        <div class="lab">you</div>
+        <div class="bub">how risky is the roles migration?</div>
+      </div>
+      <div class="m guide rise" style="animation-delay:.24s">
+        <div class="lab">◈ guide</div>
+        <div class="bub">It drops the legacy <span style="font-family:var(--mono);font-size:11px">roles</span> column — irreversible on prod, so I classified it <b>L3</b> and paused the run. Three options framed, evidence attached.
+          <div class="acard">
+            <div class="at">⚖ Escalation · roles column migration</div>
+            <div class="am">3 pre-framed options · evidence pack · expires 1h</div>
+            <span class="pin">📌 pin to canvas</span>
+          </div>
+        </div>
+      </div>
+      <div class="m you rise" style="animation-delay:.3s">
+        <div class="lab">you</div>
+        <div class="bub">actually this whole goal might be a bug, not a feature</div>
+      </div>
+      <div class="m guide rise" style="animation-delay:.36s">
+        <div class="lab">◈ guide</div>
+        <div class="bub">Reclassifying — the canvas will reshape to the debug loop and I’ll record the pivot. <span class="op">morph:debug</span></div>
+      </div>
+    </div>
+    <div class="inp rise" style="animation-delay:.4s">Steer, ask, or override the Guide… <span class="key">⏎</span></div>
+  </aside>
+
+</div>
+</body></html>

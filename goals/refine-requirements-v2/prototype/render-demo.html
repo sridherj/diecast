@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<!-- THROWAWAY Phase-0 spike. Not production. Demonstrates: structured render (Goal Card + L1/L2/L3 +
+     progressive disclosure + WHAT/HOW) and the comment loop (select -> comment -> quote-anchored
+     highlight -> resolve) on a plain stack: vanilla JS, no framework, no libraries. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refine Requirements v2 — render + comment spike</title>
+<style>
+  :root{
+    --bg:#fbfbfd; --surface:#ffffff; --ink:#1b1f27; --ink-soft:#3c424d; --muted:#6b7280;
+    --line:#e6e8ee; --accent:#3257f0; --accent-soft:#eef1fe; --accent-ink:#1f3bb3;
+    --in:#0f9d6b; --in-soft:#e9f8f1; --out:#b23b3b; --out-soft:#fdecec;
+    --warn:#b4690e; --comment:#f5b301; --comment-soft:#fff7df; --resolved:#9aa1ab;
+    --radius:12px; --shadow:0 1px 2px rgba(20,24,40,.05),0 8px 24px rgba(20,24,40,.06);
+    --maxw:820px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 80px;display:grid;
+    grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start;}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr}.rail{position:static!important}}
+  main{max-width:var(--maxw)}
+
+  /* ---- top meta row ---- */
+  .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .pill{display:inline-flex;align-items:center;gap:7px;background:var(--accent-soft);
+    color:var(--accent-ink);font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px;
+    border:1px solid #d7defb;cursor:default}
+  .pill .dim{color:#5566c9;font-weight:500}
+  .chip{font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);
+    padding:5px 10px;border-radius:999px}
+  .chip b{color:var(--warn)}
+
+  /* ---- goal card (the SC-001 surface) ---- */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:26px 28px;margin-bottom:22px}
+  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;margin-bottom:10px}
+  /* L1 = the job statement; survives a 90% cut */
+  .l1{font-size:26px;line-height:1.28;font-weight:700;letter-spacing:-.01em;margin:0 0 20px}
+  .l1 .hl{background:linear-gradient(transparent 62%,var(--accent-soft) 0)}
+  /* L2 = outcomes + scope */
+  .l2-h{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin:0 0 10px}
+  ul.l2{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
+  ul.l2 li{position:relative;padding-left:24px;font-size:15.5px;color:var(--ink)}
+  ul.l2 li::before{content:"";position:absolute;left:4px;top:9px;width:8px;height:8px;border-radius:2px;
+    background:var(--accent)}
+  ul.l2 li b{font-weight:650}
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.scope{grid-template-columns:1fr}}
+  .scope .box{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .scope .box.in{background:var(--in-soft);border-color:#cdeede}
+  .scope .box.out{background:var(--out-soft);border-color:#f5d4d4}
+  .scope h4{margin:0 0 8px;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  .scope.in h4,.box.in h4{color:var(--in)} .box.out h4{color:var(--out)}
+  .scope ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-soft)}
+  .scope li{margin:4px 0}
+
+  /* ---- collapsible depth (L3) ---- */
+  details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:12px 0;
+    overflow:hidden}
+  details[open]{box-shadow:var(--shadow)}
+  summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:14.5px;
+    display:flex;align-items:center;gap:10px;color:var(--ink)}
+  summary::-webkit-details-marker{display:none}
+  summary .tw{transition:transform .15s;color:var(--muted)}
+  details[open] summary .tw{transform:rotate(90deg)}
+  summary .count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500}
+  .body{padding:4px 18px 18px;border-top:1px solid var(--line)}
+  .us{padding:12px 0;border-bottom:1px dashed var(--line)}
+  .us:last-child{border-bottom:none}
+  .us .t{font-weight:650;font-size:14.5px;margin-bottom:3px}
+  .us .d{font-size:13.5px;color:var(--ink-soft)}
+  .us .tag{font-size:11px;color:var(--accent-ink);background:var(--accent-soft);border-radius:6px;
+    padding:1px 7px;margin-left:6px;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}
+  td code{background:#f2f3f7;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--accent-ink)}
+
+  /* ---- version toggle + diff view ---- */
+  .vbar{display:flex;margin:0 0 16px}
+  .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:3px;gap:2px}
+  .segbtn{font:inherit;font-size:13px;font-weight:600;border:none;background:none;color:var(--muted);
+    padding:6px 15px;border-radius:999px;cursor:pointer}
+  .segbtn.active{background:var(--accent);color:#fff}
+  .summary{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px}
+  .diffmode .summary{display:block;animation:slide .16s ease}
+  .sum-h{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:12px;
+    flex-wrap:wrap}
+  .sum-stat i{font-style:normal;font-size:12px;font-weight:600;margin-right:10px}
+  .sum-stat .add{color:var(--in)} .sum-stat .mod{color:var(--warn)} .sum-stat .rem{color:var(--out)}
+  .sum-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .sum-list li{font-size:13px;cursor:pointer;padding:8px 11px;border:1px solid var(--line);
+    border-radius:8px;display:flex;gap:9px;align-items:flex-start;color:var(--ink-soft)}
+  .sum-list li:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .sum-list code{background:#f2f3f7;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--accent-ink)}
+  .badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;
+    border-radius:5px;flex:none;margin-top:1px}
+  .badge.add{background:var(--in-soft);color:var(--in)} .badge.mod{background:#fcefd6;color:var(--warn)}
+  .badge.rem{background:var(--out-soft);color:var(--out)}
+  /* tracked changes — only visible in diff mode */
+  tr.diff-removed{display:none}
+  .diffmode tr.diff-removed{display:table-row}
+  .diffmode tr.diff-removed td{background:var(--out-soft);color:var(--out);text-decoration:line-through}
+  .diffmode tr.diff-added td{background:var(--in-soft)}
+  .diffmode tr.diff-added code{background:#cdeede}
+  .diffmode tr.diff-modified td{background:#fdf6e9}
+  .was{display:none}
+  .diffmode .was{display:inline;color:var(--out);text-decoration:line-through;margin-right:6px}
+  .rowflash td{background:var(--accent-soft)!important;transition:background .25s}
+
+  /* ---- directional (HOW) — visibly tentative ---- */
+  .directional{margin-top:26px;border-left:3px solid #e3d28a;background:#fffdf4;border-radius:0 10px 10px 0;
+    padding:16px 20px}
+  .directional h3{margin:0 0 4px;font-size:14px;color:var(--warn);font-weight:700}
+  .directional .sub{font-size:12px;color:#9a7b2e;font-style:italic;margin-bottom:10px}
+  .directional ul{margin:0;padding-left:18px;font-size:13.5px;color:#5f5126}
+  .directional li{margin:5px 0}
+
+  /* ---- selection highlight + comment marks ---- */
+  .commentable ::selection{background:var(--comment-soft)}
+  mark.cmt{background:var(--comment-soft);border-bottom:2px solid var(--comment);cursor:pointer;
+    border-radius:2px;padding:0 1px}
+  mark.cmt.resolved{background:#f1f2f4;border-bottom:2px solid var(--resolved);color:var(--resolved)}
+  mark.cmt.active{background:#ffe9a8}
+
+  /* ---- subtle floating add-comment affordance (Google-Docs style) ---- */
+  #pop{position:absolute;z-index:50;display:none;transform:translate(-50%,-128%)}
+  #pop button{background:var(--surface);border:1px solid var(--line);color:var(--accent-ink);
+    font:inherit;font-size:12.5px;font-weight:600;padding:6px 11px;cursor:pointer;display:flex;
+    align-items:center;gap:6px;border-radius:999px;box-shadow:var(--shadow);transition:background .12s}
+  #pop button:hover{background:var(--accent-soft);border-color:#cdd6fb}
+
+  /* ---- inline composer floats right under the selected text ---- */
+  #fcomposer{position:absolute;z-index:60;width:340px;max-width:92vw;display:none}
+  .composer{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:12px 13px;
+    margin-bottom:10px;box-shadow:0 6px 28px rgba(20,24,40,.16);animation:slide .14s ease}
+  @keyframes slide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .composer .quote{border-left:3px solid var(--comment);padding-left:8px;color:var(--muted);
+    font-style:italic;font-size:12px;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden}
+  .composer textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+    font:inherit;font-size:13px;resize:vertical;min-height:56px;outline:none;color:var(--ink)}
+  .composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .composer .row{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:9px}
+  .composer .hintk{margin-right:auto;font-size:11px;color:var(--muted)}
+  .composer .row button{font:inherit;font-size:12.5px;font-weight:600;border-radius:7px;padding:6px 14px;
+    cursor:pointer}
+  .composer .cancel{background:none;border:none;color:var(--muted)}
+  .composer .cancel:hover{color:var(--ink)}
+  .composer .submit{background:var(--accent);border:1px solid var(--accent);color:#fff}
+  .composer .submit:hover{background:var(--accent-ink)}
+  .composer .submit:disabled{opacity:.45;cursor:default}
+
+  /* ---- comments rail ---- */
+  .rail{position:sticky;top:28px}
+  .rail h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+    margin:6px 0 12px;display:flex;align-items:center;gap:8px}
+  .rail h2 .n{background:var(--comment);color:#3a2c00;border-radius:999px;font-size:11px;font-weight:700;
+    padding:1px 8px}
+  .empty{font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);
+    border-radius:10px;padding:18px;text-align:center}
+  .cmt-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 13px;
+    margin-bottom:10px;font-size:13px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .12s}
+  .cmt-card:hover{border-color:var(--comment)}
+  .cmt-card.resolved{opacity:.6}
+  .cmt-card .quote{border-left:3px solid var(--comment);padding-left:8px;color:var(--muted);
+    font-style:italic;font-size:12px;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden}
+  .cmt-card .who{font-weight:650;font-size:12px;margin-bottom:2px}
+  .cmt-card .who .kind{font-weight:500;color:var(--muted)}
+  .cmt-card .txt{color:var(--ink)}
+  .cmt-card .acts{margin-top:8px;display:flex;gap:8px}
+  .cmt-card .acts button{font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--line);
+    background:var(--surface);border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--ink-soft)}
+  .cmt-card .acts button:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .hint{font-size:12px;color:var(--muted);background:var(--accent-soft);border:1px solid #d7defb;
+    border-radius:8px;padding:9px 12px;margin-bottom:16px;display:flex;gap:8px;align-items:center}
+  .footer-note{margin-top:30px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);
+    padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="commentable" id="doc">
+    <div class="hint">✨ <span>This is a live spike — <b>select any text</b> in the document to leave a comment. Click a highlight or a card to focus it. Try the collapsible sections too.</span></div>
+
+    <div class="meta">
+      <span class="pill">🚀 New initiative <span class="dim">· PRD</span></span>
+      <span class="chip">confidence <b style="color:var(--in)">0.88</b></span>
+      <span class="chip">v3 · <b>2 open comments</b></span>
+      <span class="chip">routed → <code style="font-size:11px">new-initiative (stub)</code></span>
+    </div>
+
+    <div class="vbar">
+      <div class="seg">
+        <button class="segbtn active" id="vCurrent">Current (v3)</button>
+        <button class="segbtn" id="vDiff">Changes since v2</button>
+      </div>
+    </div>
+    <div class="summary" id="summary">
+      <div class="sum-h">What changed in <b>v3</b>
+        <span class="sum-stat"><i class="add">+1 added</i><i class="mod">~1 modified</i><i class="rem">−1 removed</i></span></div>
+      <ul class="sum-list">
+        <li data-go="fr021"><span class="badge add">Added</span><span><code>FR-021</code> — comments re-anchor by quoted text across versions; unfindable quotes surface as <em>orphaned</em>.</span></li>
+        <li data-go="fr016"><span class="badge mod">Modified</span><span><code>FR-016</code> — router now resolves from the goal's current classification <em>without re-refinement</em> (reclassify from any phase).</span></li>
+        <li data-go="fr008"><span class="badge rem">Removed</span><span><code>FR-008</code> — per-element stable identifiers (dropped: files-canonical + thin spine, no element IDs).</span></li>
+      </ul>
+    </div>
+
+    <section class="card">
+      <div class="eyebrow">The job</div>
+      <h1 class="l1">Turn requirements refinement into a <span class="hl">workflow-aware, HTML-first, living</span> system — graspable in two minutes and iterated through inline comments, not markdown edits.</h1>
+
+      <div class="l2-h">Outcomes</div>
+      <ul class="l2">
+        <li>The refined output <b>leads with the WHAT</b>; implementation ideas are confined to a non-binding "Directional" section.</li>
+        <li>Each goal is <b>classified into a work family</b> that shapes the document and routes it into the right downstream workflow.</li>
+        <li>Requirements render as a <b>designed HTML document</b> — L1/L2/L3 hierarchy, progressive disclosure, a classification pill.</li>
+        <li>Inline comments drive new versions, and requirements stay the <b>living source of truth</b> via downstream round-trip write-back.</li>
+      </ul>
+
+      <div class="scope">
+        <div class="box in">
+          <h4>✓ In scope</h4>
+          <ul>
+            <li>Classifier agent + HTML render + comment/version engine</li>
+            <li>Phase-agnostic router <em>seam</em> + named stubs</li>
+            <li>Round-trip write-back <em>receiver</em> (simulated emitter)</li>
+          </ul>
+        </div>
+        <div class="box out">
+          <h4>✕ Out of scope</h4>
+          <ul>
+            <li>Building the family-specific downstream pipelines</li>
+            <li>Multi-user realtime collaborative editing</li>
+            <li>Rewriting downstream agents (planner, task-suggester)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <details>
+      <summary><span class="tw">▶</span> User stories <span class="count">7 · tap to expand</span></summary>
+      <div class="body">
+        <div class="us"><div class="t">US1 — WHAT/HOW separation <span class="tag">P1</span></div><div class="d">See the outcome cleanly separated from directional implementation ideas, so intent validates fast without implementation noise.</div></div>
+        <div class="us"><div class="t">US2 — Workflow-type classification <span class="tag">P1</span></div><div class="d">Detect what kind of work the goal is and shape the document to that family — bug-fix around symptom/repro, initiative around PRD architecture.</div></div>
+        <div class="us"><div class="t">US3 — HTML-first human render <span class="tag">P1</span></div><div class="d">Consume requirements as a designed HTML doc with progressive disclosure, grasping the WHAT in ~2 minutes.</div></div>
+        <div class="us"><div class="t">US4 — Inline comments & iteration <span class="tag">P2</span></div><div class="d">Leave comments anchored to specific content; unresolved comments drive v2/v3 with a change summary.</div></div>
+        <div class="us"><div class="t">US6 — Phase-agnostic routing <span class="tag">P1</span></div><div class="d">Hand the goal into the right downstream workflow, invokable from any phase without re-running refinement.</div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="tw">▶</span> Functional requirements <span class="count">20 · tap to expand</span></summary>
+      <div class="body">
+        <table>
+          <tr><th>ID</th><th>Requirement</th></tr>
+          <tr><td><code>FR-001</code></td><td>Lead with WHAT; confine HOW to a marked non-binding "Directional ideas" section.</td></tr>
+          <tr><td><code>FR-002</code></td><td>Classify each goal into a workflow family and surface it at the top of the document.</td></tr>
+          <tr><td><code>FR-005</code></td><td>Produce an HTML render as the primary human-consumption artifact.</td></tr>
+          <tr><td><code>FR-007</code></td><td>Continue producing the spec-kit markdown render consumed by downstream agents.</td></tr>
+          <tr id="fr008" class="diff-removed"><td><code>FR-008</code></td><td>Requirement elements shall carry stable per-element identifiers usable as comment anchors.</td></tr>
+          <tr id="fr016" class="diff-modified"><td><code>FR-016</code></td><td><span class="was">The router is invokable from any phase.</span><span class="now">The router is invokable from any phase <b>and resolves from the goal's current classification without re-refinement.</b></span></td></tr>
+          <tr id="fr021" class="diff-added"><td><code>FR-021</code></td><td>Comments shall re-anchor by quoted text across versions; unfindable quotes surface as <em>orphaned</em>, never silently dropped.</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary><span class="tw">▶</span> Success criteria <span class="count">6 · tap to expand</span></summary>
+      <div class="body">
+        <table>
+          <tr><th>ID</th><th>Criterion</th></tr>
+          <tr><td><code>SC-001</code></td><td>A reader states the goal's WHAT within 2 minutes of opening the HTML render.</td></tr>
+          <tr><td><code>SC-004</code></td><td>Downstream agents work unchanged against v2 output.</td></tr>
+          <tr><td><code>SC-006</code></td><td>A downstream-originated change appears in the requirements file and notifies the user.</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <div class="directional">
+      <h3>Directional ideas · non-binding HOW</h3>
+      <div class="sub">Subject to change by exploration — not decided requirements.</div>
+      <ul>
+        <li>Files stay canonical with a <b>thin DB sidecar</b> (versions, comments, routing) — no per-element IDs.</li>
+        <li>Comments store the <b>quoted text</b> and a Claude subagent <b>re-anchors</b> them after edits (this very demo).</li>
+        <li>Reuse the <b>cast-preso visual toolkit</b> tokens + L1/L2/L3 classes for the render.</li>
+      </ul>
+    </div>
+
+    <div class="footer-note">Phase-0 throwaway spike · fixture = this goal's own requirements · vanilla JS, no framework, no libraries (<code>package.json</code> stays empty).</div>
+  </main>
+
+  <aside class="rail">
+    <h2>💬 Comments <span class="n" id="cnt">0</span></h2>
+    <div id="comments"><div class="empty">No comments yet.<br>Select text in the document to add one.</div></div>
+  </aside>
+</div>
+
+<div id="pop"><button id="addBtn">💬 Comment</button></div>
+<div id="fcomposer"></div>
+
+<script>
+// ---- the whole annotation loop: ~70 lines of vanilla JS, no libs ----
+const doc=document.getElementById('doc'), pop=document.getElementById('pop'),
+      list=document.getElementById('comments'), cnt=document.getElementById('cnt');
+let pending=null, comments=[], seq=0;
+
+function hidePop(){pop.style.display='none';}
+
+doc.addEventListener('mouseup',e=>{
+  if(document.body.classList.contains('diffmode')){hidePop();return;}  // no commenting while viewing a diff
+  const sel=window.getSelection();
+  const text=sel.toString().trim();
+  if(!text||text.length<3){hidePop();return;}
+  const r=sel.getRangeAt(0);
+  pending={range:r.cloneRange(),quote:text};
+  const rect=r.getBoundingClientRect();
+  // pill: above the selection if there's room near the top, else below
+  const pillAbove = rect.top > 46;
+  pop.style.left=(rect.left+rect.width/2+window.scrollX)+'px';
+  pop.style.top=((pillAbove?rect.top:rect.bottom)+window.scrollY)+'px';
+  pop.style.transform=pillAbove?'translate(-50%,-128%)':'translate(-50%,28%)';
+  pop.style.display='block';
+});
+document.addEventListener('mousedown',e=>{if(!pop.contains(e.target))hidePop();});
+
+let pendingMark=null;
+document.getElementById('addBtn').addEventListener('click',()=>{
+  if(!pending)return;
+  hidePop();
+  // highlight the selection immediately (pending state) — like Google Docs' yellow-on-select
+  pendingMark=null;
+  try{const m=document.createElement('mark');m.className='cmt active';m.id='m_pending';
+    pending.range.surroundContents(m);pendingMark=m;}catch(e){/* spans elements — still store by quote */}
+  window.getSelection().removeAllRanges();
+  openComposer(pending.quote);
+});
+
+const fc=document.getElementById('fcomposer');
+function openComposer(quote){
+  fc.innerHTML=`<div class="composer">
+    <div class="quote">"${esc(quote)}"</div>
+    <textarea id="ctext" placeholder="Add a comment…"></textarea>
+    <div class="row">
+      <span class="hintk">⌘/Ctrl + ↵ to send</span>
+      <button class="cancel" id="ccancel">Cancel</button>
+      <button class="submit" id="csubmit" disabled>Comment</button>
+    </div></div>`;
+  fc.style.display='block';
+  positionFc();
+  const ta=document.getElementById('ctext'),sub=document.getElementById('csubmit');
+  ta.focus();
+  ta.addEventListener('input',()=>{sub.disabled=!ta.value.trim();});
+  ta.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&ta.value.trim()){finalize(quote,ta.value.trim());}
+    else if(e.key==='Escape'){cancelComposer();}
+  });
+  sub.addEventListener('click',()=>{if(ta.value.trim())finalize(quote,ta.value.trim());});
+  document.getElementById('ccancel').addEventListener('click',cancelComposer);
+}
+// anchor the floating composer to the selection — below by default, flip above when cramped
+function positionFc(){
+  const ref=pendingMark||(pending&&pending.range);
+  if(!ref)return;
+  const rect=ref.getBoundingClientRect();
+  const w=fc.offsetWidth||340, h=fc.offsetHeight||160, gap=8;
+  let left=rect.left+window.scrollX;
+  const minL=window.scrollX+10, maxL=window.scrollX+document.documentElement.clientWidth-w-10;
+  left=Math.max(minL,Math.min(left,maxL));
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const placeBelow = spaceBelow >= h+gap || spaceBelow >= rect.top; // prefer below; flip up only if cramped
+  fc.style.top=((placeBelow ? rect.bottom+gap : rect.top-h-gap)+window.scrollY)+'px';
+  fc.style.left=left+'px';
+}
+function closeFc(){fc.style.display='none';fc.innerHTML='';}
+function finalize(quote,body){
+  const id='c'+(++seq);
+  if(pendingMark){pendingMark.classList.remove('active');pendingMark.id='m_'+id;pendingMark.dataset.cid=id;}
+  comments.push({id,quote,body,author:'you',kind:'human',state:'open'});
+  pendingMark=null;pending=null;closeFc();render();flash(id);
+}
+function cancelComposer(){
+  if(pendingMark){pendingMark.replaceWith(document.createTextNode(pendingMark.textContent));}
+  pendingMark=null;pending=null;closeFc();
+}
+
+function render(){
+  const open=comments.filter(c=>c.state==='open').length;
+  cnt.textContent=open;
+  document.querySelectorAll('.chip b').forEach(b=>{if(b.textContent.includes('open'))b.textContent=open+' open comments';});
+  if(!comments.length){list.innerHTML='<div class="empty">No comments yet.<br>Select text in the document to add one.</div>';return;}
+  list.innerHTML=comments.map(c=>`
+    <div class="cmt-card ${c.state}" data-cid="${c.id}">
+      <div class="quote">"${esc(c.quote)}"</div>
+      <div class="who">${c.author} <span class="kind">· ${c.kind}</span></div>
+      <div class="txt">${esc(c.body)}</div>
+      <div class="acts">
+        <button data-act="toggle" data-cid="${c.id}">${c.state==='open'?'✓ Resolve':'↺ Reopen'}</button>
+      </div>
+    </div>`).join('');
+}
+function esc(s){return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+
+// focus a comment from card or mark
+list.addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-act="toggle"]');
+  if(btn){const c=comments.find(x=>x.id===btn.dataset.cid);c.state=c.state==='open'?'resolved':'open';
+    const m=document.getElementById('m_'+c.id);if(m)m.classList.toggle('resolved',c.state==='resolved');render();return;}
+  const card=e.target.closest('.cmt-card');if(card)flash(card.dataset.cid);
+});
+doc.addEventListener('click',e=>{const m=e.target.closest('mark.cmt');if(m)flash(m.dataset.cid);});
+function flash(cid){const m=document.getElementById('m_'+cid);if(m){m.classList.add('active');
+  m.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>m.classList.remove('active'),900);}}
+
+// seed with two example comments so the "v1 · 2 open" chip is real
+function seed(q,b,who,kind){const id='c'+(++seq);
+  // find + wrap first occurrence of the quote
+  const w=findText(doc,q);if(w){const m=document.createElement('mark');m.className='cmt';m.id='m_'+id;m.dataset.cid=id;
+    w.range.surroundContents(m);}
+  comments.push({id,quote:q,body:b,author:who,kind,state:'open'});}
+function findText(root,q){const it=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+  while(n=it.nextNode()){const i=n.nodeValue.indexOf(q);if(i>=0){const r=document.createRange();
+    r.setStart(n,i);r.setEnd(n,i+q.length);return{range:r};}}return null;}
+seed('leads with the WHAT','Love this — but can we show a tiny example of a HOW item that got moved here?','Sara','human');
+seed('classified into a work family','Confirm the ~8 family set is locked before we build recipes.','cast-goal-classifier','agent');
+render();
+
+// ---- version diff view ----
+function setMode(diff){
+  document.body.classList.toggle('diffmode',diff);
+  document.getElementById('vDiff').classList.toggle('active',diff);
+  document.getElementById('vCurrent').classList.toggle('active',!diff);
+  if(diff)document.querySelectorAll('details').forEach(d=>d.open=true);  // reveal inline changes
+  hidePop();
+}
+document.getElementById('vDiff').addEventListener('click',()=>setMode(true));
+document.getElementById('vCurrent').addEventListener('click',()=>setMode(false));
+document.querySelectorAll('.sum-list li').forEach(li=>li.addEventListener('click',()=>{
+  const el=document.getElementById(li.dataset.go);if(!el)return;
+  const d=el.closest('details');if(d)d.open=true;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.classList.add('rowflash');setTimeout(()=>el.classList.remove('rowflash'),1100);
+}));
+</script>
+</body>
+</html>

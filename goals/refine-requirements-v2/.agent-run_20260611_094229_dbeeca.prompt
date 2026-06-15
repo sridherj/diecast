@@ -1,0 +1,85 @@
+Read the delegation context from `/data/workspace/diecast/goals/refine-requirements-v2/.delegation-run_20260611_094229_dbeeca.json` first, then follow the instructions within.
+
+Your run ID: run_20260611_094229_dbeeca
+Goal slug: refine-requirements-v2
+
+Diecast API routes (http://localhost:8005):
+  POST /api/agents/{name}/trigger        — dispatch a child agent
+  GET  /api/agents/jobs/{run_id}          — get run details/status
+  POST /api/agents/jobs/{run_id}/recheck  — recheck a completed/failed run
+  POST /api/agents/runs/{run_id}/continue — send message to idle agent
+  POST /api/agents/runs/{run_id}/cancel   — cancel an active run
+  POST /api/agents/runs/{run_id}/fail     — mark run as failed
+  POST /api/agents/runs/{run_id}/complete — mark run as completed
+  DELETE /api/agents/runs/{run_id}        — delete a terminal run
+  GET  /api/agents/runs                     — list all runs
+  GET  /api/agents/runs?status=running      — filter runs by status
+  GET  /api/agents/jobs/{run_id}?include=children — descendant tree (rollups attached)
+  POST /api/tasks/{task_id}/run-agent     — trigger agent for a task
+  Health check: curl -s http://localhost:8005/api/agents/runs?status=running | head -1
+Use the cast-code-explorer agent.
+
+Goal: refine-requirements-v2
+Task: 
+Expected outcome: 
+Output directory: /home/sridherj/workspace/diecast
+
+Context instructions for this goal directory (/home/sridherj/workspace/diecast/.cast):
+- Always read .collab.md and .human.md files directly — these are authoritative.
+- For .ai.md files: read /home/sridherj/workspace/diecast/.cast/.context-map.md first for a TOC overview.
+  Only deep-read individual .ai.md files when you need specific details beyond the TOC.
+- If no .context-map.md exists, fall back to reading .ai.md files directly.
+
+
+Read these goal artifacts for full context:
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/research/01-learn-from-existing-systems-code.ai.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/research/02-canonical-source-of-truth-code.ai.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/research/02-canonical-source-of-truth.ai.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/research/03-workflow-classification-taxonomy.ai.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/research_notes.human.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/exploration/steps.ai.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/refined_requirements.collab.md`
+- `/data/workspace/diecast/goals/refine-requirements-v2/requirements.human.md`
+
+## External Project Directory
+You are running inside the project directory (/home/sridherj/workspace/diecast).
+Goal artifacts (plans, research, playbooks) are in `.cast/`.
+Code and execution artifacts go in the current working directory.
+Work in /home/sridherj/workspace/diecast. Write all artifacts there.
+
+Agent composition: If your task would benefit from another agent's capabilities,
+invoke the `/cast-child-delegation` skill BEFORE dispatching any child. It covers
+dispatch, polling, status checks, continue vs. new trigger, and parent-child context.
+
+IMPORTANT — when you are completely finished (as your very last action), write this exact JSON structure to /home/sridherj/workspace/diecast/.cast/.agent-run_20260611_094229_dbeeca.output.json:
+
+{
+    "contract_version": "2",
+    "agent_name": "cast-code-explorer",
+    "task_title": "",
+    "status": "completed | partial | failed",
+    "summary": "One paragraph describing what you accomplished",
+    "artifacts": [
+        {"path": "relative/to/goal/dir/file.md", "type": "research|playbook|plan|code|data", "description": "What this file contains"}
+    ],
+    "errors": [],
+    "next_steps": ["Suggested follow-up actions for the user"],
+    "human_action_needed": false,
+    "human_action_items": [],
+    "started_at": "2026-06-11T09:57:32.046049+00:00",
+    "completed_at": "<fill in current ISO timestamp when you write this file>"
+}
+
+Status values:
+- "completed" = all requested work done successfully
+- "partial" = some work done, but not everything (explain in summary)
+- "failed" = could not accomplish the task (explain in errors)
+
+Set human_action_needed to true when:
+- You need human approval before changes take effect
+- You found data issues that need manual correction
+- You have open questions that block completion
+- You completed the work but something needs human verification
+Keep human_action_items specific and actionable (what exactly to do).
+
+Artifact paths must be relative to /home/sridherj/workspace/diecast/.cast.

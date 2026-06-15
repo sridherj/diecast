@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diecast — flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════ DIECAST KIT — identity locked ════════════════ */
+:root{
+  --cream:#F5F4F0; --cream-deep:#EDEBE4; --cream-shadow:#E2DFD5;
+  --paper:#FFFFFF; --ink:#1A1A28; --ink60:#4A4860; --ink35:#9C99AC; --ink20:#C9C6D2;
+  --line:#DDD8CD; --line-soft:#E9E6DD;
+  --rasp:#D6235C; --rasp08:rgba(214,35,92,.08); --rasp15:rgba(214,35,92,.16);
+  --maker:#3B5BB0; --maker08:rgba(59,91,176,.09);
+  --checker:#6B47B0; --ok:#2D7D4F; --ok08:rgba(45,125,79,.09); --warn:#B5821A; --warn08:rgba(181,130,26,.1);
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--cream-deep);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--sans);cursor:pointer;border:0;background:none}
+.shell{
+  display:grid;grid-template-columns:232px minmax(0,1fr) 296px;
+  width:min(1320px,100%);height:min(800px,calc(100vh - 48px));
+  background:var(--cream);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 28px 70px -34px rgba(26,26,40,.28),0 2px 6px rgba(26,26,40,.05);
+}
+/* micro-label */
+.lab{font-family:var(--mono);font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--ink35)}
+.hr-lab{display:flex;align-items:baseline;gap:9px}
+.hr-lab::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+
+/* ════ avatars — the agent grammar (humans=circles, agents=squares, same slot) ════ */
+.av{
+  width:22px;height:22px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:8.5px;font-weight:600;
+}
+.av.h{border-radius:50%;background:var(--ink);color:var(--cream)}
+.av.m{border-radius:6px;border:1.5px solid var(--maker);color:var(--maker);background:var(--paper)}
+.av.c{border-radius:6px;background:var(--checker);color:#fff}
+.pairstack{display:inline-flex;align-items:center}
+.pairstack .av+.av{margin-left:-7px;box-shadow:0 0 0 2px var(--paper)}
+/* status dots — Linear vocabulary */
+.sd{width:8px;height:8px;border-radius:50%;flex-shrink:0;position:relative}
+.sd.working{background:var(--maker)}
+.sd.working::after{content:"";position:absolute;inset:-3.5px;border-radius:50%;border:1.5px solid var(--maker);opacity:.4;animation:ping 2s ease-out infinite}
+.sd.queued{background:transparent;border:1.5px solid var(--ink20)}
+.sd.review{background:var(--checker)}
+.sd.done{background:var(--ok)}
+.sd.you{background:var(--rasp)}
+.sd.you::after{content:"";position:absolute;inset:-3.5px;border-radius:50%;border:1.5px solid var(--rasp);opacity:.45;animation:ping 2.2s ease-out infinite}
+@keyframes ping{0%{transform:scale(.45);opacity:.55}80%,100%{transform:scale(1.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.sd::after{animation:none!important}}
+
+/* ════ LEFT — goal rail ════ */
+.rail{background:var(--cream);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px 14px}
+.brand{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:-.03em;padding:0 10px}
+.brand em{font-style:normal;color:var(--rasp)}
+.tag{font-family:var(--mono);font-size:8.5px;color:var(--ink35);letter-spacing:.15em;text-transform:uppercase;padding:2px 10px 20px}
+.rail .hr-lab{padding:0 10px 8px}
+.goal{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13px;
+  color:var(--ink60);cursor:pointer;position:relative;transition:background .14s;
+  border:1px solid transparent;
+}
+.goal:hover{background:rgba(26,26,40,.04)}
+.goal.sel{background:var(--paper);color:var(--ink);font-weight:500;border-color:var(--line);box-shadow:0 1px 3px rgba(26,26,40,.06)}
+.goal.sel::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--rasp);border-radius:0 2px 2px 0}
+.fam{font-family:var(--mono);font-size:8px;letter-spacing:.07em;padding:2.5px 6px;border-radius:3px;
+  color:var(--ink60);background:var(--cream-deep);border:1px solid var(--line-soft);flex-shrink:0;min-width:38px;text-align:center}
+.goal.sel .fam{background:var(--rasp08);border-color:var(--rasp15);color:var(--rasp)}
+.goal .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;letter-spacing:-.01em}
+.ws{margin-top:auto;padding-top:12px}
+.ws .goal{font-size:12.5px;padding:7px 10px;gap:10px}
+.glyph{width:14px;text-align:center;color:var(--ink35);font-size:11.5px}
+.badge{font-family:var(--mono);font-size:9px;background:var(--ink);color:var(--cream);border-radius:99px;padding:2px 7px}
+
+/* ════ CENTER — the step surface ════ */
+.canvas{position:relative;overflow-y:auto;padding:24px 30px 28px;background:var(--cream)}
+.crumb{font-family:var(--mono);font-size:10px;color:var(--ink35);margin-bottom:13px;letter-spacing:.04em}
+.crumb b{color:var(--ink60);font-weight:500}
+.headrow{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:16px}
+.gtitle{font-family:var(--mono);font-weight:600;font-size:22px;letter-spacing:-.035em}
+.fampill{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--rasp);
+  border:1px solid var(--rasp15);background:var(--rasp08);border-radius:99px;padding:3.5px 10px;position:relative;top:-3px}
+.meta{font-family:var(--mono);font-size:10.5px;color:var(--ink35)}
+
+/* stepper — discrete steps, the user's existing mental model */
+.stepper{display:flex;align-items:center;margin-bottom:14px}
+.step{display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 10px;border-radius:7px;transition:background .14s}
+.step:hover{background:rgba(26,26,40,.04)}
+.step .ix{
+  width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:600;flex-shrink:0;
+  border:1.5px solid var(--ink20);color:var(--ink35);background:var(--paper);
+}
+.step.done .ix{border-color:var(--ok);color:var(--ok)}
+.step.now .ix{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.step .sn{font-family:var(--mono);font-size:11px;color:var(--ink35);letter-spacing:-.01em}
+.step.done .sn{color:var(--ink60)}
+.step.now .sn{color:var(--ink);font-weight:600}
+.step.now{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line),0 1px 3px rgba(26,26,40,.05)}
+.step.now::after{content:"";align-self:flex-end}
+.step.viewing:not(.now){background:var(--cream-deep)}
+.conn{flex:1 0 12px;height:1.5px;background:var(--line);margin:0 2px;min-width:10px;max-width:34px}
+.conn.done{background:var(--ok);opacity:.45}
+.iterbadge{font-family:var(--mono);font-size:9.5px;background:var(--ink);color:var(--cream);border-radius:99px;padding:3px 9px;margin-left:8px;flex-shrink:0}
+.iterbadge i{font-style:normal;color:var(--rasp)}
+
+/* guide bar — L1, the only raspberry block */
+.gbar{
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;
+  background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--rasp);
+  border-radius:9px;padding:11px 15px;box-shadow:0 1px 3px rgba(26,26,40,.04);
+}
+.gbar .gm{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--rasp);flex-shrink:0}
+.gbar .do{font-weight:700;font-size:13.5px;letter-spacing:-.015em}
+.gbar .why{font-size:12px;color:var(--ink60)}
+.cta{
+  margin-left:auto;flex-shrink:0;background:var(--rasp);color:#FFF6F9;font-weight:700;font-size:12.5px;
+  border-radius:7px;padding:8px 15px;box-shadow:0 2px 8px -2px rgba(214,35,92,.45);
+  transition:transform .12s,box-shadow .12s;
+}
+.cta:hover{transform:translateY(-1px)}
+
+/* in-flight strip — CI-status mental model */
+.strip{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.chiplet{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;
+  color:var(--ink60);background:var(--paper);border:1px solid var(--line);border-radius:99px;
+  padding:5px 12px 5px 7px;letter-spacing:-.01em;
+}
+.chiplet.you{border-color:var(--rasp15);background:var(--rasp08);color:var(--ink)}
+.chiplet .st{color:var(--ink35);font-size:9.5px}
+
+/* the step surface card */
+.surface{background:var(--paper);border:1px solid var(--line);border-radius:11px;box-shadow:0 1px 4px rgba(26,26,40,.05);overflow:hidden}
+.surf-h{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line-soft)}
+.surf-h .lab{flex:1}
+.surf-h .src{font-family:var(--mono);font-size:9px;color:var(--ink20);letter-spacing:.08em}
+
+/* —— familiar surface: DOC —— */
+.doc{padding:26px 34px 30px;max-width:640px}
+.doc h1{font-size:21px;letter-spacing:-.02em;margin-bottom:6px}
+.doc .lede{font-size:13.5px;color:var(--ink60);line-height:1.6;margin-bottom:16px}
+.doc h3{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink35);margin:16px 0 8px}
+.doc ul{list-style:none}
+.doc li{font-size:13px;line-height:1.65;padding-left:14px;position:relative;margin-bottom:4px}
+.doc li::before{content:"—";position:absolute;left:0;color:var(--ink20)}
+.docwrap{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:0}
+.margin{padding:24px 16px;border-left:1px solid var(--line-soft);background:#FCFBF8}
+.mcom{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.5;margin-bottom:10px;position:relative}
+.mcom::before{content:"";position:absolute;left:-17px;top:14px;width:16px;height:1px;background:var(--line)}
+.mcom .who{display:flex;align-items:center;gap:6px;font-weight:700;font-size:10.5px;margin-bottom:3px}
+.mcom .when{font-family:var(--mono);font-size:8.5px;color:var(--ink35);margin-left:auto;font-weight:400}
+.mcom.open{border-left:2px solid var(--warn)}
+.mcom.resolved{opacity:.55}
+.mcom .act{font-family:var(--mono);font-size:8.5px;color:var(--rasp);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;cursor:pointer}
+.hl{background:var(--warn08);border-bottom:1px dashed var(--warn);cursor:pointer}
+.vrow{display:flex;gap:8px;align-items:center;padding:13px 34px;border-top:1px solid var(--line-soft);background:#FCFBF8}
+.vchip{font-family:var(--mono);font-size:9.5px;color:var(--ink60);background:var(--cream-deep);border-radius:99px;padding:3px 9px}
+.appr{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink60);margin-left:10px}
+
+/* —— familiar surface: BOARD (Linear list idiom) —— */
+.board{padding:6px 0 10px}
+.bgroup{padding:10px 18px 4px}
+.brow{
+  display:flex;align-items:center;gap:11px;padding:9px 18px;font-size:13px;cursor:pointer;
+  border-top:1px solid transparent;border-bottom:1px solid transparent;transition:background .12s;
+}
+.brow:hover{background:#FBFAF6}
+.brow .id{font-family:var(--mono);font-size:10.5px;color:var(--ink35);width:64px;flex-shrink:0}
+.brow .bt{flex:1;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow .props{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.kchip{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:var(--ink35);border:1px solid var(--line-soft);border-radius:4px;padding:1.5px 6px}
+.kchip.warn{color:var(--warn);border-color:var(--warn);background:var(--warn08)}
+.kchip.you{color:var(--rasp);border-color:var(--rasp15);background:var(--rasp08)}
+.rework{display:inline-flex;gap:2px;align-items:center}
+.rework i{width:9px;height:3.5px;border-radius:2px;background:var(--cream-shadow)}
+.rework i.u{background:var(--warn)}
+
+/* —— familiar surface: REPORT (CI idiom) —— */
+.report{padding:18px 22px 20px}
+.rhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.rbig{font-family:var(--mono);font-weight:600;font-size:16px;letter-spacing:-.02em}
+.rbig.ok{color:var(--ok)} .rbig.bad{color:var(--rasp)}
+.check{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;padding:8px 4px;border-top:1px solid var(--line-soft)}
+.check .nm{flex:1;color:var(--ink60);letter-spacing:-.01em}
+.check .det{color:var(--ink35);font-size:10px}
+.ico{width:16px;text-align:center;flex-shrink:0}
+.ico.ok{color:var(--ok)} .ico.bad{color:var(--rasp)} .ico.warn{color:var(--warn)}
+.redgreen{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;margin-top:14px}
+.rg{background:var(--paper);padding:13px 15px}
+.rg .lab{margin-bottom:8px}
+.rg pre{font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--ink60);white-space:pre-wrap}
+.rg.red pre b{color:var(--rasp);font-weight:600}
+.rg.green pre b{color:var(--ok);font-weight:600}
+
+/* —— familiar surface: LEDGER (incident-timeline idiom) —— */
+.ledger{padding:14px 22px 18px;position:relative}
+.lrow{display:grid;grid-template-columns:52px 18px minmax(0,1fr);gap:0 12px;position:relative}
+.lrow .tm{font-family:var(--mono);font-size:9.5px;color:var(--ink35);padding-top:13px;text-align:right}
+.lrow .node{position:relative;display:flex;justify-content:center}
+.lrow .node::before{content:"";position:absolute;top:0;bottom:0;width:1.5px;background:var(--line-soft);left:50%}
+.lrow:first-child .node::before{top:14px}
+.lrow:last-child .node::before{bottom:auto;height:14px}
+.lrow .node i{position:relative;z-index:1;width:9px;height:9px;border-radius:50%;margin-top:14px;background:var(--ink20);font-style:normal}
+.lrow.refuted .node i{background:var(--ink20)}
+.lrow.confirmed .node i{background:var(--ok)}
+.lrow.live .node i{background:var(--maker);box-shadow:0 0 0 4px var(--maker08)}
+.lcard{margin:6px 0;border:1px solid var(--line-soft);border-radius:8px;padding:10px 13px;background:#FCFBF8}
+.lrow.live .lcard{background:var(--paper);border-color:var(--line);box-shadow:0 1px 4px rgba(26,26,40,.05)}
+.lcard .lt{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+.lcard .lt .hid{font-family:var(--mono);font-size:9.5px;color:var(--ink35);font-weight:400}
+.lcard .verdict{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-left:auto}
+.lrow.refuted .verdict{color:var(--ink35)} .lrow.refuted .lt .htext{color:var(--ink35);text-decoration:line-through;font-weight:400}
+.lrow.live .verdict{color:var(--maker)}
+.lcard .pd{font-size:11.5px;color:var(--ink60);margin-top:5px;line-height:1.55}
+.lcard .pd b{font-weight:600}
+
+/* —— familiar surface: NOTEBOOK (Hex idiom) —— */
+.nb{padding:16px 22px 20px}
+.cell{border:1px solid var(--line-soft);border-radius:7px;margin-bottom:8px;overflow:hidden}
+.cell .ch{display:flex;align-items:center;gap:9px;padding:7px 12px;background:#FCFBF8;font-family:var(--mono);font-size:10px;color:var(--ink35);cursor:pointer}
+.cell .ch .n{color:var(--ink60)}
+.chartwrap{border:1px solid var(--line);border-radius:9px;padding:16px 18px 10px;margin:14px 0 10px;background:var(--paper)}
+.chartwrap .ct{font-size:13.5px;font-weight:700;letter-spacing:-.015em;margin-bottom:2px}
+.chartwrap .cs{font-size:11px;color:var(--ink60);margin-bottom:10px}
+.prov{font-family:var(--mono);font-size:9.5px;color:var(--ink35);display:flex;gap:14px}
+.prov a{color:var(--ink60);text-decoration:none;border-bottom:1px solid var(--line)}
+
+/* —— familiar surface: MEMO (spike) —— */
+.memo{padding:22px 26px;max-width:620px}
+.memo .q{font-size:16px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.tb{margin-bottom:16px}
+.tb .tline{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--ink35);margin-bottom:5px}
+.tb .bar{height:6px;border-radius:3px;background:var(--cream-deep);overflow:hidden}
+.tb .fill{height:100%;width:56%;background:var(--ink);border-radius:3px}
+.probe{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line-soft);font-size:12.5px}
+.probe .pn{font-family:var(--mono);font-size:11px;color:var(--ink60);width:170px;flex-shrink:0}
+.probe .pr{color:var(--ink60)}
+.verdraft{margin-top:14px;border:1px dashed var(--ink35);border-radius:8px;padding:12px 14px;background:var(--cream)}
+.verdraft .lab{margin-bottom:6px}
+.verdraft .vt{font-size:13px;font-weight:600;line-height:1.5}
+.conf{font-family:var(--mono);font-size:9px;border:1px solid var(--warn);color:var(--warn);border-radius:3px;padding:1.5px 6px;margin-left:8px}
+
+/* todo placeholder */
+.todoph{padding:46px 30px;text-align:center;color:var(--ink35)}
+.todoph .big{font-family:var(--mono);font-size:12px;letter-spacing:.04em;margin-bottom:6px;color:var(--ink60)}
+.todoph .sm{font-size:12px}
+
+/* decision seal */
+.seal{
+  display:inline-flex;gap:9px;align-items:center;margin-top:14px;font-size:11px;color:var(--ink60);
+  border:1px dashed var(--ink35);border-radius:6px;padding:6.5px 12px;background:var(--cream);
+}
+.seal b{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:10.5px;letter-spacing:-.01em}
+.lvl{font-family:var(--mono);font-size:8px;padding:1.5px 5px;border-radius:3px;letter-spacing:.06em;border:1px solid var(--line);color:var(--ink35)}
+.lvl.l2{border-color:var(--warn);color:var(--warn)}
+
+/* ════ RIGHT — Guide ════ */
+.chat{background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.chat-h{padding:16px 16px 12px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:9px}
+.gmark{width:25px;height:25px;border-radius:7px;background:var(--rasp08);border:1px solid var(--rasp15);
+  color:var(--rasp);display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.chat-h .t{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:-.02em}
+.chat-h .s{font-family:var(--mono);font-size:8.5px;color:var(--ink35);letter-spacing:.1em;text-transform:uppercase}
+.msgs{padding:15px 15px 8px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.m{max-width:95%;font-size:12px;line-height:1.55}
+.m .mlab{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink35);margin-bottom:3px}
+.m.you{align-self:flex-end}
+.m.you .bub{background:var(--cream);border:1px solid var(--line-soft);border-radius:10px 10px 3px 10px;padding:8px 11px}
+.m.g .mlab{color:var(--rasp)}
+.m.g .bub{border-left:2px solid var(--rasp15);padding:1px 0 1px 11px}
+.op{font-family:var(--mono);font-size:9px;color:var(--rasp);background:var(--rasp08);border-radius:4px;padding:1.5px 6px;white-space:nowrap}
+.acard{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--cream);padding:9px 11px;font-size:11px}
+.acard .at{font-family:var(--mono);font-size:10.5px;font-weight:600;margin-bottom:2px}
+.acard .am{color:var(--ink60);font-size:10.5px}
+.acard .pin{display:inline-block;margin-top:7px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;
+  color:var(--rasp);cursor:pointer;border-bottom:1px solid var(--rasp15);text-transform:uppercase}
+.inp{margin:11px 13px 14px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);
+  border-radius:9px;padding:10px 12px;font-size:12px;color:var(--ink35);background:var(--cream)}
+.inp .key{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--ink35);
+  border:1px solid var(--line);border-radius:4px;padding:1.5px 5px;background:var(--paper)}
+
+::view-transition-old(surface),::view-transition-new(surface){animation-duration:.32s}
+.surface{view-transition-name:surface}
+</style></head>
+<body>
+
+<div class="shell">
+  <nav class="rail" id="rail"></nav>
+  <main class="canvas" id="canvas"></main>
+  <aside class="chat" id="chat"></aside>
+</div>
+
+<script>
+/* ═══════════ one fake-org spine, six flows ═══════════ */
+const AV = {
+  CO:`<span class="av m">CO</span>`, EC:`<span class="av m">EC</span>`, BF:`<span class="av m">BF</span>`,
+  DR:`<span class="av m">DR</span>`, AN:`<span class="av m">AN</span>`, SP:`<span class="av m">SP</span>`,
+  CC:`<span class="av c">CC</span>`, SJ:`<span class="av h">SJ</span>`, MI:`<span class="av h">MI</span>`,
+};
+const pair = (m)=>`<span class="pairstack">${AV[m]}${AV.CC}</span>`;
+
+const FLOWS = {
+  feature: {
+    fam:"FEAT", title:"Add RBAC to checkout", slug:"add-rbac-to-checkout",
+    meta:"execution · 2/5 tickets · day 3",
+    steps:[
+      {n:"Requirements",st:"done",view:"doc"},
+      {n:"Design lock",st:"done",view:"doc2"},
+      {n:"Plan",st:"done",view:"boardplan"},
+      {n:"Execution",st:"now",view:"board"},
+      {n:"Verify",st:"todo",ph:"Opens when CAST-412 and CAST-413 land — the Guide assembles the test report here."},
+    ],
+    nudge:{do:"Review CAST-412’s PR", why:"checker flagged R02 (missing FK index) — your review unblocks two queued tasks"},
+    strip:[
+      {html:`${pair("CO")} CAST-412 <span class="st">· working</span>`, dot:"working"},
+      {html:`${AV.EC} CAST-413 <span class="st">· queued</span>`, dot:"queued"},
+      {html:`${AV.SJ} review PR #2341 <span class="st">· 10 min</span>`, dot:"you", you:true},
+    ],
+    chat:[
+      {who:"you", t:"how risky is the roles migration?"},
+      {who:"g", t:`It drops the legacy <span style="font-family:var(--mono);font-size:10.5px">roles</span> column — irreversible on prod, so I classified it <b>L3</b> and paused. Three options framed.`,
+       card:{t:"⚖ Escalation · roles column migration", m:"3 pre-framed options · evidence pack · expires 1h"}},
+      {who:"you", t:"actually this might be a bug, not a feature"},
+      {who:"g", t:`Reclassifying — the canvas will reshape to the bug-fix path and I’ll record the pivot. <span class="op">morph:bugfix</span>`},
+    ],
+    guideline:"Path composed for a feature build — 5 steps. One thing needs you.",
+  },
+
+  bugfix: {
+    fam:"BUG", title:"Checkout 500s on coupon apply", slug:"checkout-500s-coupon",
+    meta:"fix · hotfix lane · 2h elapsed",
+    steps:[
+      {n:"Repro",st:"done",view:"reprorep"},
+      {n:"Root cause",st:"done",view:"rcamemo"},
+      {n:"Fix",st:"now",view:"fixboard"},
+      {n:"Verify",st:"todo",ph:"Opens when the fix lands — the original failing test must go green here (red→green is the proof)."},
+      {n:"Ship",st:"todo",ph:"Hotfix deploy — needs your approval (L3) when Verify is green."},
+    ],
+    nudge:{do:"Run the repro test against the fix", why:"red→green on the original failing test is the only honest proof"},
+    strip:[
+      {html:`${pair("BF")} guard-clause fix <span class="st">· working</span>`, dot:"working"},
+      {html:`${AV.SJ} approve hotfix deploy <span class="st">· waits on verify</span>`, dot:"queued", you:true},
+    ],
+    chat:[
+      {who:"g", t:`Cause is known — regression from the v4.2 RBAC migration — so I routed this as <b>bug fix</b> (remediation), not a debug investigation.`},
+      {who:"you", t:"any other coupon paths affected?"},
+      {who:"g", t:`Checked all 4 entry points; only guest checkout lost the guard. Added a regression test for each anyway. <span class="op">nudge:run-repro</span>`},
+    ],
+    guideline:"Known cause → remediation lane. 5 steps, two are gates.",
+  },
+
+  debugging: {
+    fam:"DEBUG", title:"Why do auth requests time out at p99?", slug:"auth-timeouts-p99",
+    meta:"investigating · iteration 2/3",
+    iter:"iter <i>2/3</i>",
+    steps:[
+      {n:"Symptom",st:"done",view:"symptmemo"},
+      {n:"Investigate",st:"now",view:"ledger"},
+      {n:"Root cause",st:"todo",ph:"Opens when a hypothesis is confirmed — then the Guide offers a pivot into a fix lane."},
+      {n:"Hand off",st:"todo",ph:"Confirmed cause becomes a bug-fix goal with the evidence attached."},
+    ],
+    nudge:{do:"Run experiment for H3 — middleware retry storm", why:"H1, H2 refuted; H3 predicts timeouts cluster within 90s of deploys"},
+    strip:[
+      {html:`${pair("DR")} H3 experiment <span class="st">· working</span>`, dot:"working"},
+      {html:`${AV.DR} trace collection <span class="st">· queued</span>`, dot:"queued"},
+    ],
+    chat:[
+      {who:"you", t:"could this be the load balancer?"},
+      {who:"g", t:`Plausible — added as <b>H4 · LB connection reuse</b>, queued after H3. Refuted hypotheses stay on the board so we never re-chase them. <span class="op">pin:ledger</span>`},
+    ],
+    guideline:"Cause unknown → investigation loop. Hypotheses are the work.",
+  },
+
+  prd: {
+    fam:"PRD", title:"PRD · Team workspaces", slug:"prd-team-workspaces",
+    meta:"review · v2 · 1 comment open",
+    steps:[
+      {n:"Outline",st:"done",view:"outline"},
+      {n:"Draft",st:"done",view:"draftnote"},
+      {n:"Review",st:"now",view:"prddoc"},
+      {n:"Final",st:"todo",ph:"Locks when the open comment resolves and PM signs off."},
+    ],
+    nudge:{do:"Resolve Mira’s comment on success metrics", why:"the last open comment — resolving it unblocks Final"},
+    strip:[
+      {html:`${AV.DR} drafting v2 SCs <span class="st">· done</span>`, dot:"done"},
+      {html:`${AV.MI} PM sign-off <span class="st">· pending</span>`, dot:"queued"},
+      {html:`${AV.SJ} resolve comment <span class="st">· 5 min</span>`, dot:"you", you:true},
+    ],
+    chat:[
+      {who:"you", t:"tighten the success metrics — they’re fuzzy"},
+      {who:"g", t:`Drafted 3 measurable criteria and anchored them at Mira’s comment. That produced <b>v2</b> — the diff is on the version chip. <span class="op">promote:v2-diff</span>`},
+      {who:"you", t:"what changed from v1?"},
+      {who:"g", t:`+2 FRs from eng review (audit log, rate limits), SSO moved out of scope (recorded, L2), metrics rewritten. Nothing else touched.`},
+    ],
+    guideline:"Document lifecycle — the doc is the work product. One comment blocks Final.",
+  },
+
+  spike: {
+    fam:"SPIKE", title:"Can SQLite hold the event store?", slug:"spike-sqlite-events",
+    meta:"timebox 3h · 1h 40m used",
+    steps:[
+      {n:"Question",st:"done",view:"spikeq"},
+      {n:"Probe",st:"now",view:"memo"},
+      {n:"Verdict",st:"todo",ph:"One-line answer + confidence + the 2-3 deciding data points. Feeds the event-store decision via spike_ref."},
+    ],
+    nudge:{do:"Run the 10k events/s sustained-write probe", why:"the last probe the verdict needs — 2 of 3 deciding data points are in"},
+    strip:[
+      {html:`${AV.SP} sustained-write probe <span class="st">· working</span>`, dot:"working"},
+    ],
+    chat:[
+      {who:"you", t:"don’t gold-plate this — verdict by EOD"},
+      {who:"g", t:`Timebox holds — 1h 20m left. If the probe is inconclusive I’ll extend once (recorded, L2) or call it at medium confidence. <span class="op">nudge:run-probe</span>`},
+    ],
+    guideline:"Timeboxed probe → verdict. Deliberately lighter than a build.",
+  },
+
+  data: {
+    fam:"DATA", title:"Which onboarding step drops the most users?", slug:"onboarding-dropoff",
+    meta:"analysis · 3 sources joined",
+    steps:[
+      {n:"Question",st:"done",view:"dataq"},
+      {n:"Sources",st:"done",view:"sources"},
+      {n:"Analysis",st:"now",view:"notebook"},
+      {n:"Report",st:"todo",ph:"Publishes the visualized answer with provenance — re-runs become dated report versions."},
+    ],
+    nudge:{do:"Bless the source-of-record for Q2 numbers", why:"two sources disagree by 8% — the headline depends on which we trust (L3)"},
+    strip:[
+      {html:`${AV.AN} cohort analysis <span class="st">· working</span>`, dot:"working"},
+      {html:`${AV.SJ} bless source <span class="st">· blocks report</span>`, dot:"you", you:true},
+    ],
+    chat:[
+      {who:"g", t:`Two sources disagree on Q2 revenue by 8% — the chart’s headline depends on which we trust. I stopped before publishing: <b>(a)</b> finance DB as source-of-record, <b>(b)</b> show both with a reconciliation note, <b>(c)</b> flag for analyst review.`,
+       card:{t:"⚖ Escalation · conflicting sources", m:"3 options · evidence: both query results attached"}},
+      {who:"you", t:"finance DB. note the discrepancy in the appendix"},
+      {who:"g", t:`Recorded (L3, author: you) — rerunning the final cells now. <span class="op">drill:run-447</span>`},
+    ],
+    guideline:"Question → sources → visualized answer. One trust call needs you.",
+  },
+};
+
+/* ═══════════ familiar-surface renderers ═══════════ */
+const SURF = {
+  doc: () => surf("Requirements · refined doc", "docs idiom", `
+    <div class="docwrap"><div class="doc">
+      <h1>Add RBAC to checkout</h1>
+      <p class="lede">When an order admin manages refunds, they need role-scoped access so
+      support staff can act without seeing payment credentials.</p>
+      <h3>Must hold</h3><ul>
+        <li>Role checks enforced at the service layer, not the UI</li>
+        <li>Existing admin sessions migrate without re-login</li>
+        <li>Audit row on every privileged action</li>
+      </ul></div>
+      <div class="margin">
+        <div class="mcom resolved"><div class="who">${AV.MI} Mira <span class="when">tue</span></div>which roles ship v1? <div style="font-size:10px;color:var(--ok);margin-top:4px">✓ resolved — owner/member/viewer</div></div>
+      </div></div>
+    <div class="vrow"><span class="vchip">v0.3 · refined</span><span class="appr"><span class="ico ok">✓</span> spec-check clean</span></div>`),
+  doc2: () => surf("Design lock · chosen direction", "design-review idiom", `
+    <div class="doc" style="max-width:none"><h3 style="margin-top:4px">Locked at review</h3><ul>
+      <li>Role model: owner / member / viewer — matrix in appendix</li>
+      <li>UI: roles managed from org settings, not per-resource</li>
+      <li>Checker: <span style="font-family:var(--mono);font-size:11.5px">rbac-compliance</span> paired for all migration PRs</li>
+    </ul><div class="seal">⚖ <b>roles UX: settings-page, not inline</b> · tue <span class="lvl l2">L2</span></div></div>`),
+  boardplan: () => surf("Plan · 5 tickets", "board idiom", boardRows([
+    g("Planned", [
+      r("done","CAST-410","Roles schema + migration scaffold", pair("EC"), [["est ✓",""]]),
+      r("done","CAST-411","Service-layer role checks", pair("CO"), [["est ✓",""]]),
+      r("queued","CAST-412","Invoice CRUD stack", pair("CO"), []),
+      r("queued","CAST-413","Role entity schema", AV.EC, []),
+      r("queued","CAST-414","Audit log rows", AV.EC, []),
+    ])])),
+  board: () => surf("Execution · board", "Linear idiom", boardRows([
+    g("In progress", [
+      r("working","CAST-412","Invoice CRUD stack — iteration 2", pair("CO"),
+        [["rework","<span class='rework'><i class='u'></i><i></i><i></i></span>"],["R02 ⚠","warn"]]),
+    ]),
+    g("In review", [
+      r("you","PR #2341","Review CRUD stack PR — @you", AV.SJ, [["yours","you"],["10 min",""]]),
+    ]),
+    g("Todo", [
+      r("queued","CAST-413","Role entity schema — waits on 412", AV.EC, []),
+      r("queued","CAST-414","Audit log rows", AV.EC, []),
+    ]),
+    g("Done", [
+      r("done","CAST-410","Roles schema + migration scaffold", pair("EC"), [["5/5 ✓",""]]),
+      r("done","CAST-411","Service-layer role checks", pair("CO"), [["5/5 ✓",""]]),
+    ]),
+  ]) + `<div style="padding:0 18px 14px"><div class="seal">⚖ <b>classification: feature → confirmed</b> · 09:18 <span class="lvl">L1</span></div></div>`),
+  reprorep: () => surf("Repro · failing test captured", "CI idiom", `
+    <div class="report">
+      <div class="rhead"><span class="rbig bad">✗ 1 failing</span><span class="meta">repro committed · 61fbd79</span></div>
+      <div class="check"><span class="ico bad">✗</span><span class="nm">test_coupon_apply_guest_checkout</span><span class="det">500 · regression</span></div>
+      <div class="check"><span class="ico ok">✓</span><span class="nm">test_coupon_apply_member</span><span class="det">passes</span></div>
+      <div class="check"><span class="ico ok">✓</span><span class="nm">3 other coupon paths</span><span class="det">pass — scoped to guest</span></div>
+    </div>`),
+  rcamemo: () => surf("Root cause", "memo idiom", `
+    <div class="memo"><div class="q">Guest checkout lost the <span style="font-family:var(--mono)">guest_session</span> guard in the v4.2 RBAC migration.</div>
+    <div class="probe"><span class="pn">bisect</span><span class="pr">narrows to migration commit range (4 commits)</span></div>
+    <div class="probe"><span class="pn">blast radius</span><span class="pr">guest checkout only — 4 coupon paths checked</span></div>
+    <div class="seal">⚖ <b>scope: hotfix lane, no re-estimate</b> · 10:42 <span class="lvl">L1</span></div></div>`),
+  fixboard: () => surf("Fix · in flight", "Linear idiom", boardRows([
+    g("In progress", [
+      r("working","FIX-1","Guard clause + repro test", pair("BF"), [["hotfix",""]]),
+    ]),
+    g("Gated", [
+      r("queued","FIX-2","Regression tests ×4 coupon paths", AV.BF, [["after FIX-1",""]]),
+      r("you","SHIP","Approve hotfix deploy — @you", AV.SJ, [["L3","warn"],["after verify",""]]),
+    ]),
+  ])),
+  symptmemo: () => surf("Symptom", "memo idiom", `
+    <div class="memo"><div class="q">Auth requests time out at p99 — intermittent, started ~last week.</div>
+    <div class="probe"><span class="pn">shape</span><span class="pr">bursts of 30-90s, then clean for hours</span></div>
+    <div class="probe"><span class="pn">scope</span><span class="pr">auth service only; downstreams healthy</span></div></div>`),
+  ledger: () => surf("Investigation · hypothesis ledger", "incident-timeline idiom", `
+    <div class="ledger">
+      <div class="lrow refuted"><span class="tm">mon 14:10</span><span class="node"><i></i></span>
+        <div class="lcard"><div class="lt"><span class="hid">H1</span><span class="htext">cache staleness</span><span class="verdict">refuted</span></div>
+        <div class="pd">predicted: repro stops with cache off → <b>observed: persists</b> (iter 1)</div></div></div>
+      <div class="lrow refuted"><span class="tm">mon 16:40</span><span class="node"><i></i></span>
+        <div class="lcard"><div class="lt"><span class="hid">H2</span><span class="htext">db pool exhaustion</span><span class="verdict">refuted</span></div>
+        <div class="pd">predicted: pool saturates at spike → <b>observed: 40% headroom</b> (iter 1)</div></div></div>
+      <div class="lrow live"><span class="tm">now</span><span class="node"><i></i></span>
+        <div class="lcard"><div class="lt"><span class="hid">H3</span>middleware retry storm<span class="verdict">testing · iter 2</span></div>
+        <div class="pd">predicts: timeouts cluster within 90s of deploy events — experiment needs one more deploy window (~20 min)</div></div></div>
+      <div class="lrow"><span class="tm">queued</span><span class="node"><i></i></span>
+        <div class="lcard" style="border-style:dashed;background:transparent"><div class="lt"><span class="hid">H4</span><span style="color:var(--ink60)">LB connection reuse</span><span class="verdict" style="color:var(--ink35)">queued</span></div>
+        <div class="pd">added from your note — runs if H3 refutes</div></div></div>
+      <div class="seal" style="margin-left:82px">⚖ <b>repro: unit → integration harness</b> · 11:03 <span class="lvl l2">L2</span></div>
+    </div>`),
+  outline: () => surf("Outline", "docs idiom", `
+    <div class="doc"><h3 style="margin-top:4px">Agreed structure</h3><ul>
+      <li>Problem & who it serves · goals/non-goals</li><li>Requirements & success metrics</li>
+      <li>Roles & permissions model</li><li>Rollout & open questions</li></ul></div>`),
+  draftnote: () => surf("Draft · v1", "docs idiom", `
+    <div class="doc"><p class="lede">v1 drafted by the Guide from the outline + your notes —
+    4 comments raised in review, 3 resolved in v2.</p>
+    <div class="seal">⚖ <b>scope: SSO deferred to v1.1</b> · 09:47 <span class="lvl l2">L2</span></div></div>`),
+  prddoc: () => surf("Review · v2", "docs idiom", `
+    <div class="docwrap"><div class="doc">
+      <h1>Team workspaces</h1>
+      <p class="lede">When a team adopts Diecast, they need a shared workspace with role-scoped
+      visibility so private skills and company-wide skills can coexist.</p>
+      <h3>Requirements</h3><ul>
+        <li>Workspace owns goals, agents, and a private skill catalogue</li>
+        <li>Success metric: <span class="hl">60% weekly active per seat</span></li>
+        <li>Roles: owner / member / viewer at v1</li>
+      </ul>
+      <h3>Out of scope (v1)</h3><ul><li>SSO — deferred to v1.1 (decision recorded)</li></ul>
+    </div>
+    <div class="margin">
+      <div class="mcom open"><div class="who">${AV.MI} Mira <span class="when">2h</span></div>what counts as “active”? define the event.<div class="act">resolve with a definition →</div></div>
+      <div class="mcom resolved"><div class="who">${AV.SJ} you <span class="when">tue</span></div>add rate limits → <span style="color:var(--ok)">✓ FR-12 added in v2</span></div>
+    </div></div>
+    <div class="vrow"><span class="vchip">v2 · +2 FRs from eng review</span>
+      <span class="appr"><span class="ico ok">✓</span> eng</span><span class="appr"><span class="ico ok">✓</span> design</span>
+      <span class="appr"><span class="ico warn">●</span> PM pending</span></div>`),
+  spikeq: () => surf("Question", "memo idiom", `
+    <div class="memo"><div class="q">Can SQLite hold the event store at our write volume, or do we need Postgres now?</div>
+    <div class="probe"><span class="pn">decides</span><span class="pr">event-store architecture decision (DEC-ARCH-07 waits on this via spike_ref)</span></div></div>`),
+  memo: () => surf("Probe · timeboxed", "memo idiom", `
+    <div class="memo">
+      <div class="tb"><div class="tline"><span>TIMEBOX 3H</span><span>1h 40m used</span></div>
+        <div class="bar"><div class="fill"></div></div></div>
+      <div class="probe"><span class="pn">burst writes 10k/s</span><span class="pr">holds — WAL mode, 4ms p95 ✓</span></div>
+      <div class="probe"><span class="pn">concurrent readers</span><span class="pr">holds to 32 readers, degrades after ✓</span></div>
+      <div class="probe"><span class="pn">sustained 10k/s · 10min</span><span class="pr" style="color:var(--maker)">running…</span></div>
+      <div class="verdraft"><div class="lab">VERDICT · DRAFT</div>
+        <div class="vt">Yes for v1 — revisit at sharding. <span class="conf">CONF · MED</span></div></div>
+    </div>`),
+  dataq: () => surf("Question", "memo idiom", `
+    <div class="memo"><div class="q">Which onboarding step drops the most users — and is it getting worse?</div></div>`),
+  sources: () => surf("Sources · 3 joined", "CI idiom", `
+    <div class="report">
+      <div class="check" style="border-top:0"><span class="ico ok">✓</span><span class="nm">events.onboarding_funnel</span><span class="det">14d · 48k rows</span></div>
+      <div class="check"><span class="ico ok">✓</span><span class="nm">finance.subscriptions</span><span class="det">source-of-record (your call)</span></div>
+      <div class="check"><span class="ico warn">⚠</span><span class="nm">crm.signups</span><span class="det">8% discrepancy — noted in appendix</span></div>
+    </div>`),
+  notebook: () => surf("Analysis · notebook", "Hex idiom", `
+    <div class="nb">
+      <div class="cell"><div class="ch">▸ <span class="n">cell 1</span> · cohort definition · sql</div></div>
+      <div class="cell"><div class="ch">▸ <span class="n">cell 2</span> · funnel steps join · sql</div></div>
+      <div class="chartwrap">
+        <div class="ct">Drop-off concentrates at “connect repo” — 38%</div>
+        <div class="cs">onboarding funnel, last 14 days · n=4,812</div>
+        <svg viewBox="0 0 520 150" style="width:100%">
+          <g font-family="IBM Plex Mono" font-size="9" fill="#9C99AC">
+            <text x="6" y="146">sign up</text><text x="110" y="146">create goal</text>
+            <text x="225" y="146">connect repo</text><text x="350" y="146">first run</text><text x="455" y="146">day-7</text>
+          </g>
+          <g>
+            <rect x="6"   y="20" width="72" height="110" rx="3" fill="#EDEBE4"/>
+            <rect x="110" y="34" width="72" height="96" rx="3" fill="#EDEBE4"/>
+            <rect x="225" y="76" width="72" height="54" rx="3" fill="#D6235C"/>
+            <rect x="350" y="88" width="72" height="42" rx="3" fill="#EDEBE4"/>
+            <rect x="455" y="96" width="58" height="34" rx="3" fill="#EDEBE4"/>
+          </g>
+          <g font-family="IBM Plex Mono" font-size="9.5" fill="#4A4860">
+            <text x="26" y="14">100%</text><text x="132" y="28">87%</text>
+            <text x="243" y="70" fill="#D6235C" font-weight="600">-38%</text><text x="372" y="82">42%</text><text x="477" y="90">31%</text>
+          </g>
+        </svg>
+        <div class="prov">PROVENANCE <a href="#">show query</a> <a href="#">source lineage</a> <a href="#">cohort def</a></div>
+      </div>
+    </div>`),
+};
+
+/* helpers */
+function surf(label, idiom, body){
+  return `<section class="surface"><div class="surf-h"><span class="lab">${label}</span><span class="src">${idiom}</span></div>${body}</section>`;
+}
+function g(label, rows){ return `<div class="bgroup hr-lab"><span class="lab">${label}</span></div>${rows.join("")}`; }
+function r(dot,id,title,who,chips){
+  const ch = chips.map(([t,k])=>k==="warn"?`<span class="kchip warn">${t}</span>`
+    :k==="you"?`<span class="kchip you">${t}</span>`
+    :t.includes("rework")?`<span class="kchip">${t.replace("rework","")}</span>`
+    :t.startsWith("<span")?t:`<span class="kchip">${t}</span>`).join("");
+  return `<div class="brow"><span class="sd ${dot}"></span><span class="id">${id}</span><span class="bt">${title}</span><span class="props">${ch}${who}</span></div>`;
+}
+function boardRows(groups){ return `<div class="board">${groups.join("")}</div>`; }
+
+/* ═══════════ shell render ═══════════ */
+let cur = "feature", curStep = null;
+
+function renderRail(){
+  const order = ["feature","bugfix","debugging","prd","spike","data"];
+  document.getElementById("rail").innerHTML = `
+    <div class="brand">die<em>cast</em></div><div class="tag">cast to spec · no drift</div>
+    <div class="hr-lab" style="padding:0 10px 8px"><span class="lab">Goals</span></div>
+    ${order.map(k=>{const f=FLOWS[k];const needsYou=f.strip.some(s=>s.you);
+      return `<div class="goal ${k===cur?"sel":""}" onclick="go('${k}')">
+        <span class="fam">${f.fam}</span><span class="t">${f.title}</span>
+        ${needsYou?`<span class="sd you"></span>`:""}</div>`;}).join("")}
+    <div class="ws"><div class="hr-lab" style="padding:0 10px 8px"><span class="lab">Workspace</span></div>
+      <div class="goal"><span class="glyph">▦</span><span class="t">Board</span><span class="badge">@you · 3</span></div>
+      <div class="goal"><span class="glyph">⬡</span><span class="t">Marketplace</span></div>
+      <div class="goal"><span class="glyph">⚙</span><span class="t">Agent ops</span></div></div>`;
+}
+
+function renderCanvas(){
+  const f = FLOWS[cur];
+  const nowIx = f.steps.findIndex(s=>s.st==="now");
+  const showIx = curStep ?? nowIx;
+  const step = f.steps[showIx];
+  const body = step.view ? SURF[step.view]() :
+    `<section class="surface"><div class="todoph"><div class="big">— ${step.n.toUpperCase()} · NOT STARTED —</div><div class="sm">${step.ph||""}</div></div></section>`;
+
+  document.getElementById("canvas").innerHTML = `
+    <div class="crumb">northwind <span style="color:var(--line)">/</span> goals <span style="color:var(--line)">/</span> <b>${f.slug}</b></div>
+    <div class="headrow"><span class="gtitle">${f.title}</span><span class="fampill">${f.fam==="FEAT"?"FEATURE":f.fam}</span><span class="meta">${f.meta}</span></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink60);margin-bottom:14px">
+      <span style="font-family:var(--mono);font-size:9.5px;color:var(--rasp);letter-spacing:.1em">◈ GUIDE</span>${f.guideline}</div>
+    <div class="stepper">
+      ${f.steps.map((s,i)=>`${i?`<span class="conn ${f.steps[i-1].st==="done"?"done":""}"></span>`:""}
+        <span class="step ${s.st} ${i===showIx&&s.st!=="now"?"viewing":""}" onclick="goStep(${i})">
+          <span class="ix">${s.st==="done"?"✓":String(i+1).padStart(2,"0")}</span><span class="sn">${s.n}</span></span>`).join("")}
+      ${f.iter?`<span class="iterbadge">↺ ${f.iter}</span>`:""}
+    </div>
+    <div class="gbar"><span class="gm">◈ NEXT</span>
+      <div><div class="do">${f.nudge.do}</div><div class="why">${f.nudge.why}</div></div>
+      <button class="cta">Go</button></div>
+    <div class="strip">${f.strip.map(s=>`<span class="chiplet ${s.you?"you":""}"><span class="sd ${s.dot}"></span>${s.html}</span>`).join("")}</div>
+    ${body}`;
+}
+
+function renderChat(){
+  const f = FLOWS[cur];
+  document.getElementById("chat").innerHTML = `
+    <div class="chat-h"><span class="gmark">◈</span><div><div class="t">Guide</div><div class="s">${f.slug}</div></div></div>
+    <div class="msgs">${f.chat.map(m=>`
+      <div class="m ${m.who==="g"?"g":"you"}"><div class="mlab">${m.who==="g"?"◈ guide":"you"}</div>
+        <div class="bub">${m.t}${m.card?`<div class="acard"><div class="at">${m.card.t}</div><div class="am">${m.card.m}</div><span class="pin">📌 pin to canvas</span></div>`:""}</div></div>`).join("")}
+    </div>
+    <div class="inp">Steer, ask, or override the Guide… <span class="key">⏎</span></div>`;
+}
+
+function paint(){ renderRail(); renderCanvas(); renderChat(); }
+function go(k){ cur=k; curStep=null;
+  if(document.startViewTransition) document.startViewTransition(paint); else paint();
+  location.hash = k; }
+function goStep(i){ curStep=i;
+  if(document.startViewTransition) document.startViewTransition(renderCanvas); else renderCanvas(); }
+
+const h = location.hash.replace("#","").split("/");
+if (FLOWS[h[0]]) cur = h[0];
+if (h[1]!==undefined && h[1]!=="") curStep = +h[1];
+paint();
+</script>
+</body></html>

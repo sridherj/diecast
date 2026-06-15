@@ -1,0 +1,77 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Option C — Single light world (Studio everywhere)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;650&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* light world: the acid accent needs a darker treatment to hold contrast */
+  [data-register="studio"] .nudge { background: #1A1A18; color: #F4FFD6; }
+  [data-register="studio"] .needs-you { box-shadow: 0 0 0 3px rgba(160,200,30,.25); background:#7FA31B; }
+  [data-register="studio"] .dot.now { background:#7FA31B; border-color:#7FA31B; }
+  [data-register="studio"] .actor.maker { color:#3D6AD6; border-color:#3D6AD6; }
+  [data-register="studio"] .actor.checker { color:#7C4FD0; border-color:#7C4FD0; }
+  [data-register="studio"] .ok { color:#2D7D4F; } [data-register="studio"] .flag { color:#B5821A; }
+</style>
+</head><body style="background:#E9E7E1">
+
+<div class="sample-label" style="color:#6B6B66">Option C — single light world · every surface Studio, including execution</div>
+
+<div class="sample-label" style="color:#6B6B66">canvas / execution / board → STUDIO (light)</div>
+<section class="register" data-register="studio">
+  <div class="goal-head">
+    <span class="pill family">FEATURE</span>
+    <span class="goal-title">Add RBAC to checkout</span>
+    <span class="needs-you" title="needs you"></span>
+    <span class="pill">execution · 2/5 tickets</span>
+    <button class="nudge">▶ Review CAST-412’s PR</button>
+  </div>
+
+  <div class="spine">
+    <span class="node"><span class="dot done"></span>Requirements</span><span class="bar"></span>
+    <span class="node"><span class="dot done"></span>Exploration</span><span class="bar"></span>
+    <span class="node"><span class="dot done"></span>Plan</span><span class="bar"></span>
+    <span class="node now"><span class="dot now"></span>Execution</span><span class="bar"></span>
+    <span class="node"><span class="dot"></span>Done</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h4>Working now</h4>
+      <div class="agent-row">
+        <span class="actor maker">crud-orchestrator</span>
+        <span class="conf" title="confidence: high">●</span>
+        <span class="autonomy">L2</span>
+        <span class="rework">rework <b>1/3</b></span>
+      </div>
+      <div class="checker-line">
+        <span class="actor checker">crud-compliance-checker</span>
+        <span>99.9% compliant · 505 runs</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4>Evidence — CAST-412</h4>
+      <div class="ev-row"><span>Tests</span><span class="ok">47 passed / 0 failed</span></div>
+      <div class="ev-row"><span>Checker rules</span><span><span class="ok">M04 ✓ S03 ✓</span> <span class="flag">R02 ⚠</span></span></div>
+      <div class="ev-row"><span>Artifact</span><span class="mono">PR #2341</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="sample-label" style="color:#6B6B66">requirements doc → STUDIO (light)</div>
+<section class="register" data-register="studio">
+  <div class="doc">
+    <div class="pills">
+      <span class="pill family">You are building a new feature</span>
+      <span class="pill">v0.3 · refined</span>
+    </div>
+    <h1>Add RBAC to checkout</h1>
+    <p class="l1">When an order admin manages refunds, they need role-scoped access so that
+    support staff can act without seeing payment credentials.</p>
+    <h3>Must hold</h3>
+    <li>Role checks enforced at the service layer, not the UI<span class="comment"><span class="who">PM · Mira</span> which roles ship v1?</span></li>
+    <li>Existing admin sessions migrate without re-login</li>
+    <li>Audit row on every privileged action</li>
+    <div class="decision-chip">⚖ <b>classification: feature → confirmed</b> · by cast-refine-requirements · 09:18 <span class="lvl">L1</span></div>
+  </div>
+</section>
+
+</body></html>

@@ -1,0 +1,29 @@
+{
+  "goal_slug": "refine-requirements-v2",
+  "parent_run_id": "run_20260611_140426_cf6da5",
+  "delegation_context": {
+    "agent_name": "cast-detailed-plan",
+    "instructions": "Create a detailed, spec-aware execution plan for ONLY Phase 1: Foundation — Spec-Kit Parser & Thin Sidecar Spine. This is the downscaled keystone: a spec-kit parser + coarse block model + thin DB sidecar (comment rows, version snapshots, content hashes), with NO deterministic anchoring engine and NO per-element IDs (the .collab.md file stays byte-canonical; comments store quoted_text + section_hint and are re-located by a Claude subagent at runtime). Read plan.collab.md Overview + 'Decisions Resolved at Plan Review' + the Phase 1 section, and refined_requirements.collab.md (the file the parser must consume). Produce concrete decisions: the parser module path/layout reusing the spec-checker regexes (US_HEADING_RE/FR_ID_RE/SC_ID_RE/EARS_SCENARIO_RE) so parser and FR-007 cannot drift; the typed block kinds {Intent,UserStory,FR,SC,Constraint,Scope,Directional,OpenQuestion}; the schema.sql + db/connection.py _run_migrations() additions for requirement_versions and requirement_comments(+comment_events); the design-note location; and the FR-007 read-only golden-file guard test. YOU ARE THE FIRST SUB-PHASE PLANNED in a parallel-waves fan-out — be deliberate and explicit about canonical module names, table/column names, and function signatures, because Phases 2/3a/3b/4/5 will adopt them. Output ONE plan file to docs/plan/.",
+    "context": {
+      "goal_title": "Refine Requirements v2 — Workflow-Aware, HTML-First Requirements Refinement",
+      "goal_phase": "Phase 1: Foundation — Spec-Kit Parser & Thin Sidecar Spine",
+      "relevant_artifacts": [
+        "goal.yaml",
+        "plan.collab.md",
+        "refined_requirements.collab.md",
+        "exploration/summary.ai.md"
+      ],
+      "prior_output": "First wave — no prior sub-phase decisions yet.",
+      "subphase_section": "## Phase 1: Foundation — Spec-Kit Parser & Thin Sidecar Spine\n> *(Provisional until the Phase 0 human gate clears — see above.)*\n**Outcome:** `refined_requirements.collab.md` parses into an ordered, typed **block model** for\nrendering, and a **thin DB spine** exists — comment rows, version snapshots, and content hashes — with\n**no deterministic anchoring engine** (comments store a quote + section hint; a subagent re-locates\nthem). The `.collab.md` file remains byte-canonical (FR-007 untouched). Every later phase consumes this.\n**Dependencies:** None (the downscaled keystone — build first).\n**Estimated effort:** 1-2 sessions (smaller than the original draft — the anchoring engine is deleted\nper the thin-spine decision).\n**Verification:** `pytest` — parser produces the expected typed blocks from this goal's own\n`refined_requirements.collab.md`; `bin/cast-spec-checker` exits 0 on the file unchanged; a snapshot\ntest pins the version-snapshot + content-hash behavior.\n\nKey activities:\n- **Codify the resolved architecture as a short design note** (`docs/design/` or atop the parser\n  module): files-canonical + **thin DB spine** (comment rows / version snapshots / conflict hash), no\n  per-element IDs, **no deterministic anchoring engine** — comments are stored with a quote + section\n  hint and re-located by a Claude subagent. Record this so future readers don't re-inherit either the\n  playbooks' DB-canonical/ULID premise *or* assume a heavy anchor scheme.\n- **Build `requirements_render/parser.py`:** read `refined_requirements.collab.md` → ordered typed\n  blocks `{kind, level, body}` where `kind ∈ {Intent, UserStory, FR, SC, Constraint, Scope,\n  Directional, OpenQuestion}`. Reuse the spec-checker's own regexes (`US_HEADING_RE`, `FR_ID_RE`,\n  `SC_ID_RE`, `EARS_SCENARIO_RE`) as the grammar so the parser and the FR-007 contract can never drift.\n  This serves the render only — it is **not** a comment-anchoring index.\n- **Add the thin DB spine** via the house migration pattern (`db/connection.py` `_run_migrations()` +\n  `schema.sql`): `requirement_versions` (file snapshots + a per-version content hash) and\n  `requirement_comments` (+ append-only `comment_events` trail). A comment row stores\n  `{goal_slug, version, quoted_text, section_hint, state, author, ...}` — **no `block_anchor` column,\n  no element surrogate.** Re-location is a runtime subagent step, not a stored key. Defer routing\n  columns to Phase 3b and `change_request*` tables to Phase 5.\n- **FR-007 read-only guard (golden-file test):** assert that generating the HTML render does **not**\n  mutate `.collab.md` bytes and `bin/cast-spec-checker` stays green. Trivial under files-canonical —\n  the render only *reads* the file.\n\n",
+      "dependencies": "None — Phase 1 is the keystone, built first.",
+      "decisions_so_far": null,
+      "prior_subphase_plans": []
+    },
+    "output": {
+      "output_dir": "docs/plan/",
+      "expected_artifacts": [
+        "2026-06-11-refine-requirements-v2-phase1-foundation.md"
+      ]
+    }
+  }
+}

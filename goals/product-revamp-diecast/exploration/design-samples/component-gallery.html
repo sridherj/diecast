@@ -1,0 +1,351 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Diecast component gallery — pick one option per component</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F4F0; --surface:#FFFFFF; --surface-2:#EFEDE7; --text:#1A1A28; --muted:#4A4860;
+  --hairline:#DDD8CD; --accent:#D6235C; --accent-soft:rgba(214,35,92,.08);
+  --maker:#3B5BB0; --checker:#6B47B0; --ok:#2D7D4F; --warn:#B5821A; --danger:#B22439;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'DM Sans',system-ui,sans-serif;
+  --radius:8px;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);padding:40px;max-width:1080px;margin:0 auto}
+h1{font-family:var(--mono);font-size:24px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:36px}
+section{margin-bottom:48px}
+h2{font-family:var(--mono);font-size:15px;border-bottom:2px solid var(--text);padding-bottom:8px;margin-bottom:6px}
+.hint{font-size:13px;color:var(--muted);margin-bottom:16px}
+.variants{display:grid;gap:14px}
+.variant{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);padding:18px}
+.vlabel{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.1em;margin-bottom:12px;font-weight:600}
+.cols2{grid-template-columns:1fr 1fr}.cols3{grid-template-columns:1fr 1fr 1fr}
+.mono{font-family:var(--mono)}
+
+/* shared atoms */
+.pill{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--hairline);color:var(--muted)}
+.btn{background:var(--accent);color:#FFF3F6;font-weight:600;font-size:13px;border:0;border-radius:var(--radius);padding:9px 16px;font-family:var(--sans);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--hairline)}
+.ok{color:var(--ok);font-family:var(--mono);font-size:12px}
+.warn{color:var(--warn);font-family:var(--mono);font-size:12px}
+
+/* 1 — feature spine */
+.spineA{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.spineA .nd{display:flex;align-items:center;gap:6px}
+.spineA .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--muted)}
+.spineA .dot.done{background:var(--muted)} .spineA .dot.now{background:var(--accent);border-color:var(--accent)}
+.spineA .nd.now{color:var(--text)} .spineA .bar{width:24px;height:1px;background:var(--hairline)}
+.spineB{display:flex;gap:4px}
+.spineB .seg{flex:1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 4px;background:var(--surface-2);border-radius:4px;border-bottom:3px solid var(--hairline)}
+.spineB .seg.done{border-bottom-color:var(--muted);color:var(--text)}
+.spineB .seg.now{border-bottom-color:var(--accent);color:var(--text);background:var(--accent-soft);font-weight:600}
+.spineC{display:flex;align-items:center;gap:6px;font-size:12px}
+.spineC .crumb{font-family:var(--mono);padding:5px 12px;border-radius:99px;border:1px solid var(--hairline);color:var(--muted)}
+.spineC .crumb.done{background:var(--surface-2);text-decoration:line-through;text-decoration-thickness:1px}
+.spineC .crumb.now{background:var(--text);color:var(--bg);border-color:var(--text)}
+.spineC .arr{color:var(--hairline)}
+
+/* 2 — debug loop */
+.loopA{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.loopA .iter{font-size:18px;color:var(--accent)}
+.loopA b{color:var(--text)}
+.loopB{display:flex;gap:0;align-items:stretch}
+.loopB .stage{padding:8px 14px;background:var(--surface-2);font-family:var(--mono);font-size:11px;color:var(--muted);position:relative}
+.loopB .stage.now{background:var(--accent-soft);color:var(--text);font-weight:600}
+.loopB .ret{align-self:center;padding:0 10px;color:var(--accent);font-size:16px}
+.loopB .count{align-self:center;font-family:var(--mono);font-size:11px;background:var(--text);color:var(--bg);border-radius:99px;padding:3px 10px;margin-left:10px}
+.ledger{font-size:13px;width:100%;border-collapse:collapse}
+.ledger td{padding:6px 10px;border-bottom:1px solid var(--hairline)}
+.ledger .h{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.refuted{color:var(--muted);text-decoration:line-through}
+.confirmed{color:var(--ok);font-weight:600}
+
+/* 3 — nudge */
+.nudgeB{background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px}
+.nudgeB .why{font-size:12.5px;color:var(--muted)}
+.nudgeB .t{font-weight:600;font-size:14px}
+.nudgeC{display:flex;align-items:center;gap:12px;border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface-2);border-radius:0 var(--radius) var(--radius) 0;font-size:13.5px}
+
+/* 4 — colleague lockup */
+.lockA{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.actor{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:4px}
+.actor.maker{color:var(--maker);border:1px solid var(--maker)}
+.actor.checker{color:var(--checker);border:1px dashed var(--checker)}
+.autonomy{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid var(--muted);color:var(--muted)}
+.rework{font-family:var(--mono);font-size:11px;color:var(--muted)} .rework b{color:var(--text)}
+.av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600}
+.av.human{background:var(--text);color:var(--bg)}
+.av.maker{border:2px solid var(--maker);color:var(--maker);background:var(--surface)}
+.av.checker{background:var(--checker);color:#fff}
+.lockB{display:flex;align-items:center;gap:8px}
+.lockB .pair{display:flex;align-items:center;margin-right:6px}
+.lockB .pair .av+.av{margin-left:-8px;box-shadow:0 0 0 2px var(--surface)}
+.lockB .meta{font-size:12.5px;color:var(--muted)} .lockB .meta b{color:var(--text)}
+.lockC{border:1px solid var(--hairline);border-radius:var(--radius);padding:12px 14px;max-width:380px}
+.lockC .row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.lockC .name{font-family:var(--mono);font-size:13px;font-weight:600}
+.lockC .foot{display:flex;justify-content:space-between;border-top:1px solid var(--hairline);padding-top:8px;font-size:11.5px;color:var(--muted)}
+.meter{display:inline-flex;gap:2px;margin-left:6px;vertical-align:middle}
+.meter i{width:10px;height:5px;border-radius:2px;background:var(--hairline)}
+.meter i.used{background:var(--warn)}
+
+/* 5 — evidence */
+.evRows .r{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--hairline)}
+.evRows .r:last-child{border:0}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--surface-2);border-radius:6px;padding:12px;text-align:center}
+.tile .big{font-family:var(--mono);font-size:18px;font-weight:600}
+.tile .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.shots{display:flex;gap:8px;margin-top:10px}
+.shot{flex:1;height:54px;background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 6px,#E7E4DC 6px,#E7E4DC 12px);border:1px solid var(--hairline);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);font-family:var(--mono)}
+.evC{display:flex;align-items:center;gap:12px;font-size:13px}
+.evC details{font-size:12.5px}
+.evC summary{cursor:pointer;color:var(--muted)}
+
+/* 6 — decision */
+.decA{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:99px;padding:5px 12px;color:var(--muted)}
+.decA b{color:var(--text)}
+.lvl{font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--warn);color:var(--warn)}
+.decB{background:var(--surface);border:1px solid var(--hairline);border-left:3px solid var(--checker);border-radius:6px;padding:12px 14px;max-width:430px;font-size:13px}
+.decB .t{font-weight:600;margin-bottom:4px}
+.decB .meta{font-size:11.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+.decC{font-family:var(--mono);font-size:12px;display:grid;grid-template-columns:46px 86px 28px 1fr 150px;gap:10px;padding:8px 0;border-bottom:1px solid var(--hairline);align-items:center}
+.decC .diff{color:var(--text)} .decC .who{color:var(--muted)}
+
+/* 7 — escalation */
+.escA{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;max-width:640px}
+.escA .opt{border-radius:var(--radius);padding:14px;font-size:12.5px}
+.escA .a{background:var(--accent);color:#FFF3F6}
+.escA .a .tag{background:rgba(255,255,255,.2)}
+.escA .b{border:1.5px solid var(--text)}
+.escA .c{border:1px dashed var(--hairline);color:var(--muted)}
+.escA .tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surface-2);display:inline-block;margin-bottom:8px}
+.escA .t{font-weight:700;margin-bottom:4px}
+.escB .opt{display:flex;gap:12px;align-items:baseline;padding:10px 12px;border:1px solid var(--hairline);border-radius:6px;margin-bottom:8px;font-size:13px;max-width:640px}
+.escB .opt.rec{border-color:var(--accent);background:var(--accent-soft)}
+.escB .k{font-family:var(--mono);font-weight:600}
+.escB .rec .k{color:var(--accent)}
+.escB .cons{color:var(--muted);font-size:12px;margin-left:auto;text-align:right}
+
+/* 8 — autonomy */
+.dialA{display:inline-flex;border:1px solid var(--hairline);border-radius:99px;overflow:hidden;font-size:12.5px}
+.dialA span{padding:7px 16px;color:var(--muted)}
+.dialA .on{background:var(--text);color:var(--bg);font-weight:600}
+.legend{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+.dialB{display:flex;gap:8px}
+.dialB .chip{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--hairline);color:var(--muted)}
+.dialB .on{border-color:var(--accent);color:var(--text);background:var(--accent-soft);font-weight:600}
+.trust{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+</style></head><body>
+
+<h1>Diecast component gallery</h1>
+<p class="sub">Same identity everywhere (cream · raspberry · IBM Plex Mono + DM Sans). Pick one option per component — reply like “1B, 2A, 3A, 4C, 5B, 6B, 7A, 8A”.</p>
+
+<!-- 1 -->
+<section>
+  <h2>1 · Stage spine — feature flow</h2>
+  <p class="hint">The backbone strip showing where the goal is. (Debug/spike/analysis get their own shapes — see 2.)</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">1A · dot rail</div>
+      <div class="spineA">
+        <span class="nd"><span class="dot done"></span>Requirements</span><span class="bar"></span>
+        <span class="nd"><span class="dot done"></span>Exploration</span><span class="bar"></span>
+        <span class="nd"><span class="dot done"></span>Plan</span><span class="bar"></span>
+        <span class="nd now"><span class="dot now"></span>Execution</span><span class="bar"></span>
+        <span class="nd"><span class="dot"></span>Done</span>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">1B · segment bar</div>
+      <div class="spineB">
+        <span class="seg done">Requirements</span><span class="seg done">Exploration</span>
+        <span class="seg done">Plan</span><span class="seg now">Execution</span><span class="seg">Done</span>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">1C · breadcrumb pills</div>
+      <div class="spineC">
+        <span class="crumb done">Requirements</span><span class="arr">›</span>
+        <span class="crumb done">Exploration</span><span class="arr">›</span>
+        <span class="crumb done">Plan</span><span class="arr">›</span>
+        <span class="crumb now">Execution</span><span class="arr">›</span>
+        <span class="crumb">Done</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>2 · Debug-loop spine</h2>
+  <p class="hint">The contrast shape — loops with an iteration counter, not a line.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">2A · inline loop glyph</div>
+      <div class="loopA">
+        Symptom → Hypothesis → Experiment → Observation <span class="iter">↺</span> <b>iteration 2/3</b> → Root cause → Fix
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">2B · staged band + counter</div>
+      <div class="loopB">
+        <span class="stage">Symptom</span><span class="stage">Hypothesis</span>
+        <span class="stage now">Experiment</span><span class="stage">Observation</span>
+        <span class="ret">↺</span><span class="count">iter 2/3</span>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">2C · hypothesis ledger as the spine (board-style)</div>
+      <table class="ledger">
+        <tr><td class="h">H1 cache staleness</td><td class="refuted">refuted — repro persists with cache off</td></tr>
+        <tr><td class="h">H2 race in queue</td><td class="refuted">refuted — single-worker repro</td></tr>
+        <tr><td class="h">H3 auth middleware</td><td class="confirmed">confirmed — repro isolated · iter 2/3</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>3 · Nudged next step</h2>
+  <p class="hint">The one visually-primary action per screen. Overrides (chat/nav) always remain.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">3A · filled button</div>
+      <button class="btn">▶ Review CAST-412’s PR</button>
+      <button class="btn ghost" style="margin-left:8px">More options</button>
+    </div>
+    <div class="variant"><div class="vlabel">3B · nudge card with “why now”</div>
+      <div class="nudgeB">
+        <div><div class="t">Review CAST-412’s PR</div>
+        <div class="why">3 open questions block planning — this unblocks the most work</div></div>
+        <button class="btn" style="margin-left:auto">Go ▶</button>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">3C · banner strip</div>
+      <div class="nudgeC"><b>Next:</b> Review CAST-412’s PR <span style="color:var(--muted);font-size:12px">· checker flagged R02</span>
+      <button class="btn" style="margin-left:auto;padding:6px 12px">▶</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2>4 · Agent colleague lockup</h2>
+  <p class="hint">How an agent appears everywhere it acts (board, ticket, resume, dispatch tree). Maker+checker always paired.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">4A · chip row</div>
+      <div class="lockA">
+        <span class="actor maker">crud-orchestrator</span>
+        <span title="confidence high">●</span>
+        <span class="autonomy">L2</span>
+        <span class="rework">rework <b>1/3</b></span>
+        <span class="actor checker">crud-compliance-checker</span>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">4B · paired avatars + meta line</div>
+      <div class="lockB">
+        <span class="pair"><span class="av maker">CO</span><span class="av checker">CC</span></span>
+        <span class="meta"><b>crud-orchestrator</b> · paired: crud-compliance-checker · L2 · rework 1/3 · ● high</span>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">4C · mini-card with stat footer</div>
+      <div class="lockC">
+        <div class="row1"><span class="av maker">CO</span><span class="name">crud-orchestrator</span>
+          <span class="autonomy">L2</span><span class="meter"><i class="used"></i><i></i><i></i></span></div>
+        <div class="foot"><span>→ paired: crud-compliance-checker</span><span>99.9% · 505 runs</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2>5 · Evidence panel (feature family / E1)</h2>
+  <p class="hint">“Testing is the outcome of WHAT.” Outcome first, proof one click in. Never a bare green badge.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">5A · row list</div>
+      <div class="evRows">
+        <div class="r"><span>Tests</span><span class="ok">47 passed / 0 failed</span></div>
+        <div class="r"><span>Checker rules</span><span><span class="ok">M04 ✓ S03 ✓</span> <span class="warn">R02 ⚠</span></span></div>
+        <div class="r"><span>Artifact</span><span class="mono" style="font-size:12px">PR #2341</span></div>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">5B · stat tiles + screenshot strip</div>
+      <div class="tiles">
+        <div class="tile"><div class="big ok">47/47</div><div class="lbl">tests green</div></div>
+        <div class="tile"><div class="big">2/3 <span class="warn" style="font-size:12px">⚠</span></div><div class="lbl">checker rules</div></div>
+        <div class="tile"><div class="big mono" style="font-size:14px">PR #2341</div><div class="lbl">artifact</div></div>
+      </div>
+      <div class="shots"><div class="shot">before.png</div><div class="shot">after.png</div><div class="shot">admin-view.png</div></div>
+    </div>
+    <div class="variant"><div class="vlabel">5C · one-line verdict + expandable checklist</div>
+      <div class="evC">
+        <span class="ok" style="font-size:14px">✓</span>
+        <span><b>Acceptance met</b> — 47 tests, 2/3 checker rules clean, R02 flagged</span>
+        <details style="margin-left:auto"><summary>show proof</summary>
+          <div style="padding-top:8px" class="mono" style="font-size:12px">M04 ✓ · S03 ✓ · R02 ⚠ missing FK index · PR #2341</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2>6 · Decision record (in context)</h2>
+  <p class="hint">A judgment call surfaced on the thing it changed — rationale + time + reversibility.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">6A · inline pill</div>
+      <span class="decA">⚖ <b>classification: feature → bug</b> · crud-orchestrator · 14:22 <span class="lvl">L2</span></span>
+    </div>
+    <div class="variant"><div class="vlabel">6B · left-rule callout</div>
+      <div class="decB">
+        <div class="t">⚖ Classified CAST-412 as bug, not feature</div>
+        <div>Repro is a regression from the v4.2 RBAC migration, not new scope. Routes to the debug loop; skips re-estimate.</div>
+        <div class="meta">crud-orchestrator · 14:22 · <span class="lvl">L2</span> · revisit if bisect lands outside migration range</div>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">6C · trail row (diff-first)</div>
+      <div class="decC"><span class="who">14:22</span><span class="who">execution</span><span class="lvl">L2</span>
+        <span class="diff">classification: feature → bug</span><span class="who">crud-orchestrator</span></div>
+      <div class="decC"><span class="who">13:05</span><span class="who">planning</span><span class="lvl" style="border-color:var(--muted);color:var(--muted)">L1</span>
+        <span class="diff">FR-014 → FR-014a, FR-014b</span><span class="who">cast-detailed-plan</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2>7 · L3 escalation rail (3 pre-framed options)</h2>
+  <p class="hint">Agent stops; you pick. Rank must be visible — but no rubber-stamp default.</p>
+  <div class="variants">
+    <div class="variant"><div class="vlabel">7A · hero / outline / ghost cards</div>
+      <div class="escA">
+        <div class="opt a"><span class="tag">A · RECOMMENDED</span><div class="t">Additive migration</div>keep legacy column 90 days; zero data risk</div>
+        <div class="opt b"><span class="tag">B</span><div class="t">Drop now + snapshot</div>backup first; faster, restore window 30d</div>
+        <div class="opt c"><span class="tag">C</span><div class="t">Spike a dual-write</div>2h timebox; defers the call with data</div>
+      </div>
+    </div>
+    <div class="variant"><div class="vlabel">7B · ranked list rows</div>
+      <div class="escB">
+        <div class="opt rec"><span class="k">A</span> Additive migration, keep column 90 days <span class="cons">zero data risk · slowest</span></div>
+        <div class="opt"><span class="k">B</span> Drop now with backup snapshot <span class="cons">fast · 30d restore window</span></div>
+        <div class="opt"><span class="k">C</span> Spike a dual-write window first <span class="cons">2h timebox · defers call</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2>8 · Autonomy dial (per goal)</h2>
+  <p class="hint">Re-keys where L1/L2/L3 thresholds sit. Framed as earned trust.</p>
+  <div class="variants cols2">
+    <div class="variant"><div class="vlabel">8A · segmented control + legend</div>
+      <div class="dialA"><span>Conservative</span><span class="on">Balanced</span><span>Autonomous</span></div>
+      <div class="legend"><b>Balanced</b> — decide &amp; record routine (L1), notify on notable (L2), stop to ask on irreversible (L3).</div>
+      <div class="trust">ⓘ this goal’s agents: 99.4% compliance across 312 runs</div>
+    </div>
+    <div class="variant"><div class="vlabel">8B · chip toggle</div>
+      <div class="dialB"><span class="chip">Conservative</span><span class="chip on">Balanced</span><span class="chip">Autonomous</span></div>
+      <div class="trust">ⓘ earned: 99.4% compliance · 312 runs</div>
+    </div>
+  </div>
+</section>
+
+</body></html>

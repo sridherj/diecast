@@ -1,0 +1,33 @@
+{
+  "goal_slug": "refine-requirements-v2",
+  "parent_run_id": "run_20260611_140426_cf6da5",
+  "delegation_context": {
+    "agent_name": "cast-detailed-plan",
+    "instructions": "Create a detailed, spec-aware execution plan for ONLY Phase 3b: Routing — Phase-Agnostic Workflow Router. ADOPT from decisions_so_far: Phase 2 WorkFamily enum values (new_initiative, pilot_poc, bug_fix, data_analysis, random_idea, testing_qa, refactor_migration, personal_non_eng, generic) and the classification.family front-matter the resolver consumes; the Phase 1 service DB pattern (flat functions, db_path injectable, get_connection(db_path), modeled on goal_service/task_service). Plan concretely: (1) add the family registry to config.py beside STARTER_TASKS: a closed WORKFLOW_FAMILIES set + a TOTAL WORKFLOW_REGISTRY map, every value status='stub' with enumerated steps (bug-fix: logs->RCA->confirm->fix/test; etc.). Flipping a family to 'implemented' later is a registry-only diff (FR-015). (2) Build the pure resolver workflow_router_service.py modeled on orchestration_service.py for STRUCTURE but using the goal_service get_connection(db_path) DB pattern; resolve(family) is TOTAL — defined for every family + None (->needs-classification) + unknown (->unmatched, a self-announcing Special Case, never a silent Null Object / never STARTER_TASKS). The resolver NEVER re-classifies — pure consumer of the persisted family (this preserves FR-016 phase-agnosticism). (3) Add recording columns to goals (workflow_family, routing_handle, routed_at) via the ALTER TABLE ADD COLUMN migration pattern; thread through GoalUpdate; auto-render to goal.yaml. NOT tags. (4) Write record_routing_decision(slug, family, handle) — the only writer; idempotent. (5) Expose POST /api/goals/{slug}/route — the phase-agnostic surface a future planning/execution agent hits to re-resolve from persisted state (FR-016). (6) Have cast-refine-requirements call the cast-goal-classifier agent (Phase 2), write workflow_family to the goal, call record_routing_decision; refinement is the ONLY v2 caller of classifier+router; handle reclassification surfacing the changed downstream workflow (US6 S4); optionally ship a /cast-router skill. Run /cast-update-spec for the new goals columns to keep specs current (Spec References note). Output ONE plan file to docs/plan/.",
+    "context": {
+      "goal_title": "Refine Requirements v2 — Workflow-Aware, HTML-First Requirements Refinement",
+      "goal_phase": "Phase 3b: Routing — Phase-Agnostic Workflow Router",
+      "relevant_artifacts": [
+        "goal.yaml",
+        "plan.collab.md",
+        "refined_requirements.collab.md",
+        "exploration/summary.ai.md"
+      ],
+      "prior_output": "Prior sub-phase decisions are summarized at docs/plan/refine-requirements-v2-decisions-so-far.md. ADOPT their module names, table/column names, function signatures, and the three new agent names unless you have a strong reason to deviate; if you must deviate, document it under a 'Suggested Revisions to Prior Sub-Phases' section.",
+      "subphase_section": "## Phase 3b: Routing — Phase-Agnostic Workflow Router (parallel with Phase 3a)\n**Outcome:** A classified goal resolves to a family-specific downstream-workflow **handle** (a named\n**stub** for unbuilt pipelines), the decision is recorded on the goal, and the resolver is invokable\nfrom **any phase** without re-running refinement. v2 ships the seam + stubs, not the pipelines.\n**Dependencies:** Phase 2 (classification produces the family the resolver consumes).\n**Estimated effort:** 1-2 sessions\n**Verification:** Seed 5 goals (one per family) → `resolve` returns the correct handle/stub and\npersists `workflow_family`/`routing_handle` (SC-005). Flip a goal's `phase`, call `resolve` again →\n**byte-identical** handle, **no** re-classification. Assert no unimplemented family ever resolves to\n`STARTER_TASKS` or a generic bucket (0 silent fallbacks; every stub names its steps).\n\nKey activities:\n- **Add the family registry to `config.py`** beside `STARTER_TASKS`: a closed `WORKFLOW_FAMILIES` set\n  and a **total** `WORKFLOW_REGISTRY` map, every value `status=\"stub\"` with enumerated `steps`\n  (bug-fix: `logs→RCA→confirm→fix/test`; etc.). Flipping a family to `\"implemented\"` later is a\n  registry-only diff — no seam change (FR-015).\n- **Build the pure resolver `workflow_router_service.py`** modeled on `orchestration_service.py` (no\n  LLM, no subprocess, `db_path=` injectable, CLI hook). `resolve(family)` is **total** — defined for\n  every family + `None` (→ `needs-classification`) + unknown (→ `unmatched`, a Special Case that\n  *announces itself*, never a silent Null Object). The resolver **never re-classifies** — it is a pure\n  consumer of the persisted family (this is how FR-016 phase-agnosticism is preserved, not built).\n- **Add recording columns to `goals`** (`workflow_family`, `routing_handle`, `routed_at`) via the\n  `ALTER TABLE … ADD COLUMN` migration pattern; thread through `GoalUpdate`; they auto-render to\n  `goal.yaml` for free. **Not** `tags` (flat, collides).\n- **Write `record_routing_decision(slug, family, handle)`** — the only part that writes; idempotent\n  (re-recording the same family is a no-op). Keep it separate from the pure `resolve`.\n- **Expose `POST /api/goals/{slug}/route`** — the phase-agnostic surface a future planning/execution\n  agent hits to re-resolve from persisted state (FR-016).\n- **Have `cast-refine-requirements` call the `cast-goal-classifier` agent** (built in Phase 2), then\n  write `workflow_family` to the goal and call `record_routing_decision`. Refinement is the **only** v2\n  caller of the classifier and the router — do not wire other phases. Handle reclassification updates\n  surfacing the changed downstream workflow (US6 Scenario 4). Optionally ship a `/cast-router` skill.\n  Net seam: **classifier agent + resolver service, both phase-agnostic, both single-caller in v2.**\n\n",
+      "dependencies": "Phase 2 (classification produces the WorkFamily the resolver consumes).",
+      "decisions_so_far": "docs/plan/refine-requirements-v2-decisions-so-far.md",
+      "prior_subphase_plans": [
+        "docs/plan/2026-06-11-refine-requirements-v2-phase1-foundation.md",
+        "docs/plan/2026-06-11-refine-requirements-v2-phase1b-refinement-brain.md",
+        "docs/plan/2026-06-11-refine-requirements-v2-phase2-classification.md"
+      ]
+    },
+    "output": {
+      "output_dir": "docs/plan/",
+      "expected_artifacts": [
+        "2026-06-11-refine-requirements-v2-phase3b-workflow-router.md"
+      ]
+    }
+  }
+}

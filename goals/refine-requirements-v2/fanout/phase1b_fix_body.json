@@ -1,0 +1,29 @@
+{
+  "goal_slug": "refine-requirements-v2",
+  "parent_run_id": "run_20260611_140426_cf6da5",
+  "delegation_context": {
+    "agent_name": "cast-detailed-plan",
+    "instructions": "SURGICAL REVISION of an existing plan file — NOT a new plan. Read docs/plan/2026-06-11-refine-requirements-v2-phase1b-refinement-brain.md. The owner has OVERRIDDEN one recorded decision. Change ONLY the HARD-GATE-headless decision from Opt B to Opt A, and update every section that referenced the old Opt B so the plan is internally consistent. The owner's decision (Opt A, verbatim intent): the gstack /spec HARD GATE applies WHEN RUNNING INTERACTIVELY; when cast-refine-requirements is invoked headless / HTTP-delegated (no human to give the go-ahead), it PERSISTS automatically after the meta-pass + reviewer subagent and records 'auto-persisted: non-interactive run' in its output contract. This keeps the anti-one-shot discipline where a human is present, but never hangs an unattended/orchestrated run. Headless invocation is therefore explicitly SUPPORTED (not a non-goal). Update: (1) the activity-7 HARD GATE description (currently ~lines 167-181 saying 'unconditional, does NOT relax when non-interactive, headless is a non-goal'); (2) the Decisions appendix entry dated ...16:34:57Z (Issue #1) to record Opt A with the gate-only-when-interactive rationale; (3) the risk-table rows mentioning 'unconditional / headless is a non-goal' (~lines 314, 325); (4) the flow diagram annotation and any summary line (~lines 354-355) that says headless is a non-goal. Leave ALL other content, decisions, and the 3-of-6 gbrain import scope EXACTLY as-is. Do NOT run a full plan review and do NOT dispatch cast-plan-review — this is a targeted owner-directed correction, apply it directly and rewrite the same file in place. Keep the filename identical.",
+    "context": {
+      "goal_title": "Refine Requirements v2 — Workflow-Aware, HTML-First Requirements Refinement",
+      "goal_phase": "Phase 1b: Refinement Brain Upgrades (surgical decision-override revision)",
+      "relevant_artifacts": [
+        "docs/plan/2026-06-11-refine-requirements-v2-phase1b-refinement-brain.md",
+        "plan.collab.md"
+      ],
+      "prior_output": "Owner override of one recorded decision; apply Opt A (gate-only-when-interactive, headless auto-persists). No other changes.",
+      "constraints": [
+        "Revise the existing file in place, same filename",
+        "Change ONLY the HARD-GATE-headless decision and its dependent references",
+        "Do NOT run plan review / do NOT dispatch cast-plan-review",
+        "Preserve all other decisions and the 3-of-6 gbrain import scope"
+      ]
+    },
+    "output": {
+      "output_dir": "docs/plan/",
+      "expected_artifacts": [
+        "2026-06-11-refine-requirements-v2-phase1b-refinement-brain.md"
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "goal_slug": "refine-requirements-v2",
+  "parent_run_id": "run_20260611_140426_cf6da5",
+  "delegation_context": {
+    "agent_name": "cast-detailed-plan",
+    "instructions": "Create a detailed, spec-aware execution plan for ONLY Phase 1b: Refinement Brain Upgrades (gbrain imports). These are pure agent-prompt edits to cast-refine-requirements, independent of the parser/render/DB build — porting portable upgrades from second-brain's taskos-refine-requirements: the stage-adaptive framework (vague->JTBD; specific->Example-Mapping; near-complete->EARS), explicit exit conditions + logging gaps into Open Questions, a dated Decisions section (Chose/Over/Because), an adversarial meta-pass ('what would an engineer reject?'), an evidence-quoting mandate for confidence scores, scope-mode detection from signal words, and optionally the gstack /spec HARD GATE + an office-hours-style adversarial reviewer subagent. Read plan.collab.md and the Phase 1b section. This sub-phase touches the AGENT PROMPT (agents/cast-refine-requirements/*), not cast-server code — keep it scoped there. Define the verification (re-refine 2-3 real writeups; confirm stage-adaptive behavior, a populated Decisions section, an adversarial contradiction surfaced; no spec-checker regression). Output ONE plan file to docs/plan/.",
+    "context": {
+      "goal_title": "Refine Requirements v2 — Workflow-Aware, HTML-First Requirements Refinement",
+      "goal_phase": "Phase 1b: Refinement Brain Upgrades (gbrain imports)",
+      "relevant_artifacts": [
+        "goal.yaml",
+        "plan.collab.md",
+        "refined_requirements.collab.md",
+        "exploration/summary.ai.md"
+      ],
+      "prior_output": "First wave — no prior sub-phase decisions yet.",
+      "subphase_section": "## Phase 1b: Refinement Brain Upgrades (gbrain imports) — parallel with Phase 1\n**Outcome:** `cast-refine-requirements` produces sharper drafts via portable upgrades from\nsecond-brain's `taskos-refine-requirements`, independent of the render/comments/versioning build.\n**Dependencies:** None (pure agent-prompt edits; run concurrently with Phase 1).\n**Estimated effort:** 1 session (~1 day of prompt edits)\n**Verification:** Re-refine 2-3 real writeups (one vague, one near-complete) and confirm the\nstage-adaptive behavior, a populated Decisions section, and that the adversarial meta-pass surfaces at\nleast one real contradiction; no regression in the existing spec-checker pass.\n\nKey activities:\n- Import the **stage-adaptive framework** (vague → JTBD; specific → Example-Mapping; near-complete →\n  EARS) — this *is* the Template-Enforcer guard the spec fears, applied at the authoring layer.\n- Add **explicit exit conditions** + log gaps into Open Questions when budget exhausts (no silent\n  low-confidence sections).\n- Add a dated **Decisions section** (Chose / Over / Because) — pairs naturally with Phase 4 versioning.\n- Add the **adversarial meta-pass** (\"what would an engineer reject?\") and the **evidence-quoting\n  mandate** for confidence scores (cite draft text).\n- Add **scope-mode detection** from signal words (MVP / comprehensive / dream).\n- Optionally port the gstack `/spec` HARD GATE (\"no output before Phase 1\") and an `/office-hours`-style\n  adversarial reviewer subagent (Diecast child-delegation makes this trivial).\n\n",
+      "dependencies": "None — pure agent-prompt edits, runs concurrently with Phase 1.",
+      "decisions_so_far": null,
+      "prior_subphase_plans": []
+    },
+    "output": {
+      "output_dir": "docs/plan/",
+      "expected_artifacts": [
+        "2026-06-11-refine-requirements-v2-phase1b-refinement-brain.md"
+      ]
+    }
+  }
+}
