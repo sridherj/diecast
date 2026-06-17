@@ -1,0 +1,7 @@
+model: haiku            # mechanical: launches server, reads output — no heavy reasoning
+interactive: true       # requires user to annotate in browser between launch and feedback read
+dispatch_mode: subagent # can also be dispatched by parent; will surface the URL and pause for signal
+context_mode: lightweight
+timeout_minutes: 60     # user may take time annotating before submitting
+proactive: false        # terminal command — opens session then reads what came back
+allowed_delegations: []

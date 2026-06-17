@@ -1,0 +1,41 @@
+/* cast-comment-html — annotation layer (namespaced cch-*, self-contained: no host CSS dependency) */
+.cch-pop{position:absolute;z-index:2147483000;background:#1a1a28;border-radius:8px;box-shadow:0 8px 26px -10px rgba(0,0,0,.45);padding:4px;display:none;font-family:ui-monospace,Menlo,monospace}
+.cch-pop.cch-show{display:block}
+.cch-pop button{font:inherit;font-size:11px;background:transparent;color:#fff;border:0;cursor:pointer;padding:3px 9px}
+mark.cch-hl{background:rgba(181,130,26,.16);border-bottom:1px dashed #b5821a;border-radius:2px;padding:0 1px;cursor:pointer;color:inherit}
+mark.cch-hl.cch-flash{background:rgba(214,35,92,.22)}
+mark.cch-hl.cch-resolved{background:rgba(45,125,79,.16);border-bottom-color:#2d7d4f}
+.cch-tray{position:fixed;top:0;right:0;width:330px;height:100vh;background:#fbfaf8;border-left:1px solid rgba(74,72,96,.18);box-shadow:0 8px 26px -10px rgba(0,0,0,.25);z-index:2147483001;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#1a1a28}
+.cch-tray.cch-open{transform:none}
+.cch-tray .cch-th{display:flex;align-items:center;gap:8px;padding:16px;border-bottom:1px solid rgba(74,72,96,.18);font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#4a4860}
+.cch-tray .cch-th .cch-x{margin-left:auto;cursor:pointer;color:rgba(74,72,96,.6);font-size:17px;line-height:1}
+.cch-body{flex:1;overflow-y:auto;padding:12px 16px 24px}
+.cch-empty{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:rgba(74,72,96,.6);padding:16px 0;line-height:17px}
+.cch-sec{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:rgba(74,72,96,.6);margin:16px 0 8px}
+.cch-new{border:1px solid rgba(214,35,92,.3);border-radius:6px;background:rgba(214,35,92,.07);padding:12px;margin-bottom:12px}
+.cch-new .cch-nq{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:rgba(74,72,96,.6);border-left:2px solid #b5821a;padding-left:6px;margin-bottom:8px;max-height:48px;overflow:auto}
+.cch-new textarea{width:100%;box-sizing:border-box;font:inherit;font-size:12px;line-height:17px;border:1px solid rgba(74,72,96,.18);border-radius:6px;padding:6px 9px;resize:vertical;min-height:46px;background:#fff;color:#1a1a28}
+.cch-new .cch-row{display:flex;gap:8px;margin-top:8px}
+.cch-new button{font:inherit;font-size:11px;font-weight:500;border-radius:6px;padding:5px 12px;cursor:pointer;border:1px solid rgba(74,72,96,.18);background:#f5f4f0;color:#4a4860}
+.cch-new button.cch-save{background:#d6235c;border-color:#d6235c;color:#fff}
+.cch-com{border:1px solid rgba(74,72,96,.18);border-radius:6px;background:#fff;padding:12px;margin-bottom:8px;cursor:pointer}
+.cch-com.cch-displaced{opacity:.6;border-style:dashed}
+.cch-com.cch-resolved{opacity:.7}
+.cch-com .cch-q{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:rgba(74,72,96,.45);border-left:2px solid #b5821a;padding-left:6px;margin-bottom:5px;line-height:14px}
+.cch-com.cch-resolved .cch-q{border-left-color:#2d7d4f}
+mark.cch-qmark{background:rgba(181,130,26,.2);color:rgba(74,72,96,.95);border-radius:2px;padding:0 1px;font-weight:600}
+.cch-new .cch-nq .cch-nqsec{opacity:.7}
+.cch-new .cch-nq mark.cch-qmark{background:rgba(214,35,92,.18);color:#1a1a28}
+.cch-com .cch-b{font-size:12px;line-height:17px;color:#1a1a28}
+.cch-com .cch-f{display:flex;align-items:center;gap:12px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:9px;color:rgba(74,72,96,.6)}
+.cch-com .cch-f button{background:transparent;border:0;color:rgba(74,72,96,.6);cursor:pointer;font:inherit;padding:0}
+.cch-com .cch-f button:hover{color:#d6235c}
+.cch-com .cch-f .cch-dsp{color:#b5821a}
+.cch-com .cch-f .cch-ts{margin-left:auto}
+.cch-bar{position:fixed;bottom:16px;right:16px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid rgba(74,72,96,.18);border-radius:22px;box-shadow:0 8px 26px -10px rgba(0,0,0,.25);padding:6px 8px 6px 15px;z-index:2147483001;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#4a4860}
+.cch-bar .cch-cnt b{color:#d6235c}
+.cch-bar button{font:inherit;font-size:10px;border:1px solid rgba(74,72,96,.18);background:#f5f4f0;color:#4a4860;border-radius:14px;padding:4px 11px;cursor:pointer}
+.cch-bar button:hover{color:#1a1a28}
+.cch-bar button.cch-primary{background:#d6235c;color:#fff;border-color:#d6235c}
+.cch-toast{position:fixed;bottom:66px;right:16px;background:#1a1a28;color:#fbfaf8;font-family:ui-monospace,Menlo,monospace;font-size:11px;padding:6px 13px;border-radius:8px;z-index:2147483002;opacity:0;transition:opacity .2s ease;pointer-events:none;max-width:300px}
+.cch-toast.cch-show{opacity:1}
