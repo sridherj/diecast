@@ -1,7 +1,15 @@
 # cast-comment-html — Manual Test Cases
 
 Automated coverage: `test_anchor.js` (pure anchoring) + `test_render_md.py` (MD rendering, runs the
-node suite too). The scenarios below cover the browser-interactive path that pytest can't drive.
+node suite too) + `run_layout_test.sh` (DOM wrap-layout regression in headless Chrome; skips when no
+browser is installed). The scenarios below cover the browser-interactive path that pytest can't drive.
+
+## TC0 — Highlighting must not change layout (regression: grid/flex columns)
+1. Serve an HTML file whose content uses a CSS **grid** or **flex** container (e.g. a two-column card).
+2. Select text that spans BOTH columns → "+ Comment" → Add comment.
+3. **Expect:** both columns stay side-by-side and in their box; no column drops to a new row. The
+   selection is highlighted in place. (Covered automatically by `run_layout_test.sh`: a `<mark>` must
+   never be wrapped around inter-element whitespace, which would become a stray grid/flex item.)
 
 ## TC1 — Happy path: comment on unique text
 1. `uv run python agents/cast-comment-html/comment_html.py <file>.html --port 8077`

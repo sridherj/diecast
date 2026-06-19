@@ -2,7 +2,7 @@
 .cch-pop{position:absolute;z-index:2147483000;background:#1a1a28;border-radius:8px;box-shadow:0 8px 26px -10px rgba(0,0,0,.45);padding:4px;display:none;font-family:ui-monospace,Menlo,monospace}
 .cch-pop.cch-show{display:block}
 .cch-pop button{font:inherit;font-size:11px;background:transparent;color:#fff;border:0;cursor:pointer;padding:3px 9px}
-mark.cch-hl{background:rgba(181,130,26,.16);border-bottom:1px dashed #b5821a;border-radius:2px;padding:0 1px;cursor:pointer;color:inherit}
+mark.cch-hl{background:rgba(181,130,26,.16);border-bottom:1px dashed #b5821a;border-radius:2px;padding:0;cursor:pointer;color:inherit}
 mark.cch-hl.cch-flash{background:rgba(214,35,92,.22)}
 mark.cch-hl.cch-resolved{background:rgba(45,125,79,.16);border-bottom-color:#2d7d4f}
 .cch-tray{position:fixed;top:0;right:0;width:330px;height:100vh;background:#fbfaf8;border-left:1px solid rgba(74,72,96,.18);box-shadow:0 8px 26px -10px rgba(0,0,0,.25);z-index:2147483001;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#1a1a28}

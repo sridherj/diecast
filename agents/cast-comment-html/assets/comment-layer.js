@@ -87,11 +87,44 @@
   }
 
   // ---- highlight wrap + re-anchor ----
+  // Wrap a selection without restructuring the document: highlight EACH intersected text node's
+  // segment in its own <mark>, never the whole multi-element range. The old code wrapped the range
+  // wholesale and, when the selection crossed an element boundary (surroundContents throws there),
+  // fell back to extractContents()+insertNode() — which re-parents block-level content inside one
+  // inline <mark>, collapsing the layout. Per-text-node wrapping always succeeds (each sub-range
+  // sits inside a single text node) and leaves block structure untouched. One comment id may now
+  // map to several <mark>s; unwrap/resolve/scroll iterate all of them.
   function wrapRange(range, id) {
-    var m = el('mark', 'cch-hl'); m.dataset.cid = id;
-    try { range.surroundContents(m); } catch (e) { try { var f = range.extractContents(); m.appendChild(f); range.insertNode(m); } catch (e2) { return false; } }
-    m.addEventListener('click', function () { openTray(); focusComment(id); });
-    return true;
+    if (range.collapsed) return false;
+    var sc = range.startContainer, so = range.startOffset, ec = range.endContainer, eo = range.endOffset;
+    var rootEl = range.commonAncestorContainer;
+    if (rootEl.nodeType !== 1) rootEl = rootEl.parentNode;
+    if (!rootEl) return false;
+    var walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (txtFilter(n) !== NodeFilter.FILTER_ACCEPT) return NodeFilter.FILTER_REJECT;
+        return range.intersectsNode(n) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var nodes = [], n; while (n = walker.nextNode()) nodes.push(n);
+    var wrapped = false;
+    nodes.forEach(function (tn) {
+      var start = (tn === sc) ? so : 0;
+      var endOff = (tn === ec) ? eo : tn.nodeValue.length;
+      if (endOff <= start) return;
+      // Skip whitespace-only segments. Inter-element whitespace (e.g. the gap between two grid/flex
+      // items) is its own text node; wrapping it in a <mark> turns that whitespace into a real
+      // element — a stray grid/flex/flow child that breaks the container's layout. It carries
+      // nothing visible to highlight, so there is no reason to wrap it.
+      if (!/\S/.test(tn.nodeValue.slice(start, endOff))) return;
+      var r = document.createRange();
+      try { r.setStart(tn, start); r.setEnd(tn, endOff); } catch (e) { return; }
+      var m = el('mark', 'cch-hl'); m.dataset.cid = id;
+      try { r.surroundContents(m); } catch (e) { return; }
+      m.addEventListener('click', function () { openTray(); focusComment(id); });
+      wrapped = true;
+    });
+    return wrapped;
   }
   // Re-anchor a comment to the occurrence whose surrounding context matches (ordinal breaks ties).
   function findAndWrap(c) {
@@ -149,16 +182,16 @@
         box.innerHTML = q + '<div class="cch-b"></div><div class="cch-f">' + (displaced ? '<span class="cch-dsp">displaced</span>' : '') + '<button type="button" data-act="resolve">' + (c.state === 'resolved' ? 'reopen' : 'resolve') + '</button><button type="button" data-act="del">delete</button><span class="cch-ts">' + c.ts + '</span></div>';
         box.querySelector('.cch-b').textContent = c.body;
         box.onclick = function (e) { if (e.target.dataset.act) return; scrollToComment(c.id); };
-        box.querySelector('[data-act="resolve"]').onclick = function (e) { e.stopPropagation(); c.state = (c.state === 'resolved' ? 'open' : 'resolved'); var m = document.querySelector('mark.cch-hl[data-cid="' + c.id + '"]'); if (m) m.classList.toggle('cch-resolved', c.state === 'resolved'); save(); renderTray(); };
+        box.querySelector('[data-act="resolve"]').onclick = function (e) { e.stopPropagation(); c.state = (c.state === 'resolved' ? 'open' : 'resolved'); $all('mark.cch-hl[data-cid="' + c.id + '"]').forEach(function (m) { m.classList.toggle('cch-resolved', c.state === 'resolved'); }); save(); renderTray(); };
         box.querySelector('[data-act="del"]').onclick = function (e) { e.stopPropagation(); unwrap(c.id); comments = comments.filter(function (x) { return x.id !== c.id; }); save(); renderTray(); };
         trayBody.appendChild(box);
       });
     });
     updateCount();
   }
-  function scrollToComment(id) { var m = document.querySelector('mark.cch-hl[data-cid="' + id + '"]'); if (m) { m.scrollIntoView({ behavior: 'smooth', block: 'center' }); m.classList.add('cch-flash'); setTimeout(function () { m.classList.remove('cch-flash'); }, 1200); } }
+  function scrollToComment(id) { var ms = $all('mark.cch-hl[data-cid="' + id + '"]'); if (ms.length) { ms[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); ms.forEach(function (m) { m.classList.add('cch-flash'); }); setTimeout(function () { ms.forEach(function (m) { m.classList.remove('cch-flash'); }); }, 1200); } }
   function focusComment(id) { var box = trayBody.querySelector('.cch-com[data-cid="' + id + '"]'); if (box) box.scrollIntoView({ block: 'nearest' }); scrollToComment(id); }
-  function unwrap(id) { var m = document.querySelector('mark.cch-hl[data-cid="' + id + '"]'); if (m) { var par = m.parentNode; while (m.firstChild) par.insertBefore(m.firstChild, m); par.removeChild(m); par.normalize(); } }
+  function unwrap(id) { $all('mark.cch-hl[data-cid="' + id + '"]').forEach(function (m) { var par = m.parentNode; if (!par) return; while (m.firstChild) par.insertBefore(m.firstChild, m); par.removeChild(m); par.normalize(); }); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(comments)); } catch (e) {} updateCount(); }
   function updateCount() { $all('.cch-count').forEach(function (n) { n.textContent = comments.length; }); }
 
