@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cch wrap-layout test (pending)</title>
+<!--
+  DOM regression test for comment-layer.js wrapRange().
+
+  The defect class this guards: highlighting must NOT change the document's layout. wrapRange wraps
+  the selection in <mark> elements. The trap is INTER-ELEMENT WHITESPACE — the text node sitting
+  between two siblings. In normal block flow, wrapping it in a <mark> is invisible, so block-only
+  fixtures (an earlier test gap) never caught the bug. But inside a CSS grid / flexbox container,
+  that whitespace text node is a real layout slot: wrap it and the <mark> becomes an extra
+  grid/flex ITEM, shoving the real columns onto a new row. Real review docs use grid for their
+  two-column cards, so this shipped as a visible "the second column fell out of the box" break.
+
+  wrapRange must therefore: (a) wrap each intersected text node's segment in its OWN <mark> (never
+  the whole multi-element range — that restructures block content), and (b) SKIP whitespace-only
+  segments so it never injects a stray grid/flex/flow item.
+
+  Run headlessly: tests/run_layout_test.sh  (loads this file in headless Chrome, asserts PASS).
+-->
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .flex { display: flex; }
+  .col  { padding: 8px; }
+</style>
+</head>
+<body>
+  <h2 id="h">Layout fixtures</h2>
+
+  <!-- 1. CSS GRID — the failure case. Note the whitespace text node between the two .col divs. -->
+  <div id="grid" class="grid">
+    <div class="col" id="g1">Grid left column with enough words to select across the boundary here.</div>
+    <div class="col" id="g2">Grid right column also with several words for the selection to end inside.</div>
+  </div>
+
+  <!-- 2. FLEXBOX — same trap as grid. -->
+  <div id="flex" class="flex">
+    <div class="col" id="f1">Flex left column words for selecting across into the next flex item now.</div>
+    <div class="col" id="f2">Flex right column words so the range ends comfortably inside this item.</div>
+  </div>
+
+  <!-- 3. TABLE — a stray <mark> as a direct child of <tr>/<table> is invalid and reflows columns. -->
+  <table id="table"><tbody>
+    <tr><td id="t1">cell one alpha</td><td>cell one beta</td></tr>
+    <tr><td id="t2">cell two alpha</td><td>cell two beta</td></tr>
+  </tbody></table>
+
+  <!-- 4. NORMAL BLOCK FLOW — must still highlight, and must NOT collapse p2 into p1. -->
+  <div id="block">
+    <p id="p1">First paragraph of normal flow text that we will select from partway through.</p>
+    <p id="p2">Second paragraph that the selection ends inside, across the block boundary.</p>
+  </div>
+
+  <div id="__result__">pending</div>
+
+  <script>localStorage.clear();</script>
+  <script src="../assets/anchor.js"></script>
+  <script src="../assets/comment-layer.js"></script>
+  <script>
+  (function () {
+    var fails = [];
+    function check(name, cond) { if (!cond) fails.push(name); }
+    function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function tnFirst(el) { for (var n = el.firstChild; n; n = n.nextSibling) { if (n.nodeType === 3 && n.nodeValue.trim()) return n; if (n.nodeType === 1) { var d = tnFirst(n); if (d) return d; } } return null; }
+    function tnLast(el) { for (var n = el.lastChild; n; n = n.previousSibling) { if (n.nodeType === 3 && n.nodeValue.trim()) return n; if (n.nodeType === 1) { var d = tnLast(n); if (d) return d; } } return null; }
+    // Drive the REAL user flow: select a..b, "+ Comment", type, "Add comment".
+    async function comment(aNode, aOff, bNode, bOff, text) {
+      var r = document.createRange(); r.setStart(aNode, aOff); r.setEnd(bNode, bOff);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      await delay(30);
+      var pb = document.querySelector('.cch-pop button'); if (!pb) throw new Error('no +Comment popover');
+      pb.click();
+      var ta = document.querySelector('.cch-new textarea'); if (!ta) throw new Error('no comment form');
+      ta.value = text;
+      document.querySelector('.cch-new .cch-save').click();
+      await delay(30);
+    }
+    function isLayoutParent(el) {
+      if (!el || el.nodeType !== 1) return false;
+      var d = getComputedStyle(el).display;
+      return d === 'grid' || d === 'inline-grid' || d === 'flex' || d === 'inline-flex'
+        || el.tagName === 'TABLE' || el.tagName === 'TBODY' || el.tagName === 'THEAD' || el.tagName === 'TR';
+    }
+
+    (async function run() {
+      try {
+        var grid = document.getElementById('grid'), g1 = document.getElementById('g1'), g2 = document.getElementById('g2');
+        var flex = document.getElementById('flex'), f1 = document.getElementById('f1'), f2 = document.getElementById('f2');
+        var table = document.getElementById('table'), t1 = document.getElementById('t1'), t2 = document.getElementById('t2');
+        var p1 = document.getElementById('p1'), p2 = document.getElementById('p2');
+
+        // --- 1. GRID: select across both columns ---
+        await comment(tnFirst(g1), 0, tnLast(g2), tnLast(g2).nodeValue.length, 'grid span');
+        check('grid: no stray <mark> injected as a grid item',
+          [].slice.call(grid.children).every(function (c) { return c.tagName !== 'MARK'; }) && grid.children.length === 2);
+        check('grid: columns stay on the same row (layout unchanged)',
+          Math.abs(g1.getBoundingClientRect().top - g2.getBoundingClientRect().top) < 2);
+        check('grid: text in BOTH columns got highlighted',
+          g1.querySelector('mark.cch-hl') && g2.querySelector('mark.cch-hl'));
+
+        // --- 2. FLEX: select across both items ---
+        await comment(tnFirst(f1), 0, tnLast(f2), tnLast(f2).nodeValue.length, 'flex span');
+        check('flex: no stray <mark> injected as a flex item',
+          [].slice.call(flex.children).every(function (c) { return c.tagName !== 'MARK'; }) && flex.children.length === 2);
+        check('flex: items stay on the same row',
+          Math.abs(f1.getBoundingClientRect().top - f2.getBoundingClientRect().top) < 2);
+
+        // --- 3. TABLE: select across two cells in different rows ---
+        await comment(tnFirst(t1), 0, tnLast(t2), tnLast(t2).nodeValue.length, 'table span');
+        var tbody = table.tBodies[0];
+        check('table: row count unchanged', tbody.rows.length === 2);
+        check('table: every row has only cell children (no <mark> as a row/table child)',
+          [].slice.call(tbody.rows).every(function (tr) {
+            return [].slice.call(tr.children).every(function (c) { return c.tagName === 'TD' || c.tagName === 'TH'; });
+          }));
+        check('table: cells got highlighted', t1.querySelector('mark.cch-hl') && t2.querySelector('mark.cch-hl'));
+
+        // --- 4. BLOCK FLOW: select across the paragraph boundary ---
+        await comment(tnFirst(p1), 6, tnFirst(p2), 6, 'block span');
+        check('block: p2 is still a separate <p> sibling (no collapse)',
+          p2.tagName === 'P' && p2.parentNode === document.getElementById('block') && p2.previousElementSibling === p1);
+        check('block: both paragraphs got highlighted (coverage not lost)',
+          p1.querySelector('mark.cch-hl') && p2.querySelector('mark.cch-hl'));
+
+        // --- 5. GLOBAL INVARIANT: no <mark> is a direct child of any layout container ---
+        check('global: no <mark> is a direct child of a grid/flex/table/row container',
+          [].slice.call(document.querySelectorAll('mark.cch-hl')).every(function (m) { return !isLayoutParent(m.parentElement); }));
+
+        var out = document.getElementById('__result__');
+        if (fails.length === 0) { out.textContent = 'PASS'; document.title = 'PASS'; }
+        else { out.textContent = 'FAIL: ' + fails.join(' | '); document.title = 'FAIL'; }
+      } catch (e) {
+        document.getElementById('__result__').textContent = 'FAIL exc: ' + e.message;
+        document.title = 'FAIL';
+      }
+    })();
+  })();
+  </script>
+</body>
+</html>
