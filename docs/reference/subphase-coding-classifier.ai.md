@@ -38,6 +38,7 @@ surfaces classification quality regressions over time.
 2. **`sp2_b6_terminal_portability`** — creates `agents/_shared/terminal.py`, edits prompts.
 3. **`sp4b_us10_tshirt_estimates`** — edits `db/schema.sql`, `task.py`, authors a migrator script.
 4. **`sp4d_us14_typed_next_steps`** — edits config.yaml across many agents, authors a JSON Schema.
+5. **`sp3b_html_commenting`** — edits `comment_service.py`/API routes/`schema.sql`, authors a host postMessage bridge JS + jsdom + pytest tests; coding.
 
 ### Non-Coding (SKIP cast-review-code)
 
