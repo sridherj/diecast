@@ -1,0 +1,11 @@
+model: opus
+timeout_minutes: 180
+context_mode: full
+# The JS Workflow this skill launches dispatches these agents as (step,hat) cells and the
+# per-step synthesis barrier. Phase-1 reuse (decompose/code-explore) may dispatch the others.
+allowed_delegations:
+- cast-hat-researcher
+- cast-playbook-synthesizer
+- cast-goal-decomposer
+- cast-code-explorer
+proactive: true

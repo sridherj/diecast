@@ -42,12 +42,40 @@ def _check_size(value: str, field: str) -> str:
     return value
 
 
+def _validate_artifact_ref(v: str | None) -> str | None:
+    """Same-door artifact-ref guard (sp3b): a goal-relative ``.html`` path, no ``..``/absolute.
+
+    ``None`` / empty → ``None`` (the requirements default; existing requirements comments send no
+    ``artifact_ref`` and stay byte-identical). A value is the goal-relative path the iframe bridge
+    POSTed — the client supplies it, so it is the untrusted edge: it MUST be ``.html``, MUST NOT be
+    absolute, and MUST NOT contain a ``..`` traversal segment. The service-layer resolver re-checks
+    containment under ``goal_dir`` as defense-in-depth, but the route rejects malformed shapes up
+    front with a 422 (never hand-roll a *second* path semantics — this is the same goal-relative,
+    no-traversal, ``.html``-only contract ``validate_artifact_path_read`` enforces for reads)."""
+    if v is None:
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    if s.startswith("/") or (len(s) > 1 and s[1] == ":"):
+        raise ValueError("artifact_ref must be a goal-relative path, not absolute")
+    if ".." in s.replace("\\", "/").split("/"):
+        raise ValueError("artifact_ref must not contain '..' path segments")
+    if not s.endswith(".html"):
+        raise ValueError("artifact_ref must be a .html artifact path")
+    return s
+
+
 class CreateCommentRequest(BaseModel):
     quoted_text: str
     body: str
     section_hint: str | None = None
     author: str = "human"
     author_kind: str = "human"
+    # sp3b: the goal-relative served-.html the quote was minted against. Default None preserves the
+    # requirements contract verbatim (requirements comments carry no artifact_ref). Validated as a
+    # goal-relative, no-traversal, .html-only path — the one new optional field on the same door.
+    artifact_ref: str | None = None
 
     @field_validator("quoted_text")
     @classmethod
@@ -58,6 +86,11 @@ class CreateCommentRequest(BaseModel):
     @classmethod
     def _v_body(cls, v: str) -> str:
         return _check_size(v, "body")
+
+    @field_validator("artifact_ref")
+    @classmethod
+    def _v_artifact_ref(cls, v: str | None) -> str | None:
+        return _validate_artifact_ref(v)
 
 
 class ActorRequest(BaseModel):
@@ -114,11 +147,15 @@ def _current_text(goal_slug: str) -> str:
 def _relocate_compare_text(goal_slug: str, comment: dict) -> str:
     """The verbatim-substring backstop text for a relocate, chosen per the comment's anchor space
     (refine-req-v3 sp2). A ``'render'``-space comment validates against the SERVED render's
-    container text (degrading to the source check when no render is on disk); a ``'source'``-space
-    comment keeps the canonical source check. ``block_ref`` is never read from the request — it
-    stays server-resolved (trust boundary)."""
+    container text — keyed by the comment's stored ``artifact_ref`` (sp3b: relocate validates against
+    the SAME artifact the comment was minted from, never a different document; ``None`` keeps the
+    requirements render) — degrading to the source check when no render is on disk; a ``'source'``-
+    space comment keeps the canonical source check. ``block_ref``/``artifact_ref`` are never read
+    from the request — they stay server-resolved off the stored row (trust boundary)."""
     if comment.get("anchor_space") == "render":
-        return comment_service._resolve_render_compare_text(goal_slug, None, None)
+        return comment_service._resolve_render_compare_text(
+            goal_slug, None, None, comment.get("artifact_ref")
+        )
     return comment_service._resolve_current_text(goal_slug, None, None)
 
 
@@ -162,6 +199,7 @@ async def create_comment(request: Request, goal_slug: str):
         body=payload.body,
         author=payload.author,
         author_kind=payload.author_kind,
+        artifact_ref=payload.artifact_ref,
     )
     if _is_hx(request):
         return templates.TemplateResponse(

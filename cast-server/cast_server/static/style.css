@@ -2522,6 +2522,75 @@ select:focus-visible {
     background-color: var(--bg-primary);
 }
 
+/* Render-class .html artifacts embed via <iframe srcdoc> (null-origin). The
+   frame must not collapse: full-width, generous min-height, internal scroll.
+   The onload height-fit script grows it to fit; this is the floor. */
+.artifact-content.artifact-html {
+    padding: 0;
+}
+.artifact-html-frame {
+    display: block;
+    width: 100%;
+    min-height: 480px;
+    border: 0;
+}
+
+/* Maximize / fullscreen control for the embedded HTML render (YouTube-style). */
+.artifact-html-wrap {
+    position: relative;
+}
+.artifact-html-maximize {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text-secondary, #555);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.artifact-html-wrap:hover .artifact-html-maximize,
+.artifact-html-maximize:focus-visible {
+    opacity: 1;
+}
+.artifact-html-maximize:hover {
+    background: #fff;
+    color: var(--text-primary, #111);
+}
+.artifact-html-maximize .ic-compress {
+    display: none;
+}
+/* When the wrap is fullscreen: fill the viewport, keep the control visible, swap icon. */
+.artifact-html-wrap:fullscreen {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+.artifact-html-wrap:fullscreen .artifact-html-frame {
+    flex: 1 1 auto;
+    height: 100% !important;   /* override the onload pixel height while maximized */
+    min-height: 0;
+}
+.artifact-html-wrap:fullscreen .artifact-html-maximize {
+    opacity: 1;
+}
+.artifact-html-wrap:fullscreen .ic-expand {
+    display: none;
+}
+.artifact-html-wrap:fullscreen .ic-compress {
+    display: inline-flex;
+}
+
 /* === Markdown body styles (rendered artifacts) === */
 .markdown-body {
     color: var(--text-primary);

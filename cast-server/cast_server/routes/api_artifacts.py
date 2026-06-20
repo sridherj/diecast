@@ -7,6 +7,7 @@ from fastapi import APIRouter, Form, Request, Response
 
 from cast_server.config import GOALS_DIR
 from cast_server.deps import templates  # noqa: F401 — used by edit_artifact
+from cast_server.requirements_render import comment_layer_inject
 from cast_server.utils.responses import toast_header
 
 router = APIRouter(prefix="/api/artifacts", tags=["artifacts"])
@@ -50,10 +51,17 @@ def validate_artifact_path(path: str, goal_slug: str | None = None) -> Path:
 
 
 def validate_artifact_path_read(path: str, goal_slug: str | None = None) -> Path:
-    """Validate artifact path for READING. Any .md file within allowed dirs."""
+    """Validate artifact path for READING. Any .md or .html file within allowed dirs.
+
+    `.html` is admitted as a render-class artifact (cast-requirements-render US4):
+    read-only, surfaced in the dual viewer via `<iframe srcdoc>`. Editing stays
+    `.md`-only — see `validate_artifact_path` (the EDIT gate), unchanged.
+    Path-traversal protection comes from `_validate_artifact_path_base` (resolve +
+    `is_relative_to`) and applies to `.html` for free.
+    """
     resolved = _validate_artifact_path_base(path, goal_slug=goal_slug)
-    if not resolved.name.endswith(".md"):
-        raise ValueError("Only markdown files can be viewed")
+    if not (resolved.name.endswith(".md") or resolved.name.endswith(".html")):
+        raise ValueError("Only markdown and html files can be viewed")
     return resolved
 
 
@@ -131,20 +139,34 @@ async def artifact_sidebar(request: Request, task_id: int, artifact_path: str):
     except ValueError as e:
         return Response(status_code=400, content=str(e))
 
-    # Read and render markdown
+    # Read the artifact. `.html` is a render-class artifact (US4): passed through
+    # verbatim into `<iframe srcdoc>` (NOT md.markdown()-processed) so its own
+    # <head>/<style> survive; `.md` is rendered to HTML as today.
     content = resolved.read_text()
-    html = md.markdown(content, extensions=MD_EXTENSIONS,
-                       extension_configs=MD_EXTENSION_CONFIGS)
-
-    # Determine authorship from filename
     name = resolved.name
-    authorship = None
-    if name.endswith(".human.md"):
-        authorship = "human"
-    elif name.endswith(".collab.md"):
-        authorship = "collab"
-    elif name.endswith(".ai.md"):
-        authorship = "ai"
+    artifact_ref = ""  # only render-class .html artifacts carry a bridge artifact_ref
+    if name.endswith(".html"):
+        kind = "html"
+        # sp3b: inject the bridge-mode comment layer keyed by the goal-relative path so the sidebar
+        # viewer's `.html` artifacts are annotatable too (same host bridge as the phase-tab viewer).
+        try:
+            artifact_ref = resolved.resolve().relative_to(goal_dir.resolve()).as_posix()
+        except ValueError:
+            artifact_ref = resolved.name
+        html = comment_layer_inject.inject_comment_layer(content, goal_slug, artifact_ref)
+        authorship = None  # render-class: no authorship suffix, no edit button
+    else:
+        kind = "markdown"
+        html = md.markdown(content, extensions=MD_EXTENSIONS,
+                           extension_configs=MD_EXTENSION_CONFIGS)
+        # Determine authorship from filename
+        authorship = None
+        if name.endswith(".human.md"):
+            authorship = "human"
+        elif name.endswith(".collab.md"):
+            authorship = "collab"
+        elif name.endswith(".ai.md"):
+            authorship = "ai"
 
     # Use relative path for display (don't leak server filesystem paths)
     display_path = f"{goal_slug}/{artifact_path}"
@@ -153,7 +175,9 @@ async def artifact_sidebar(request: Request, task_id: int, artifact_path: str):
         "name": name,
         "path": display_path,
         "html": html,
+        "kind": kind,
         "authorship": authorship,
         "goal_slug": goal_slug,
+        "artifact_ref": artifact_ref,
         "phase": task.get("phase", ""),
     })

@@ -1,0 +1,6 @@
+dispatch_mode: subagent  # Agent tool, bare-JSON verdict, no .output.json envelope (FR-011 carve-out)
+interactive: false
+context_mode: lightweight
+allowed_delegations: []
+timeout_minutes: 15
+model: opus   # [USER-DEFERRED] tier knob — placeholder, do not tune here (owner confirmed opus 2026-06-12)

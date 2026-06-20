@@ -1,0 +1,627 @@
+<!-- AUTO-GENERATED: Read-only render of refined_requirements.collab.md. Do not edit. -->
+<!-- source-hash: c0d15b7fe8aa5a85119f880b6b5d355533576ffb34a8fa5da9270dc1e73c4faf -->
+<!-- served-by: maker -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploration Pipeline — N×M Workflow + 90/10 Hat + Diecast HTML Surface</title>
+<style>
+  :root{
+    --ink:#16202e; --ink-2:#39485c; --muted:#6b7787;
+    --line:#e4e8ee; --bg:#f6f8fb; --card:#ffffff;
+    --accent:#2f6fed; --accent-soft:#eaf1fe;
+    --hot:#e07b2f; --hot-soft:#fcefe2;
+    --good:#1d8a5b; --good-soft:#e6f4ec;
+    --chip:#eef1f6; --chip-ink:#41506a;
+    --radius:14px; --maxw:980px;
+    --font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; font-family:var(--font); color:var(--ink);
+    background:var(--bg); line-height:1.55; font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px 72px}
+  a{color:var(--accent)}
+
+  /* ---------- Above-the-fold hero ---------- */
+  .hero{
+    background:linear-gradient(155deg,#16202e 0%,#1d2c44 60%,#22406b 100%);
+    color:#fff; padding:40px 0 44px; margin-bottom:38px;
+  }
+  .hero .wrap{padding-bottom:0}
+  .kicker{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:18px}
+  .badge{
+    font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    background:rgba(255,255,255,.14); color:#cfe0ff; padding:6px 12px; border-radius:999px;
+  }
+  .badge.fam{background:#2f6fed; color:#fff}
+  .badge.calm{background:rgba(29,138,91,.22); color:#a8e9c8}
+  .hero h1{font-size:30px; line-height:1.2; margin:.1em 0 .35em; letter-spacing:-.01em}
+  .jtbd{font-size:18px; color:#dbe6f7; max-width:760px; margin:0}
+  .jtbd .q{color:#9fc0ff}
+  .fold{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:30px;
+  }
+  .fold .cell{
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+    border-radius:12px; padding:16px 16px 15px;
+  }
+  .fold .lab{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8fb0e6; font-weight:700}
+  .fold .big{font-size:22px; font-weight:750; margin:6px 0 2px; letter-spacing:-.01em}
+  .fold .sub{font-size:13.5px; color:#c3d2e8; margin:0}
+
+  /* ---------- Sections ---------- */
+  section.block{margin:0 0 34px}
+  .sec-head{margin:0 0 8px}
+  .sec-head h2{font-size:21px; margin:0 0 2px; letter-spacing:-.01em}
+  .sec-num{
+    display:inline-block; font-size:12px; font-weight:800; color:var(--accent);
+    letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .takeaway{
+    background:var(--accent-soft); border-left:3px solid var(--accent);
+    border-radius:0 10px 10px 0; padding:12px 16px; margin:8px 0 18px;
+    color:var(--ink-2); font-size:15px;
+  }
+  .takeaway strong{color:var(--ink)}
+
+  /* ---------- Unit cards ---------- */
+  .units{display:grid; gap:12px}
+  .units.two{grid-template-columns:1fr 1fr}
+  .unit{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:15px 17px 16px; position:relative;
+  }
+  .unit h3{font-size:15.5px; margin:0 0 5px; letter-spacing:-.005em}
+  .unit p{margin:0; color:var(--ink-2); font-size:14.5px}
+  .unit p + p{margin-top:7px}
+  .anchor-row{display:flex; align-items:center; gap:8px; margin-bottom:7px; flex-wrap:wrap}
+  .rr-anchor{
+    font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.04em; background:var(--chip); color:var(--chip-ink);
+    padding:5px 8px; border-radius:6px; white-space:nowrap;
+  }
+  .rr-anchor.us{background:#eaf1fe; color:#2156c7}
+  .rr-anchor.sc{background:#e9f4ec; color:#187a4e}
+  .tag{font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+
+  /* ---------- 8 hats exhibit ---------- */
+  .exhibit{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:6px 4px 4px; margin:0 0 14px; overflow:hidden;
+  }
+  .exhibit-cap{font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); padding:12px 14px 4px}
+  table.hats{width:100%; border-collapse:collapse; font-size:13.5px}
+  table.hats th,table.hats td{text-align:left; padding:9px 14px; border-top:1px solid var(--line); vertical-align:top}
+  table.hats th{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border-top:none}
+  table.hats td.n{color:var(--muted); width:26px; font-variant-numeric:tabular-nums}
+  table.hats .name{font-weight:650; color:var(--ink)}
+  .gate{font:700 10.5px/1 ui-monospace,monospace; padding:4px 7px; border-radius:5px; white-space:nowrap}
+  .gate.on{background:var(--good-soft); color:var(--good)}
+  .gate.able{background:var(--chip); color:var(--muted)}
+  tr.hot td{background:var(--hot-soft)}
+  tr.hot .name{color:#b25e1c}
+  tr.on-row td{background:#f3faf6}
+
+  /* ---------- 90/10 detail ---------- */
+  .nine{
+    border:1px solid var(--hot); background:var(--hot-soft);
+    border-radius:var(--radius); padding:16px 18px; margin:0 0 14px;
+  }
+  .nine .quote{font-style:italic; color:#8a4a16; margin:0 0 10px; font-size:14.5px}
+  .nine .distinct{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px}
+  .nine .distinct div{background:#fff; border:1px solid #f0d5bd; border-radius:10px; padding:10px 12px}
+  .nine .distinct h4{margin:0 0 3px; font-size:13px; color:#b25e1c}
+  .nine .distinct p{margin:0; font-size:13px; color:var(--ink-2)}
+
+  /* ---------- artifact paths ---------- */
+  code.path{font:600 13px/1.5 ui-monospace,monospace; background:#f1f3f7; color:#384459; padding:2px 6px; border-radius:5px}
+
+  /* ---------- scope fence ---------- */
+  .fence{background:#fbfbfc; border:1px dashed #cfd6e0; border-radius:var(--radius); padding:6px 6px}
+  .fence li{list-style:none; padding:10px 14px; border-bottom:1px solid var(--line); color:var(--ink-2); font-size:14.5px; display:flex; gap:10px}
+  .fence li:last-child{border-bottom:none}
+  .fence .x{color:#b94a3a; font-weight:800; flex:0 0 auto}
+
+  /* ---------- decisions ---------- */
+  .decided-banner{
+    display:flex; align-items:center; gap:10px; background:var(--good-soft);
+    border:1px solid #bfe6cf; border-radius:12px; padding:12px 16px; margin:0 0 14px;
+    color:#15663f; font-weight:600; font-size:15px;
+  }
+  table.dec{width:100%; border-collapse:collapse; font-size:13.5px;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+  table.dec th,table.dec td{text-align:left; padding:10px 14px; border-top:1px solid var(--line); vertical-align:top}
+  table.dec th{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border-top:none; background:#fafbfc}
+  table.dec .chose{font-weight:650; color:var(--ink)}
+  table.dec .over{color:var(--muted)}
+
+  footer{margin-top:46px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px}
+
+  @media (max-width:720px){
+    .fold{grid-template-columns:1fr}
+    .units.two{grid-template-columns:1fr}
+    .nine .distinct{grid-template-columns:1fr}
+    .hero h1{font-size:24px}
+  }
+</style>
+</head>
+<body data-goal-slug="exploration-pipeline-nxm-claude-workflow-9010-angle">
+
+<!-- ================= ABOVE THE FOLD ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">
+      <span class="badge fam">New Initiative</span>
+      <span class="badge">Exploration Pipeline</span>
+      <span class="badge calm">0 open questions · refined</span>
+    </div>
+    <h1>Each thinking hat researches each step in its own clean context — fanned out N×M and driven by a Workflow.</h1>
+    <p class="jtbd"><span class="q">“</span>When I start a new goal, I want each hat's take on each step researched in its own clean context — no cross-priming — still synthesized into opinionated per-step playbooks, and surfaced as a polished HTML report I can read and annotate anywhere in Diecast, including an explicit 90/10 laziest-path-to-most-of-the-value hat.<span class="q">”</span></p>
+
+    <div class="fold">
+      <div class="cell">
+        <div class="lab">The move</div>
+        <div class="big">N × M isolated agents</div>
+        <p class="sub">Every (step, hat) cell gets its own clean-context researcher — ending the single-context priming that waters down contrarian and first-principles takes.</p>
+      </div>
+      <div class="cell">
+        <div class="lab">New hat</div>
+        <div class="big">90/10 → M = 8</div>
+        <p class="sub">The “laziest path to ~90% of the value” idea is promoted from a buried sub-bullet to its own always-on hat.</p>
+      </div>
+      <div class="cell">
+        <div class="lab">Scope guard</div>
+        <div class="big">Additive, parallel</div>
+        <p class="sub">Markdown artifacts and the per-step synthesizer are untouched; HTML is layered on top and the Workflow ships beside cast-explore.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= SECTION 1 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">01 · The core move</span>
+      <h2>What we're building and the job it chases</h2>
+    </div>
+    <div class="takeaway">
+      <strong>Exploration's research layer is being re-architected</strong> so every
+      <em>(step, hat)</em> cell is researched by its own clean-context agent, fanned across
+      N steps × M hats and orchestrated by a deterministic Claude Workflow — because today all hats
+      research inside one per-step context, where “earlier angles bias later ones” and the contrarian
+      and first-principles takes get watered down. The human-in-loop Phase 1 finishes first and hands
+      the approved steps + hat-matrix to the Workflow as args.
+    </div>
+
+    <div class="units">
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US1</span><span class="tag">P1 · user story</span></div>
+        <h3>Isolated N×M research fan-out</h3>
+        <p>Each (step, hat) is researched by its own clean-context agent, so hats never cross-prime
+        and every perspective stays sharp. Two hat-agent prompts for the same step share no
+        hat-specific framing, and no agent sees another hat's output before producing its own.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US2</span><span class="tag">P1 · user story</span></div>
+        <h3>Deterministic Workflow orchestration</h3>
+        <p>The autonomous research + synthesis phase is driven by a Workflow script — fan-out and the
+        synthesis barrier are deterministic, replacing hand-rolled child delegation.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US11</span><span class="tag">P2 · user story</span></div>
+        <h3>Interactive Phase 1 stays with the main agent</h3>
+        <p>Intent, decomposition, step approval, and hat-matrix computation all happen before the
+        Workflow launches, so the human-in-loop decisions precede the non-interactive run. The
+        approved steps and the computed hat-matrix pass in as Workflow args.</p>
+      </div>
+
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-001</span><span class="tag">requirement</span></div>
+        <h3>Workflow is the autonomous-phase entrypoint</h3>
+        <p>The starter-exploration entrypoint launches a Workflow for the autonomous phase — not a
+        child-delegation orchestrator.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-002</span><span class="tag">requirement</span></div>
+        <h3>One agent per applicable cell</h3>
+        <p>Research fan-out is N steps × M<sub>applicable</sub>(step) hats, and each cell runs as a
+        separate agent.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-003</span><span class="tag">requirement</span></div>
+        <h3>Prompt isolation = angle independence</h3>
+        <p>Each hat-agent prompt contains only its own step and its own hat's framing — the structural
+        guarantee that angles stay independent.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-004</span><span class="tag">requirement</span></div>
+        <h3>A lean single-hat researcher agent</h3>
+        <p>A new lean single-hat researcher agent, parameterized by hat, becomes the per-cell worker —
+        reusing only the resilient web-fetch / browser protocol from today's researcher.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-014</span><span class="tag">requirement</span></div>
+        <h3>Approval precedes launch</h3>
+        <p>Interactive decomposition and approval precede the Workflow launch; the approved steps and
+        the hat-matrix are passed as Workflow args.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-015</span><span class="tag">requirement</span></div>
+        <h3>Concurrency cap</h3>
+        <p>The Workflow respects a concurrency cap of <code class="path">min(16, cores−2)</code>;
+        excess cells queue rather than overrun the host.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-001</span><span class="tag">success criterion</span></div>
+        <h3>One note per applicable hat per step</h3>
+        <p>Each step has exactly one research note per applicable hat — verified by counting
+        <code class="path">research/*.ai.md</code> against the sum of M<sub>applicable</sub>(step).</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-002</span><span class="tag">success criterion</span></div>
+        <h3>No prompt leaks another hat</h3>
+        <p>No hat-agent prompt contains another hat's content — verified by prompt inspection.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">02 · The new hat</span>
+      <h2>Promoting 90/10 to a first-class hat — and gating the matrix</h2>
+    </div>
+    <div class="takeaway">
+      <strong>The 90/10 solution becomes its own always-on, clean-context hat (M<sub>total</sub> = 8)</strong>,
+      and the 80/20 sub-notion is carved out of the First Principles research hat so each angle stays
+      clean. Relevance gating computes M<sub>applicable</sub>(step) at Phase 1 so only applicable hats
+      run per step — but Contrarian, First Principles, and 90/10 are never gated out, and the
+      decomposer's 4-lens set is untouched.
+    </div>
+
+    <div class="exhibit">
+      <div class="exhibit-cap">The 8 hats (M_total = 8)</div>
+      <table class="hats">
+        <thead><tr><th class="n">#</th><th>Hat</th><th>Generative question</th><th>Gating</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1</td><td class="name">Expert Practitioner</td><td>How do the world's best people / orgs do this?</td><td><span class="gate able">gateable</span></td></tr>
+          <tr><td class="n">2</td><td class="name">Tool / Product Landscape</td><td>Best tools — how do they really compare?</td><td><span class="gate able">gateable</span></td></tr>
+          <tr><td class="n">3</td><td class="name">AI-Native / Innovation</td><td>What's newly possible with AI that wasn't 2 years ago?</td><td><span class="gate able">gateable</span></td></tr>
+          <tr><td class="n">4</td><td class="name">Community Wisdom</td><td>What do practitioners who've actually done this say?</td><td><span class="gate able">gateable</span></td></tr>
+          <tr><td class="n">5</td><td class="name">Framework / Methodology</td><td>What structured approaches exist?</td><td><span class="gate able">gateable</span></td></tr>
+          <tr class="on-row"><td class="n">6</td><td class="name">Contrarian</td><td>What does the majority get wrong?</td><td><span class="gate on">always-on</span></td></tr>
+          <tr class="on-row"><td class="n">7</td><td class="name">First Principles</td><td>From scratch, physics-only — and what IS the value here?</td><td><span class="gate on">always-on</span></td></tr>
+          <tr class="hot"><td class="n">8</td><td class="name">90/10 Solution · NEW</td><td>What gets ~90% of this step's value for ~10% of the effort?</td><td><span class="gate on">always-on</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nine">
+      <p class="quote">“Accomplish 90% of what you want with only 10% of the work / effort / time… a
+      90% solution available right away beats a 100% solution that takes ages.” — the hat is a
+      <strong>builder proposing the laziest viable cut</strong>, accepting the step's value as given,
+      not an auditor. It flags disqualified cuts: hard-10%-is-the-moat, regulated / trust-critical,
+      or irreversible one-way doors.</p>
+      <div class="distinct">
+        <div>
+          <h4>vs First Principles</h4>
+          <p>First Principles re-litigates <em>what the value is</em> and may reframe or shrink the
+          step; 90/10 never re-opens the goal — it finds the cheapest path to the given value.</p>
+        </div>
+        <div>
+          <h4>vs Contrarian</h4>
+          <p>Contrarian runs the broad adversarial failure-hunt; 90/10 proposes a cut and self-checks
+          only enough to keep that cut safe.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="units">
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US3</span><span class="tag">P1 · user story</span></div>
+        <h3>First-class 90/10 hat</h3>
+        <p>A dedicated 90/10 hat gives every step a clean-context deep dive on the laziest-high-value
+        path instead of a buried one-liner. Test: a <code class="path">…-90-10.ai.md</code> note
+        exists per step, and the First Principles note contains no 80/20 content.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US4</span><span class="tag">P2 · user story</span></div>
+        <h3>Relevance-gated matrix</h3>
+        <p>Only applicable hats run per step, so cost stays controlled and low-signal notes don't
+        bloat synthesis. For a pure-strategy step, gateable hats are absent while the always-on hats
+        are still present.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-005</span><span class="tag">requirement</span></div>
+        <h3>90/10 in, 80/20 out</h3>
+        <p>M<sub>total</sub> = 8 includes the new 90/10 hat, and the 80/20 sub-notion is removed from
+        the First Principles research hat.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-006</span><span class="tag">requirement</span></div>
+        <h3>Decomposer lenses unchanged</h3>
+        <p>The decomposer's 4-lens set — including its “10x” lens — is unchanged; that is a
+        decomposition-time device, not a research hat.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-007</span><span class="tag">requirement</span></div>
+        <h3>Hat-matrix gating with locked always-on hats</h3>
+        <p>Relevance gating computes M<sub>applicable</sub>(step) at interactive Phase 1 from each
+        step's type / tags; Contrarian, First Principles, and 90/10 are never gated out. The output is
+        a hat-matrix (step → hats) passed as a Workflow arg, mirroring today's code-exploration gating.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-003</span><span class="tag">success criterion</span></div>
+        <h3>90/10 present, First Principles clean</h3>
+        <p>A 90/10 note exists for every step, and the First Principles note has no 80/20 content —
+        verified by file inspection.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">03 · What stays the same</span>
+      <h2>The playbook deliverable and md substrate stay intact</h2>
+    </div>
+    <div class="takeaway">
+      <strong>Only the research layer changes.</strong> The per-step synthesizer is preserved — one
+      synthesizer per step producing exactly one opinionated playbook — so the actionable deliverable
+      is unchanged. Every existing markdown artifact is still written at its current path and shape, a
+      hard compatibility contract with <code class="path">cast-high-level-planner</code>; HTML is
+      additive, never a replacement.
+    </div>
+
+    <div class="units">
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US5</span><span class="tag">P2 · user story</span></div>
+        <h3>Per-step synthesis unchanged</h3>
+        <p>The existing per-step synthesizer is preserved — one synthesizer per step → one opinionated
+        playbook — so the actionable-playbook deliverable is unchanged; only the research layer gains
+        the hat dimension. Test: exactly one playbook file per step, as today.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US6</span><span class="tag">P2 · user story</span></div>
+        <h3>Markdown substrate preserved</h3>
+        <p>All existing md artifacts are still produced at existing paths so
+        <code class="path">cast-high-level-planner</code> consumes them unchanged; HTML is additive,
+        not a replacement.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-008</span><span class="tag">requirement</span></div>
+        <h3>Synthesis is unchanged</h3>
+        <p>Per-step synthesis stays exactly as today: one synthesizer per step → one playbook.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-009</span><span class="tag">requirement</span></div>
+        <h3>Md artifacts at existing paths</h3>
+        <p>All existing markdown artifacts are still produced, rooted at <code class="path">goals/{slug}/</code>:
+        <code class="path">exploration/research/{NN}-{step}-{hat}.ai.md</code>,
+        <code class="path">exploration/playbooks/{NN}-{step}.ai.md</code>, and
+        <code class="path">exploration/summary.ai.md</code>.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-004</span><span class="tag">success criterion</span></div>
+        <h3>One playbook per step</h3>
+        <p>One opinionated playbook per step is still produced — verified by counting
+        <code class="path">playbooks/*.ai.md</code> against N.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">04 · The new surface</span>
+      <h2>A Diecast-wide HTML render and commenting surface</h2>
+    </div>
+    <div class="takeaway">
+      <strong>Dual md/html rendering plus inline commenting becomes a Diecast-wide capability.</strong>
+      A reusable trio — a WHAT content agent (no HTML), a HOW presentation agent (one self-contained
+      bespoke doc), and a render-checker — turns artifacts into polished HTML, modeled on the v3
+      requirements renderer. The viewer renders it via iframe/srcdoc right where markdown shows today,
+      and any HTML artifact becomes selectable-and-commentable. Exploration is consumer #1;
+      refined-requirements is consumer #2.
+    </div>
+
+    <div class="units">
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US7</span><span class="tag">P1 · user story</span></div>
+        <h3>General WHAT/HOW HTML render capability</h3>
+        <p>A content agent (decides what each section conveys, emits no HTML) + a presentation agent
+        (renders bespoke HTML) + a render-checker let any artifact become a polished HTML view, modeled
+        on the v3 requirements renderer (<code class="path">render_job_service.py</code>).</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US8</span><span class="tag">P1 · user story</span></div>
+        <h3>Dual md/html artifact viewer</h3>
+        <p>The artifact viewer renders both <code class="path">.md</code> (as today) and
+        <code class="path">.html</code> (via iframe/srcdoc) in the same phase-tab surface where
+        markdown shows now — so polished HTML appears in place without leaving the viewer.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US9</span><span class="tag">P1 · user story</span></div>
+        <h3>Diecast-wide commenting</h3>
+        <p>A user can select text in any HTML artifact and leave a comment. Comments use the
+        <code class="path">/cast-comment-html</code> {quoted_text, section_hint, body} shape and the
+        same-door re-anchor API.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US10</span><span class="tag">P2 · user story</span></div>
+        <h3>refined-requirements HTML in-viewer</h3>
+        <p>The refined-requirements render — today exiled to <code class="path">/goals/{slug}/render</code> —
+        is surfaced in the dual viewer so HTML + commenting is uniform across Diecast. Requirements is
+        consumer #2; exploration is consumer #1.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-010</span><span class="tag">requirement</span></div>
+        <h3>WHAT + HOW + render-checker trio</h3>
+        <p>A WHAT agent (content) + HOW agent (HTML) + render-checker produce polished HTML, tool-free,
+        gated by Python checks mirroring their contracts. Exploration HTML lands at
+        <code class="path">goals/{slug}/exploration/exploration.html</code> (atomic write, served-by
+        stamp), modeled on <code class="path">render_job_service.py</code>.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-011</span><span class="tag">requirement</span></div>
+        <h3>Dual viewer + gate/glob extension</h3>
+        <p>The artifact viewer renders <code class="path">.html</code> (iframe/srcdoc) alongside
+        <code class="path">.md</code>; the markdown-only gate (<code class="path">api_artifacts.py:52</code>)
+        and the phase-tab globs (<code class="path">api_goals.py:~422</code>) are extended to allow
+        <code class="path">.html</code>.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-012</span><span class="tag">requirement</span></div>
+        <h3>Commentable HTML via same-door API</h3>
+        <p>HTML artifacts are servable to <code class="path">/cast-comment-html</code>; comments feed
+        the same-door re-anchor API via verbatim-substring relocation this round (stable anchor-ids
+        deferred).</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-013</span><span class="tag">requirement</span></div>
+        <h3>Requirements as consumer #2</h3>
+        <p>The refined-requirements HTML render is reachable in the dual viewer, generalizing the
+        capability beyond a one-off.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-017</span><span class="tag">requirement</span></div>
+        <h3>4-criteria render-checker rubric</h3>
+        <p>The exploration render-checker grades four criteria: (1) every applicable hat is visible per
+        step; (2) the per-step opinionated POV is legible at the zero-click surface; (3) hat
+        perspectives stay distinct, not prematurely blended; (4) visual quality is real, not generic
+        AI-slop. It mirrors the requirements render-checker's comprehension + visual structure, adapted
+        to the distinct-hats requirement.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-005</span><span class="tag">success criterion</span></div>
+        <h3>Polished HTML passes the checker</h3>
+        <p>A polished exploration HTML renders and passes the render-checker's 4 criteria — verified by
+        the checker verdict.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-006</span><span class="tag">success criterion</span></div>
+        <h3>Both views in the phase tab</h3>
+        <p>The viewer shows both the <code class="path">.html</code> report and the
+        <code class="path">.md</code> artifacts in the phase tab — verified by UI check.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-007</span><span class="tag">success criterion</span></div>
+        <h3>Selection → comment, end to end</h3>
+        <p>Selecting text in any HTML artifact yields a comment via the same-door API — verified
+        end-to-end.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-008</span><span class="tag">success criterion</span></div>
+        <h3>Requirements HTML in the dual viewer</h3>
+        <p>refined-requirements HTML is viewable in the dual viewer — verified by UI check.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 5 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">05 · Resilience</span>
+      <h2>One bad cell never sinks the run</h2>
+    </div>
+    <div class="takeaway">
+      <strong>Failure is isolated per cell.</strong> A failed hat-agent is logged and its cell dropped
+      to <code class="path">null</code>, and the step's playbook still synthesizes from the surviving
+      hats. Combined with the deterministic Workflow, a full autonomous exploration completes without
+      manual intervention once the decomposition is approved.
+    </div>
+
+    <div class="units">
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor us">US12</span><span class="tag">P3 · user story</span></div>
+        <h3>Failure isolation</h3>
+        <p>A failed hat-agent drops that cell to <code class="path">null</code> (logged) so one bad
+        cell never sinks the step or the run; the playbook synthesizes from the surviving hats. Test:
+        with one hat-agent forced to fail, the run completes and the step's playbook is still produced.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor">FR-016</span><span class="tag">requirement</span></div>
+        <h3>Log, null-drop, continue</h3>
+        <p>A failed hat-agent is logged and drops its cell to <code class="path">null</code> without
+        sinking the step or the run.</p>
+      </div>
+      <div class="unit">
+        <div class="anchor-row"><span class="rr-anchor sc">SC-009</span><span class="tag">success criterion</span></div>
+        <h3>Hands-off completion after approval</h3>
+        <p>A full exploration completes without manual intervention after step approval — verified by a
+        run.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 6 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">06 · The fence</span>
+      <h2>Deliberately out of scope</h2>
+    </div>
+    <div class="takeaway">
+      <strong>This is a parallel addition, not a migration.</strong> <code class="path">cast-explore</code>
+      is not retired — the Workflow ships alongside it and the user merges later. Markdown is not
+      replaced, and neither the per-step synthesis model nor the decomposer's lens set changes.
+    </div>
+    <ul class="fence">
+      <li><span class="x">×</span><span>Rewriting <code class="path">cast-high-level-planner</code> or any downstream consumer; changing the <code class="path">summary.ai.md</code> format.</span></li>
+      <li><span class="x">×</span><span>Adding CEO/Viability, Security/Risk, or Eng-Pragmatism hats — 90/10 only this round.</span></li>
+      <li><span class="x">×</span><span>A stable anchor-id scheme for HTML comments — deferred; verbatim-substring relocation this round.</span></li>
+      <li><span class="x">×</span><span>Changing the per-step synthesis model or the decomposer's lens set.</span></li>
+      <li><span class="x">×</span><span>Replacing markdown with HTML — HTML is additive visualization.</span></li>
+      <li><span class="x">×</span><span>Retiring <code class="path">cast-explore</code> / a big-bang migration — the Workflow ships in parallel; the user merges later.</span></li>
+      <li><span class="x">×</span><span>Multi-goal orchestration.</span></li>
+    </ul>
+  </section>
+
+  <!-- ================= SECTION 7 ================= -->
+  <section class="block">
+    <div class="sec-head">
+      <span class="sec-num">07 · Settled</span>
+      <h2>What's decided, and what's still open</h2>
+    </div>
+    <div class="decided-banner">
+      ✓ Zero open questions — every ambiguity was resolved during refinement, and the 4-criteria
+      render-checker rubric is pinned.
+    </div>
+    <table class="dec">
+      <thead><tr><th>Chose</th><th>Over</th><th>Because</th></tr></thead>
+      <tbody>
+        <tr><td class="chose">New goal as home</td><td class="over">reuse existing / standalone doc</td><td>distinct, sizable multi-pillar feature</td></tr>
+        <tr><td class="chose"><code class="path">new_initiative</code> family</td><td class="over"><code class="path">refactor_migration</code></td><td>large new design surface warrants full PRD depth</td></tr>
+        <tr><td class="chose">Relevance-gated matrix</td><td class="over">full Cartesian / tunable knob</td><td>cost control; matches code-exploration gating precedent</td></tr>
+        <tr><td class="chose">Synthesis unchanged (multi-agent split)</td><td class="over">perspectives-only / origin-pure</td><td>“split between diff agents is right” — only research isolation changes</td></tr>
+        <tr><td class="chose">90/10 only (M=8); gstack = techniques only</td><td class="over">add CEO/Security/Eng hats; gstack ethos</td><td>avoid dilution — never the boil-the-ocean ethos or review/score principles, only techniques</td></tr>
+        <tr><td class="chose">Carve 80/20 out of First Principles</td><td class="over">leave it embedded</td><td>clean angle-independence; 90/10 gets its own clean-context depth</td></tr>
+        <tr><td class="chose">Dual md/html, in-viewer (iframe/srcdoc), Diecast-wide</td><td class="over">html-only / md-only / its own /render page</td><td>“md files will still be produced… html on top… part of entire diecast,” shown where md is now</td></tr>
+        <tr><td class="chose">Verbatim-substring relocation this round</td><td class="over">stable anchor-ids now</td><td>proven cast-comment-html path; defer ids</td></tr>
+        <tr><td class="chose">Workflow ships in parallel to cast-explore</td><td class="over">replace the autonomous phase outright</td><td>“have it in parallel — I will take care of merging later”</td></tr>
+        <tr><td class="chose">New lean single-hat agent</td><td class="over">refactor cast-web-researcher to dual-mode</td><td>don't carry forward the 7-in-one-context structure we're retiring</td></tr>
+        <tr><td class="chose">Lock the render-checker rubric now (4 criteria)</td><td class="over">defer to cast-detailed-plan</td><td>enough known from the requirements checker; closes the only open item</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Exploration Pipeline · N×M Workflow + 90/10 Hat + Diecast HTML Surface — refined requirements,
+    new_initiative · 0 open questions. Markdown artifacts remain the compatibility contract; this HTML
+    view is additive.
+  </footer>
+
+</div>
+
+<script src="/static/htmx.min.js"></script>
+<script src="/static/requirements_comments.js"></script>
+</body>
+</html>

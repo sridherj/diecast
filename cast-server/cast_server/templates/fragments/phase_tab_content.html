@@ -1,6 +1,6 @@
 {# Phase tab content fragment — returned by GET /api/goals/{slug}/tab/{phase}.
    Shows tasks (primary action items) then artifacts (reference material) for this phase.
-   Expects: goal (dict), tasks (list), phase (str), artifacts (list of dicts with name/path/html/authorship),
+   Expects: goal (dict), tasks (list), phase (str), artifacts (list of dicts with name/path/html/kind/authorship),
             phase_suggestions (list of dicts, optional) #}
 {% from "macros/markdown_viewer.html" import artifact_header, artifact_content %}
 <div class="phase-tab-content">
@@ -66,7 +66,7 @@
             <summary>
                 {{ artifact_header(artifact.name, artifact.path, artifact.authorship, goal.slug, phase) }}
             </summary>
-            {{ artifact_content(artifact.html) }}
+            {{ artifact_content(artifact.html, artifact.kind, artifact.artifact_ref|default(""), goal.slug) }}
         </details>
         {% endfor %}
     </div>

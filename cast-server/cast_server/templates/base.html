@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     <script src="/static/htmx.min.js"></script>
+    {# sp3b: host-side comment bridge — proxies postMessage'd comment batches from null-origin
+       srcdoc artifact iframes to the same-door create endpoint. Auto-inits + rescans on htmx swaps. #}
+    <script src="/static/comment-bridge.js" defer></script>
 </head>
 <body>
     <nav class="sidebar">

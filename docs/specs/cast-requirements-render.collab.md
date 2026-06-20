@@ -76,13 +76,51 @@ linked_files:
   - cast-server/tests/test_comment_service.py
   - docs/plan/2026-06-12-refine-requirements-v3-how-update-mode-render-anchoring.md
   - docs/plan/2026-06-13-refine-requirements-v3-spec-v8-change-brief.md
-last_verified: "2026-06-13"
+  # v9 Phase 2b (exploration-pipeline-nxm) — dual md/html artifact viewer (this spec extension)
+  - cast-server/cast_server/routes/api_artifacts.py
+  - cast-server/cast_server/routes/api_goals.py
+  - cast-server/cast_server/templates/macros/markdown_viewer.html
+  - cast-server/tests/test_dual_viewer.py
+  - docs/plan/2026-06-20-exploration-pipeline-nxm-2b-dual-viewer.md
+last_verified: "2026-06-20"
 ---
 
 # Cast Requirements Render — Spec
 
 > **Spec maturity:** draft
-> **Version:** 8
+> **Version:** 10
+> **Updated:** 2026-06-20 — v10 (Phase 3b, exploration-pipeline-nxm): **Diecast-wide commenting on ANY
+> served `.html`.** Render-space anchoring becomes **artifact-keyed** — the `anchor_space='render'`
+> anchor now resolves against the SPECIFIC served `.html` the quote was minted from, selected by a new
+> goal-relative **`artifact_ref`** (a third additive nullable `requirement_comments` column; NULL =
+> `refined_requirements.html`, so requirements + every existing comment keep working byte-identically).
+> The same-door create endpoint gains **one** optional, defaulted `artifact_ref` field — server-validated
+> goal-relative / `.html`-only / no-traversal, **NO** parallel route (US8 honored). In-iframe commenting
+> (deferred in v9) is now **LIVE**: the injected null-origin srcdoc comment layer postMessages a
+> `cch:submit` batch to a **host bridge** (`static/comment-bridge.js`) that proxies **per-comment**
+> same-door POSTs and replies `cch:submitted`, validated on **SOURCE IDENTITY** (`event.source ===` the
+> iframe's `contentWindow`; origin is `"null"` and is **never** checked) via an `artifact_ref →
+> contentWindow` registry, routing the reply to the **originating frame only** (`targetOrigin "*"`),
+> multiple commentable iframes per tab. Verbatim-substring relocation + honest-NULL `block_ref`
+> generalize to any served `.html` (Phase 4's `exploration.html` inherits commenting for **free**;
+> ref-less is honest success). US4 (render read-only), US7 (selectable units, **no** ids / **no**
+> anchor-id scheme — none introduced) and US8 (same-door, single write path) are **REUSED, not
+> superseded**. **Still out of scope:** stable anchor-ids (deferred) and any write-back round-trip to
+> exploration md (comments are feedback-only). New: US23, FR-064–FR-066, SC-026.
+> **Updated:** 2026-06-20 — v9 (Phase 2b, exploration-pipeline-nxm): the Diecast **phase-tab artifact
+> viewer** now renders render-class `.html` artifacts via `<iframe srcdoc>` (null-origin sandbox:
+> `allow-scripts allow-popups`, **no** `allow-same-origin`) **alongside** the `.md` it already renders.
+> The `.md`-only **read** gate (`api_artifacts.validate_artifact_path_read`) and the phase-tab globs
+> (`api_goals.get_phase_tab`) are extended to admit `.html`; the artifact-dict **`kind`** discriminator
+> (`markdown` | `html`) + the `_add_html_file` collector (verbatim file bytes, never `md.markdown()`-
+> processed) are the seam. The **edit** gate stays `.md`-only — `.html` renders are read-only. This makes
+> the **refined-requirements HTML** reachable in-viewer (render **consumer #2**), not only on `/render`;
+> **exploration** is render **consumer #1** (Phase 4 produces `exploration/exploration.html`). US4
+> (render-class, read-only, no authorship suffix, atomic + `served-by` stamp) and US7 (selectable units,
+> **no ids/anchors** — the DOM contract Phase 3b's verbatim-substring anchoring + the `anchor_space='render'`
+> path consume) are **REUSED, not superseded**, now applied to ALL render-class `.html` in the viewer.
+> **Out of scope (stated to avoid over-claiming):** in-iframe commenting (Phase 3b) and the exploration
+> render pipeline (Phase 4) — v9 ships the *viewer render* only. New: US22, FR-062–FR-063, SC-025.
 > **Updated:** 2026-06-13 — v8 (Phase-5 follow-up: HOW two-mode + render-snapshot anchoring): the HOW
 > maker gains a CREATE/UPDATE two-mode contract (CREATE re-renders fresh + readability-first; UPDATE
 > re-renders only changed blocks and keeps unchanged unit containers byte-identical) bounded by a
@@ -791,6 +829,84 @@ not verbatim-locate in the corpus allowlist.
   v2 DOM contract preserved) so carriage + survival gates stay green on a marked render; the checker grants
   gap amnesty (a surfaced gap is honest source-gap communication, not a comprehension defect).
 
+### US22 — The phase-tab viewer renders render-class `.html` alongside `.md` (Priority: P1)
+
+**As a** reader of a goal's phase tab, **I want to** see a render-class `.html` artifact embedded in the
+viewer the same place I read its `.md` source, **so that** a rendered surface (refined-requirements today,
+exploration tomorrow) is reachable without leaving the goal screen for the standalone `/render` page.
+
+**Independent test:** A requirements phase tab whose goal directory holds both a `.collab.md` and a
+`refined_requirements.html` renders the markdown in a `markdown-body` div AND embeds the html inside an
+`<iframe srcdoc>` whose decoded content equals the file bytes verbatim; the html artifact shows **no** edit
+button (render-class), and a tab with only `.md` artifacts emits no iframe (the md path is unchanged).
+
+**Acceptance scenarios (EARS-style):**
+
+- **Scenario 1 (dual render):** WHEN a phase tab collects a directory's artifacts, THE SYSTEM SHALL admit
+  both `.md` and `.html`, tagging each artifact dict with a `kind` discriminator (`markdown` | `html`);
+  `.md` is rendered to HTML as today, `.html` carries its **verbatim file bytes** (never
+  `md.markdown()`-processed) so a full standalone document keeps its own `<head>`/`<style>`.
+- **Scenario 2 (isolated embed):** WHEN a `kind="html"` artifact is rendered, THE SYSTEM SHALL embed it via
+  `<iframe srcdoc>` in a **null-origin** sandbox (`allow-scripts allow-popups`, **never**
+  `allow-same-origin`) so the document cannot read host cookies/DOM and its styles cannot collide with the
+  host page; `allow-scripts` is present so the Phase 3b comment bridge can later run.
+- **Scenario 3 (read-only, US4 reuse):** WHEN a `.html` artifact is surfaced, THE SYSTEM SHALL treat it as a
+  **render-class** artifact (US4): read-only with **no** edit affordance (`authorship=None`) and exempt from
+  the `.human`/`.ai`/`.collab` authorship-suffix convention — the **read** gate admits `.html`, the **edit**
+  gate still rejects it, and the existing path-traversal guard applies to `.html` unchanged.
+- **Scenario 4 (md path unchanged):** WHEN a phase tab holds only `.md` artifacts, THE SYSTEM SHALL render
+  them exactly as before (the `kind="markdown"` default keeps every existing call site byte-identical) — no
+  iframe, no regression.
+- **Scenario 5 (consumer surface, US7 reuse):** WHEN the refined-requirements HTML exists on disk, THE
+  SYSTEM SHALL surface it in the requirements phase tab as render **consumer #2** (exploration is consumer
+  #1) **without** retiring the `/render` route; the rendered DOM keeps the US7 contract (selectable units,
+  zero `id=`/`data-block-anchor`) so Phase 3b's verbatim-substring anchoring and the `anchor_space='render'`
+  path keep working. **Out of scope here:** in-iframe commenting (Phase 3b) and the exploration render
+  pipeline (Phase 4).
+
+### US23 — Diecast-wide commenting on any served `.html` via the host bridge (Priority: P1)
+
+> **In scope as of v10 (was deferred in v9).** Selecting text in ANY served `.html` artifact in the dual
+> viewer and submitting persists a same-door render-space comment keyed to **that** artifact. The hard
+> part is two boundary crossings, both reused-not-rebuilt: the null-origin srcdoc can't `fetch` the
+> same-door API (→ a **host postMessage bridge** proxies the POST), and the server's render resolver was
+> requirements-hardwired (→ it becomes **artifact-keyed** by `artifact_ref`). No new anchoring algorithm
+> and **no** stable anchor-id scheme — US7 holds; relocation stays verbatim-substring.
+
+**As a** reviewer of any rendered artifact (refined-requirements today, `exploration.html` tomorrow),
+**I want to** select text in the embedded render and leave a comment, **so that** it lands in the existing
+same-door comment store anchored to the artifact I was reading — with no artifact-specific code.
+
+**Independent test:** a jsdom unit test drives the host bridge with a registered frame and asserts a
+`cch:submit` fans out to one same-door POST per comment carrying `{quoted_text, section_hint, body,
+artifact_ref, author_kind}` and replies `cch:submitted` to the originating frame only; a foreign window
+sends nothing. A server-contract test asserts that proxied POST body creates a render-space comment whose
+stored `artifact_ref` is the one supplied (and that omitting it defaults to `refined_requirements.html`,
+byte-compatible with v9).
+
+**Acceptance scenarios (EARS-style):**
+
+- **Scenario 1 (artifact-keyed anchor):** WHEN a comment is created with an `artifact_ref`, THE SYSTEM
+  SHALL resolve the render-space anchor against THAT goal-relative served `.html` (validated containment,
+  `.html`-only) and store `artifact_ref` on the row; WHEN `artifact_ref` is absent, THE SYSTEM SHALL
+  resolve against `refined_requirements.html` (the back-compatible default) and store NULL — the
+  requirements path stays byte-identical.
+- **Scenario 2 (injected bridge-mode layer):** WHEN a render-class `.html` is served into the viewer
+  iframe, THE SYSTEM SHALL inject the cast-comment-html layer (the SAME assets the standalone tool serves)
+  before `</body>` in **bridge mode**, so Submit `postMessage`s a `{type:"cch:submit", goal_slug,
+  artifact_ref, comments[]}` batch to the host instead of a (blocked) null-origin `fetch`.
+- **Scenario 3 (source-identity guard):** WHEN the host receives a `message`, THE SYSTEM SHALL accept it
+  ONLY when `event.source` is a `contentWindow` in its `artifact_ref → contentWindow` registry — origin is
+  `"null"` for srcdoc and SHALL NOT be checked; a foreign window or a malformed payload issues **no** POST.
+- **Scenario 4 (per-comment fan-out, reply to originator):** WHEN a valid batch arrives, THE SYSTEM SHALL
+  issue ONE same-door POST per comment (a failure on one SHALL NOT abort the others) and `postMessage` a
+  `{type:"cch:submitted", ok, results[]}` reply to the **originating** frame only (`targetOrigin "*"`),
+  surfacing per-comment success/failure as a visible toast — never silently dropped.
+- **Scenario 5 (multi-iframe, US7/US8 preserved):** WHEN a tab embeds several commentable iframes (e.g.
+  `exploration.html` + `refined_requirements.html`), THE SYSTEM SHALL route each frame's submit and reply
+  independently by source identity; the comment is authored through the ONE same-door create handler (no
+  parallel route, US8) and the render DOM keeps US7 (no ids, verbatim-substring placement).
+
 ## Functional Requirements
 
 | ID | Requirement | Notes |
@@ -851,11 +967,16 @@ not verbatim-locate in the corpus allowlist.
 | FR-054 | A **read-only flagged-renders list** (slug, `review_reason`, `published_score`, render link) is surfaced on an existing screen (`/runs`) from `render_job_service.list_flagged_renders()` — a query of the 4a recording-only `render_jobs` flag columns (`human_review=1`) with **no** new write path and **no** new column. It is the honest degraded-page signal the structural override makes load-bearing ("surface, don't suppress"); additive scope only — **no** queue/triage UI | Resolves the human-review-flag row's "the LIST is Phase 5d" pointer; the migration is unchanged (`git diff` shows no `render_jobs` schema change) |
 | FR-055 | The render job decides CREATE vs UPDATE via the pure `render_job_service.decide_mode(...)`. UPDATE iff ALL hold: a prior render exists AND was a CLEAN maker publish (`served-by: maker`, no human-review — never UPDATE *from* a flagged/fallback render); the prior source is recoverable (prior job dir, else a `requirement_versions` content-hash match); the goal's `workflow_family` is unchanged; `changed_fraction <= RENDER_UPDATE_MAX_CHANGED_FRACTION` (config default 0.4); and `prior_render_bytes <= RENDER_UPDATE_MAX_PRIOR_BYTES` (config default 600 000, plan-review Decision #6). EVERY precondition failure degrades to CREATE with a job `_note` — **never a job error** (CREATE is always safe). `changed_fraction = (added+removed+modified)/max(old_blocks,new_blocks)` from the consumed `block_diff.diff_blocks` engine (the deterministic-diff extend-never-fork rule — consumed unchanged, not edited). The decided `mode` is stamped on the `render_jobs` row for observability | Every UPDATE precondition failure degrades to CREATE, noted, never errored — shared-context Owner Principle |
 | FR-056 | UPDATE is the **deterministic splice** (Spike 1a verdict FAIL → splice, NOT gate-enforced LLM copy): the server keeps each unchanged unit container's bytes verbatim from the prior render and splices in HOW-rendered changed-block fragments via the `RR-FRAGMENT` sub-contract (HOW emits **only** changed blocks, never a full page). Byte-identity of unchanged containers is a **construction guarantee**. `check_update_fidelity(html, prior_html, unchanged_refs)` compares **NORMALIZED container TEXT** via the shared `container_text_index` walker (NOT raw bytes — a raw-byte gate on LLM output thrashes on serialization noise); a changed ref HOW emitted no fragment for is a structural violation taking the standard retry. UPDATE **reuses the prior gated WHAT doc** (no `run_what`); a WHAT-reuse miss degrades the whole job to CREATE. The published UPDATE artifact is therefore **server-assembled** (splice), not a single LLM emission | The splice-assembles-the-published-artifact architecture note; one walker, no copy |
-| FR-057 | Comment anchoring lives in the **published-render snapshot** space. `requirement_comments` gains two additive columns: `block_ref TEXT NULL` (server-resolved canonical id of the enclosing labeled unit container; NULL = cross-boundary OR a ref-less render — both honest) and `anchor_space TEXT NOT NULL DEFAULT 'source'` (`'source' \| 'render'`). `block_ref` is resolved SERVER-SIDE from the served artifact by `comment_anchor.resolve_render_anchor` (the productionized 1b dry-run, reusing the single `container_text_index` walker) and is **NEVER accepted from the client** (a spoofed ref would mis-route a future change-request) — it stays out of the POST body schema. A ref-less-render NULL `block_ref` is a **placed-comment SUCCESS**, never an unplaced miss to retry/badge (plan-review Decision #1). `create_comment` / `list_comments` / `relocate` re-target to render space; `list_comments` picks the comparison space per `anchor_space`. Old rows keep the back-compatible `'source'` default (additive migration: `db/schema.sql` + `tests/test_schema_migration.py`) | The crux move — comments anchor to the render, bridged back to source by a server-resolved ref |
+| FR-057 | Comment anchoring lives in the **published-render snapshot** space. `requirement_comments` gains two additive columns: `block_ref TEXT NULL` (server-resolved canonical id of the enclosing labeled unit container; NULL = cross-boundary OR a ref-less render — both honest) and `anchor_space TEXT NOT NULL DEFAULT 'source'` (`'source' \| 'render'`). `block_ref` is resolved SERVER-SIDE from the served artifact by `comment_anchor.resolve_render_anchor` (the productionized 1b dry-run, reusing the single `container_text_index` walker) and is **NEVER accepted from the client** (a spoofed ref would mis-route a future change-request) — it stays out of the POST body schema. A ref-less-render NULL `block_ref` is a **placed-comment SUCCESS**, never an unplaced miss to retry/badge (plan-review Decision #1). `create_comment` / `list_comments` / `relocate` re-target to render space; `list_comments` picks the comparison space per `anchor_space`. Old rows keep the back-compatible `'source'` default (additive migration: `db/schema.sql` + `tests/test_schema_migration.py`). **v10:** the served-render resolver is now **artifact-keyed** — `_resolve_served_render_html` / `_resolve_render_compare_text` / `create_comment` / `relocate` take an optional `artifact_ref` and `list_comments` resolves the render compare-text **per `artifact_ref`** (cached keyed by it), so a goal's comments minted against different served `.html` documents never cross-anchor; absent `artifact_ref` resolves the requirements default (the same-door field + resolver are specified in the v10 rows below) | The crux move — comments anchor to the render, bridged back to source by a server-resolved ref; v10 keys that resolution to the specific artifact |
 | FR-058 | UPDATE **SKIPS `emit_change_requests` entirely** and REUSES the prior `gaps-state.json` (plan-review Decision #2 — LOAD-BEARING, not an optimization): the gap-CR dedupe fingerprint rides `origin_artifact_path` keyed by the CURRENT `source_hash[:12]`; an UPDATE runs under a NEW hash, so re-emitting would write a DUPLICATE gap CR the dedupe pre-check cannot match. Any diff that would change the gap set has already flipped the job to CREATE (WHAT reuse fell back). The prior render's `.rr-gap` markers ride along in the unchanged containers the splice preserves | Gap-CR idempotency under UPDATE — guards the source-hash-keyed dedupe duplication risk (the gap-idempotency criterion below) |
 | FR-059 | For an UPDATE's **expected-miss** comments (those on modified/removed blocks), the pipeline runs ONE `cast-comment-reanchor` v3 dispatch at the **publish boundary** (`_post_publish_reanchor`, after `_finalize` so it never affects the terminal row): a `relocated` verdict re-points the comment to a verbatim span of the new render, `resolved` resolves it, anything else (incl. crash / garbage / non-verbatim quote) leaves the comment **open + badged** — never silently dropped, never auto-resolved. An expected miss never flips survival `passed`; a comment on an unchanged block survives **structurally** (no dispatch) | US19-reoriented; surface, don't suppress |
 | FR-060 | `maker_gate.check_html` gains an **empty-shell** check: a render whose body carries section scaffolding but no actual requirement content (an empty shell) is a structural violation, so a degenerate maker emission cannot publish as a clean page — the CREATE-mode floor that replaces the superseded blanket verbatim-carriage requirement (it pairs with US16 Scenario 2's CREATE supersession). The `cast-requirements-what` zero-ref contract (empty `block_refs` for a genuinely ref-less source) and the HOW zero-ref + empty-shell hardening pair with it | Hardens the `pilot_poc`/`random_idea` ref-less path against degenerate output |
 | FR-061 | Two config knobs follow the `RENDER_*` env-overridable convention: `RENDER_UPDATE_MAX_CHANGED_FRACTION` (default 0.4, `CAST_RENDER_UPDATE_MAX_CHANGED_FRACTION`) and `RENDER_UPDATE_MAX_PRIOR_BYTES` (default 600 000, `CAST_RENDER_UPDATE_MAX_PRIOR_BYTES`). The legacy `RENDER_UPDATE_ENABLED` flag is **retired as a behaviour gate** (sp3b wired UPDATE live: an UPDATE fires whenever `decide_mode` lands `mode='update'`, `_is_update_active(state)`); it survives only as a harmless legacy constant | `RENDER_*`/`QUALITY_*` knob convention; the flag-gate is gone |
+| FR-062 | The phase-tab artifact viewer is **dual md/html**: the per-directory and single-file artifact collection in `get_phase_tab` admits both `.md` and `.html`, every artifact dict carries a `kind ∈ {markdown, html}` discriminator, and the render macro dispatches on it — `markdown` → today's `markdown-body` div (the `kind="markdown"` default keeps every existing call site byte-identical), `html` → an `<iframe srcdoc>` carrying the file's **verbatim bytes** (never `md.markdown()`-processed) in a **null-origin** sandbox (`allow-scripts allow-popups`, **no** `allow-same-origin`). The `.html` collector (`_add_html_file`) sets `authorship=None` (render-class). `.html` is collected **after** `.md` per directory (md source first, render below) — the deterministic ordering Phase 4 relies on | Naming contract — Phase 3b/4 adopt `kind`, `_add_html_file`, the iframe sandbox verbatim; `allow-scripts` is mandatory so the Phase 3b comment bridge can run; `allow-same-origin` is **forbidden** (it would defeat the null-origin isolation) |
+| FR-063 | The artifact **read** gate (`validate_artifact_path_read`) admits `.html` (a render-class artifact, US4 — read-only, no authorship suffix), while the **edit** gate (`validate_artifact_path`) stays `.md`-only; the existing `_validate_artifact_path_base` traversal guard (`resolve` + `is_relative_to` GOALS_DIR / `external_project_dir`) applies to `.html` unchanged (no new path surface). The refined-requirements HTML is added to the requirements phase's artifact set so it surfaces in-viewer as render **consumer #2** — a **lazy** surface that appears once a render has written the file, gracefully empty when absent — **without** removing the `/render` route; **exploration** is render **consumer #1** (Phase 4 produces `exploration/exploration.html`). US7 (zero `id=`/`data-block-anchor`, quote anchoring) is preserved on the embedded render so Phase 3b's verbatim-substring anchoring + the `anchor_space='render'` path keep working — **REUSED, not superseded** | US4/US7 (and the render-class read-only + zero-`id`/`data-block-anchor` DOM clauses they carry) are cited and unchanged; in-iframe commenting (Phase 3b) + the exploration render pipeline (Phase 4) are **out of scope** for this version |
+| FR-064 | The same-door create endpoint gains **one** optional, defaulted `artifact_ref` field on `CreateCommentRequest` (the goal-relative served-`.html` the quote was minted against; `None` = `refined_requirements.html`, the requirements contract verbatim). It is **server-validated** as goal-relative (no `..` segment, not absolute) and `.html`-only — the same goal-relative / no-traversal / `.html` contract the read gate enforces; a malformed value is a `422` and persists nothing. It is passed into `comment_service.create_comment(..., artifact_ref=...)`; `block_ref`/`anchor_space` stay server-resolved (never client-trusted). **No new endpoint, no parallel route** — same-door (US8) is one new field on the one canonical handler | One optional field on the one door (US8 honored); the client-supplied edge is validated server-side, the anchor stays server-resolved |
+| FR-065 | The served-render resolver is **artifact-keyed** (`comment_service._resolve_artifact_path`): `artifact_ref=None` → `refined_requirements.html` (back-compatible default); a value resolves a **validated, contained** goal-relative `.html` under the goal dir (`resolve()` + `is_relative_to` — a traversal/`.html` violation is a hard `ValueError`, never an off-tree read); a missing file degrades to `""` (the read-time detector never crashes, as today). `artifact_ref` is stored on the comment row (third additive nullable `requirement_comments` column; NULL = requirements) so displacement/relocate later resolve against the **same** artifact the quote was minted from. The default path (`artifact_ref` NULL) is **byte-identical** to v9 — regression-asserted | The load-bearing seam — without it, comments on `exploration.html` would silently anchor against the requirements render; default-None keeps requirements unchanged |
+| FR-066 | The **host postMessage bridge** (`static/comment-bridge.js`) is the boundary crossing: the bridge-mode comment layer (the SAME cast-comment-html assets, injected before `</body>` of every served `.html` by `comment_layer_inject.inject_comment_layer`) `postMessage`s a `{type:"cch:submit", goal_slug, artifact_ref, comments[]}` batch to the host. The host validates the message on **SOURCE IDENTITY** — `event.source` must be a `contentWindow` in its `artifact_ref → contentWindow` registry (origin is `"null"` for srcdoc and is **never** checked); a foreign window or a payload failing the shape-check issues **no** POST. For each comment it issues ONE same-door create POST (`author_kind:"human"`, the artifact's `artifact_ref`); a per-comment failure does **not** abort the batch. It replies `{type:"cch:submitted", ok, results[]}` to the **originating** frame only (`targetOrigin "*"`), so the in-iframe layer toasts per-comment success/failure (surface, don't suppress). Multiple commentable iframes per tab are routed independently by source identity | Source-identity (not origin) is the only correct guard for null-origin srcdoc (1b browser-confirmed); reply-to-originator-only + per-comment fan-out keep the server contract single |
 
 ## Success Criteria
 
@@ -885,6 +1006,8 @@ not verbatim-locate in the corpus allowlist.
 | SC-022 | The two-mode decision is correct + degrade-safe: `decide_mode` returns UPDATE only when every precondition holds and degrades to CREATE (with a note, never an error) on each individual failure (no/flagged/unrecoverable prior, family flip, massive `changed_fraction`, oversize prior); an UPDATE publishes `served_by=maker` keeping unchanged unit containers byte-identical and swapping only changed blocks; a ref-less / massive / family-changed / flagged-prior edit re-renders fresh in CREATE. **v8 (the validation target): the three previously-flagged families (`bug_fix`, `pilot_poc`, `random_idea`) re-render CLEAN (`served_by=maker`, `human_review=0`) and the nine-family aggregate is 9/9 published, 0 flagged — readability-first CREATE did not regress the six previously-clean families** | `tests/test_render_mode_decision.py` + `tests/test_render_job_service.py` (live UPDATE splice + degrade tests) + `tests/test_maker_gate_update_fidelity.py`; **the nine-family clean record: `tests/eval_family_sweep.py --golden` (9/9 clean) + `signoff/golden/` + `signoff/sp5-proof.md`** (supersedes the prior 6/9-clean nine-family record) |
 | SC-023 | Comments anchor to the render snapshot with a server-resolved bridge: `create_comment` stores `anchor_space='render'` + a server-resolved `block_ref` (never client-supplied — no `block_ref` POST param); a ref-less render yields `block_ref=NULL` treated as SUCCESS; displacement + survival are computed in render space; a comment on an unchanged UPDATE block survives structurally, one on a modified block routes to the publish-boundary reanchor (relocate/resolve/orphan), never dropped, never auto-resolved | `tests/test_comment_service.py` + `tests/test_comment_anchor_render.py` + `tests/eval_sc003_survival.py` (render-anchor + UPDATE survival regressions a–f) |
 | SC-024 | Gap CRs are idempotent under UPDATE: an UPDATE-mode re-render of a doc carrying an open gap emits **ZERO** new gap change-requests (reuse prior `gaps-state.json`, skip `emit_change_requests`) — the source-hash-keyed dedupe duplication risk is pinned by a regression so a future refactor cannot silently reintroduce it | `tests/eval_sc003_survival.py` (regression f) + `tests/test_gap_reconciliation.py` |
+| SC-025 | The dual md/html viewer renders both classes without regressing the md path: a phase tab with a `.md` **and** a `.html` artifact shows the md in a `markdown-body` div and the html inside an `<iframe srcdoc>` whose decoded value equals the file bytes **byte-exact**, the html artifact has **no** edit button (render-class), the iframe sandbox **omits** `allow-same-origin`, and a `.md`-only tab emits **no** iframe; the read gate admits `.html` while the edit gate rejects it. An **adversarial** render-class doc (containing `</script>`, quotes/backtick, `&`, and a render-marker) round-trips byte-exact through `srcdoc` and parses to **exactly one** `<script>` (plan-review Decision #6) | `cast-server/tests/test_dual_viewer.py` (read/edit gate, dual-artifact render, sandbox-omits-same-origin, md-only regression, `kind="markdown"` default byte-identity, adversarial srcdoc round-trip + single-script); the in-viewer requirements eyeball is the 1b browser-validated carry-forward (`spike-1b-result.md`). **v10 note:** the **macro** still escapes whatever bytes it is handed byte-exact (the adversarial + default-param tests are unchanged); the **served** `.html` now additionally carries the injected bridge-mode comment layer appended before its own `</body>` (the host-bridge row below) — so the route-level srcdoc preserves the artifact's markup verbatim but is no longer byte-identical to the on-disk file |
+| SC-026 | Diecast-wide commenting + the host bridge are proven **without a browser** (autonomous CI can't drive Chrome; 1b did the live validation): (a) a jsdom host-bridge unit test asserts foreign-window rejection, payload shape-check, per-comment POST fan-out with the exact same-door body incl. `artifact_ref`, the `cch:submit`→`cch:submitted` round-trip to the originating frame only, and multi-iframe source-identity routing; (b) a server-contract test asserts the proxied POST body creates a render-space comment whose stored `artifact_ref` matches, that **omitting** `artifact_ref` defaults to `refined_requirements.html` (byte-compatible), and that a traversal/`.html` violation is `422`; (c) the injector preserves artifact markup, is idempotent, and carries `{bridge, goal_slug, artifact_ref}` config | `agents/cast-comment-html/tests/test_comment_bridge.js` (jsdom, via `npm test`) + `cast-server/tests/test_html_comment_bridge_contract.py` + `cast-server/tests/test_comment_layer_inject.py`; the live in-iframe comment is the 1b browser-validated carry-forward (`spike-1b-result.md`) |
 
 ## Open Questions
 
@@ -959,3 +1082,17 @@ not verbatim-locate in the corpus allowlist.
   admits **paraphrase meaning-drift** — a dedicated paraphrase-meaning-fidelity checker is explicitly
   **OUT of scope** (HOLD); the `cast-requirements-render-checker` comprehension pass is the only guard,
   and a future review MAY add a fidelity dimension.
+- **v9 (Phase 2b, exploration-pipeline-nxm: dual md/html viewer):** nothing blocking. The Diecast
+  phase-tab viewer now renders render-class `.html` (via `<iframe srcdoc>`, null-origin sandbox) alongside
+  `.md` (US22, FR-062–FR-063, SC-025); the refined-requirements HTML is reachable in-viewer as render
+  **consumer #2** (exploration is **consumer #1**, produced by Phase 4) **without** retiring `/render`.
+  US4 (render-class: read-only, no authorship suffix, atomic + `served-by` stamp) and US7 (selectable
+  units, zero `id=`/`data-block-anchor` — the DOM contract Phase 3b's verbatim-substring anchoring + the
+  `anchor_space='render'` path consume) are **REUSED, not superseded**, now applied to ALL render-class
+  `.html` in the viewer. The 1b spike browser-validated the srcdoc embed + in-frame selection +
+  postMessage source-identity guard (`spike-1b-result.md`); the `allow-scripts` (no `allow-same-origin`)
+  sandbox is the forward-looking constraint that lets the Phase 3b bridge run. **Two deliberate
+  out-of-scope items, not open questions:** in-iframe **commenting** (Phase 3b — this version ships the
+  *viewer render* only) and the **exploration render pipeline** (Phase 4 produces
+  `exploration/exploration.html`). Artifact ordering is md-source-first, render-after per directory
+  (deterministic); Phase 4 MAY set its own ordering when it produces `exploration.html`.

@@ -11,6 +11,6 @@
     </div>
     <div class="sidebar-content">
         {{ artifact_header(name, path, authorship, goal_slug, phase) }}
-        {{ artifact_content(html) }}
+        {{ artifact_content(html, kind|default("markdown"), artifact_ref|default(""), goal_slug) }}
     </div>
 </div>

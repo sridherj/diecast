@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
 
 from cast_server.deps import templates
+from cast_server.requirements_render import comment_layer_inject
 from cast_server.services.goal_service import (
     create_goal, update_status as change_status, update_phase as set_phase, toggle_focus,
 )
@@ -398,17 +399,59 @@ async def get_phase_tab(request: Request, slug: str, phase: str):
     goal_dir = Path(goal["folder_path"])
     artifacts = []
 
-    def _add_md_file(f: Path, section: str = ""):
-        """Read a markdown file and append it as an artifact."""
+    def _label(f: Path, section: str = "") -> str:
+        label = f.stem.replace("-", " ").replace("_", " ").title()
+        if section:
+            label = f"{section}: {label}"
+        return label
+
+    def _goal_relative_ref(f: Path, base: Path) -> str:
+        """The goal-relative artifact_ref (e.g. ``exploration/exploration.html``) for the bridge POST.
+
+        Falls back to the bare filename if ``f`` is somehow not under ``base`` (defensive — the glob
+        sources only ever yield paths under ``goal_dir``)."""
         try:
-            label = f.stem.replace("-", " ").replace("_", " ").title()
-            if section:
-                label = f"{section}: {label}"
+            return f.resolve().relative_to(base.resolve()).as_posix()
+        except ValueError:
+            return f.name
+
+    def _add_md_file(f: Path, section: str = ""):
+        """Read a markdown file and append it as a `kind="markdown"` artifact."""
+        try:
             artifacts.append({
-                "name": label,
+                "name": _label(f, section),
                 "path": str(f),
+                "kind": "markdown",
                 "html": render_md(f.read_text()),
                 "authorship": extract_authorship(f.name),
+            })
+        except OSError:
+            pass
+
+    def _add_html_file(f: Path, section: str = ""):
+        """Append an `.html` file as a render-class `kind="html"` artifact.
+
+        Mirrors `_add_md_file` but carries the file's VERBATIM bytes (no render_md)
+        so a full standalone HTML doc keeps its own <head>/<style> when passed into
+        `<iframe srcdoc>`. `authorship=None` → render-class (US4): no edit button,
+        no authorship suffix.
+
+        sp3b: the bridge-mode cast-comment-html layer is injected before serving, keyed by the
+        artifact's goal-relative path — so EVERY served `.html` (requirements render today,
+        exploration.html in Phase 4) is annotatable, comments routed via the host postMessage
+        bridge. Artifact-generic: no per-artifact branching.
+        """
+        try:
+            raw = f.read_text()
+            artifact_ref = _goal_relative_ref(f, goal_dir)
+            html = comment_layer_inject.inject_comment_layer(raw, goal["slug"], artifact_ref)
+            artifacts.append({
+                "name": _label(f, section),
+                "path": str(f),
+                "kind": "html",
+                "html": html,
+                "authorship": None,
+                "artifact_ref": artifact_ref,
             })
         except OSError:
             pass
@@ -418,18 +461,27 @@ async def get_phase_tab(request: Request, slug: str, phase: str):
             dir_path = goal_dir / artifact_pattern.rstrip("/")
             if not dir_path.is_dir():
                 continue
-            # Top-level .md files (e.g. summary.md)
+            # Top-level .md files (e.g. summary.md), then .html renders after
+            # (deterministic: md source first, rendered html below — the ordering
+            # contract Phase 4 relies on).
             for f in sorted(dir_path.glob("*.md")):
                 _add_md_file(f)
+            for f in sorted(dir_path.glob("*.html")):
+                _add_html_file(f)
             # Subdirectories (e.g. research/, playbooks/)
             for subdir in sorted(dir_path.iterdir()):
                 if subdir.is_dir():
                     for f in sorted(subdir.glob("*.md")):
                         _add_md_file(f, section=subdir.name.capitalize())
+                    for f in sorted(subdir.glob("*.html")):
+                        _add_html_file(f, section=subdir.name.capitalize())
         else:
             file_path = goal_dir / artifact_pattern
             if file_path.is_file():
-                _add_md_file(file_path)
+                if file_path.name.endswith(".html"):
+                    _add_html_file(file_path)
+                else:
+                    _add_md_file(file_path)
 
     from cast_server.services.task_suggestion_service import get_pending_suggestions
     phase_suggestions = get_pending_suggestions(slug, phase=phase)

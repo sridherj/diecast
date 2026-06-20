@@ -67,35 +67,70 @@ def _resolve_current_text(goal_slug: str, db_path: Path | None, goals_dir: Path 
     return source.read_text(encoding="utf-8")
 
 
-def _resolve_served_render_html(goal_slug: str, db_path: Path | None, goals_dir: Path | None) -> str:
-    """Read the goal's SERVED render artifact (``refined_requirements.html``), or ``""`` if missing.
+def _resolve_artifact_path(goal_dir: Path, artifact_ref: str | None) -> Path:
+    """Resolve ``artifact_ref`` to a validated, goal-relative ``.html`` path under ``goal_dir``.
+
+    ``artifact_ref=None`` → ``refined_requirements.html`` (the back-compatible default: every
+    requirements comment + existing render-space comment keeps resolving byte-for-byte as before).
+    A non-empty value is a goal-relative path (e.g. ``exploration/exploration.html``) the bridge
+    POST carried; the server is the trust boundary, so this re-validates path shape even though the
+    same-door route already validated it: it must stay UNDER ``goal_dir`` (no ``..``/absolute escape)
+    and be ``.html``. A violation raises ``ValueError`` — never silently reads the wrong file.
+
+    This is the load-bearing seam of sp3b: it makes the served-render resolver artifact-keyed instead
+    of requirements-hardwired, so commenting is Diecast-wide (Phase 4's ``exploration.html`` inherits
+    it for free) without any artifact-specific server code.
+    """
+    if not artifact_ref:
+        return goal_dir / "refined_requirements.html"
+    ref = str(artifact_ref).strip()
+    if not ref.endswith(".html"):
+        raise ValueError(f"artifact_ref must be a .html path: {artifact_ref!r}")
+    base = goal_dir.resolve()
+    candidate = (base / ref).resolve()
+    if not candidate.is_relative_to(base):
+        raise ValueError(f"artifact_ref escapes the goal directory: {artifact_ref!r}")
+    return candidate
+
+
+def _resolve_served_render_html(goal_slug: str, db_path: Path | None, goals_dir: Path | None,
+                                artifact_ref: str | None = None) -> str:
+    """Read the goal's SERVED render artifact, or ``""`` if missing.
+
+    ``artifact_ref=None`` → ``refined_requirements.html`` (the back-compatible default); a value →
+    the validated goal-relative ``.html`` it names (sp3b: artifact-keyed, so a comment minted against
+    ``exploration/exploration.html`` anchors against THAT document, not the requirements render).
 
     The served `.html` is the text space comments now anchor to (refine-req-v3 sp2 — the crux move:
     a comment's quote is minted from / validated against the published render, not the canonical
     `.collab.md`). A missing render is NOT an error — the read-time detector degrades to the source
-    check rather than crashing (see ``_resolve_render_compare_text``).
+    check rather than crashing (see ``_resolve_render_compare_text``). A path-shape violation in
+    ``artifact_ref`` is the one hard error (a spoofed traversal must never read off-tree).
     """
     from cast_server.services import requirements_render_service
 
     goals_dir = goals_dir or GOALS_DIR
     goal_dir = requirements_render_service._resolve_goal_dir(goal_slug, goals_dir, db_path)
-    served = goal_dir / "refined_requirements.html"
+    served = _resolve_artifact_path(goal_dir, artifact_ref)
     if not served.exists():
         return ""
     return served.read_text(encoding="utf-8")
 
 
-def _resolve_render_compare_text(goal_slug: str, db_path: Path | None, goals_dir: Path | None) -> str:
+def _resolve_render_compare_text(goal_slug: str, db_path: Path | None, goals_dir: Path | None,
+                                 artifact_ref: str | None = None) -> str:
     """The displacement-comparison text for a ``'render'``-space comment.
 
     The served render's container text — extracted via the SHARED ``container_text_index`` walker
     (the same text space ``create_comment``'s resolver and ``maker_gate`` place against — never a
-    second tokenizer). **No render artifact on disk → fall back to the SOURCE check** (Step 2.4:
-    a missing render must never crash the read-time detector — degrade, never error).
+    second tokenizer). ``artifact_ref`` selects WHICH served ``.html`` (sp3b: the comment displaces
+    against the artifact it was minted from, never a different document). **No render artifact on
+    disk → fall back to the SOURCE check** (Step 2.4: a missing render must never crash the read-time
+    detector — degrade, never error).
     """
     from cast_server.requirements_render.maker_gate import container_text_index
 
-    html = _resolve_served_render_html(goal_slug, db_path, goals_dir)
+    html = _resolve_served_render_html(goal_slug, db_path, goals_dir, artifact_ref)
     if not html:
         return _resolve_current_text(goal_slug, db_path, goals_dir)
     return container_text_index(html).document_text
@@ -128,6 +163,7 @@ def create_comment(goal_slug: str, quoted_text: str, section_hint: str | None, b
                    author: str, author_kind: str = "human",
                    *, version: int | None = None, db_path: Path | None = None,
                    goals_dir: Path | None = None,
+                   artifact_ref: str | None = None,
                    served_render_html: str | None = None) -> dict:
     """Insert an ``open`` comment + its ``created`` event in ONE transaction; return the row.
 
@@ -140,6 +176,12 @@ def create_comment(goal_slug: str, quoted_text: str, section_hint: str | None, b
     ``block_ref`` would mis-route a future change-request). A ``block_ref`` of ``None`` is stored and
     treated as SUCCESS when the render is ref-less (zero anchor labels) or the quote is
     cross-boundary — it is never an unplaced miss to retry/badge (plan-review Decision #1).
+
+    ``artifact_ref`` (sp3b) is the goal-relative ``.html`` the quote was minted against; ``None`` →
+    ``refined_requirements.html`` (the requirements default — byte-identical legacy behavior). It is
+    stored on the row so future displacement/relocate resolve against the SAME artifact, never a
+    different document. Like ``block_ref``, the *resolution* is server-side; the route is the trust
+    boundary that validated the path shape before it reached here.
     ``served_render_html`` is a test seam; in production the served `.html` is read off disk.
     """
     if version is None:
@@ -150,8 +192,9 @@ def create_comment(goal_slug: str, quoted_text: str, section_hint: str | None, b
     # Resolve the render-space anchor SERVER-SIDE from the served artifact (the crux move). The
     # served render is the text the UI minted this quote against, so the quote places by
     # construction in real use; block_ref bridges it back to source space (NULL = honest).
+    # artifact_ref selects WHICH served .html — None keeps the requirements default.
     if served_render_html is None:
-        served_render_html = _resolve_served_render_html(goal_slug, db_path, goals_dir)
+        served_render_html = _resolve_served_render_html(goal_slug, db_path, goals_dir, artifact_ref)
     anchor = comment_anchor.resolve_render_anchor(served_render_html, quoted_text)
     source_hash = (
         requirements_render_service._embedded_source_hash(served_render_html)
@@ -164,16 +207,17 @@ def create_comment(goal_slug: str, quoted_text: str, section_hint: str | None, b
         cur = conn.execute(
             """INSERT INTO requirement_comments
                (goal_slug, version, quoted_text, section_hint, body, state,
-                author, author_kind, block_ref, anchor_space, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?, 'render', ?, ?)""",
+                author, author_kind, block_ref, anchor_space, artifact_ref, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?, 'render', ?, ?, ?)""",
             (goal_slug, version, quoted_text, section_hint, body,
-             author, author_kind, anchor.block_ref, now, now),
+             author, author_kind, anchor.block_ref, artifact_ref, now, now),
         )
         comment_id = cur.lastrowid
         # The served artifact's embedded source-hash rides the created event for forensics (no new
         # column) — it pins exactly which render this anchor was resolved against.
         _append_event(conn, comment_id, "created", author,
                       {"anchor_space": "render", "block_ref": anchor.block_ref,
+                       "artifact_ref": artifact_ref,
                        "source_hash": source_hash, "miss_class": anchor.miss_class}, now)
         conn.commit()
         return _get_row(conn, comment_id)
@@ -229,17 +273,23 @@ def list_comments(goal_slug: str, *, state: str | None = None,
     if not any(c["state"] == "open" for c in comments):
         return comments  # nothing to displacement-check → skip the file read entirely
 
-    # Resolve each comparison space lazily and at most once (a goal's open comments are usually all
-    # one space; a missing seam triggers the on-disk lookup only when that space is actually used).
+    # Resolve each comparison space lazily and at most once PER ARTIFACT (a goal may now carry
+    # render-space comments minted against several served .html artifacts — sp3b — so the render
+    # compare-text is cached keyed by artifact_ref, not as a single string). The ``render_text`` seam
+    # still pins the requirements-default render (artifact_ref None) for tests that supply it.
     _source = current_text
-    _render = render_text
+    _render_cache: dict[str | None, str] = {}
+    if render_text is not None:
+        _render_cache[None] = render_text
 
-    def _compare_for(space: str) -> str:
-        nonlocal _source, _render
+    def _compare_for(space: str, artifact_ref: str | None) -> str:
+        nonlocal _source
         if space == "render":
-            if _render is None:
-                _render = _resolve_render_compare_text(goal_slug, db_path, goals_dir)
-            return _render
+            if artifact_ref not in _render_cache:
+                _render_cache[artifact_ref] = _resolve_render_compare_text(
+                    goal_slug, db_path, goals_dir, artifact_ref
+                )
+            return _render_cache[artifact_ref]
         if _source is None:
             _source = _resolve_current_text(goal_slug, db_path, goals_dir)
         return _source
@@ -247,7 +297,7 @@ def list_comments(goal_slug: str, *, state: str | None = None,
     for c in comments:
         if c["state"] == "open":
             space = c["anchor_space"] if c["anchor_space"] in ("render", "source") else "source"
-            c["displaced"] = c["quoted_text"] not in _compare_for(space)
+            c["displaced"] = c["quoted_text"] not in _compare_for(space, c.get("artifact_ref"))
     return comments
 
 

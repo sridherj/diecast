@@ -1,0 +1,12 @@
+{
+  "name": "cast-comment-html",
+  "version": "1.0.0",
+  "private": true,
+  "description": "cast-comment-html annotation layer + Diecast host comment bridge — JS unit tests (anchor + bridge).",
+  "scripts": {
+    "test": "node tests/test_anchor.js && node tests/test_comment_bridge.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

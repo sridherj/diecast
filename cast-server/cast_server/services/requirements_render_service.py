@@ -20,12 +20,15 @@ to land clean and flagged renders through the identical write envelope, plus a `
 """
 
 import logging
-import os
-import tempfile
+import os  # noqa: F401 — kept so `requirements_render_service.os.replace` stays monkeypatchable;
+            # it is the SAME os module render_common.atomic._atomic_write calls os.replace through.
 from dataclasses import dataclass
 from pathlib import Path
 
 from cast_server.config import GOALS_DIR
+# The atomic-write primitive lives in render_common now (ONE copy, shared with the exploration
+# render-job). Imported under its existing name so every in-module caller is byte-unchanged.
+from cast_server.render_common.atomic import _atomic_write
 from cast_server.requirements_render import is_stub, parse_requirements_file
 from cast_server.requirements_render.hashing import content_hash
 from cast_server.requirements_render.renderer import render_requirements
@@ -105,26 +108,6 @@ def _embedded_human_review(html: str) -> bool:
         if stripped.startswith(_HUMAN_REVIEW_PREFIX) and stripped.endswith(_HUMAN_REVIEW_SUFFIX):
             return stripped[len(_HUMAN_REVIEW_PREFIX):-len(_HUMAN_REVIEW_SUFFIX)].strip() == "1"
     return False
-
-
-def _atomic_write(target: Path, text: str) -> None:
-    """Write `text` to `target` atomically (tmp file in the same dir + `os.replace`).
-
-    A crash mid-write leaves either the old file or the new file — never a truncated one.
-    """
-    target.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(dir=str(target.parent), prefix=".", suffix=".html.tmp")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        os.replace(tmp_name, target)
-    except BaseException:
-        # Best-effort cleanup of the temp file on any failure; never leave it behind.
-        try:
-            os.unlink(tmp_name)
-        except OSError:
-            pass
-        raise
 
 
 def rerender_requirements_html(

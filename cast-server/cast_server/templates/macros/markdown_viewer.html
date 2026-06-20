@@ -24,8 +24,42 @@
 </div>
 {% endmacro %}
 
-{% macro artifact_content(html) %}
+{% macro artifact_content(html, kind="markdown", artifact_ref="", goal_slug="") %}
+{% if kind == "html" %}
+{# Render-class .html: embed verbatim via <iframe srcdoc> (null-origin sandbox).
+   `|e` HTML-attribute-escapes the whole doc into srcdoc; the browser un-escapes
+   it into a null-origin document — so the doc's own <head>/<style> can't collide
+   with the host page. sandbox OMITS allow-same-origin (this IS the null origin);
+   allow-scripts is present so sp3b's postMessage comment bridge can run.
+   data-artifact-ref / data-goal-slug let the host comment bridge register this frame's
+   contentWindow in its artifact_ref→window registry (sp3b — source-identity routing). #}
+<div class="artifact-content artifact-html">
+    {# .artifact-html-wrap is the fullscreen target (not the iframe), so the maximize
+       control stays visible/usable while maximized — YouTube-style toggle. #}
+    <div class="artifact-html-wrap">
+        <button type="button" class="artifact-html-maximize"
+                title="Maximize (fullscreen) — Esc to exit"
+                aria-label="Toggle fullscreen"
+                onclick="event.stopPropagation();var w=this.closest('.artifact-html-wrap');if(document.fullscreenElement===w){document.exitFullscreen();}else if(w.requestFullscreen){w.requestFullscreen();}">
+            <svg class="ic-expand" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" fill="currentColor"/>
+            </svg>
+            <svg class="ic-compress" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" fill="currentColor"/>
+            </svg>
+        </button>
+        <iframe class="artifact-html-frame"
+                sandbox="allow-scripts allow-popups"
+                data-artifact-ref="{{ artifact_ref }}"
+                data-goal-slug="{{ goal_slug }}"
+                srcdoc="{{ html|e }}"
+                loading="lazy"
+                onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe>
+    </div>
+</div>
+{% else %}
 <div class="artifact-content markdown-body">
     {{ html | safe }}
 </div>
+{% endif %}
 {% endmacro %}

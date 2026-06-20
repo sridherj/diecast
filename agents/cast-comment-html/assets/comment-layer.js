@@ -206,7 +206,46 @@
   }
   function download(name, text, type) { var b = new Blob([text], { type: type }); var a = el('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
   function toast_(m) { toast.textContent = m; toast.classList.add('cch-show'); setTimeout(function () { toast.classList.remove('cch-show'); }, 1800); }
+
+  // --- bridge transport (Diecast in-viewer commenting, exploration-pipeline-nxm sp3b) ---
+  // When CFG.bridge is set, this layer runs inside a null-origin <iframe srcdoc> embedded in the
+  // Diecast dual viewer. A direct fetch() to the same-door API is blocked (null origin), so Submit
+  // postMessages the batch to the host (window.parent), which proxies the per-comment POSTs and
+  // replies with a `cch:submitted` envelope. 1b proved this is the clean path — a direct transport
+  // replacement, NOT a fetch shim. The reply round-trips per-comment results into a visible toast so
+  // failures are surfaced, never silently dropped.
+  function submitViaBridge() {
+    if (!comments.length) { toast_('no comments to submit'); return; }
+    var payload = {
+      type: 'cch:submit',
+      goal_slug: CFG.goal_slug || null,
+      artifact_ref: CFG.artifact_ref || null,
+      comments: comments
+    };
+    try {
+      window.parent.postMessage(payload, CFG.targetOrigin || '*');
+      toast_('submitting ' + comments.length + ' comment(s)…');
+    } catch (e) {
+      download('feedback.json', JSON.stringify(comments, null, 2), 'application/json');
+      toast_('bridge unavailable — downloaded JSON');
+    }
+  }
+  // Host → layer reply. Accept only the host frame (window.parent) and the expected envelope shape;
+  // an ok=false or per-comment error becomes a visible toast and the comments stay in the local list.
+  window.addEventListener('message', function (e) {
+    if (e.source !== window.parent) return;
+    var d = e.data;
+    if (!d || d.type !== 'cch:submitted') return;
+    var results = Array.isArray(d.results) ? d.results : [];
+    var ok = 0, fail = 0;
+    results.forEach(function (r) { if (r && r.ok) ok++; else fail++; });
+    if (d.ok && fail === 0) toast_('submitted ' + ok + ' comment(s) ✓');
+    else if (ok > 0) toast_('submitted ' + ok + ', ' + fail + ' failed — kept locally');
+    else toast_('submit failed (' + fail + ') — kept locally');
+  });
+
   function submit() {
+    if (CFG.bridge) { submitViaBridge(); return; }
     if (!CFG.submit) { download('feedback.json', JSON.stringify(comments, null, 2), 'application/json'); toast_('no server — downloaded JSON'); return; }
     fetch(CFG.submit, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: CFG.file || location.pathname, out: CFG.out || null, comments: comments }) })
       .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })

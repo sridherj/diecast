@@ -210,6 +210,8 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
                                                  --   container (server-resolved); NULL = cross-boundary
                                                  --   OR a ref-less render — both honest (sp2 Decision #1)
         anchor_space TEXT NOT NULL DEFAULT 'source', -- 'source' | 'render' (refine-req-v3 sp2)
+        artifact_ref TEXT,                       -- goal-relative served-.html path the quote was minted
+                                                 --   against (sp3b); NULL = refined_requirements.html
         created_at TEXT NOT NULL,
         updated_at TEXT,
         FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
@@ -219,9 +221,13 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     # columns gets them added additively. Old rows keep anchor_space='source', block_ref=NULL —
     # the back-compatible default (a legacy source-anchored comment until the one-time migration
     # flips it). heartbeat/flag precedent: nullable/defaulted, no row rewrites.
+    # exploration-pipeline-nxm sp3b: artifact_ref keys render-space anchoring to the SPECIFIC served
+    # .html the quote was minted from. Nullable/defaulted — NULL = refined_requirements.html (the
+    # existing meaning); additive only, old rows read NULL and keep requirements behavior byte-for-byte.
     for col_name, col_type in [
         ("block_ref", "TEXT"),
         ("anchor_space", "TEXT NOT NULL DEFAULT 'source'"),
+        ("artifact_ref", "TEXT"),
     ]:
         try:
             conn.execute(f"ALTER TABLE requirement_comments ADD COLUMN {col_name} {col_type}")

@@ -62,20 +62,38 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
-import subprocess
 import threading
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Protocol
 
 import yaml
 
 import cast_server.config as config
-from cast_server.config import DIECAST_ROOT, GOALS_DIR
+from cast_server.config import GOALS_DIR
 from cast_server.db.connection import get_connection
-from cast_server.models.agent_config import load_agent_config
+# Shared render core (exploration-pipeline-nxm sub-phase 4, Decision 2A): the runner seam, the
+# sentinel contract, the concurrency mechanism, and the quality-loop skeleton live in render_common
+# now (ONE copy, shared with the exploration render-job). Imported under the names this module's
+# existing callers + tests expect (`extract_render`, `AgentRunner`, `JobState`, `_acquire_slot`, …).
+from cast_server.render_common.agent_runner import (
+    AgentRunError,
+    AgentRunner,
+    ProductionAgentRunner,
+    _clean_child_env,
+    _load_agent_md,
+)
+from cast_server.render_common.job_runtime import JobRegistry
+from cast_server.render_common.job_runtime import age_seconds as _age_seconds
+from cast_server.render_common.job_runtime import get_job_row, latest_job_row
+from cast_server.render_common.job_runtime import insert_job as _insert_job
+from cast_server.render_common.job_runtime import update_job as _update_job
+from cast_server.render_common.job_runtime import utcnow as _utcnow
+from cast_server.render_common.job_runtime import utcnow_iso as _utcnow_iso
+from cast_server.render_common.quality_loop import AttemptRecord, FeedbackItem
+from cast_server.render_common.quality_loop import best_attempt as _best_attempt
+from cast_server.render_common.quality_loop import decide_quality as _decide_quality
+from cast_server.render_common.quality_loop import run_quality_loop as _run_quality_loop
+from cast_server.render_common.sentinel import _BEGIN_SENTINEL, _END_SENTINEL, extract_render
 from cast_server.requirements_render import (
     ParsedRequirements,
     is_stub,
@@ -125,11 +143,8 @@ from cast_server.services.change_request_service import verbatim_locate
 
 logger = logging.getLogger(__name__)
 
-# Strict sentinel pair (shared-context HOW contract). Content = the FIRST `_BEGIN` to the FIRST
-# following `_END`. Anything after the first `_END` (e.g. the reserved Phase-5 `GAPS-DETECTED`
-# trailer) is outside the window and byte-ignored — no handling written for it (Step 3c.3).
-_BEGIN_SENTINEL = "<!-- BEGIN RENDER -->"
-_END_SENTINEL = "<!-- END RENDER -->"
+# The strict sentinel pair (`_BEGIN_SENTINEL` / `_END_SENTINEL`) + `extract_render` now live in
+# `render_common.sentinel` (imported above) — the HOW contract is identical for both render-jobs.
 
 _WHAT_AGENT = "cast-requirements-what"
 _HOW_AGENT = "cast-requirements-how"
@@ -163,97 +178,9 @@ _NO_OUTPUT_FEEDBACK = (
 )
 
 
-@dataclass(frozen=True)
-class FeedbackItem:
-    """One rework instruction with its provenance (CQ1). Structural items are hard, non-negotiable
-    fixes (deterministic gate violations); quality items are the checker's subjective nudges. They
-    ride the SAME transport (Phase 3's feedback channel) but render under SEPARATE prompt headings so
-    the HOW agent never treats a taste suggestion as a hard requirement or down-weights a structural
-    correction."""
-
-    text: str
-    provenance: str  # "structural" | "quality"
-
-
-@dataclass
-class AttemptRecord:
-    """One scored HOW attempt — the prefer-valid-then-score ranking input + the replayable
-    post-mortem record (4a2.6). `structurally_valid` reads the structural gate; `canonical_score`
-    is the code-side recompute (None when unscored)."""
-
-    attempt_no: int
-    html: str
-    gate_report: GateReport | None
-    what_ok: bool
-    structurally_valid: bool
-    verdict: CheckerVerdict | None
-    unscored: bool
-    canonical_score: float | None
-
-
-# ======================================================================================
-# AgentRunner seam (Step 3c.1) — production subprocess impl + test-injected fakes
-# ======================================================================================
-class AgentRunner(Protocol):
-    """Run one tool-free agent and return its raw stdout. Tests inject fakes."""
-
-    def run_agent(self, agent_name: str, user_msg: str, *, timeout_s: int) -> str: ...
-
-
-class AgentRunError(RuntimeError):
-    """A maker subprocess failed (non-zero exit, timeout, or spawn error)."""
-
-
-def _clean_child_env(*exclude: str) -> dict[str, str]:
-    """`os.environ` minus the excluded keys — never mutates the global env.
-
-    Mirrors `agent_service._clean_child_env` (the production subprocess-hygiene precedent): a
-    `claude -p` that inherits a parent session's `CLAUDECODE` / `CLAUDE_SESSION_ID` can hang or
-    recurse. This is net-new request-path subprocess code — env isolation is not optional.
-    """
-    skip = set(exclude)
-    return {k: v for k, v in os.environ.items() if k not in skip}
-
-
-def _load_agent_md(agent_name: str) -> str:
-    """Read `agents/<name>/<name>.md` (the agent's system prompt). Raises if absent."""
-    path = Path(DIECAST_ROOT) / "agents" / agent_name / f"{agent_name}.md"
-    return path.read_text(encoding="utf-8")
-
-
-class ProductionAgentRunner:
-    """Run an agent as `claude -p <msg> --append-system-prompt <agent.md> --model <m> --tools ""`.
-
-    `--tools ""` disables all tools, so the maker is structurally unable to write the canonical
-    `.collab.md` (FR-007). The runner inlines every agent input into `user_msg` (the pipeline
-    builds the prompts). Subprocess hygiene pins to the `agent_service.py` precedent:
-    `env -u CLAUDECODE` + an explicit per-job cwd + a clean child env.
-    """
-
-    def __init__(self, cwd: Path) -> None:
-        self._cwd = Path(cwd)
-
-    def run_agent(self, agent_name: str, user_msg: str, *, timeout_s: int) -> str:
-        agent_md = _load_agent_md(agent_name)
-        cfg = load_agent_config(agent_name)
-        env = _clean_child_env("CLAUDECODE", "CLAUDE_SESSION_ID")
-        self._cwd.mkdir(parents=True, exist_ok=True)
-        try:
-            proc = subprocess.run(
-                ["claude", "-p", user_msg, "--append-system-prompt", agent_md,
-                 "--model", cfg.model, "--tools", ""],
-                capture_output=True, text=True, timeout=timeout_s,
-                cwd=str(self._cwd), env=env,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise AgentRunError(f"{agent_name} timed out after {timeout_s}s") from exc
-        except OSError as exc:
-            raise AgentRunError(f"{agent_name} could not be spawned: {exc}") from exc
-        if proc.returncode != 0:
-            raise AgentRunError(
-                f"{agent_name} exited {proc.returncode}: {proc.stderr.strip()[:300]}"
-            )
-        return proc.stdout
+# `FeedbackItem` / `AttemptRecord` + the `AgentRunner` Protocol / `AgentRunError` /
+# `ProductionAgentRunner` / `_clean_child_env` / `_load_agent_md` now live in render_common
+# (imported above). Re-exported names keep `svc.FeedbackItem` / `svc.AgentRunError` resolving.
 
 
 # ======================================================================================
@@ -319,117 +246,26 @@ class JobState:
 
 
 # ======================================================================================
-# Module-level concurrency state (single-flight registry + in-flight semaphore)
+# Module-level concurrency state (single-flight registry + in-flight semaphore + reaper)
 # ======================================================================================
-_registry: dict[tuple[str, str], JobState] = {}
-_registry_lock = threading.Lock()
-
-# Bounded semaphore over distinct (slug, hash) jobs — the global in-flight ceiling (Step 3c.6).
-# Rebuilt from config by `_reset_state` (tests). `_slots_held` mirrors the held keys under
-# `_slot_lock` so the reaper can release a reaped orphan's slot and tests can assert on it.
-_inflight = threading.BoundedSemaphore(config.RENDER_MAX_INFLIGHT)
-_slot_lock = threading.Lock()
-_slots_held: set[tuple[str, str]] = set()
-
-
-def _acquire_slot(state: JobState) -> None:
-    """Block until an in-flight slot is free, then mark it held (the generating state is what a
-    waiting view sees meanwhile)."""
-    _inflight.acquire()
-    with _slot_lock:
-        state.slot_held = True
-        _slots_held.add(state.key)
-
-
-def _release_slot(state: JobState) -> None:
-    """Release a held in-flight slot exactly once (idempotent via the `slot_held` flag)."""
-    with _slot_lock:
-        if not state.slot_held:
-            return
-        state.slot_held = False
-        _slots_held.discard(state.key)
-        _inflight.release()
+# The mechanism lives in render_common.job_runtime.JobRegistry now (shared with the exploration
+# render-job). This module owns ONE instance and re-exports its members under the existing module
+# names so callers + the (unchanged) tests keep resolving `_registry`, `_acquire_slot`, etc.
+_runtime = JobRegistry(config.RENDER_MAX_INFLIGHT)
+_registry = _runtime.registry
+_registry_lock = _runtime.registry_lock
+_acquire_slot = _runtime.acquire_slot
+_release_slot = _runtime.release_slot
+slots_held = _runtime.slots_held
 
 
 def _reset_state(*, max_inflight: int | None = None) -> None:
     """Test hook: clear the registry + held-slot set and rebuild the semaphore. NOT for prod use."""
-    global _inflight
-    with _registry_lock:
-        _registry.clear()
-    with _slot_lock:
-        _slots_held.clear()
-        _inflight = threading.BoundedSemaphore(max_inflight or config.RENDER_MAX_INFLIGHT)
+    _runtime.reset(max_inflight=max_inflight or config.RENDER_MAX_INFLIGHT)
 
 
-def slots_held() -> frozenset[tuple[str, str]]:
-    """The set of (slug, hash) keys currently holding an in-flight slot (observability / tests)."""
-    with _slot_lock:
-        return frozenset(_slots_held)
-
-
-# ======================================================================================
-# Time helpers
-# ======================================================================================
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _utcnow_iso() -> str:
-    return _utcnow().isoformat()
-
-
-def _age_seconds(ts: str | None, now: datetime) -> float | None:
-    """Seconds between an ISO timestamp and `now`, or None if unparseable/absent."""
-    if not ts:
-        return None
-    try:
-        dt = datetime.fromisoformat(ts)
-    except (ValueError, TypeError):
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return (now - dt).total_seconds()
-
-
-# ======================================================================================
-# render_jobs row I/O (the observability surface — never the readiness key)
-# ======================================================================================
-def _insert_job(goal_slug: str, source_hash: str, db_path) -> int:
-    now = _utcnow_iso()
-    conn = get_connection(db_path)
-    try:
-        cur = conn.execute(
-            "INSERT INTO render_jobs (goal_slug, source_hash, status, attempts, "
-            "started_at, heartbeat_at) VALUES (?, ?, 'running', 0, ?, ?)",
-            (goal_slug, source_hash, now, now),
-        )
-        conn.commit()
-        return int(cur.lastrowid)
-    finally:
-        conn.close()
-
-
-def _update_job(row_id: int, db_path, **fields) -> None:
-    if not fields or row_id is None:
-        return
-    cols = ", ".join(f"{k} = ?" for k in fields)
-    vals = [*fields.values(), row_id]
-    conn = get_connection(db_path)
-    try:
-        conn.execute(f"UPDATE render_jobs SET {cols} WHERE id = ?", vals)
-        conn.commit()
-    finally:
-        conn.close()
-
-
-def get_job_row(row_id: int, db_path=None) -> dict | None:
-    """Fetch a render_jobs row as a dict (status surface for 3d + tests)."""
-    conn = get_connection(db_path)
-    try:
-        row = conn.execute("SELECT * FROM render_jobs WHERE id = ?", (row_id,)).fetchone()
-    finally:
-        conn.close()
-    return dict(row) if row else None
+# Row I/O (`_insert_job` / `_update_job` / `get_job_row` / `latest_job_row`) + the time helpers
+# (`_utcnow` / `_utcnow_iso` / `_age_seconds`) are imported from render_common.job_runtime above.
 
 
 def list_flagged_renders(db_path=None, limit: int = 100) -> list[dict]:
@@ -455,25 +291,8 @@ def list_flagged_renders(db_path=None, limit: int = 100) -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def latest_job_row(goal_slug: str, source_hash: str, db_path=None) -> dict | None:
-    """The most recent render_jobs row for ``(goal_slug, source_hash)``, or None.
-
-    The observability surface 3d's status endpoint reads to tell ``generating`` from ``failed``:
-    readiness itself is always derived from the artifact (never this table), but a *no-servable-
-    artifact* terminal — a first-generation crash the reaper marks ``failed`` — is only knowable
-    here. The artifact stays the single source of truth for ``ready``; this row only distinguishes
-    "still working" from "gave up with nothing to serve."
-    """
-    conn = get_connection(db_path)
-    try:
-        row = conn.execute(
-            "SELECT * FROM render_jobs WHERE goal_slug = ? AND source_hash = ? "
-            "ORDER BY id DESC LIMIT 1",
-            (goal_slug, source_hash),
-        ).fetchone()
-    finally:
-        conn.close()
-    return dict(row) if row else None
+# `latest_job_row` is imported from render_common.job_runtime above (re-exported for 3d's status
+# endpoint + callers).
 
 
 def _heartbeat(state: JobState, stage: str) -> None:
@@ -504,30 +323,8 @@ def _report_json(report: GateReport) -> str:
     return json.dumps({"passed": report.passed, "violations": list(report.violations)}, indent=2)
 
 
-# ======================================================================================
-# Strict sentinel extraction (Step 3c.3)
-# ======================================================================================
-def extract_render(raw: str | None) -> str | None:
-    """Content from the FIRST `<!-- BEGIN RENDER -->` to the FIRST following `<!-- END RENDER -->`,
-    or None when no such well-formed pair exists.
-
-    None ⇒ no-output for this attempt. Covers missing / mis-ordered (END before BEGIN) / duplicate
-    sentinels and empty windows. Anything after the first END (the reserved Phase-5 `GAPS-DETECTED`
-    trailer) is outside the window and byte-ignored — no handling for it (revision f).
-    """
-    if not raw:
-        return None
-    begin = raw.find(_BEGIN_SENTINEL)
-    if begin == -1:
-        return None
-    end = raw.find(_END_SENTINEL, begin + len(_BEGIN_SENTINEL))
-    if end == -1:
-        return None
-    content = raw[begin + len(_BEGIN_SENTINEL):end].strip()
-    if not content or "<" not in content:
-        # An empty window or a window with no markup (a chatty/fenced non-render) is no-output.
-        return None
-    return content
+# `extract_render` + the sentinel pair are imported from render_common.sentinel above (the HOW
+# output contract is identical for both render-jobs).
 
 
 # ======================================================================================
@@ -1881,118 +1678,123 @@ def _maybe_escalate_what(state: JobState, verdict: CheckerVerdict | None) -> Non
 # --------------------------------------------------------------------------------------
 # The quality loop + the terminal decision (Step 4a2.2 — the policy table, OVERRIDE baked in)
 # --------------------------------------------------------------------------------------
+# The loop MECHANISM (rework iteration, ranking, the policy table, the OVERRIDE) lives in
+# render_common.quality_loop now (shared with the exploration render-job). This module supplies the
+# requirements-specific stage bodies + terminal hooks via `_RequirementsLoopOps`, an adapter the
+# generic loop drives over `JobState`. Behavior is byte-identical: the clean-publish path still
+# records `_gap_row_reason`, the flagged path `_terminal_error`, and both run `_post_publish_reanchor`
+# after a successful `_compare_and_publish`; the `_maybe_escalate_what` hook fires unchanged.
+class _RequirementsLoopOps:
+    """Bind the generic quality loop to one requirements `JobState`."""
+
+    def __init__(self, state: JobState) -> None:
+        self.state = state
+
+    # --- ceiling knobs (read dynamically so tests can monkeypatch config) ---
+    @property
+    def max_attempts(self) -> int:
+        return config.QUALITY_MAX_ATTEMPTS
+
+    @property
+    def structural_stop(self) -> int:
+        return config.QUALITY_STRUCTURAL_STOP
+
+    # --- stage callables ---
+    def run_how(self, feedback, score_history) -> str | None:
+        return run_how(self.state, feedback, score_history)
+
+    def gate_html(self) -> None:
+        gate_html(self.state)
+
+    def run_checker(self, html: str):
+        return run_checker(self.state, html)
+
+    # --- reads off the latest gate results ---
+    def structurally_valid(self) -> bool:
+        return self.state.html_report is not None and self.state.html_report.passed
+
+    def what_ok(self) -> bool:
+        return self.state.what_report is not None and self.state.what_report.passed
+
+    # --- verdict math ---
+    def derive_pass(self, verdict) -> bool:
+        return derive_pass(verdict)
+
+    def canonical_score(self, verdict) -> float:
+        return canonical_score(verdict)
+
+    def gate_report(self):
+        return self.state.html_report
+
+    # --- counters (proxy onto JobState so the loop's mutations land on the real state) ---
+    @property
+    def how_attempts(self) -> int:
+        return self.state.how_attempts
+
+    @property
+    def consecutive_structural(self) -> int:
+        return self.state.consecutive_structural
+
+    @consecutive_structural.setter
+    def consecutive_structural(self, value: int) -> None:
+        self.state.consecutive_structural = value
+
+    @property
+    def attempts_history(self) -> list[AttemptRecord]:
+        return self.state.attempts_history
+
+    # --- feedback builders ---
+    def no_output_feedback(self) -> FeedbackItem:
+        return FeedbackItem(_NO_OUTPUT_FEEDBACK, "structural")
+
+    def rework_feedback(self, verdict) -> list[FeedbackItem]:
+        return _rework_feedback(self.state, verdict)
+
+    def score_history(self) -> str:
+        return _score_history(self.state)
+
+    # --- escalation hook (intent-level comprehension miss → re-run run_what) ---
+    def maybe_escalate(self, verdict) -> None:
+        _maybe_escalate_what(self.state, verdict)
+
+    # --- terminal hooks ---
+    def heartbeat(self, stage: str) -> None:
+        _heartbeat(self.state, stage)
+
+    def publish_clean(self, record: AttemptRecord) -> None:
+        state = self.state
+        if _compare_and_publish(state, record.html, served_by="maker",
+                                human_review=False, review_reason=None):
+            # 5a: even on a CLEAN publish, a gap that could not be filled (evidence-demoted or
+            # ask-failed) is recorded on the row — zero silent failures. The page already marks the
+            # gap honestly; the row carries the machine-readable reason.
+            _finalize(state, "published", error=_gap_row_reason(state),
+                      published_attempt=record.attempt_no, published_score=record.canonical_score)
+            _post_publish_reanchor(state)  # 3b: ONE re-anchor for UPDATE expected misses
+
+    def publish_flagged(self, record: AttemptRecord, *, served_by: str, reason: str) -> None:
+        state = self.state
+        if _compare_and_publish(state, record.html, served_by=served_by,
+                                human_review=True, review_reason=reason):
+            _finalize(state, "published", error=_terminal_error(state, record),
+                      human_review=1, review_reason=reason,
+                      published_attempt=record.attempt_no, published_score=record.canonical_score)
+            _post_publish_reanchor(state)
+
+    def publish_fallback(self, reason: str) -> None:
+        _publish_fallback(self.state, reason)
+
+
 def _quality_loop(state: JobState) -> None:
-    """Drive the HOW rework loop until a clean publish, the structural-stop, or the ceiling. Each
-    iteration: `run_how → gate_html → run_checker`, then `decide_quality`. A clean attempt
-    (structurally valid AND `derive_pass`) publishes immediately; otherwise the failing verdict's
-    feedback (provenance-tagged) drives the next rework. The single structural retry of Phase 3 is
-    SUBSUMED by this loop — a structural failure is just another rework, bounded by
-    `QUALITY_STRUCTURAL_STOP` consecutive failures (which would otherwise burn the ceiling on a
-    structurally-degraded maker for nothing)."""
-    feedback: list[FeedbackItem] | None = None
-    while state.how_attempts < config.QUALITY_MAX_ATTEMPTS:
-        score_history = _score_history(state) if feedback else None
-        extracted = run_how(state, feedback, score_history)
-        gate_html(state)
-
-        if extracted is None:
-            # A per-attempt no-output (crash / sentinel failure) is a structural failure with nothing
-            # to score. Surface it as the no-output feedback and rework.
-            state.consecutive_structural += 1
-            if state.consecutive_structural >= config.QUALITY_STRUCTURAL_STOP:
-                break
-            feedback = [FeedbackItem(_NO_OUTPUT_FEEDBACK, "structural")]
-            continue
-
-        verdict, unscored = run_checker(state, extracted)
-        structurally_valid = state.html_report is not None and state.html_report.passed
-        what_ok = state.what_report is not None and state.what_report.passed
-        score = None if unscored or verdict is None else canonical_score(verdict)
-        state.attempts_history.append(AttemptRecord(
-            attempt_no=state.how_attempts, html=extracted, gate_report=state.html_report,
-            what_ok=what_ok, structurally_valid=structurally_valid,
-            verdict=verdict, unscored=unscored, canonical_score=score,
-        ))
-
-        # Clean publish requires BOTH structural validity (gate_what + gate_html) AND the checker.
-        if what_ok and structurally_valid and verdict is not None and derive_pass(verdict):
-            chosen = state.attempts_history[-1]
-            if _compare_and_publish(state, chosen.html, served_by="maker",
-                                    human_review=False, review_reason=None):
-                # 5a: even on a CLEAN publish, a gap that could not be filled (evidence-demoted or
-                # ask-failed) is recorded on the row — zero silent failures. The page already marks
-                # the gap honestly; the row carries the machine-readable reason.
-                _finalize(state, "published", error=_gap_row_reason(state),
-                          published_attempt=chosen.attempt_no, published_score=score)
-                _post_publish_reanchor(state)  # 3b: ONE re-anchor for UPDATE expected misses
-            return
-
-        # Not clean → track consecutive structural failures (a quality-only fail resets the streak).
-        if structurally_valid and what_ok:
-            state.consecutive_structural = 0
-        else:
-            state.consecutive_structural += 1
-
-        _maybe_escalate_what(state, verdict)
-
-        if state.consecutive_structural >= config.QUALITY_STRUCTURAL_STOP:
-            break
-        feedback = _rework_feedback(state, verdict)
-
-    decide_quality(state)
-
-
-def _best_attempt(records: list[AttemptRecord]) -> AttemptRecord:
-    """Best within a pool: scored over unscored, then highest canonical score, then latest."""
-    return max(
-        records,
-        key=lambda r: (
-            0 if r.unscored else 1,
-            r.canonical_score if r.canonical_score is not None else -1.0,
-            r.attempt_no,
-        ),
-    )
+    """Drive the HOW rework loop (generic skeleton, requirements-bound ops). See
+    render_common.quality_loop.run_quality_loop for the mechanism."""
+    _run_quality_loop(_RequirementsLoopOps(state))
 
 
 def decide_quality(state: JobState) -> None:
     """The terminal decision (the policy table, OVERRIDE baked in). PREFER VALID, THEN SCORE.
-
-    - No attempt ever extracted → **literal no-output** → deterministic fallback (the ONLY fallback
-      trigger; never LLM-gated).
-    - ≥1 structurally-VALID attempt → serve the best valid one (`served-by: maker`), flagged
-      `human_review=1` with a `review_reason` (`structural_degradation` on the structural-stop,
-      `checker_unavailable` if every valid attempt is unscored, else `non_convergent`).
-    - Zero valid attempts but attempts WERE extracted → serve the best structurally-BROKEN attempt
-      (`served-by: structural_violation`, `review_reason='structural_violation'`). A broken attempt
-      can NEVER outrank a valid one on score alone."""
-    _heartbeat(state, "decide_quality")
-    history = state.attempts_history
-    if not history:
-        _publish_fallback(state, "maker produced no extractable render across all attempts")
-        return
-
-    structural_stop = state.consecutive_structural >= config.QUALITY_STRUCTURAL_STOP
-    valid = [r for r in history if r.structurally_valid]
-    if valid:
-        chosen = _best_attempt(valid)
-        served_by = "maker"
-        if structural_stop:
-            reason = "structural_degradation"
-        elif all(r.unscored for r in valid):
-            reason = "checker_unavailable"
-        else:
-            reason = "non_convergent"
-    else:
-        chosen = _best_attempt(history)
-        served_by = "structural_violation"
-        reason = "structural_violation"
-
-    if _compare_and_publish(state, chosen.html, served_by=served_by,
-                            human_review=True, review_reason=reason):
-        _finalize(state, "published", error=_terminal_error(state, chosen),
-                  human_review=1, review_reason=reason,
-                  published_attempt=chosen.attempt_no, published_score=chosen.canonical_score)
-        _post_publish_reanchor(state)
+    Generic policy in render_common.quality_loop.decide_quality, bound to this JobState's ops."""
+    _decide_quality(_RequirementsLoopOps(state))
 
 
 def _terminal_error(state: JobState, chosen: AttemptRecord) -> str | None:
@@ -2310,40 +2112,9 @@ def reap_stale_jobs(db_path=None) -> list[int]:
     live thread (after a server restart the in-memory registry is empty, so the ceiling is the real
     guard). A job blocked on an in-flight slot has a *live* thread and is never reaped. The reaper
     MUST release the in-flight slot of a reaped orphan (revision a) — else a crashed-thread orphan
-    leaks a slot permanently. Returns the reaped row ids.
-    """
-    ceiling = reaper_ceiling_seconds()
-    now = _utcnow()
-    conn = get_connection(db_path)
-    try:
-        rows = conn.execute(
-            "SELECT id, goal_slug, source_hash, heartbeat_at, started_at "
-            "FROM render_jobs WHERE status = 'running'"
-        ).fetchall()
-    finally:
-        conn.close()
-
-    reaped: list[int] = []
-    for row in rows:
-        age = _age_seconds(row["heartbeat_at"] or row["started_at"], now)
-        if age is None or age <= ceiling:
-            continue
-        key = (row["goal_slug"], row["source_hash"])
-        with _registry_lock:
-            state = _registry.get(key)
-            live = state is not None and state.thread is not None and state.thread.is_alive()
-            if live:
-                continue  # genuinely running (e.g. blocked on a slot) — not an orphan
-            if state is not None:
-                _release_slot(state)  # revision a: free the leaked slot
-                _registry.pop(key, None)
-        _update_job(
-            row["id"], db_path, status="failed",
-            error=f"reaped: stale heartbeat past ceiling ({int(age)}s > {ceiling}s, no live thread)",
-            finished_at=_utcnow_iso(),
-        )
-        reaped.append(row["id"])
-    return reaped
+    leaks a slot permanently. Returns the reaped row ids. The mechanism lives in
+    render_common.job_runtime; this binds the requirements ceiling (from the configured stage list)."""
+    return _runtime.reap_stale_jobs(ceiling=reaper_ceiling_seconds(), db_path=db_path)
 
 
 # ======================================================================================

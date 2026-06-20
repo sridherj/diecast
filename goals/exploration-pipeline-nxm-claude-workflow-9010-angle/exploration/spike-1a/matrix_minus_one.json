@@ -1,0 +1,5 @@
+{"goal_slug":"spike-1a","goal_context":"ctx",
+ "steps":[
+   {"nn":"01","slug":"alpha","name":"A","hats":["contrarian","first-principles"]},
+   {"nn":"02","slug":"beta","name":"B","hats":["contrarian"]}
+ ]}

@@ -52,7 +52,8 @@ STATUS_TRANSITIONS = {
 # Work phases (for accepted goals — "where am I in the work?")
 PHASES = ["requirements", "exploration", "plan", "execution"]
 PHASE_ARTIFACTS = {
-    "requirements": ["requirements.human.md", "refined_requirements.collab.md"],
+    "requirements": ["requirements.human.md", "refined_requirements.collab.md",
+                     "refined_requirements.html"],
     "exploration": ["exploration/"],
     "plan": ["plan.collab.md"],
     "execution": [],

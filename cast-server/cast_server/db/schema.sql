@@ -143,6 +143,11 @@ CREATE TABLE IF NOT EXISTS requirement_comments (
                                              --   ref-less render (zero anchor labels) — both honest
     anchor_space TEXT NOT NULL DEFAULT 'source', -- 'source' | 'render' (refine-req-v3 sp2: comments
                                              --   anchor to the published render snapshot, not source)
+    artifact_ref TEXT,                       -- goal-relative path of the SERVED .html the quote was
+                                             --   minted against (exploration-pipeline-nxm sp3b). NULL
+                                             --   means refined_requirements.html (the back-compatible
+                                             --   default). A value keys multi-artifact render-space
+                                             --   anchoring so a comment never cross-anchors elsewhere
     created_at TEXT NOT NULL,
     updated_at TEXT,
     FOREIGN KEY (goal_slug) REFERENCES goals(slug) ON DELETE CASCADE
