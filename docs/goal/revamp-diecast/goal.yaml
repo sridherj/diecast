@@ -4,7 +4,7 @@
 #   external_project_dir = code/execution artifacts destination.
 slug: revamp-diecast
 title: Revamp DieCast
-status: accepted
+status: completed
 phase: requirements
 origin: manual
 in_focus: false
