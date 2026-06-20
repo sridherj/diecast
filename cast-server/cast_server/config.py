@@ -85,7 +85,7 @@ STARTER_TASKS = [
      "recommended_agent": "cast-refine-requirements",
      "artifact": "refined_requirements.collab.md"},
     {"title": "Run starter exploration", "phase": "exploration",
-     "tip": "Deep 7-angle research on the goal", "recommended_agent": "cast-explore"},
+     "tip": "Deep 7-angle research on the goal", "recommended_agent": "cast-explore-workflow"},
     {"title": "Go through starter research output", "phase": "exploration",
      "tip": "Leverage research, form your POV", "recommended_agent": None},
     {"title": "Add research notes", "phase": "exploration",
@@ -95,7 +95,7 @@ STARTER_TASKS = [
      "tip": "City map — directionally right, progressively detailed", "recommended_agent": "cast-high-level-planner"},
     {"title": "Create detailed execution plan", "phase": "plan",
      "tip": "Spec-aware planning with inline design review",
-     "recommended_agent": "cast-detailed-plan"},
+     "recommended_agent": "cast-fanout-detailed-plan"},
 ]
 
 # Workflow routing registry (Phase 3b). Keys are WorkFamily string values —

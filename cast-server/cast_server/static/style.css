@@ -3051,12 +3051,12 @@ select:focus-visible {
     color: var(--text-muted);
     cursor: pointer;
     padding: 2px;
-    opacity: 0;
-    transition: opacity 0.15s;
+    opacity: 1; /* always visible, parity with copy-path-btn (was hover-gated on a non-existent .artifact-header) */
+    transition: color 0.15s;
 }
-.artifact-header:hover .edit-artifact-btn,
+.artifact-section:hover .edit-artifact-btn,
 .edit-artifact-btn:focus {
-    opacity: 1;
+    color: var(--text-secondary);
 }
 .edit-artifact-btn:hover {
     color: var(--color-info);
