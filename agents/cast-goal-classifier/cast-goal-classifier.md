@@ -1,3 +1,17 @@
+---
+name: cast-goal-classifier
+model: sonnet
+description: >
+  Fast work-family triage classifier. Given a Diecast goal's title and raw writeup,
+  sorts the work into exactly one of nine WorkFamily values, with confidence, runner-up,
+  a one-sentence rationale, and two within-family modifiers — emitted as a single bare
+  JSON object and nothing else. Does not plan, rewrite, or advise. Dispatched as a
+  subagent (no cast-server, no file writes); the classify seam consumed by
+  cast-refine-requirements Step 0 and bin/cast-classify-gate. Trigger phrases: "classify
+  this goal", "what work family", "triage this writeup".
+effort: low
+---
+
 <!--
 DESIGN NOTE — "strict tool-call" realization (Phase 2, sp2a Step 2a.3):
 This repo has no `anthropic` SDK usage; agents are Claude Code sessions, not raw API calls.
