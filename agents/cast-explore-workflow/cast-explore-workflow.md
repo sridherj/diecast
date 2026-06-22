@@ -32,10 +32,11 @@ Workflow** (via the Workflow tool) that does the deterministic fan-out + synthes
 
 The fan-out engine is a **JavaScript Workflow script** at
 **`agents/cast-explore-workflow/workflow.mjs`** (NOT a Python `workflow.py` — binding G1
-correction). It uses the Workflow tool's inline-JS API: `agent()`, `parallel()`, `pipeline()`,
-`phase()`, `log()`, `budget`, `args`. You pass it the `hat-matrix` as `args`. You do NOT
-re-author its logic — you compute the matrix, hand the script + args to the Workflow tool, and
-let it run non-interactively in the background.
+correction). It uses the **current** Workflow tool API (ported 2026-06-21): `agent(prompt, {agentType,…})`,
+`parallel()`, `phase()`, `log()`, `args` — NO `pipeline(name,thunk)` and NO script filesystem; the
+disk-glob synthesis barrier + degraded-placeholder write run inside a fs-capable agent. You pass it the
+`hat-matrix` as `args`. You do NOT re-author its logic — you compute the matrix, hand the script + args to
+the Workflow tool, and let it run non-interactively in the background.
 
 ---
 
@@ -113,6 +114,7 @@ engine script is `agents/cast-explore-workflow/workflow.mjs`. Pass the computed 
 {
   "goal_slug": "<slug>",
   "goal_context": "<≤280-char step-neutral intent paragraph; identical for every cell>",
+  "exploration_dir": "<OPTIONAL absolute/relative output base; default goals/<slug>/exploration>",
   "steps": [
     { "nn": "01", "slug": "how-to-...", "name": "How to ...?",
       "hats": ["contrarian","first-principles","90-10","expert-practitioner","tool-landscape"] },
@@ -128,13 +130,14 @@ Launch instruction to issue (Option A — main agent holds the Workflow tool):
 > `agents/cast-explore-workflow/workflow.mjs` with these `args` (the hat-matrix): `{…}`.
 > Optionally save it as `/cast-explore-workflow` so it can be re-run via `/workflows`."
 
-The Workflow then runs **non-interactively in the background**:
-- `pipeline()` per step → `parallel()` over `M_applicable(step)` hats → one clean-context
+The Workflow then runs **non-interactively in the background** (current Workflow API):
+- `parallel()` over steps; per step, `parallel()` over `M_applicable(step)` hats → one clean-context
   `cast-hat-researcher` per `(step, hat_id)` cell (the 2a contract).
-- A per-step **synthesis barrier** (`parallel()` join) → the **unchanged** `cast-playbook-synthesizer`,
-  fed the surviving hat notes for that step (resolved by disk-glob ∩ hat_id, review #9).
-- A **final stage** assembles `summary.ai.md` (in-script — the G1-confirmed location), then the
-  terminal result returns to your launching session as a message.
+- A per-step **synthesis barrier** (`parallel()` join) → a fs-capable resolver agent applies the
+  disk-glob ∩ hat_id rule (review #9) and writes the degraded placeholder on all-hats-fail (review #7)
+  → the **unchanged** `cast-playbook-synthesizer`, fed the surviving notes for that step.
+- A **final stage** assembles `summary.ai.md` via the synthesizer; completion is logged back to your
+  launching session. Outputs honor an optional `exploration_dir` arg (default `goals/{slug}/exploration`).
 
 ### Handoff (1a-confirmed)
 

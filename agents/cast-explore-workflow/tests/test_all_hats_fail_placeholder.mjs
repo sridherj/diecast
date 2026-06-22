@@ -19,7 +19,7 @@ globalThis.pipeline = (_n, _f) => ({});
 globalThis.phase = (_n, _f) => ({});
 globalThis.args = { goal_slug: "g", goal_context: "c", steps: [] };
 
-const { degradedPlaceholder } = await import("../workflow.mjs");
+const { degradedPlaceholder } = await import("../lib.mjs");
 
 let failures = 0;
 function check(name, fn) {

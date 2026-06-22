@@ -26,7 +26,7 @@ globalThis.pipeline = (_name, _fn) => ({ _name });
 globalThis.phase = (_name, _fn) => ({ _name });
 globalThis.args = { goal_slug: "g", goal_context: "c", steps: [] };
 
-const mod = await import("../workflow.mjs");
+const mod = await import("../lib.mjs");
 const { resolveSurvivingNotes, safeSlug, HAT_VOCAB } = mod;
 
 let failures = 0;

@@ -4,7 +4,7 @@
 #   external_project_dir = code/execution artifacts destination.
 slug: exploration-pipeline-nxm-claude-workflow-9010-angle
 title: 'Exploration Pipeline: NxM Claude Workflow + 90/10 Angle'
-status: accepted
+status: completed
 phase: requirements
 origin: manual
 in_focus: false
