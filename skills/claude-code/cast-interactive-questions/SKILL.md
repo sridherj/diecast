@@ -1,8 +1,13 @@
 ---
 name: cast-interactive-questions
 description: >
-  Standard protocol for asking users questions via AskUserQuestion tool.
-  One question at a time, structured options, recommendation first with grounded reasoning.
+  ALWAYS invoke this BEFORE asking the user any question or resolving any open
+  decision, ambiguity, or clarification -- in chat or inside any cast-* agent.
+  Triggers: you are about to ask the user something, you hit a fork that needs
+  their input, requirements/scope/approach are unclear, or you would otherwise
+  pose a plain-text question. Standard protocol for asking via the AskUserQuestion
+  tool: one question at a time, structured options, recommendation first with
+  grounded reasoning, and a concrete example when it clarifies the stakes.
   Referenced by all interactive Diecast agents.
 ---
 
@@ -51,6 +56,23 @@ Ask the most consequential question first. Priority:
 3. **Scope ambiguity** (unclear boundaries that could cause 2x effort)
 4. **Edge cases and preferences** (nice to resolve but recoverable if wrong)
 
+### 7. Example when it clarifies
+
+When a concrete example would make the question or the consequences of an option
+clearer, **include one**. Abstract labels and rationales often hide what a choice
+actually means in practice; a worked example makes the trade-off legible and lets
+the user answer with confidence. Use an example for any question where the wording
+is unfamiliar, the options sound similar, or picking wrong has a non-obvious cost.
+
+Anchor the example in something concrete: a sample output, a before/after, a specific
+value, or what breaks if the option is chosen wrong. Keep it short (one `e.g., ...`
+clause or a one-line snippet) and place it in the question context or the relevant
+option's rationale. Bad: "Option A uses soft deletes." Good: "Option A uses soft
+deletes -- e.g., deleting goal #42 sets `deleted_at` but keeps the row, so its child
+runs still resolve; Option B hard-deletes and those child runs would 404."
+
+Don't force an example where the choice is already self-evident (see Anti-Pattern 7).
+
 ## Format Template
 
 Use this structure in every AskUserQuestion call:
@@ -58,11 +80,12 @@ Use this structure in every AskUserQuestion call:
 ```
 **Question #N: [Topic]**
 
-[1-2 sentences of context: why this matters, what you found that makes it ambiguous]
+[1-2 sentences of context: why this matters, what you found that makes it ambiguous.
+Add a concrete example here when it makes the question or its stakes clearer.]
 
-- **Option A -- [short description] (Recommended):** [grounded rationale]
-- **Option B -- [short description]:** [grounded rationale]
-- **Option C -- [short description]:** [grounded rationale]
+- **Option A -- [short description] (Recommended):** [grounded rationale; add "e.g., ..." when an example clarifies the consequence]
+- **Option B -- [short description]:** [grounded rationale; add "e.g., ..." when an example clarifies the consequence]
+- **Option C -- [short description]:** [grounded rationale; add "e.g., ..." when an example clarifies the consequence]
 ```
 
 For yes/no questions or open-ended input where options don't apply, simplify:
@@ -95,6 +118,11 @@ For yes/no questions or open-ended input where options don't apply, simplify:
 6. **The Redundant Question** -- Asking about something the requirements or exploration
    already answered clearly. Fix: check artifacts before asking. Only ask when genuinely
    ambiguous.
+
+7. **The Forced Example** -- Bolting an example onto a choice that's already self-evident
+   ("Option A: English / Option B: Spanish -- e.g., English means English"). Adds noise,
+   not clarity. Fix: only include an example when it actually disambiguates the question
+   or exposes a non-obvious consequence (Rule 7); skip it when the labels speak for themselves.
 
 ## Close-out Discipline (US13)
 
