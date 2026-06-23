@@ -152,18 +152,20 @@ decisions.append({
 
 Do **not** call Edit or Write on the plan file at this point.
 
-### 5.3 Per-section confirm-and-commit checkpoint
+### 5.3 Advance between sections (no prompt)
 
 At the end of each of the four sections (Architecture, Code Quality, Tests, Performance),
-ask via `cast-interactive-questions`:
+**do not ask the user whether to continue**. Keep the buffer in memory and advance straight
+to the next section. The review flows Architecture → Code Quality → Tests → Performance
+without an inter-section gate; decisions stay buffered for the single end-of-review write
+in Step 5.7.
 
-> "Section <name> complete with N issue(s) resolved. Ready to continue to the next section,
-> or stop here?"
+State the transition in a plain one-line status (not an AskUserQuestion), e.g.
+`Code Quality complete — N issue(s) resolved. Continuing to Tests.`, then proceed.
 
-- **Continue** → keep the buffer in memory; advance to the next section.
-- **Stop**     → commit the buffered decisions immediately by jumping to Step 5.5 below.
-                  This is the documented mitigation for the interruption tradeoff: a Ctrl-C
-                  or crash mid-review otherwise loses the entire buffer.
+Tradeoff: because nothing is written until Step 5.7, a Ctrl-C or crash mid-review loses the
+buffered decisions. This is accepted in exchange for an uninterrupted review flow. The user
+can still stop manually at any point; if they do, jump to Step 5.5 to commit what's buffered.
 
 ### 5.4 End-of-review preflight (stale-target check)
 
@@ -225,16 +227,17 @@ loss mid-AskUserQuestion) loses every decision still buffered in memory. This is
 accepted tradeoff: per-decision writes were retired because they triggered O(N) file
 rewrites and confused diff review.
 
-The mitigation is the per-section confirm-and-commit checkpoint in Step 5.3 — replying
-"stop" commits the buffer immediately so the user keeps progress through the last
-completed section. Surface this tradeoff explicitly in the agent's user-facing help and
-in the opening message of every review run.
+The review does **not** prompt between sections (Step 5.3) — it flows through all four
+without an inter-section gate. If the user stops manually mid-review, jump to Step 5.5 to
+commit what's buffered so progress through the last completed section is kept. Surface this
+tradeoff explicitly in the agent's user-facing help and in the opening message of every
+review run.
 
 ### Path & re-entry rules (summary)
 
 | Concern              | Behavior                                                              |
 |----------------------|-----------------------------------------------------------------------|
-| Plan write count     | Exactly 1 per run (or 1 per "stop" checkpoint if interrupted early).  |
+| Plan write count     | Exactly 1 per run (or 1 if the user stops the review early).          |
 | Path-traversal       | Guard rejects anything outside `goal_dir/` or `docs/plan/`.           |
 | Idempotent rerun     | Same key → in-place update; no duplicates in the appendix.            |
 | Stale target marker  | `[stale-target]` flag + follow-up surfaced via cast-interactive-questions. |
@@ -272,5 +275,5 @@ Minimal example (full schema lives in the spec):
 - If no issues are found in a section, say so and move on
 - Plan modifications from review should be made inline in the plan, not as a separate document
 - **Single Write contract:** never write or edit the plan file mid-review. Every decision
-  buffers in memory until Step 5.7 (or a "stop" checkpoint). Regression to per-decision
+  buffers in memory until Step 5.7 (or until the user stops the review early). Regression to per-decision
   writes is what this agent's B2 redesign retired — see plan-review Issue #15.
