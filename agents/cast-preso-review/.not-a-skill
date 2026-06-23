@@ -1,0 +1,5 @@
+# Presence of this file tells bin/generate-skills to skip this directory.
+#
+# cast-preso-review is a python-script tool (deterministic CLI/HTML renderer),
+# NOT an LLM agent — see README.md ("Type: python-script"). It intentionally
+# has no cast-preso-review.md, so it must not be materialized as a skill.

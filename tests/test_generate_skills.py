@@ -140,6 +140,38 @@ def test_non_cast_subdir_is_skipped_with_warning(tmp_path: Path) -> None:
     assert not (target / 'gemini-shim').exists()
 
 
+def test_cast_dir_with_not_a_skill_marker_is_skipped_silently(tmp_path: Path) -> None:
+    repo = _make_repo(tmp_path)
+    _write_agent(repo, 'cast-foo')
+    # A cast-* tool dir (python-script, not an agent) with no <name>.md but a
+    # .not-a-skill marker must be skipped WITHOUT a missing-.md warning.
+    tool = repo / 'agents' / 'cast-tool'
+    tool.mkdir()
+    (tool / '.not-a-skill').write_text('opt out\n', encoding='utf-8')
+    target = tmp_path / 'out'
+
+    result = _run(repo, '--target-dir', str(target))
+
+    assert result.returncode == 0, result.stderr
+    assert 'cast-tool' not in result.stderr
+    assert 'missing' not in result.stderr
+    assert (target / 'cast-foo' / 'SKILL.md').exists()
+    assert not (target / 'cast-tool').exists()
+
+
+def test_cast_dir_missing_md_without_marker_still_warns(tmp_path: Path) -> None:
+    repo = _make_repo(tmp_path)
+    broken = repo / 'agents' / 'cast-broken'
+    broken.mkdir()  # no cast-broken.md, no marker → genuine mistake
+    target = tmp_path / 'out'
+
+    result = _run(repo, '--target-dir', str(target))
+
+    assert result.returncode == 0, result.stderr
+    assert 'cast-broken' in result.stderr
+    assert 'missing' in result.stderr
+
+
 def test_dry_run_writes_nothing(tmp_path: Path) -> None:
     repo = _make_repo(tmp_path)
     _write_agent(repo, 'cast-foo')

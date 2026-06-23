@@ -73,6 +73,13 @@ def _discover(root: Path, kind: str, filename_hint: str | None) -> tuple[list[So
             )
             continue
 
+        # A cast-* directory can opt out of skill generation with a
+        # .not-a-skill marker — e.g. python-script tools that live under
+        # agents/ but are not LLM agents (cast-preso-review). Skip silently:
+        # this is intentional, not a missing-.md mistake.
+        if (child / '.not-a-skill').is_file():
+            continue
+
         if kind == 'agent':
             candidate = child / f'{child.name}.md'
         else:
