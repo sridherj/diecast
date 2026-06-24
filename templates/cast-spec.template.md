@@ -4,10 +4,17 @@
 > **Version:** 0.1.0
 > **Linked files:** {{path1}}, {{path2}}
 
-This template is the canonical shape for spec documents written by
-`cast-refine-requirements` and `cast-update-spec`, and is enforced by
-`cast-spec-checker`. It adopts the spec-kit User Story / Priority /
-Independent Test / Acceptance Scenarios / `FR-NNN` / `SC-NNN` shape.
+This template is the canonical spec-kit shape — User Story / Priority /
+Independent Test / Acceptance Scenarios / `FR-NNN` / `SC-NNN` — enforced by
+`cast-spec-checker`. Two callers use it differently:
+
+- **`cast-update-spec`** writes a real **product spec** (the durable requirement of
+  a product, living in `docs/spec/`) — here the whole document IS this shape.
+- **`cast-refine-requirements`** writes a **brief** (the requirement of the *work*),
+  and renders this shape as a **spec-formatted SECTION inside that brief** — and only
+  for a product-building family. The brief *contains* this section; it never *becomes*
+  a spec. Non-product families (research / catch-up / prioritize / loose-idea / go-do)
+  carry no US/FR/SC at all (see the per-family note below).
 
 ## User Stories
 
