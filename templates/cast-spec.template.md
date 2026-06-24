@@ -65,6 +65,16 @@ works in isolation}}
      RECIPE_REALIZATION / REQUIRED_SECTIONS_BY_FAMILY). `random_idea` is the floor — its
      recipe is `## Intent` only; never pad it with empty spec-kit tables. -->
 
+<!-- OPTIONAL section. Emit whenever the source writeup carried HOW (proposed approaches,
+     reference repos, design instincts). Holds the founder's HOW + one-or-two approach options
+     worth exploring — captured and DEVELOPED, never locked (locking the implementation is the
+     plan's job). `cast-spec-checker` treats a `## Directional…` H2 as first-class for most
+     families (WARNs only for data_analysis / personal_non_eng). Omit only when there is no HOW. -->
+## Directional Ideas
+
+- **{{approach the user brought}}** — {{how it serves the WHAT}}.
+- **Option A vs Option B** — {{one or two approaches you'd explore, with the trade-off}}.
+
 <!-- OPTIONAL section. Present only when human decisions were recorded during refinement
      (and immediately before Out of Scope / Open Questions when those sections exist). Not
      required by cast-spec-checker; omit when no human decisions were made. -->
