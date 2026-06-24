@@ -94,11 +94,23 @@ points where execution must pause for human judgment), create gate entries:
 5. Re-run: `/cast-orchestrate docs/execution/<project> --from-subphase GN`
 ```
 
-Present the proposed breakdown to the user:
+Present the proposed breakdown to the user as a plain one-time status (NOT an AskUserQuestion):
 - List each sub-phase with a one-line summary
 - Show the dependency graph (which sub-phases depend on which)
 - Mark parallel groups and decision gates
-- Ask for feedback using AskUserQuestion before proceeding
+
+Then **proceed straight to Step 4** — do not ask a generic "proceed as proposed, or adjust
+first?" confirmation. By this point the plan has already cleared its refine/planning/plan-review
+gates, so splitting it is mechanical, and any real clarifications are batched later (Step 5
+Enhancement Pass and Step 7 review open-questions).
+
+Only raise an `AskUserQuestion` here when there is a **genuine, specific decision** the split
+itself forces, e.g.:
+- A sub-phase boundary is genuinely ambiguous and the two options produce materially different plans
+- A proposed parallel group can only be made conflict-free by a tradeoff the user must pick
+
+If no such decision exists, the user can still redirect after seeing the breakdown — but don't
+manufacture a checkpoint where there is no choice to make.
 
 ## Step 4: Create `_shared_context.md`
 
