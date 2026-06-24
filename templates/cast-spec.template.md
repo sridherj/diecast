@@ -72,6 +72,16 @@ works in isolation}}
      RECIPE_REALIZATION / REQUIRED_SECTIONS_BY_FAMILY). `random_idea` is the floor — its
      recipe is `## Intent` only; never pad it with empty spec-kit tables. -->
 
+<!-- No-product brief = specified, not just exempt. For a research / catch-up / "go through
+     these resources" / prioritize brief (the *doing* is the requirement), dropping US/FR/SC
+     does NOT mean a thin document. Its `## Intent` (plus `## Decisions` / `## Open Questions`
+     where the recipe emits them) positively names: the ACTIVITY + its inputs (which resources
+     to traverse, what to look for); the DELIVERABLE of the doing (a survey / ranked
+     recommendation / decision / notes artifact — not a feature); and what "DONE" means
+     (coverage reached, question answered, call made). Same intent / scope / open-question /
+     confidence / cold-reader bars — never invent behavior scenarios or quantified constraints
+     for a product it does not have. "## Intent: do some research" is a failed no-product brief. -->
+
 <!-- OPTIONAL section. Emit whenever the source writeup carried HOW (proposed approaches,
      reference repos, design instincts). Holds the founder's HOW + one-or-two approach options
      worth exploring — captured and DEVELOPED, never locked (locking the implementation is the

@@ -91,6 +91,7 @@ The SC-001 fold-in plus document-depth additions. Cite these as `criterion` on
 | `l1-l2-hierarchy` | Does the **job statement dominate** (L1), with the assertions clearly secondary (L2)? (reused verbatim from the fleet vocabulary) |
 | `section-outcomes-land` | Does **each section communicate one clear takeaway** — not a reformatted dump of raw fields? A section that just reflows `| FR-001 | … |` rows into prose without a point fails this. |
 | `scannable-not-wall` | Is the page **navigable by headings**, with no wall-of-text blocks that a reader has to grind through? |
+| `no-product-completeness` | **No-product families only** (`random_idea` and the research / catch-up / "go through these resources" / prioritize flavors — judge from the family label). Dropping US/FR/SC is correct here, but the brief must still be *specified*, not just thinned: can you see **what activity is being done + on which inputs**, **what the deliverable of the doing is** (a survey / ranked recommendation / decision / notes artifact — *not* a feature), and **what "done" means** (coverage reached / question answered / call made)? A page that says only "do some research" with no inputs, no deliverable, and no done-criteria is an under-specified no-product brief — emit this as an `error`. **Does NOT apply to product families** (they carry the spec-formatted section instead) — never raise it there, and never demand US/FR/SC of a no-product page. |
 
 ## Visual criteria
 
@@ -117,6 +118,13 @@ generic one because it only ran the WHAT-restate test. You **do** grade family-f
 the family's language (`bug_fix` → "What broke / The evidence / The fix"). That restructuring is a
 **strength**, not a defect. Judge whether the family-shaped sections communicate, never whether the
 canonical requirement-id headings are present.
+
+**The symmetric guard (`no-product-completeness`):** dropping US/FR/SC is a strength, but it is not
+a licence for an *empty* page. For a no-product family the absence of US/FR/SC must be *replaced*
+by the brief's own content — the activity + inputs, the deliverable, the done-criteria. Reward the
+restructuring; still fail a no-product page that restructured into nothing. The two criteria are a
+pair: `family-appropriate-structure` says "don't demand product slots here," and
+`no-product-completeness` says "but do demand the no-product brief actually specify its doing."
 
 ## GAP-AMNESTY CLAUSE (binding — read literally)
 

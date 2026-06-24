@@ -23,9 +23,26 @@ is a downstream lift-and-move — a nice consequence, not the section's reason t
 
 **The document's shape follows the work-family** (classified in Step 0). A product-building family
 gets the spec-formatted section; a research / catch-up / prioritize / loose-idea / go-do family
-does **not** get forced US/FR/SC — it gets Intent + "what good output looks like" + Decisions +
-Open Questions. Never pad a non-product brief with empty requirement tables (Step 0 already
-enforces this; the framing here is why).
+does **not** get forced US/FR/SC. Never pad a non-product brief with empty requirement tables
+(Step 0 already enforces this; the framing here is why).
+
+**A no-product brief is specified just as concretely — not merely exempted.** Dropping US/FR/SC is
+not the same as leaving the document thin. For a process / research / catch-up / "go through these
+resources" / prioritize-these-options brief, the *doing* is the requirement, so the spec-shaped
+bars (testable WHEN/IF/SHALL behavior, quantified constraints) do not apply — but **positively**,
+a good one names:
+
+- **The activity and its inputs** — which resources / sources to traverse, and what to look for in
+  them (not "do some research," but "read these five threads + the v1 spec, looking for X").
+- **The deliverable of the doing** — what the work produces: a survey, a ranked recommendation, a
+  decision, a notes artifact — *not a feature*.
+- **What "done" means for the activity** — coverage reached, the question answered, the call made.
+
+It is held to the **same** intent / scope / open-question / confidence / cold-reader bars as any
+brief, and it **never invents** behavior scenarios or quantified constraints for a product it does
+not have. This content lives in the sections the family recipe emits (for the `random_idea` floor,
+inside `## Intent`; richer process families add `## Decisions` / `## Open Questions`) — a thin
+"`## Intent`: do some research" is a *failed* no-product brief, not a passing one.
 
 **WHAT is primary; HOW is captured, not discarded.** The #1 thing to nail is *what* the user is
 trying to achieve. But a founder's HOW is **direction**, not noise — never strip it out and defer
@@ -550,8 +567,10 @@ Render the final **brief**. Its section set is the one Step 0's family recipe se
 shape below is the **product-family** shape (it carries the spec-formatted section: User Stories /
 Functional Requirements / Success Criteria, rendered against `templates/cast-spec.template.md`). A
 non-product family emits a thinner brief (`random_idea` → `## Intent` only; research / catch-up /
-prioritize / go-do families → Intent + "what good output looks like" + Decisions + Open Questions)
-— never the US/FR/SC tables. Write to `goals/{goal-slug}/refined_requirements.collab.md`:
+prioritize / go-do families → Intent + Decisions + Open Questions) — never the US/FR/SC tables.
+A thinner section set does **not** mean thinner content: a no-product brief still names its
+activity + inputs, its deliverable, and its done-criteria (see "A no-product brief is specified
+just as concretely" above). Write to `goals/{goal-slug}/refined_requirements.collab.md`:
 
 ```yaml
 ---
@@ -741,9 +760,14 @@ concrete scenarios for the happy path, clear boundaries on scope.
 
 - **Intent is a job statement** — not a feature description
 - **The shape fits the work-family** — a product family carries the spec-formatted section; a
-  research / catch-up / prioritize / go-do brief carries Intent + "what good output looks like" +
-  Decisions + Open Questions, and is *not* forced into US/FR/SC
-- **Constraints are quantified** — "responds in <200ms" not "should be fast"
+  research / catch-up / prioritize / go-do brief carries Intent + Decisions + Open Questions, and
+  is *not* forced into US/FR/SC
+- **A no-product brief is concrete, not just exempt** — it names the activity + its inputs (what
+  resources to traverse, what to look for), the deliverable of the doing (a survey / ranked
+  recommendation / decision / notes artifact — not a feature), and what "done" means (coverage
+  reached, question answered, call made). "`## Intent`: do some research" is a fail
+- **Constraints are quantified** — "responds in <200ms" not "should be fast" (product-family only;
+  a no-product brief invents no constraints for a product it lacks)
 - **Out of Scope is explicit** — prevents the #1 cause of scope creep
 - **Open Questions are genuine** — real unknowns, not padding
 - **Confidence scores are honest** — low means low, not "I didn't bother checking"
