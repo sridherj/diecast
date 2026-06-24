@@ -16,6 +16,13 @@ it to "the plan." Capture it, reflect it back, and where it helps, surface a cou
 options. You lock the WHAT; you *open up* the HOW (you do not lock the implementation — that is the
 plan's job).
 
+**Carry everything the user brought.** HOW is not the only thing worth keeping. Every reference
+(reference repos, links, prior art, docs), every note, every aside the user wrote is **preserved
+in the refined file and carried downstream** — supporting material helps the reader and every
+downstream consumer (planner, task suggester, coders), so nothing the user brought is dropped. It
+lives in the non-binding **Directional Ideas** section (below). The render pipeline then represents
+it beautifully, not buried.
+
 **The conversation IS the refinement.** The spec document is a *byproduct* of a good
 conversation, not the goal. Design the conversation first, spec format second.
 
@@ -304,11 +311,13 @@ Write 3-10 EARS scenarios covering the happy path, key edge cases, and error con
 
 **Out of Scope:** Explicitly excluded items — prevents scope creep.
 
-**Directional Ideas (HOW):** The approaches the founder brought + the one-or-two options you'd
-explore to get the WHAT done — *captured and developed, not locked*. References, design instincts,
-"split into smaller agents," "model it like Jira," "two ways: A or B." Emit this whenever the
-writeup carries HOW; omit it only when there genuinely is none. This is where a founder's HOW
-lives so it is never lost to "the plan."
+**Directional Ideas (supporting, non-binding):** The home for everything the founder brought that
+isn't a binding requirement — design approaches / HOW, the one-or-two options you'd explore,
+**references** (reference repos, links, prior art, docs), and **author notes**. *Captured and
+developed, not locked* ("split into smaller agents," "model it like Jira," "two ways: A or B").
+Preserve ALL of it — it stays in this file and helps every downstream consumer; never strip it to
+"the plan." Emit this whenever the writeup carries any such material; omit only when there
+genuinely is none.
 
 **Open Questions:** Unresolved items that need future input.
 
@@ -580,12 +589,16 @@ isolation]
 
 ## Directional Ideas
 
-> Optional, but emit whenever the writeup carried HOW. The founder's approaches/references +
-> one-or-two options worth exploring — captured and developed, NOT locked (locking is the plan's
-> job). `cast-spec-checker` treats a `## Directional…` section as first-class for most families.
+> Optional, but emit whenever the writeup carried supporting material. The non-binding home for the
+> founder's approaches / HOW, references, and notes — captured and developed, NOT locked (locking is
+> the plan's job). Preserve ALL of it: it stays in this file and flows downstream, and the render
+> pipeline represents it beautifully. `cast-spec-checker` treats a `## Directional…` section as
+> first-class for most families.
 
 - **[Approach the user brought]** — captured in spirit, with a line on how it serves the WHAT.
 - **Option A vs Option B** — [one or two concrete approaches you'd explore, with the trade-off].
+- **References** — [reference repos, links, prior art, docs the user pointed at].
+- **Notes** — [any other notes worth keeping for the reader / downstream].
 
 ## Decisions
 

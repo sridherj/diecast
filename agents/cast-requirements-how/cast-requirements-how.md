@@ -90,6 +90,14 @@ The runner inlines all of this in your user message (you are tool-free — you c
    catches — never echo another unit's bare id inside a unit. **When the WHAT doc carries no ids
    at all (a ref-less source), print ZERO anchor labels and invent none** — see the CREATE-mode
    ref-less rule below.
+6. **Render the supporting material as a beautiful, clearly non-binding panel.** When the WHAT doc
+   carries a supporting-material section (design directions / HOW, references, author notes),
+   render it with real care — a tasteful aside or panel (e.g. a `consulting-exhibit` sidebar or a
+   distinct muted card), visually **subordinate to the binding requirements but never buried,
+   collapsed, or ugly**. Render references as real, usable links / a clean list; render directions
+   and notes as legible prose. Give the zone a quiet non-binding label (e.g. "Directions &
+   references — non-binding context") so a reader never mistakes it for a committed requirement.
+   Carry it, never drop it; omit only when the WHAT doc has no such section.
 
 ## Two render modes — CREATE (fresh) vs UPDATE (fragment splice)
 

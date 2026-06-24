@@ -75,7 +75,16 @@ The runner inlines all of this in your user message (you are tool-free — you c
 5. **Anything you genuinely cannot place goes in `unmapped_refs`** — never silently dropped.
    Leftovers fail the gate loudly, which is the correct, surfaced behavior (surface, don't
    suppress). On a clean document `unmapped_refs` is `[]`.
-6. **Write the body** — per-section communication-intent prose mirroring the
+6. **Carry the supporting material — never drop it.** Beyond the binding requirements, the source
+   often carries non-binding supporting material the author brought: design directions / HOW (e.g.
+   a `## Directional` section), references (reference repos, links, prior art, docs), and author
+   notes. This material **helps downstream consumers and the reader** — always carry it into the
+   WHAT doc as its own dedicated communication section (e.g. `title: "Directions & references"`),
+   with an `outcome` that frames it as **non-binding context, not a committed requirement**. It
+   has no canonical ids, so its `block_refs` is `[]`. Never relegate it to `unmapped_refs`, never
+   fold it into `gaps`, never silently drop it. Omit the section only when the source genuinely
+   carries no such material.
+7. **Write the body** — per-section communication-intent prose mirroring the
    `cast-preso-what-worker` doc shape, adapted to a single scrolling document page (not slides).
    For each section, state its L1 takeaway, its L2 supporting points, and which source content
    carries them. This briefs the HOW layer; it is not the final copy.
@@ -184,6 +193,12 @@ names. Pick the wording the *source* earns; if the source is thin, fewer section
 - **`generic`** (PROBLEM → OPEN): the unmatched fallback — lead with a neutral, honest
   framing of the captured intent ("What this is about"), then "Open questions". When the
   source genuinely doesn't fit a family, plain and honest beats forced specificity.
+- **Supporting material (ALL families):** when the source carries design directions / HOW,
+  references, or author notes, add a final **non-binding** section ("Directions & references",
+  "Notes & references") that carries them for the reader and for downstream consumers — placed
+  **last**, framed as context that does **not** constrain the solution. Empty `block_refs`. This
+  is additive to the family's lead sections, never a substitute for them; omit it only when the
+  source truly carries no such material. (Per step 6 of "How to build the WHAT doc".)
 
 <!-- ============================================================================
 ADDITIVE BLOCK — sp5a gaps-schema + gap-detection.
