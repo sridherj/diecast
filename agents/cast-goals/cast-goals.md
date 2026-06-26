@@ -17,10 +17,14 @@ Manage Diecast goals directly via `uv run python -c` commands from the `diecast/
 
 ## Environment
 
-All commands must set PYTHONPATH to resolve the cast_server package:
+All commands set `PYTHONPATH` to resolve the `cast_server` package **and** pass
+`uv run --directory <repo-root>` so the right project environment is used no
+matter what the current working directory is (without `--directory`, `uv run`
+resolves the venv from the caller's cwd and fails with `ModuleNotFoundError`
+when invoked from outside the repo):
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "..."
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "..."
 ```
 
 ## Operations
@@ -28,7 +32,7 @@ PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c
 ### List All Goals
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import get_all_goals
 goals = get_all_goals()
 for g in goals:
@@ -39,7 +43,7 @@ for g in goals:
 ### Get a Single Goal
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import get_goal
 import json
 g = get_goal('SLUG_HERE')
@@ -50,7 +54,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Create a Goal
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import create_goal
 import json
 g = create_goal(title='TITLE_HERE', tags=['tag1', 'tag2'], in_focus=False)
@@ -63,7 +67,7 @@ Creates directory, goal.yaml, DB record, and starter tasks. Status starts as `ac
 ### Update Status
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import update_status
 import json
 g = update_status('SLUG_HERE', 'TARGET_STATUS')
@@ -74,7 +78,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Update Phase
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import update_phase
 import json
 g = update_phase('SLUG_HERE', 'TARGET_PHASE')
@@ -85,7 +89,7 @@ print(json.dumps(g, indent=2, default=str))
 ### Toggle Focus
 
 ```bash
-PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run python -c "
+PYTHONPATH=$(cd ~/.claude/skills/diecast && pwd -P)/cast-server uv run --directory "$(cd ~/.claude/skills/diecast && pwd -P)" python -c "
 from cast_server.services.goal_service import toggle_focus
 import json
 g = toggle_focus('SLUG_HERE', True)   # or False to unfocus
