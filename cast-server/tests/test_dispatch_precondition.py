@@ -171,6 +171,22 @@ def test_trigger_route_returns_422_with_structured_payload(env):
     assert "detail" in body
 
 
+def test_trigger_route_returns_404_on_missing_goal(env):
+    """A goal_slug that names no goal short-circuits to a plain 404 goal_not_found,
+    BEFORE precondition/delegation checks — so a wrong slug never masquerades as a
+    missing_external_project_dir or invalid_delegation_context 422."""
+    resp = env["client"].post(
+        "/api/agents/cast-create-execution-plan/trigger",
+        json={"goal_slug": "no-such-goal"},
+    )
+
+    assert resp.status_code == 404, resp.text
+    body = resp.json()
+    assert body["error_code"] == "goal_not_found"
+    assert body["goal_slug"] == "no-such-goal"
+    assert "not found" in body["detail"].lower()
+
+
 def test_trigger_route_returns_422_when_path_missing(env, tmp_path):
     bogus = str(tmp_path / "ghost-project")
     _insert_goal(env["db_path"], "bad-path-route", external_project_dir=bogus)
@@ -325,7 +341,10 @@ def test_trigger_returns_422_on_malformed_delegation_context(env, tmp_path):
     assert resp.status_code == 422, resp.text
     body = resp.json()
     assert body["error_code"] == "invalid_delegation_context"
-    assert body["detail"] == "delegation_context failed validation"
+    assert body["detail"].startswith("delegation_context failed validation")
+    # Missing required fields are named up front in both detail and missing_required.
+    assert "instructions" in body["detail"] and "context" in body["detail"]
+    assert set(body["missing_required"]) == {"instructions", "context"}
     assert isinstance(body.get("errors"), list) and body["errors"], body
     assert "cast-delegation-contract" in body["hint"]
 

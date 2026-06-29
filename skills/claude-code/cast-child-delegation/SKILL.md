@@ -20,15 +20,28 @@ Complete reference for Diecast agent delegation: parent mechanics (dispatch, pol
 
 Invoke this skill BEFORE dispatching any child agent. Follow the patterns for your specific use case.
 
+### Two dispatch modes — read this first
+
+This skill serves **two kinds of caller**, and the difference is the single most common source of wasted rounds:
+
+- **Dispatched agents** are launched by cast-server with a prompt **preamble** that already pre-fills `{goal_dir}`, `{goal_title}`, `{run_id}`, `{output_dir}`. Use those injected values directly — do not re-fetch them.
+- **Inline callers** (e.g. `/cast-orchestrate` running in the user's interactive session) get **no preamble**. They must fetch goal facts themselves via `GET /api/goals/{slug}/config` (returns the goal as JSON) before building a `delegation_context`. The fields below (`goal_title`, `goal_dir`, …) are **not** auto-present — read them first.
+
+If you are an inline caller and you skip the GET, you will guess `goal_title`/`goal_dir` wrong and burn rounds on 404s and 422s. Fetch, then dispatch.
+
 ### Section 0: Preflight (external_project_dir)
 
 Every dispatch path on cast-server requires the goal to have a usable `external_project_dir`. The server enforces this at `POST /api/agents/{name}/trigger` and returns **HTTP 422** with `error_code: "missing_external_project_dir"` when it isn't set or the configured path doesn't exist on disk. Resolve it **before** dispatching so the user sees one clean prompt instead of a failed run.
 
+> **Endpoint:** `GET /api/goals/{slug}/config` returns the goal as JSON (slug, title, status, phase, `external_project_dir`, …). A missing goal returns **404** `{"detail": "Goal '<slug>' not found"}` — a 404 means the slug is wrong or the goal lives in another store, **not** that you should `POST /api/goals` to create it. There is no bare `GET /api/goals/{slug}` route; always use the `/config` suffix.
+
 **Check, prompt, set, then dispatch:**
 
 ```bash
-# Step 1: GET the goal config
-GOAL_JSON=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/$GOAL_SLUG")
+# Step 1: GET the goal config (JSON). Confirms the goal exists AND reads its dir.
+GOAL_JSON=$(curl -s "http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}/api/goals/$GOAL_SLUG/config")
+# A 404 here means the slug is wrong — do NOT create the goal. Stop and recheck the slug.
+GOAL_TITLE=$(echo "$GOAL_JSON" | jq -r '.title // empty')   # pass this as context.goal_title later
 EXT_DIR=$(echo "$GOAL_JSON" | jq -r '.external_project_dir // empty')
 
 # Step 2: If unset or missing on disk, ask the user
@@ -100,7 +113,7 @@ CHILD_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}
       "agent_name": "{agent-name}",
       "instructions": "What the child should do — be specific, include constraints",
       "context": {
-        "goal_title": "...",
+        "goal_title": "'"$GOAL_TITLE"'",
         "goal_phase": "...",
         "relevant_artifacts": ["list of relevant artifact paths from goal_dir"],
         "prior_output": "summary of your work so far if relevant",
@@ -119,6 +132,7 @@ CHILD_RUN_ID=$(curl -s -X POST http://${CAST_HOST:-localhost}:${CAST_PORT:-8005}
 - `parent_run_id` (string): Your run_id, injected in prompt preamble. Links delegation tree. Auto-injected into `delegation_context` if missing there.
 - `delegation_context.agent_name` (string): The agent to invoke (e.g., "cast-detailed-plan").
 - `delegation_context.instructions` (string): Detailed task description for the child. Include what success looks like.
+- `delegation_context.context.goal_title` (string, **REQUIRED**): The goal's human title. The server does **not** auto-fill this — you must pass it explicitly, or the trigger returns **422 `invalid_delegation_context`** with `missing_required: ["context.goal_title"]`. Dispatched agents have it in their preamble as `{goal_title}`; inline callers read it from `GET /api/goals/{slug}/config` (`.title`). Unlike `goal_slug`/`parent_run_id`/`output_dir` (all auto-injected), this one is on you.
 - `delegation_context.context.relevant_artifacts` (array): List artifact paths relative to `goal_dir` that the child should read.
 - `delegation_context.context.prior_output` (string): Summarize what you've done so far, so child understands context.
 - `delegation_context.context.constraints` (array of strings): Any constraints on the work (e.g., ["do not modify existing configs"]).

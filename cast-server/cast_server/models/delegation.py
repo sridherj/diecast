@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 class DelegationContextData(BaseModel):
     model_config = ConfigDict(extra="allow")  # Allow custom fields (phase_section, etc.)
 
-    goal_title: str
+    goal_title: str  # REQUIRED — caller passes explicitly (read via GET /api/goals/{slug}/config)
     goal_phase: str = ""  # Optional — not always meaningful for orchestrators
     relevant_artifacts: list[str] = []  # Absolute paths — parent resolves before delegation
     prior_output: str = ""  # 2-3 sentence summary of parent's work so far

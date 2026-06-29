@@ -273,6 +273,21 @@ async def update_focus(
     return response
 
 
+@router.get("/{slug}/config")
+async def get_goal_config(slug: str):
+    """Return the goal as JSON — the machine-readable read-counterpart to PATCH.
+
+    Inline callers (e.g. ``/cast-orchestrate``) that lack a server-injected
+    preamble use this to confirm a goal exists and read ``external_project_dir``
+    before dispatching. 404s plainly when the goal is absent so callers never
+    misread a missing route as a missing goal.
+    """
+    goal = goal_service.get_goal(slug)
+    if not goal:
+        raise HTTPException(status_code=404, detail=f"Goal '{slug}' not found")
+    return goal
+
+
 @router.patch("/{slug}/config")
 async def update_goal_config(
     request: Request,

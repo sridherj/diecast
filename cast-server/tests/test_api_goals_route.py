@@ -291,3 +291,31 @@ def test_no_reclassify_source_pin(env):
     assert "goal_service.get_goal" in code
     assert "workflow_router_service.resolve" in code
     assert "workflow_router_service.record_routing_decision" in code
+
+
+# ---------------------------------------------------------------------------
+# GET /api/goals/{slug}/config — JSON read-counterpart to PATCH (inline-caller path)
+# ---------------------------------------------------------------------------
+
+def test_get_goal_config_returns_json(env):
+    """The JSON read endpoint returns the goal dict so inline callers can confirm
+    existence and read external_project_dir before dispatch — no HTML parsing."""
+    client, db_path, goals_root = env["client"], env["db_path"], env["goals_root"]
+    _seed_goal(db_path, goals_root, "goal-readable")
+
+    resp = client.get("/api/goals/goal-readable/config")
+
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["slug"] == "goal-readable"
+    assert "external_project_dir" in body
+    assert "title" in body
+
+
+def test_get_goal_config_404_on_missing_goal(env):
+    """A missing goal returns a plain 404 — callers must NOT read this as a signal
+    to create the goal."""
+    resp = env["client"].get("/api/goals/ghost-goal/config")
+
+    assert resp.status_code == 404, resp.text
+    assert "not found" in resp.json()["detail"].lower()

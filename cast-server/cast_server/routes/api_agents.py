@@ -12,6 +12,7 @@ from cast_server.models.agent_config import load_agent_config
 from cast_server.models.delegation import DelegationContext
 from cast_server.services import (
     agent_service,
+    goal_service,
     subagent_invocation_service,
     user_invocation_service,
 )
@@ -95,6 +96,24 @@ async def trigger_agent(request: Request, name: str):
     scheduled_at = data.get("scheduled_at")  # ISO UTC timestamp or None
     parent_run_id = data.get("parent_run_id")
 
+    # Fail loud and plain when the goal doesn't exist, before any schema/dir
+    # checks — so a missing goal never surfaces as a confusing downstream 422.
+    if goal_slug and goal_service.get_goal(goal_slug) is None:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "goal_not_found",
+                "goal_slug": goal_slug,
+                "detail": f"Goal '{goal_slug}' not found",
+                "hint": (
+                    "Confirm the slug with GET /api/goals/{slug}/config. "
+                    "Do not create it blindly — a 404 here means the slug is "
+                    "wrong or the goal lives in another store, not that you "
+                    "must POST /api/goals."
+                ),
+            },
+        )
+
     delegation_context_raw = data.get("delegation_context")
     if delegation_context_raw:
         delegation_context_raw.setdefault("goal_slug", goal_slug)
@@ -108,13 +127,28 @@ async def trigger_agent(request: Request, name: str):
         try:
             delegation_context = DelegationContext(**delegation_context_raw)
         except ValidationError as e:
+            errors = e.errors(include_url=False)
+            # Surface the missing required fields by dotted path up front —
+            # the raw errors[] array buries them and callers waste rounds
+            # guessing. context.goal_title is the usual culprit (required).
+            missing = [
+                ".".join(str(p) for p in err["loc"])
+                for err in errors
+                if err.get("type") == "missing"
+            ]
+            detail = "delegation_context failed validation"
+            if missing:
+                detail += f" — missing required field(s): {', '.join(missing)}"
             return JSONResponse(
                 status_code=422,
                 content={
                     "error_code": "invalid_delegation_context",
-                    "detail": "delegation_context failed validation",
-                    "errors": e.errors(include_url=False),
+                    "detail": detail,
+                    "missing_required": missing,
+                    "errors": errors,
                     "hint": (
+                        "context.goal_title is REQUIRED — pass it explicitly "
+                        "(read it from GET /api/goals/{slug}/config). "
                         "See docs/specs/cast-delegation-contract.collab.md and "
                         "skills/claude-code/cast-child-delegation/SKILL.md for the "
                         "expected shape."

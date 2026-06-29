@@ -48,8 +48,14 @@ This is a first-class subsection because it gates every dispatch path. Without i
 
 - **Defense-in-depth at launch**: `_launch_agent` re-validates the same precondition. A run that bypasses the trigger contract (direct DB insert, scheduled enqueue under a stale config) raises `MissingExternalProjectDirError` and is marked `failed` with the error in `error_message`. The launcher MUST NOT silently fall back to a "default" working directory.
 - **Client-side preflight (canonical)**: `cast-child-delegation` Section 0 GETs the goal config before dispatch and prompts the user via `AskUserQuestion` (cwd / type path / cancel) when `external_project_dir` is missing or stale. On user choice it `PATCH /api/goals/{slug}/config` and proceeds. The 422 path is the fallback; the preflight prompt is the happy path.
+- **Goal read endpoint**: `GET /api/goals/{slug}/config` returns the goal as JSON (the read-counterpart to the existing `PATCH` on the same path). It is the canonical machine-readable way to confirm a goal exists and read `external_project_dir`/`title` before dispatch. There is **no** bare `GET /api/goals/{slug}` route — callers MUST use the `/config` suffix. A missing goal returns **404** `{"error_code": "goal_not_found", ...}` (or a plain `{"detail": "Goal '<slug>' not found"}` from the read route). A 404 means the slug is wrong or the goal lives in another store — it is NOT a signal to `POST /api/goals` and create one.
+- **Missing-goal at trigger time**: `POST /api/agents/{name}/trigger` short-circuits to **404 `goal_not_found`** when `goal_slug` names a goal that doesn't exist, *before* any delegation-context or precondition check — so a wrong slug never surfaces as a confusing 422.
 
 > Edge: `invoke_agent` (CLI `/invoke` route) is intentionally NOT subject to this precondition today — it serves ad-hoc, often goal-less, diagnostic invocations. Promoting `/invoke` to the same precondition is a separate concern.
+
+### Delegation context required fields
+
+`delegation_context.context.goal_title` is **required** and has **no server-side default** — unlike `goal_slug`, `parent_run_id` (both auto-injected from top-level request fields), and `output.output_dir` (backfilled to `<GOALS_DIR>/<slug>`). A caller that omits it gets **422 `invalid_delegation_context`** with `missing_required: ["context.goal_title"]` naming the field. Dispatched agents read it from their prompt preamble (`{goal_title}`); inline callers read it from `GET /api/goals/{slug}/config` (`.title`). This asymmetry is deliberate — the title is a human-meaningful label the caller should state, not a value silently inferred.
 
 ### Overview & Boundary
 
