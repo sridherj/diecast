@@ -125,6 +125,8 @@ Tell the user: which files are being reviewed, and the path to the review brief 
 
 ## Review Issue Shape (additive `confidence` field)
 
+> Note: deliver these findings to the parent to address — never prompt to accept/delegate/fix and never apply fixes.
+
 Each review issue emitted by cast-review-code carries:
 
 ```json
