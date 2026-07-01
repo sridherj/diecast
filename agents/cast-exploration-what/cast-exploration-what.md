@@ -1,3 +1,16 @@
+---
+name: cast-exploration-what
+model: sonnet
+description: >
+  The WHAT layer of the exploration-render maker pipeline — the content brain, sibling to
+  cast-requirements-what. Reads the exploration md substrate (per-step playbook + surviving
+  hat notes + summary) and decides, per step, the single opinionated POV a reader must take
+  away plus each surviving thinking-hat's DISTINCT one-line take in that hat's own voice.
+  Never renders HTML (that is cast-exploration-how's job) and never invents content the md
+  does not contain. Tool-free subprocess maker; emits one machine-checked WHAT doc.
+effort: medium
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (the cast-comment-reanchor /
 cast-goal-classifier carve-out precedent — owner Decision #2; direct sibling: cast-requirements-what).

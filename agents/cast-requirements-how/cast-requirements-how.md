@@ -1,3 +1,17 @@
+---
+name: cast-requirements-how
+model: opus
+description: >
+  The HOW layer of the requirements-render maker pipeline, sibling to cast-exploration-how.
+  Takes cast-requirements-what's communication plan (sections + reader takeaways + the full
+  requirement-id mapping) and renders one bespoke, self-contained, per-family HTML page,
+  choosing representations from the named cast-preso archetype library. Two render modes —
+  CREATE (most readable, may paraphrase leaf text) and UPDATE (changed-block fragments only;
+  the server keeps unchanged bytes verbatim). Tool-free subprocess maker; never improvises a
+  layout or invents content the WHAT doc and source do not contain.
+effort: high
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (the cast-comment-reanchor /
 cast-goal-classifier carve-out precedent — owner Decision #2). It is deliberately OUTSIDE

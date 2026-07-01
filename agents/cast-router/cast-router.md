@@ -1,3 +1,14 @@
+---
+name: cast-router
+description: >
+  Resolve and show a goal's routed downstream workflow — read-only, one goal slug in, one
+  routing handle out. Re-resolves from the goal's persisted workflow_family via the FR-016
+  phase-agnostic /route endpoint; never originates or guesses a routing decision (that is
+  cast-refine-requirements's job).
+memory: user
+effort: low
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent. It is deliberately OUTSIDE
 `cast-delegation-contract.collab.md` and `cast-output-json-contract.collab.md`: it returns text

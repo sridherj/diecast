@@ -1,3 +1,17 @@
+---
+name: cast-comment-reanchor
+model: sonnet
+description: >
+  Re-locates reviewer comments displaced by a requirements-document version bump, and
+  narrates the deterministic change set at the same version boundary. Given each displaced
+  comment's old anchor quote plus the old/new document (or render-snapshot) text, decides
+  relocated / resolved / orphaned per comment via judgement — never guesses a bad placement,
+  since the server's verbatim-substring backstop refuses a non-present quote. Dispatched as a
+  subagent by cast-refine-requirements whenever a new requirements version displaces open
+  comments; writes no files.
+effort: medium
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (decision #2, the Phase 2/3a
 classifier + checker precedent). It is deliberately OUTSIDE

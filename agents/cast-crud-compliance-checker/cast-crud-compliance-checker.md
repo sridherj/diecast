@@ -1,3 +1,10 @@
+---
+name: cast-crud-compliance-checker
+description: "Audits cast-crud maker-chain output for CRUD-pattern conformance against a single user-supplied entity."
+model: opus
+memory: project
+---
+
 <!--
 SCOPE BOUNDARY (v1 — both checkers ship per Q#24, approved 2026-04-30):
 
@@ -13,12 +20,6 @@ SCOPE BOUNDARY (v1 — both checkers ship per Q#24, approved 2026-04-30):
 
 Consolidation revisit: v1.1 retro per Q#24. If real-use overlap surfaces, merge into one checker; otherwise keep both for readability and incremental adoption (a user-authored MVCS module without using cast-crud still benefits from cast-mvcs-compliance).
 -->
----
-name: cast-crud-compliance-checker
-description: "Audits cast-crud maker-chain output for CRUD-pattern conformance against a single user-supplied entity."
-model: opus
-memory: project
----
 
 # cast-crud-compliance-checker
 

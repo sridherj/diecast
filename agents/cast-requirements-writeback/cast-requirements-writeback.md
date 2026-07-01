@@ -1,3 +1,16 @@
+---
+name: cast-requirements-writeback
+model: sonnet
+description: >
+  The sole mutator of a goal's canonical refined_requirements.collab.md. Applies one accepted
+  or auto-applied change_request as a targeted, byte-faithful splice — never a blind whole-file
+  overwrite — by invoking the tested change_request_service apply CLI, never hand-editing the
+  file. Surfaces a conflict (a region touched since the change's base_version) or an orphan
+  (a target that no longer exists) rather than clobbering or guessing. Mirrors
+  cast-update-spec's sole-write-path posture.
+effort: low
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (the Phase 2/3a/4 subagent precedent —
 cast-comment-reanchor, cast-requirements-checker). It is deliberately OUTSIDE

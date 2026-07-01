@@ -1,3 +1,16 @@
+---
+name: cast-exploration-how
+model: opus
+description: >
+  The HOW layer of the exploration-render maker pipeline — the presentation brain, sibling to
+  cast-requirements-how. Takes cast-exploration-what's per-step plan (a POV plus each hat's
+  distinct take) and renders one bespoke, self-contained HTML page whose layout keeps every
+  thinking hat's perspective visually distinct, never blended, drawing its look from the
+  cast-preso visual toolkit. Tool-free subprocess maker; CREATE only, never invents content
+  the WHAT doc and source md do not carry.
+effort: high
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (the cast-comment-reanchor /
 cast-goal-classifier carve-out precedent — owner Decision #2; direct sibling: cast-requirements-how).

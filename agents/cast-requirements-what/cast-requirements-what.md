@@ -1,3 +1,16 @@
+---
+name: cast-requirements-what
+model: sonnet
+description: >
+  The WHAT layer of the requirements-render maker pipeline, sibling to cast-exploration-what.
+  Reads a goal's canonical refined_requirements.collab.md and decides, per family-appropriate
+  section, the information and the reader takeaway — mapping every canonical requirement id
+  into exactly one section. Never renders HTML or invents content the source does not contain
+  (that is cast-requirements-how's job). Tool-free subprocess maker; emits one machine-checked
+  WHAT doc.
+effort: medium
+---
+
 <!--
 CONTRACT SCOPE: This is a `dispatch_mode: subagent` agent (the cast-comment-reanchor /
 cast-goal-classifier carve-out precedent — owner Decision #2). It is deliberately OUTSIDE
