@@ -106,11 +106,28 @@ def discover_sources(repo_root: Path) -> tuple[list[Source], list[str]]:
 
 
 def render(source: Source, repo_root: Path) -> str:
-    """Render the SKILL.md content for a source: header + back-reference + body."""
+    """Render the SKILL.md content for a source: header + back-reference + body.
+
+    The header/back-reference comments are inserted *after* the source's YAML
+    frontmatter block, not before it — frontmatter parsers require the opening
+    ``---`` on line 1, so a leading HTML comment would hide the frontmatter
+    (and its ``description``) from anything that reads it.
+    """
     rel = source.source_path.relative_to(repo_root)
     body = source.source_path.read_text(encoding='utf-8')
-    back_ref = f'<!-- Source: {rel} -->\n'
-    return GENERATED_HEADER + back_ref + body
+    header = GENERATED_HEADER + f'<!-- Source: {rel} -->\n'
+    return _insert_after_frontmatter(body, header)
+
+
+def _insert_after_frontmatter(text: str, insert: str) -> str:
+    """Insert ``insert`` right after a leading YAML frontmatter block, if present."""
+    if text.startswith('---\n'):
+        close = text.find('\n---', 4)
+        if close != -1:
+            line_end = text.find('\n', close + 1)
+            split_at = line_end + 1 if line_end != -1 else len(text)
+            return text[:split_at] + insert + text[split_at:]
+    return insert + text
 
 
 def _backup_existing(target_file: Path, target_root: Path, backup_root: Path) -> Path | None:
