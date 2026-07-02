@@ -147,3 +147,13 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 
   **v1 limitation:** `/cast-upgrade` tracks `main` only at v1; per-clone
   branch tracking via a `upgrade_branch:` config key is deferred to v1.1.
+
+- `/cast-uninstall` skill: the lifecycle counterpart to `./setup` /
+  `/cast-upgrade` — removes `cast-*` skills, `cast-*` agents, and the
+  `~/.claude/skills/diecast` symlink, with a 3-option scope prompt to also
+  remove cast-hook `settings.json` entries and/or `~/.cast/` (config + run
+  database) and `~/.cache/diecast/` (logs). Reuses the same
+  `.cast-bak-<ts>/` move-not-delete primitive as install/upgrade, so every
+  removal is reversible until the shared 5-newest-kept backup retention
+  prunes it. Never touches non-`cast-*` installs (e.g. any sibling
+  ecosystem's skill set) or the diecast git repo itself.
